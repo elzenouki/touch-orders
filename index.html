@@ -817,6 +817,33 @@
   .note{font-size:12.5px; color:var(--muted2); font-weight:700; line-height:1.7;}
   body.inner .hadithBox{display:none;}
   body.inner .header{padding-bottom:22px;}
+  .modeRow{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;}
+  .modeBtn{border:1.5px solid var(--border); background:var(--card); border-radius:13px; padding:12px 6px; font-family:inherit; font-weight:800; font-size:15px; color:var(--muted2); cursor:pointer;}
+  .modeBtn.on.order{background:var(--green-bg); border-color:#8fd0aa; color:var(--green);}
+  .modeBtn.on.ret{background:var(--red-bg); border-color:#e8a9a9; color:var(--red);}
+  .modeBtn.on.pay{background:var(--gold-bg); border-color:rgba(182,134,47,.55); color:var(--gold-d);}
+  .modeBtn.on.none{background:#eef1f7; border-color:#b9c3dd; color:var(--navy);}
+  .secTitle{font-weight:900; font-size:15px; color:var(--navy); margin-bottom:12px;}
+  .secTitle.green{color:var(--green);} .secTitle.red{color:var(--red);} .secTitle.gold{color:var(--gold-d);}
+  .retCard{border-color:#efc4c4;}
+  .orderLine.ret{background:#fdf3f3; border-color:#efc4c4;}
+  .orderLine.ret .oName{color:var(--red);}
+  .orderLine .oMeta{font-size:11.5px; color:var(--muted2); font-weight:700; margin-top:2px;}
+  .orderSum.red{color:var(--red);}
+  .condRow{display:flex; gap:8px; margin-bottom:12px;}
+  .condRow button{flex:1; border:1px solid var(--border); background:var(--card2); border-radius:11px; padding:10px; font-family:inherit; font-weight:800; font-size:14.5px; color:var(--muted2); cursor:pointer;}
+  .condRow button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .addBtn.retAdd{width:100%; height:48px; border:none; border-radius:11px; background:var(--red); color:#fff; font-weight:800; font-size:15px; font-family:inherit; cursor:pointer;}
+  .payAmount{font-size:24px; font-weight:900; text-align:center;}
+  .actRow{display:flex; gap:8px; margin:6px 0 22px;}
+  .actRow .bigAction{margin:0; flex:1; font-size:14px; padding:13px 6px;}
+  .bigAction.newCust{border-color:var(--green); background:var(--green-bg); color:var(--green);}
+  .statRow .statBox b{font-size:18px;}
+  .chip.new{background:#e9f3ff; color:#1d5fb8; border-color:#c4dbf7;}
+  .docBlock{border-top:1px dashed var(--border); margin-top:10px; padding-top:10px;}
+  .docBlock .dbTitle{font-weight:900; font-size:13.5px; margin-bottom:4px;}
+  .docBlock.red .dbTitle{color:var(--red);} .docBlock.green .dbTitle{color:var(--green);} .docBlock.gold .dbTitle{color:var(--gold-d);}
+  .kv.red span{color:var(--red) !important;}
 </style>
 </head>
 <body>
@@ -896,6 +923,7 @@
         <div class="statBox"><b id="stVisits">0</b><span>زيارة النهارده</span></div>
         <div class="statBox"><b id="stOrders">0</b><span>طلبية</span></div>
         <div class="statBox"><b id="stPlan">0/0</b><span>خط السير</span></div>
+        <div class="statBox"><b id="stCollected">0</b><span>تحصيل</span></div>
       </div>
       <div class="gpsChip" id="gpsChip" hidden onclick="onGpsChip_()"><span class="dot"></span><span id="gpsChipText">الموقع</span></div>
     </div>
@@ -908,11 +936,14 @@
         <span class="routeProg" id="routeProg"></span>
       </div>
       <div id="routeList"><div class="empty">جاري التحميل...</div></div>
-      <button class="bigAction" onclick="openScreen('customers')">＋ زيارة تاجر تاني (من خارج خط النهارده)</button>
+      <div class="actRow">
+        <button class="bigAction" onclick="openScreen('customers')">🔎 زيارة تاجر تاني</button>
+        <button class="bigAction newCust" onclick="openScreen('newcust')">＋ عميل جديد</button>
+      </div>
       <div class="subHeader"><span class="lbl">خدمات إضافية</span><span class="line"></span></div>
       <div class="subPanel">
         <div class="gridSub">
-          <button class="adminLink ic-history" onclick="openScreen('myorders')"><div class="icon">📋</div><div class="title">طلبياتي</div></button>
+          <button class="adminLink ic-history" onclick="openScreen('myorders')"><div class="icon">📋</div><div class="title">سجل زياراتي</div></button>
           <button class="adminLink ic-mystats" onclick="openScreen('report')"><div class="icon">📊</div><div class="title">زياراتي</div></button>
           <button class="adminLink ic-settings" onclick="openScreen('profile')"><div class="icon">⚙</div><div class="title">إعداداتي</div></button>
           <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon">⎋</div><div class="title">تسجيل خروج</div></button>
@@ -945,7 +976,7 @@
       <div class="subPanel">
         <div class="gridSub">
           <button class="adminLink ic-itemsales" onclick="openScreen('items')"><div class="icon">📦</div><div class="title">الأصناف المطلوبة</div></button>
-          <button class="adminLink ic-history" onclick="openScreen('export')"><div class="icon">⬇</div><div class="title">تصدير الطلبيات Excel</div></button>
+          <button class="adminLink ic-history" onclick="openScreen('export')"><div class="icon">⬇</div><div class="title">تصدير اليوم Excel</div></button>
           <button class="adminLink ic-settings" onclick="openScreen('profile')"><div class="icon">⚙</div><div class="title">إعداداتي</div></button>
           <button class="adminLink wide ic-admin" id="adminLink" onclick="openScreen('admin')" hidden><div class="icon">👥</div><div class="title">إدارة المناديب والأصناف</div></button>
           <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon">⎋</div><div class="title">تسجيل خروج</div></button>
@@ -956,8 +987,24 @@
 
   <!-- ============ كل تجاري (بحث) ============ -->
   <div id="viewCustomers" hidden>
-    <div class="searchBox"><input type="search" id="custSearch" placeholder="🔎 دوّر باسم التاجر أو الكود أو العنوان..." oninput="renderCustomers_()"></div>
+    <div class="searchBox"><input type="search" id="custSearch" placeholder="🔎 دوّر باسم التاجر أو الكود أو التليفون..." oninput="renderCustomers_()"></div>
+    <button class="bigAction newCust" style="margin:0 0 14px;" onclick="openScreen('newcust')">＋ العميل مش موجود؟ ضيفه كعميل جديد</button>
     <div id="custList"></div>
+  </div>
+
+  <!-- ============ عميل جديد ============ -->
+  <div id="viewNewCust" hidden>
+    <div class="card">
+      <div class="cardTitle">بيانات العميل الجديد</div>
+      <label>اسم المحل / العميل *</label><input type="text" id="ncName" maxlength="120">
+      <label>التليفون *</label><input type="tel" id="ncPhone" class="ltrNum" inputmode="tel" dir="ltr" maxlength="20" placeholder="01xxxxxxxxx">
+      <label>العنوان *</label><input type="text" id="ncAddress" maxlength="200" placeholder="الشارع — علامة مميزة">
+      <label>المنطقة</label><input type="text" id="ncArea" maxlength="80">
+      <label>ملاحظات</label><textarea id="ncNotes" placeholder="مثلاً: اسم صاحب المحل، مواعيد الفتح..."></textarea>
+      <div class="locBox" id="ncLocBox">📍 جاري تحديد موقعك...</div>
+      <button class="finalize" id="ncSaveBtn" onclick="saveNewCustomer_()">✔ حفظ وابدأ الزيارة</button>
+      <div class="note" style="margin-top:10px;">العميل هيتضاف على اسمك ويتعلّم "جديد" في الشيت، والمكتب يكمّل بياناته.</div>
+    </div>
   </div>
 
   <!-- ============ زيارة تاجر ============ -->
@@ -968,11 +1015,14 @@
       <div class="visitBtns" id="vBtns"></div>
       <div class="locBox" id="locBox">📍 جاري تحديد موقعك...</div>
     </div>
-    <div class="seg">
-      <button class="order on" id="segOrder" onclick="setVisitMode_('order')">🧾 طلبية</button>
-      <button class="noorder" id="segNo" onclick="setVisitMode_('no')">✋ بدون طلب</button>
+    <div class="modeRow">
+      <button type="button" class="modeBtn order on" id="modeOrder" onclick="toggleMode_('order')">🧾 طلبية</button>
+      <button type="button" class="modeBtn ret" id="modeRet" onclick="toggleMode_('ret')">↩ مرتجع</button>
+      <button type="button" class="modeBtn pay" id="modePay" onclick="toggleMode_('pay')">💵 تحصيل</button>
+      <button type="button" class="modeBtn none" id="modeNone" onclick="toggleMode_('none')">✋ مافيش طلب</button>
     </div>
-    <div class="card" id="orderBox">
+    <div class="card secCard" id="orderBox">
+      <div class="secTitle green">🧾 الطلبية</div>
       <label>الصنف</label>
       <div class="acWrap">
         <input type="text" id="itemInput" class="acInput" placeholder="اكتب اسم الصنف أو الكود..." autocomplete="off">
@@ -988,8 +1038,36 @@
       <div id="orderLines"></div>
       <div class="orderSum" id="orderSum" hidden><span id="orderSumItems"></span><span id="orderSumQty"></span></div>
     </div>
-    <div class="card" id="noOrderBox" hidden>
-      <label>ليه مافيش طلبية؟</label>
+    <div class="card secCard retCard" id="retBox" hidden>
+      <div class="secTitle red">↩ المرتجع (بيتسجل بالسالب)</div>
+      <label>الصنف</label>
+      <div class="acWrap">
+        <input type="text" id="retItemInput" class="acInput" placeholder="اكتب اسم الصنف أو الكود..." autocomplete="off">
+        <div class="acList" id="retItemList" hidden></div>
+      </div>
+      <div class="rangeRow">
+        <div style="flex:0 0 96px;"><label>الكمية</label><input type="text" id="retQtyInput" class="ltrNum" inputmode="numeric" dir="ltr" placeholder="0"></div>
+        <div><label>السبب</label><select id="retReason"></select></div>
+      </div>
+      <label>حالة المرتجع</label>
+      <div class="condRow" id="retCond">
+        <button type="button" class="on" data-c="سليم">✔ سليم</button>
+        <button type="button" data-c="تالف">✖ تالف</button>
+      </div>
+      <button class="addBtn retAdd" onclick="addReturnLine_()">＋ إضافة للمرتجع</button>
+      <div id="retLines"></div>
+      <div class="orderSum red" id="retSum" hidden><span id="retSumItems"></span><span id="retSumQty"></span></div>
+    </div>
+    <div class="card secCard" id="payBox" hidden>
+      <div class="secTitle gold">💵 التحصيل</div>
+      <label>المبلغ اللي استلمته (جنيه)</label>
+      <input type="text" id="payAmount" class="ltrNum payAmount" inputmode="decimal" dir="ltr" placeholder="0">
+      <label>طريقة الدفع</label>
+      <div class="reasonGrid" id="payMethods"></div>
+      <div id="chequeWrap" hidden><label>تاريخ الشيك (الاستحقاق)</label><input type="date" id="chequeDate"></div>
+    </div>
+    <div class="card secCard" id="noOrderBox" hidden>
+      <div class="secTitle">✋ ليه مافيش طلبية؟</div>
       <div class="reasonGrid" id="reasonGrid"></div>
     </div>
     <div class="card">
@@ -1008,7 +1086,7 @@
     </div>
     <div class="card" id="doneDetails"></div>
     <div id="doneOrderBtns">
-      <button class="whatsapp" onclick="shareOrderExcel_(state.lastDone)">📤 ابعت الطلبية Excel للمكتب</button>
+      <button class="whatsapp" onclick="shareOrderExcel_(state.lastDone)">📤 ابعت الزيارة Excel للمكتب</button>
       <button class="ghost" onclick="downloadOrderExcel_(state.lastDone)">⬇ تحميل ملف Excel</button>
     </div>
     <button class="primary" style="margin-top:14px;" onclick="goHome()">رجوع لخط السير</button>
@@ -1092,7 +1170,7 @@
       <label>المندوب</label><select id="eRep"></select>
       <button class="finalize" onclick="exportOrders_('download')">⬇ تحميل Excel</button>
       <button class="whatsapp" onclick="exportOrders_('share')">📤 مشاركة Excel</button>
-      <div class="note" style="margin-top:12px;">الملف فيه شيت بكل الطلبيات (سطر فاضي بين كل طلبية والتانية) وشيت تاني بإجمالي كل صنف.</div>
+      <div class="note" style="margin-top:12px;">الملف فيه: شيت الطلبيات والمرتجعات (فاصل بين كل مستند والتاني، والمرتجع بالأحمر وكميته بالسالب)، وشيت التحصيلات، وشيت إجمالي كل صنف.</div>
     </div>
     <div id="exportOut"></div>
   </div>
@@ -1914,7 +1992,7 @@
   // ================================================================
   //                 طلبيات تاتش — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.0.0';
+  const APP_VERSION_ = 'v1.1.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;               // نفس الرقم اللي في السيرفر
   const SHOP_FIX_MAX_ACC_ = 100;         // أقصى دقة (متر) لتثبيت موقع محل — نفس السيرفر
@@ -1933,7 +2011,7 @@
     gps: 'unknown',     // on | off | unknown
   };
 
-  const VIEWS_ = ['viewLogin', 'viewOtp', 'viewHome', 'viewCustomers', 'viewVisit', 'viewDone', 'viewMyOrders', 'viewReport',
+  const VIEWS_ = ['viewLogin', 'viewOtp', 'viewHome', 'viewCustomers', 'viewNewCust', 'viewVisit', 'viewDone', 'viewMyOrders', 'viewReport',
     'viewUnvisited', 'viewItems', 'viewMap', 'viewLive', 'viewExport', 'viewAdmin', 'viewProfile'];
   function setView(name){
     VIEWS_.forEach(function(id){ document.getElementById(id).hidden = (id !== name); });
@@ -2074,7 +2152,7 @@
     if(!_pkOfferShownThisSession_) setTimeout(function(){ maybeOfferPasskey_(false); }, 2500);
   }
   function goBack_(){
-    if(state.screen === 'visit' && state.backTo === 'customers'){ openScreen('customers'); return; }
+    if((state.screen === 'visit' || state.screen === 'newcust') && state.backTo === 'customers'){ openScreen('customers'); return; }
     if(state.screen === 'map' && state.backTo){ openScreen(state.backTo); return; }
     goHome();
   }
@@ -2131,8 +2209,10 @@
 
   function openScreen(name){
     clearMsg();
+    state.prevScreen = state.screen;
     state.screen = name;
     if(name === 'customers'){ openCustomers_(); return; }
+    if(name === 'newcust'){ openNewCust_(); return; }
     if(name === 'myorders'){ loadMyOrders_(); return; }
     if(name === 'report'){ openReport_(); return; }
     if(name === 'unvisited'){ openUnvisited_(); return; }
@@ -2170,10 +2250,22 @@
     chip.classList.toggle('off', s === 'off');
     document.getElementById('gpsChipText').textContent = s === 'on' ? 'الموقع شغال' : s === 'off' ? 'الموقع مقفول — دوس هنا' : 'الموقع';
   }
+  function isIOS_(){
+    const ua = navigator.userAgent || '';
+    return /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
   function gpsHelpText_(){
-    return 'التطبيق محتاج الموقع عشان يسجل مكانك مع كل زيارة. لو مقفول: <b>1)</b> شغّل الـ GPS (الموقع) من فوق في الموبايل. ' +
-      '<b>2)</b> من Chrome: دوس على علامة القفل 🔒 جنب اللينك ← الأذونات ← الموقع ← <b>سماح</b>. ' +
-      '<b>3)</b> لو فاتح التطبيق من الأيقونة: إعدادات الموبايل ← التطبيقات ← Chrome ← الأذونات ← الموقع ← سماح.';
+    if(isIOS_()){
+      const inChrome = /CriOS/i.test(navigator.userAgent || '');
+      return 'التطبيق محتاج الموقع عشان يسجل مكانك مع كل زيارة. على الآيفون: ' +
+        '<b>1)</b> الإعدادات ← الخصوصية والأمان ← <b>خدمات الموقع</b> ← لازم تبقى مفعّلة. ' +
+        '<b>2)</b> في نفس الصفحة انزل لـ ' + (inChrome ? '<b>Chrome</b>' : '<b>مواقع Safari</b>') + ' واختار <b>أثناء استخدام التطبيق</b> وفعّل <b>الموقع الدقيق</b>. ' +
+        '<b>3)</b> الأفضل تفتح البرنامج من أيقونته: من Safari دوس زرار المشاركة ⬆️ ← <b>إضافة إلى الشاشة الرئيسية</b>، وافتحه منها واسمح بالموقع.';
+    }
+    return 'التطبيق محتاج الموقع عشان يسجل مكانك مع كل زيارة. على أندرويد: ' +
+      '<b>1)</b> شغّل <b>الموقع (GPS)</b> من الشريط اللي فوق في الموبايل. ' +
+      '<b>2)</b> من Chrome: دوس على علامة 🔒 جنب اللينك ← الأذونات ← الموقع ← <b>سماح</b>. ' +
+      '<b>3)</b> لو فاتح البرنامج من أيقونته: إعدادات الموبايل ← التطبيقات ← Chrome ← الأذونات ← الموقع ← <b>السماح أثناء الاستخدام</b>، وفعّل الموقع الدقيق.';
   }
   function onGpsChip_(){ requestGps_(true); }
   function requestGps_(showResult){
@@ -2257,6 +2349,14 @@
       })
       .catch(function(err){ if(!state.rep) onError(err); });
   }
+  // نتيجة الزيارة من البيانات اللي اتبعتت (للزيارات اللي لسه في الطابور)
+  function resultOf_(p){
+    const parts = [];
+    if(p.items && p.items.length) parts.push('طلبية');
+    if(p.returns && p.returns.length) parts.push('مرتجع');
+    if(p.payment && p.payment.amount) parts.push('تحصيل');
+    return parts.length ? parts.join(' + ') : 'بدون طلب';
+  }
   // زيارات النهارده = اللي على السيرفر + اللي لسه في الطابور (النت فاصل)
   function todayVisits_(){
     const d = state.rep;
@@ -2265,15 +2365,22 @@
     if(d && d.today !== today) list.length = 0; // البيانات المحفوظة من يوم قبل كده
     queueGet_().forEach(function(q){
       if(!state.auth || q.email !== state.auth.email || q.day !== today) return;
-      list.push({ code: q.payload.customerCode, name: q.custName, result: q.payload.result, reason: q.payload.reason, time: q.time, pending: true });
+      const p = q.payload;
+      list.push({
+        code: p.customerCode, name: q.custName, result: p.result || resultOf_(p), reason: p.reason, time: q.time, pending: true,
+        orderId: (p.items && p.items.length) ? '…' : '', returnId: (p.returns && p.returns.length) ? '…' : '',
+        amount: p.payment ? Number(p.payment.amount) || 0 : 0,
+      });
     });
     return list;
   }
+  function visitHasOrder_(v){ return !!v.orderId || v.result === 'طلبية'; }
   function visitStatusMap_(){
     const m = {};
+    const rank = function(v){ return visitHasOrder_(v) ? 3 : (v.returnId || v.amount) ? 2 : 1; };
     todayVisits_().forEach(function(v){
       const cur = m[v.code];
-      if(!cur || v.result === 'طلبية') m[v.code] = v;
+      if(!cur || rank(v) >= rank(cur)) m[v.code] = v;
     });
     return m;
   }
@@ -2281,10 +2388,14 @@
     const pos = state.lastPos;
     let cls = '', icon = escapeHtml((c.name || '?').trim().charAt(0));
     const chips = [];
+    if(c.isNew) chips.push('<span class="chip new">جديد</span>');
     if(v){
       if(v.pending){ cls = 'pending'; icon = '⏳'; chips.push('<span class="chip blue">⏳ لسه ماتبعتش</span>'); }
-      else if(v.result === 'طلبية'){ cls = 'done'; icon = '✔'; chips.push('<span class="chip green">✔ طلبية ' + escapeHtml(v.time || '') + '</span>'); }
+      else if(visitHasOrder_(v)){ cls = 'done'; icon = '✔'; chips.push('<span class="chip green">✔ طلبية ' + escapeHtml(v.time || '') + '</span>'); }
+      else if(v.returnId || v.amount){ cls = 'noorder'; icon = '✔'; chips.push('<span class="chip gold">' + escapeHtml(v.result) + '</span>'); }
       else { cls = 'noorder'; icon = '✋'; chips.push('<span class="chip gold">✋ ' + escapeHtml(v.reason || 'بدون طلب') + '</span>'); }
+      if(!v.pending && v.returnId && visitHasOrder_(v)) chips.push('<span class="chip red">↩ مرتجع</span>');
+      if(!v.pending && v.amount && (visitHasOrder_(v) || v.returnId)) chips.push('<span class="chip gold">💵 ' + fmt(v.amount) + '</span>');
     } else {
       chips.push('<span class="chip">آخر زيارة: ' + daysAgoText_(c.lastVisitDays) + '</span>');
     }
@@ -2328,16 +2439,16 @@
       });
     }
     const tv = todayVisits_();
-    const orders = tv.filter(function(v){ return v.result === 'طلبية'; }).length;
     document.getElementById('stVisits').textContent = tv.length;
-    document.getElementById('stOrders').textContent = orders;
+    document.getElementById('stOrders').textContent = tv.filter(visitHasOrder_).length;
     document.getElementById('stPlan').textContent = done.length + '/' + planned.length;
+    document.getElementById('stCollected').textContent = fmt(tv.reduce(function(s, v){ return s + (Number(v.amount) || 0); }, 0));
     document.getElementById('routeTitle').textContent = 'خط سير النهارده — ' + wdName;
     document.getElementById('routeProg').textContent = planned.length ? done.length + ' / ' + planned.length : '';
 
     let html = '';
     if(!d.customers.length){
-      html = '<div class="card"><div class="empty">مفيش تجار متسجلين باسمك في تاب "التجار" — كلم المشرف يضيفهم.</div></div>';
+      html = '<div class="card"><div class="empty">مفيش تجار متسجلين باسمك لسه — تقدر تضيف عميل جديد من الزرار اللي تحت، أو كلم المشرف يضيف تجارك.</div></div>';
     } else if(!planned.length){
       html = '<div class="card"><div class="empty">مفيش تجار متخططين ليوم ' + wdName + ' — تقدر تزور أي تاجر من تجارك من الزرار اللي تحت.</div></div>';
     } else {
@@ -2372,7 +2483,7 @@
     const status = visitStatusMap_();
     const list = d.customers.filter(function(c){
       if(!nq) return true;
-      return [c.name, c.code, c.address, c.area, c.phone].some(function(x){ return norm(x).indexOf(nq) !== -1; });
+      return [c.name, c.code, c.address, c.area, normalizeDigits(c.phone || '')].some(function(x){ return norm(x).indexOf(nq) !== -1; });
     }).sort(function(a, b){ return a.name.localeCompare(b.name, 'ar'); });
     box.innerHTML = list.length
       ? list.map(function(c){
@@ -2382,15 +2493,78 @@
     bindCustCards_(box, 'customers');
   }
 
+  // ================== عميل جديد ==================
+  let ncPos_ = null;
+  function openNewCust_(){
+    state.backTo = state.prevScreen === 'customers' ? 'customers' : null;
+    state.screen = 'newcust';
+    setTitle_('عميل جديد');
+    ['ncName', 'ncPhone', 'ncAddress', 'ncArea', 'ncNotes'].forEach(function(id){ document.getElementById(id).value = ''; });
+    const q = (document.getElementById('custSearch').value || '').trim();
+    if(q && state.backTo === 'customers') document.getElementById(/^[\d٠-٩+ ]+$/.test(q) ? 'ncPhone' : 'ncName').value = q;
+    setView('viewNewCust');
+    ncPos_ = null;
+    renderNcLoc_('📍 جاري تحديد موقعك...', '');
+    getPos_({ timeout: 20000, maxAge: 0 })
+      .then(function(p){
+        ncPos_ = p; pushTrack_(p);
+        if(p.acc <= SHOP_FIX_MAX_ACC_) renderNcLoc_('📍 موقع المحل هيتسجل من مكانك دلوقتي (دقة ±' + p.acc + ' م) — اتأكد إنك جوه المحل.', 'ok');
+        else renderNcLoc_('⚠️ دقة الموقع ضعيفة (±' + p.acc + ' م) — العميل هيتسجل من غير موقع، وتقدر تثبّته في أول زيارة.', 'warn');
+      })
+      .catch(function(err){ renderNcLoc_('⚠️ ' + err.message + ' — العميل هيتسجل من غير موقع.', 'bad'); });
+  }
+  function renderNcLoc_(text, cls){
+    const b = document.getElementById('ncLocBox');
+    b.className = 'locBox' + (cls ? ' ' + cls : '');
+    b.textContent = text;
+  }
+  let ncSaving_ = false;
+  function saveNewCustomer_(){
+    if(ncSaving_) return;
+    clearMsg();
+    const d = {
+      name: document.getElementById('ncName').value.trim(),
+      phone: normalizeDigits(document.getElementById('ncPhone').value.trim()),
+      address: document.getElementById('ncAddress').value.trim(),
+      area: document.getElementById('ncArea').value.trim(),
+      notes: document.getElementById('ncNotes').value.trim(),
+    };
+    if(!d.name){ showMsg('اكتب اسم العميل', 'error'); return; }
+    if(d.phone.replace(/\D/g, '').length < 8){ showMsg('اكتب رقم تليفون صحيح', 'error'); return; }
+    if(!d.address){ showMsg('اكتب العنوان', 'error'); return; }
+    if(ncPos_){ d.lat = ncPos_.lat; d.lng = ncPos_.lng; d.acc = ncPos_.acc; }
+    ncSaving_ = true;
+    showLoading(true);
+    callApi('addCustomer', [state.auth, d])
+      .then(function(r){
+        showLoading(false);
+        ncSaving_ = false;
+        if(!state.rep) state.rep = { customers: [], asnaf: [], reasons: [], returnReasons: [], paymentMethods: [], todayVisits: [] };
+        if(!state.rep.customers.some(function(c){ return c.code === r.customer.code; })) state.rep.customers.push(r.customer);
+        localCacheSet_('rep', state.rep);
+        showMsg(r.existed ? 'العميل ده متسجل بالفعل — كمّل الزيارة' : 'اتضاف العميل ✔', 'success');
+        openVisit_(r.customer.code, 'home');
+      })
+      .catch(function(err){
+        ncSaving_ = false;
+        if(err && err.isNetwork){ showLoading(false); showAlertModal_('محتاج نت عشان تضيف عميل جديد — جرّب تاني لما النت يرجع', 'error'); return; }
+        onError(err);
+      });
+  }
+
   // ================== زيارة تاجر ==================
   function openVisit_(code, from){
     const c = state.rep && state.rep.customers.find(function(x){ return x.code === code; });
     if(!c){ showMsg('التاجر ده مش موجود', 'error'); return; }
     state.backTo = from;
     state.screen = 'visit';
-    state.visit = { cust: c, mode: 'order', lines: [], reason: '', sel: null, pos: null, posErr: null, reqId: genRequestId_(), setShop: false, setShopTouched: false };
+    state.visit = {
+      cust: c, modes: { order: true, ret: false, pay: false, none: false },
+      lines: [], rets: [], reason: '', sel: null, retSel: null, retCond: 'سليم', payMethod: '',
+      pos: null, posErr: null, reqId: genRequestId_(), setShop: false, setShopTouched: false,
+    };
     setTitle_('زيارة تاجر', c.name);
-    document.getElementById('vName').textContent = c.name;
+    document.getElementById('vName').textContent = c.name + (c.isNew ? ' (جديد)' : '');
     document.getElementById('vSub').innerHTML = escapeHtml([('كود ' + c.code), c.address, c.area].filter(Boolean).join(' • ')) +
       (c.notes ? '<br>📝 ' + escapeHtml(c.notes) : '') +
       '<br>آخر زيارة: ' + daysAgoText_(c.lastVisitDays) + (c.lastOrder ? ' — آخر طلبية: ' + escapeHtml(c.lastOrder) : '');
@@ -2399,12 +2573,16 @@
     if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '">🧭 الاتجاهات</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
-    document.getElementById('visitNotes').value = '';
-    document.getElementById('itemInput').value = '';
-    document.getElementById('qtyInput').value = '';
-    setVisitMode_('order');
+    ['visitNotes', 'itemInput', 'qtyInput', 'retItemInput', 'retQtyInput', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
+    const rr = (state.rep && state.rep.returnReasons) || [];
+    document.getElementById('retReason').innerHTML = '<option value="">اختار السبب...</option>' +
+      rr.map(function(r){ return '<option>' + escapeHtml(r) + '</option>'; }).join('');
+    renderCond_();
+    renderPayMethods_();
+    renderModes_();
     renderReasons_();
     renderOrderLines_();
+    renderRetLines_();
     renderLocBox_();
     setView('viewVisit');
     refreshVisitPos_();
@@ -2457,14 +2635,37 @@
       }
     }
   }
-  function setVisitMode_(mode){
-    if(!state.visit) return;
-    state.visit.mode = mode;
-    document.getElementById('segOrder').classList.toggle('on', mode === 'order');
-    document.getElementById('segNo').classList.toggle('on', mode === 'no');
-    document.getElementById('orderBox').hidden = mode !== 'order';
-    document.getElementById('noOrderBox').hidden = mode === 'order';
-    document.getElementById('submitVisitBtn').textContent = mode === 'order' ? '✔ سجّل الطلبية' : '✔ سجّل الزيارة';
+  // طلبية / مرتجع / تحصيل ممكن يتعلّموا مع بعض — "مافيش طلب" لوحده
+  function toggleMode_(k){
+    const m = state.visit && state.visit.modes;
+    if(!m) return;
+    if(k === 'none'){
+      const on = !m.none;
+      m.none = on;
+      if(on){ m.order = false; m.ret = false; m.pay = false; }
+    } else {
+      m[k] = !m[k];
+      if(m[k]) m.none = false;
+    }
+    if(!m.order && !m.ret && !m.pay && !m.none) m.none = true;
+    renderModes_();
+  }
+  function renderModes_(){
+    const m = state.visit.modes;
+    document.getElementById('modeOrder').classList.toggle('on', m.order);
+    document.getElementById('modeRet').classList.toggle('on', m.ret);
+    document.getElementById('modePay').classList.toggle('on', m.pay);
+    document.getElementById('modeNone').classList.toggle('on', m.none);
+    document.getElementById('orderBox').hidden = !m.order;
+    document.getElementById('retBox').hidden = !m.ret;
+    document.getElementById('payBox').hidden = !m.pay;
+    document.getElementById('noOrderBox').hidden = !(m.none || (!m.order && (m.ret || m.pay)));
+    document.querySelector('#noOrderBox .secTitle').textContent = m.none ? '✋ ليه مافيش طلبية؟' : '✋ ليه مافيش طلبية؟ (اختياري)';
+    const parts = [];
+    if(m.order) parts.push('الطلبية');
+    if(m.ret) parts.push('المرتجع');
+    if(m.pay) parts.push('التحصيل');
+    document.getElementById('submitVisitBtn').textContent = '✔ سجّل ' + (parts.length ? parts.join(' و') : 'الزيارة');
   }
   function renderReasons_(){
     const reasons = (state.rep && state.rep.reasons) || [];
@@ -2473,11 +2674,28 @@
       return '<button type="button" class="' + (state.visit.reason === r ? 'on' : '') + '" data-r="' + escapeHtml(r) + '">' + escapeHtml(r) + '</button>';
     }).join('');
     box.querySelectorAll('button').forEach(function(b){
-      b.onclick = function(){ state.visit.reason = b.dataset.r; renderReasons_(); };
+      b.onclick = function(){ state.visit.reason = state.visit.reason === b.dataset.r ? '' : b.dataset.r; renderReasons_(); };
     });
   }
+  function renderCond_(){
+    document.querySelectorAll('#retCond button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.c === state.visit.retCond);
+      b.onclick = function(){ state.visit.retCond = b.dataset.c; renderCond_(); };
+    });
+  }
+  function renderPayMethods_(){
+    const ms = (state.rep && state.rep.paymentMethods) || ['كاش', 'تحويل بنكي', 'إنستاباي / محفظة', 'شيك'];
+    const box = document.getElementById('payMethods');
+    box.innerHTML = ms.map(function(x){
+      return '<button type="button" class="' + (state.visit.payMethod === x ? 'on' : '') + '" data-m="' + escapeHtml(x) + '">' + escapeHtml(x) + '</button>';
+    }).join('');
+    box.querySelectorAll('button').forEach(function(b){
+      b.onclick = function(){ state.visit.payMethod = b.dataset.m; renderPayMethods_(); };
+    });
+    document.getElementById('chequeWrap').hidden = state.visit.payMethod !== 'شيك';
+  }
 
-  // ---------- اختيار الصنف (بحث سريع) ----------
+  // ---------- اختيار الصنف (بحث سريع) — نفس الطريقة للطلبية والمرتجع ----------
   function normAr_(s){ return String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim(); }
   function itemMatches_(q){
     const asnaf = (state.rep && state.rep.asnaf) || [];
@@ -2489,9 +2707,13 @@
       return c.indexOf(nq) === 0 || words.every(function(w){ return n.indexOf(w) !== -1; });
     }).slice(0, 40);
   }
-  function renderItemList_(){
-    const input = document.getElementById('itemInput');
-    const list = document.getElementById('itemList');
+  const AC_ = {
+    order: { input: 'itemInput', list: 'itemList', qty: 'qtyInput', sel: 'sel', add: function(){ addOrderLine_(); } },
+    ret: { input: 'retItemInput', list: 'retItemList', qty: 'retQtyInput', sel: 'retSel', add: function(){ addReturnLine_(); } },
+  };
+  function renderItemList_(cfg){
+    const input = document.getElementById(cfg.input);
+    const list = document.getElementById(cfg.list);
     const m = itemMatches_(input.value);
     if(!m.length){ list.innerHTML = '<div class="acEmpty">مفيش صنف بالاسم ده</div>'; list.hidden = false; return; }
     list.innerHTML = m.map(function(a, i){
@@ -2502,34 +2724,35 @@
       el.onmousedown = function(e){ e.preventDefault(); };
       el.onclick = function(){
         const a = m[Number(el.dataset.i)];
-        state.visit.sel = a;
+        state.visit[cfg.sel] = a;
         input.value = a.name;
         list.hidden = true;
-        const qi = document.getElementById('qtyInput');
-        qi.focus();
+        document.getElementById(cfg.qty).focus();
       };
     });
   }
-  (function bindItemInput_(){
-    const input = document.getElementById('itemInput');
-    input.addEventListener('input', function(){ if(state.visit) state.visit.sel = null; renderItemList_(); });
-    input.addEventListener('focus', renderItemList_);
-    input.addEventListener('blur', function(){ setTimeout(function(){ document.getElementById('itemList').hidden = true; }, 150); });
-    document.getElementById('qtyInput').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); addOrderLine_(); } });
-  })();
-  function resolveTypedItem_(){
+  Object.keys(AC_).forEach(function(k){
+    const cfg = AC_[k];
+    const input = document.getElementById(cfg.input);
+    input.addEventListener('input', function(){ if(state.visit) state.visit[cfg.sel] = null; renderItemList_(cfg); });
+    input.addEventListener('focus', function(){ renderItemList_(cfg); });
+    input.addEventListener('blur', function(){ setTimeout(function(){ document.getElementById(cfg.list).hidden = true; }, 150); });
+    document.getElementById(cfg.qty).addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); cfg.add(); } });
+  });
+  function resolveTypedItem_(cfg){
     const v = state.visit;
-    if(v.sel) return v.sel;
-    const typed = normAr_(normalizeDigits(document.getElementById('itemInput').value));
+    if(v[cfg.sel]) return v[cfg.sel];
+    const typed = normAr_(normalizeDigits(document.getElementById(cfg.input).value));
     if(!typed) return null;
     const asnaf = (state.rep && state.rep.asnaf) || [];
     return asnaf.find(function(a){ return normAr_(a.name) === typed || normAr_(a.code) === typed; }) ||
       (itemMatches_(typed).length === 1 ? itemMatches_(typed)[0] : null);
   }
+  function readQty_(id){ return Number(normalizeDigits(document.getElementById(id).value || '').replace(/[^\d.]/g, '')); }
   function addOrderLine_(silent){
     const v = state.visit;
-    const a = resolveTypedItem_();
-    const qty = Number(normalizeDigits(document.getElementById('qtyInput').value || '').replace(/[^\d.]/g, ''));
+    const a = resolveTypedItem_(AC_.order);
+    const qty = readQty_('qtyInput');
     if(!a){ if(!silent) showMsg('اختار الصنف من القايمة', 'error'); return false; }
     if(!(qty > 0)){ if(!silent) showMsg('اكتب الكمية', 'error'); document.getElementById('qtyInput').focus(); return false; }
     const ex = v.lines.find(function(l){ return (l.code || l.name) === (a.code || a.name); });
@@ -2564,20 +2787,70 @@
   }
   function removeLine_(i){ state.visit.lines.splice(i, 1); renderOrderLines_(); }
 
+  // ---------- المرتجع ----------
+  function addReturnLine_(silent){
+    const v = state.visit;
+    const a = resolveTypedItem_(AC_.ret);
+    const qty = readQty_('retQtyInput');
+    const reason = document.getElementById('retReason').value;
+    if(!a){ if(!silent) showMsg('اختار صنف المرتجع من القايمة', 'error'); return false; }
+    if(!(qty > 0)){ if(!silent) showMsg('اكتب كمية المرتجع', 'error'); document.getElementById('retQtyInput').focus(); return false; }
+    if(!reason){ if(!silent) showMsg('اختار سبب المرتجع', 'error'); return false; }
+    const ex = v.rets.find(function(l){ return (l.code || l.name) === (a.code || a.name) && l.reason === reason && l.condition === v.retCond; });
+    if(ex) ex.qty += qty; else v.rets.push({ code: a.code, name: a.name, qty: qty, reason: reason, condition: v.retCond });
+    v.retSel = null;
+    document.getElementById('retItemInput').value = '';
+    document.getElementById('retQtyInput').value = '';
+    clearMsg();
+    renderRetLines_();
+    return true;
+  }
+  function renderRetLines_(){
+    const v = state.visit;
+    document.getElementById('retLines').innerHTML = v.rets.map(function(l, i){
+      return '<div class="orderLine ret"><div class="oName">' + escapeHtml(l.name) + ' <span class="oCode">' + escapeHtml(l.code) + '</span>' +
+        '<div class="oMeta">' + escapeHtml(l.reason) + ' • ' + escapeHtml(l.condition) + '</div></div>' +
+        '<div class="lNum" style="color:var(--red); font-weight:900; direction:ltr;">-' + fmt(l.qty) + '</div>' +
+        '<button type="button" class="rm" onclick="state.visit.rets.splice(' + i + ',1); renderRetLines_();">✕</button></div>';
+    }).join('');
+    const total = v.rets.reduce(function(s, l){ return s + l.qty; }, 0);
+    document.getElementById('retSum').hidden = !v.rets.length;
+    document.getElementById('retSumItems').textContent = v.rets.length + ' صنف مرتجع';
+    document.getElementById('retSumQty').textContent = 'إجمالي -' + fmt(total) + ' قطعة';
+  }
+
   // ---------- تسجيل الزيارة ----------
   let submitting_ = false;
   async function submitVisit_(){
     const v = state.visit;
     if(!v || submitting_) return;
     clearMsg();
-    if(v.mode === 'order'){
-      if(document.getElementById('itemInput').value.trim() && document.getElementById('qtyInput').value.trim()) addOrderLine_(true);
-      if(!v.lines.length){ showMsg('ضيف الأصناف والكميات الأول', 'error'); return; }
-      const total = v.lines.reduce(function(s, l){ return s + l.qty; }, 0);
-      const ok = await confirmModal_('تأكيد طلبية <b>' + escapeHtml(v.cust.name) + '</b>:<br>' + v.lines.length + ' صنف — إجمالي ' + fmt(total) + ' قطعة', '✔ تأكيد', 'رجوع');
+    const m = v.modes;
+    // صنف مكتوب ومتضافش — نضيفه لوحده
+    if(m.order && document.getElementById('itemInput').value.trim() && document.getElementById('qtyInput').value.trim()) addOrderLine_(true);
+    if(m.ret && document.getElementById('retItemInput').value.trim() && document.getElementById('retQtyInput').value.trim()){
+      if(!addReturnLine_(false)) return;
+    }
+    if(m.order && !v.lines.length){ showMsg('ضيف أصناف الطلبية والكميات (أو شيل علامة "طلبية")', 'error'); return; }
+    if(m.ret && !v.rets.length){ showMsg('ضيف أصناف المرتجع (أو شيل علامة "مرتجع")', 'error'); return; }
+    let payment = null;
+    if(m.pay){
+      const amount = Number(normalizeDigits(document.getElementById('payAmount').value || '').replace(/[^\d.]/g, ''));
+      if(!(amount > 0)){ showMsg('اكتب مبلغ التحصيل', 'error'); document.getElementById('payAmount').focus(); return; }
+      if(!v.payMethod){ showMsg('اختار طريقة الدفع', 'error'); return; }
+      const cd = document.getElementById('chequeDate').value;
+      if(v.payMethod === 'شيك' && !cd){ showMsg('اكتب تاريخ الشيك', 'error'); return; }
+      payment = { amount: amount, method: v.payMethod, chequeDate: v.payMethod === 'شيك' ? cd : '' };
+    }
+    if(m.none && !v.reason){ showMsg('اختار سبب عدم الطلب', 'error'); return; }
+    // تأكيد
+    const lines = [];
+    if(m.order) lines.push('🧾 طلبية: ' + v.lines.length + ' صنف — ' + fmt(v.lines.reduce(function(s, l){ return s + l.qty; }, 0)) + ' قطعة');
+    if(m.ret) lines.push('<span style="color:var(--red)">↩ مرتجع: ' + v.rets.length + ' صنف — -' + fmt(v.rets.reduce(function(s, l){ return s + l.qty; }, 0)) + ' قطعة</span>');
+    if(payment) lines.push('💵 تحصيل: ' + fmt(payment.amount) + ' جنيه (' + escapeHtml(payment.method) + ')');
+    if(lines.length){
+      const ok = await confirmModal_('تأكيد زيارة <b>' + escapeHtml(v.cust.name) + '</b>:<br>' + lines.join('<br>'), '✔ تأكيد', 'رجوع');
       if(!ok) return;
-    } else if(!v.reason){
-      showMsg('اختار سبب عدم الطلب', 'error'); return;
     }
     submitting_ = true;
     try{
@@ -2596,10 +2869,11 @@
       if(pos) pushTrack_(pos);
       const payload = {
         customerCode: v.cust.code,
-        result: v.mode === 'order' ? 'طلبية' : 'بدون طلب',
-        reason: v.mode === 'order' ? '' : v.reason,
+        items: m.order ? v.lines.map(function(l){ return { code: l.code, name: l.name, qty: l.qty }; }) : [],
+        returns: m.ret ? v.rets.map(function(l){ return { code: l.code, name: l.name, qty: l.qty, reason: l.reason, condition: l.condition }; }) : [],
+        payment: payment,
+        reason: m.order ? '' : v.reason,
         notes: document.getElementById('visitNotes').value.trim(),
-        items: v.mode === 'order' ? v.lines.map(function(l){ return { code: l.code, name: l.name, qty: l.qty }; }) : [],
         lat: pos ? pos.lat : null, lng: pos ? pos.lng : null, acc: pos ? pos.acc : null,
         setShopLocation: v.cust.lat == null && !!v.setShop,
         clientTs: Date.now(),
@@ -2623,11 +2897,15 @@
       submitting_ = false;
     }
   }
+  function todayEntry_(res){
+    return { code: res.customer.code, name: res.customer.name, result: res.result, reason: res.reason, orderId: res.orderId,
+      returnId: res.returnId || '', paymentId: res.paymentId || '', amount: res.payment ? res.payment.amount : 0, time: res.time };
+  }
   function afterVisitSaved_(res){
     const d = state.rep;
     if(d){
       d.todayVisits = d.todayVisits || [];
-      d.todayVisits.push({ code: res.customer.code, name: res.customer.name, result: res.result, reason: res.reason, orderId: res.orderId, time: res.time });
+      d.todayVisits.push(todayEntry_(res));
       const c = d.customers.find(function(x){ return x.code === res.customer.code; });
       if(c){
         c.lastVisit = res.date; c.lastVisitDays = 0;
@@ -2638,15 +2916,43 @@
     }
     showDone_(res, false);
   }
+  // تفاصيل الزيارة (طلبية / مرتجع / تحصيل) — بتستخدم في شاشة "اتسجلت" وفي سجل زياراتي
+  function visitDocsHtml_(res, pending){
+    let det = '';
+    const items = res.items || [], rets = res.returns || [];
+    if(items.length){
+      det += '<div class="docBlock green"><div class="dbTitle">🧾 طلبية ' + (res.orderId ? '<span class="ltrNum" style="font-weight:700; color:var(--muted)">' + escapeHtml(res.orderId) + '</span>' : (pending ? '(لسه ماتبعتش)' : '')) + '</div>';
+      det += items.map(function(it){ return '<div class="kv"><span>' + escapeHtml(it.name) + '</span><span class="ltrNum">' + fmt(it.qty) + '</span></div>'; }).join('');
+      det += '<div class="kv"><span>الإجمالي</span><span class="ltrNum">' + fmt(items.reduce(function(s, i){ return s + i.qty; }, 0)) + ' قطعة</span></div></div>';
+    }
+    if(rets.length){
+      det += '<div class="docBlock red"><div class="dbTitle">↩ مرتجع ' + (res.returnId ? '<span class="ltrNum" style="font-weight:700; color:var(--muted)">' + escapeHtml(res.returnId) + '</span>' : '') + '</div>';
+      det += rets.map(function(it){ return '<div class="kv red"><span>' + escapeHtml(it.name) + ' — ' + escapeHtml(it.reason) + ' (' + escapeHtml(it.condition) + ')</span><span class="ltrNum">-' + fmt(it.qty) + '</span></div>'; }).join('');
+      det += '</div>';
+    }
+    if(res.payment){
+      det += '<div class="docBlock gold"><div class="dbTitle">💵 تحصيل</div><div class="kv"><span>' + escapeHtml(res.payment.method) +
+        (res.payment.chequeDate ? ' — شيك بتاريخ ' + escapeHtml(res.payment.chequeDate.indexOf('-') > 0 ? ymdToDmy_(res.payment.chequeDate) : res.payment.chequeDate) : '') +
+        '</span><span class="ltrNum">' + fmt(res.payment.amount) + ' ج</span></div></div>';
+    }
+    if(!items.length && !rets.length && !res.payment){
+      det += '<div class="kv"><span>السبب</span><span>' + escapeHtml(res.reason || '') + '</span></div>';
+    } else if(res.reason){
+      det += '<div class="kv"><span>سبب عدم الطلب</span><span>' + escapeHtml(res.reason) + '</span></div>';
+    }
+    if(res.notes) det += '<div class="kv"><span>ملاحظات</span><span>' + escapeHtml(res.notes) + '</span></div>';
+    return det;
+  }
   function showDone_(res, pending, why){
     state.lastDone = res;
     state.screen = 'done';
-    const isOrder = res.result === 'طلبية';
-    setTitle_(isOrder ? 'الطلبية اتسجلت' : 'الزيارة اتسجلت', res.customer.name);
+    const hasDocs = (res.items && res.items.length) || (res.returns && res.returns.length) || res.payment;
+    const isOrder = !!(res.items && res.items.length);
+    setTitle_('الزيارة اتسجلت', res.customer.name);
     const icon = document.getElementById('doneIcon');
-    icon.textContent = pending ? '⏳' : (isOrder ? '✔' : '✋');
+    icon.textContent = pending ? '⏳' : (hasDocs ? '✔' : '✋');
     icon.className = 'doneIcon' + (isOrder && !pending ? '' : ' gold');
-    document.getElementById('doneTitle').textContent = pending ? 'اتحفظت على الموبايل' : (isOrder ? 'الطلبية اتسجلت ✔' : 'الزيارة اتسجلت ✔');
+    document.getElementById('doneTitle').textContent = pending ? 'اتحفظت على الموبايل' : (res.result || 'الزيارة') + ' — اتسجلت ✔';
     const flags = [];
     if(pending) flags.push(why ? 'ماتبعتتش دلوقتي (' + why + ') — هتتبعت لوحدها تاني' : 'النت فاصل — هتتبعت لوحدها أول ما النت يرجع');
     if(res.shopSaved) flags.push('📍 موقع المحل اتثبت');
@@ -2654,17 +2960,8 @@
     if(!pending && !res.hasLocation) flags.push('⚠️ من غير موقع');
     if(!pending && res.inPlan === false) flags.push('من خارج خط النهارده');
     document.getElementById('doneSub').innerHTML = escapeHtml(res.customer.name) + ' • ' + escapeHtml(res.time || '') + (flags.length ? '<br>' + flags.map(escapeHtml).join('<br>') : '');
-    let det = '';
-    if(isOrder){
-      det += '<div class="kv"><span>رقم الطلبية</span><span class="ltrNum">' + escapeHtml(res.orderId || 'لسه ماتبعتش') + '</span></div>';
-      det += res.items.map(function(it){ return '<div class="kv"><span>' + escapeHtml(it.name) + '</span><span class="ltrNum">' + fmt(it.qty) + '</span></div>'; }).join('');
-      det += '<div class="kv"><span>الإجمالي</span><span class="ltrNum">' + fmt(res.items.reduce(function(s, i){ return s + i.qty; }, 0)) + ' قطعة</span></div>';
-    } else {
-      det += '<div class="kv"><span>السبب</span><span>' + escapeHtml(res.reason) + '</span></div>';
-    }
-    if(res.notes) det += '<div class="kv"><span>ملاحظات</span><span>' + escapeHtml(res.notes) + '</span></div>';
-    document.getElementById('doneDetails').innerHTML = det;
-    document.getElementById('doneOrderBtns').hidden = !isOrder || pending;
+    document.getElementById('doneDetails').innerHTML = visitDocsHtml_(res, pending);
+    document.getElementById('doneOrderBtns').hidden = !hasDocs || pending;
     setView('viewDone');
   }
 
@@ -2680,8 +2977,8 @@
     });
     queueSet_(q);
     showDone_({
-      result: payload.result, reason: payload.reason, notes: payload.notes, orderId: '', time: q[q.length - 1].time,
-      customer: { code: v.cust.code, name: v.cust.name }, items: payload.items,
+      result: resultOf_(payload), reason: payload.reason, notes: payload.notes, orderId: '', time: q[q.length - 1].time,
+      customer: { code: v.cust.code, name: v.cust.name }, items: payload.items, returns: payload.returns, payment: payload.payment,
     }, true, why);
   }
   function renderQueueBar_(){
@@ -2704,7 +3001,7 @@
         queueSet_(queueGet_().filter(function(x){ return x.reqId !== item.reqId; }));
         if(state.rep){
           state.rep.todayVisits = state.rep.todayVisits || [];
-          if(res.date === state.rep.today) state.rep.todayVisits.push({ code: res.customer.code, name: res.customer.name, result: res.result, reason: res.reason, orderId: res.orderId, time: res.time });
+          if(res.date === state.rep.today) state.rep.todayVisits.push(todayEntry_(res));
         }
         sent++;
       }catch(err){
@@ -2746,59 +3043,93 @@
     }
     downloadBlob_(blob, fileName);
   }
-  const XL_NAVY_ = 'FF0C1730', XL_GOLD_ = 'FFFAF3E1', XL_BORDER_ = { style: 'thin', color: { argb: 'FFD9D2BF' } };
+  const XL_NAVY_ = 'FF0C1730', XL_GOLD_ = 'FFFAF3E1', XL_RED_ = 'FFB83A3A', XL_RED_BG_ = 'FFFBECEC', XL_GREEN_BG_ = 'FFEAF5EE';
+  const XL_BORDER_ = { style: 'thin', color: { argb: 'FFD9D2BF' } };
   function xlBorders_(cell){ cell.border = { top: XL_BORDER_, left: XL_BORDER_, bottom: XL_BORDER_, right: XL_BORDER_ }; }
+  function xlFill_(argb){ return { type: 'pattern', pattern: 'solid', fgColor: { argb: argb } }; }
+  // ملف زيارة واحدة للمكتب: الطلبية + المرتجع (بالأحمر وبالسالب) + التحصيل
   async function buildOrderXlsx_(o){
     await ensureExcelJsLoaded_();
+    const items = o.items || [], rets = o.returns || [];
     const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('طلبية', { views: [{ rightToLeft: true }] });
-    ws.columns = [{ width: 6 }, { width: 14 }, { width: 38 }, { width: 11 }];
-    ws.mergeCells('A1:D1');
+    const ws = wb.addWorksheet('الزيارة', { views: [{ rightToLeft: true }] });
+    ws.columns = [{ width: 6 }, { width: 14 }, { width: 36 }, { width: 11 }, { width: 24 }];
+    const kind = items.length ? 'طلبية' : rets.length ? 'مرتجع' : 'تحصيل';
+    ws.mergeCells('A1:E1');
     const t = ws.getCell('A1');
-    t.value = 'طلبية — ' + o.customer.name;
+    t.value = (o.result || kind) + ' — ' + o.customer.name;
     t.font = { bold: true, size: 15, color: { argb: 'FFFFFFFF' } };
-    t.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL_NAVY_ } };
+    t.fill = xlFill_(XL_NAVY_);
     t.alignment = { horizontal: 'center', vertical: 'middle' };
     ws.getRow(1).height = 28;
     const info = [
-      ['رقم الطلبية', o.orderId || ''], ['التاريخ', (o.date || '') + (o.time ? '  ' + o.time : '')], ['المندوب', o.rep || (state.user && state.user.name) || ''],
+      ['التاريخ', (o.date || '') + (o.time ? '  ' + o.time : '')], ['المندوب', o.rep || (state.user && state.user.name) || ''],
       ['كود التاجر', o.customer.code], ['اسم التاجر', o.customer.name],
     ];
     if(o.notes) info.push(['ملاحظات', o.notes]);
-    info.forEach(function(r, i){
-      const row = 2 + i;
+    let row = 1;
+    info.forEach(function(r){
+      row++;
       ws.mergeCells('A' + row + ':B' + row);
-      ws.mergeCells('C' + row + ':D' + row);
+      ws.mergeCells('C' + row + ':E' + row);
       const a = ws.getCell('A' + row), c = ws.getCell('C' + row);
       a.value = r[0]; c.value = r[1];
       a.font = { bold: true, color: { argb: 'FF736E60' } };
       c.font = { bold: true };
       c.alignment = { horizontal: 'right', wrapText: true };
     });
-    let row = 2 + info.length + 1;
-    const head = ws.getRow(row);
-    head.values = ['م', 'كود الصنف', 'اسم الصنف', 'الكمية'];
-    head.eachCell(function(c){ c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL_GOLD_ } }; xlBorders_(c); c.alignment = { horizontal: 'center' }; });
-    let total = 0;
-    o.items.forEach(function(it, i){
+    function section(title, docId, list, isRet){
+      row += 2;
+      ws.mergeCells('A' + row + ':E' + row);
+      const h = ws.getCell('A' + row);
+      h.value = title + (docId ? '  —  ' + docId : '');
+      h.font = { bold: true, size: 13, color: { argb: isRet ? XL_RED_ : 'FF2B7A4F' } };
       row++;
-      const r = ws.getRow(row);
-      r.values = [i + 1, it.code, it.name, it.qty];
-      r.eachCell(function(c){ xlBorders_(c); });
-      r.getCell(1).alignment = { horizontal: 'center' };
-      r.getCell(4).alignment = { horizontal: 'center' };
-      total += Number(it.qty) || 0;
-    });
-    row++;
-    const tr = ws.getRow(row);
-    ws.mergeCells('A' + row + ':C' + row);
-    tr.getCell(1).value = 'الإجمالي';
-    tr.getCell(4).value = total;
-    [1, 4].forEach(function(k){ const c = tr.getCell(k); c.font = { bold: true }; xlBorders_(c); c.alignment = { horizontal: 'center' }; });
+      const head = ws.getRow(row);
+      head.values = isRet ? ['م', 'كود الصنف', 'اسم الصنف', 'الكمية', 'السبب / الحالة'] : ['م', 'كود الصنف', 'اسم الصنف', 'الكمية'];
+      head.eachCell(function(c){ c.font = { bold: true }; c.fill = xlFill_(isRet ? XL_RED_BG_ : XL_GOLD_); xlBorders_(c); c.alignment = { horizontal: 'center' }; });
+      let total = 0;
+      list.forEach(function(it, i){
+        row++;
+        const r = ws.getRow(row);
+        const q = isRet ? -Math.abs(Number(it.qty) || 0) : Number(it.qty) || 0;
+        r.values = isRet ? [i + 1, it.code, it.name, q, (it.reason || '') + ' / ' + (it.condition || '')] : [i + 1, it.code, it.name, q];
+        r.eachCell(function(c){ xlBorders_(c); if(isRet) c.font = { color: { argb: XL_RED_ } }; });
+        r.getCell(1).alignment = { horizontal: 'center' };
+        r.getCell(4).alignment = { horizontal: 'center' };
+        total += q;
+      });
+      row++;
+      const tr = ws.getRow(row);
+      ws.mergeCells('A' + row + ':C' + row);
+      tr.getCell(1).value = 'الإجمالي';
+      tr.getCell(4).value = total;
+      [1, 4].forEach(function(k){ const c = tr.getCell(k); c.font = { bold: true, color: isRet ? { argb: XL_RED_ } : undefined }; xlBorders_(c); c.alignment = { horizontal: 'center' }; });
+    }
+    if(items.length) section('🧾 الطلبية', o.orderId, items, false);
+    if(rets.length) section('↩ المرتجع', o.returnId, rets, true);
+    if(o.payment){
+      row += 2;
+      ws.mergeCells('A' + row + ':E' + row);
+      const h = ws.getCell('A' + row);
+      h.value = '💵 التحصيل' + (o.paymentId ? '  —  ' + o.paymentId : '');
+      h.font = { bold: true, size: 13, color: { argb: 'FF8A6218' } };
+      const cd = o.payment.chequeDate ? (o.payment.chequeDate.indexOf('-') > 0 ? ymdToDmy_(o.payment.chequeDate) : o.payment.chequeDate) : '';
+      [['المبلغ', Number(o.payment.amount) || 0], ['طريقة الدفع', o.payment.method]].concat(cd ? [['تاريخ الشيك', cd]] : []).forEach(function(r){
+        row++;
+        ws.mergeCells('A' + row + ':B' + row);
+        ws.mergeCells('C' + row + ':E' + row);
+        ws.getCell('A' + row).value = r[0];
+        ws.getCell('A' + row).font = { bold: true, color: { argb: 'FF736E60' } };
+        ws.getCell('C' + row).value = r[1];
+        ws.getCell('C' + row).font = { bold: true };
+        ws.getCell('C' + row).alignment = { horizontal: 'right' };
+      });
+    }
     const buf = await wb.xlsx.writeBuffer();
     return {
       blob: new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-      fileName: 'طلبية - ' + o.customer.name.replace(/[\\\/:*?"<>|]/g, ' ') + ' - ' + safeDateForFile(o.date) + '.xlsx',
+      fileName: kind + ' - ' + o.customer.name.replace(/[\\\/:*?"<>|]/g, ' ') + ' - ' + safeDateForFile(o.date) + '.xlsx',
     };
   }
   async function shareOrderExcel_(o){
@@ -2810,29 +3141,31 @@
     catch(err){ onError(err); }
   }
 
-  // ================== طلبياتي ==================
+  // ================== سجل زياراتي ==================
   function loadMyOrders_(){
-    setTitle_('طلبياتي', 'آخر 30 يوم');
+    setTitle_('سجل زياراتي', 'الطلبيات والمرتجعات والتحصيل — آخر 30 يوم');
     setView('viewMyOrders');
     const box = document.getElementById('myOrdersList');
-    const cached = localCacheGet_('myorders');
+    const cached = localCacheGet_('myvisits');
     if(cached && cached.v) renderMyOrders_(cached.v); else box.innerHTML = '<div class="empty">جاري التحميل...</div>';
     callApi('listMyOrders', [state.auth, 30])
-      .then(function(list){ localCacheSet_('myorders', list); if(state.screen === 'myorders') renderMyOrders_(list); })
+      .then(function(list){ localCacheSet_('myvisits', list); if(state.screen === 'myorders') renderMyOrders_(list); })
       .catch(function(err){ if(!cached) onError(err); });
   }
   function renderMyOrders_(list){
     state.myOrders_ = list;
     const box = document.getElementById('myOrdersList');
-    if(!list.length){ box.innerHTML = '<div class="empty">مفيش طلبيات في آخر 30 يوم</div>'; return; }
+    if(!list.length){ box.innerHTML = '<div class="empty">مفيش طلبيات ولا مرتجعات ولا تحصيل في آخر 30 يوم</div>'; return; }
     let html = '', lastDay = '';
     list.forEach(function(o, i){
       if(o.date !== lastDay){ lastDay = o.date; html += '<div class="dayHead">' + escapeHtml(o.date) + '</div>'; }
-      const total = o.items.reduce(function(s, it){ return s + it.qty; }, 0);
+      const chips = [];
+      if(o.items && o.items.length) chips.push('<span class="chip green">🧾 ' + fmt(o.items.reduce(function(s, it){ return s + it.qty; }, 0)) + '</span>');
+      if(o.returns && o.returns.length) chips.push('<span class="chip red">↩ -' + fmt(o.returns.reduce(function(s, it){ return s + it.qty; }, 0)) + '</span>');
+      if(o.payment) chips.push('<span class="chip gold">💵 ' + fmt(o.payment.amount) + '</span>');
       html += '<div class="orderCard"><div class="ocTop"><div><div class="ocName">' + escapeHtml(o.customer.name) + '</div>' +
-        '<div class="ocSub">' + escapeHtml(o.orderId) + ' • ' + escapeHtml(o.time) + '</div></div>' +
-        '<span class="chip green">' + fmt(total) + ' قطعة</span></div>' +
-        '<div class="ocItems">' + o.items.map(function(it){ return escapeHtml(it.name) + ' × ' + fmt(it.qty); }).join(' • ') + '</div>' +
+        '<div class="ocSub">' + escapeHtml(o.time || '') + '</div></div><div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end;">' + chips.join('') + '</div></div>' +
+        visitDocsHtml_(o, false) +
         '<div class="ocBtns"><button onclick="shareOrderExcel_(state.myOrders_[' + i + '])">📤 مشاركة Excel</button>' +
         '<button onclick="downloadOrderExcel_(state.myOrders_[' + i + '])">⬇ تحميل</button></div></div>';
     });
@@ -2870,6 +3203,9 @@
       '<div class="tile gold"><b>' + t.conversion + '%</b><span>نسبة الطلب</span></div>' +
       '<div class="tile"><b>' + pctTxt_(t.planPct) + '</b><span>التزام بخط السير</span></div>' +
       '<div class="tile"><b>' + fmt(t.qty) + '</b><span>قطعة مطلوبة</span></div>' +
+      '<div class="tile red"><b>' + fmt(t.returnQty) + '</b><span>قطعة مرتجعة</span></div>' +
+      '<div class="tile gold"><b>' + fmt(t.collected) + '</b><span>تحصيل (ج)</span></div>' +
+      '<div class="tile"><b>' + t.newCustomers + '</b><span>عملاء جدد</span></div>' +
       '<div class="tile red"><b>' + (t.far + t.noLocation) + '</b><span>بعيد/من غير موقع</span></div></div>';
     if(!r.repFilter){
       html += r.reps.map(function(p){
@@ -2878,6 +3214,8 @@
           '<button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="map">🗺 الخريطة</button></span></div>' +
           '<div class="rGrid"><div><b>' + p.visits + '</b><span>زيارة</span></div><div><b>' + p.orders + '</b><span>طلبية</span></div>' +
           '<div><b>' + p.conversion + '%</b><span>نسبة الطلب</span></div><div><b>' + fmt(p.qty) + '</b><span>قطعة</span></div></div>' +
+          '<div class="rGrid"><div><b style="color:var(--red)">' + p.returns + '</b><span>مرتجع</span></div><div><b style="color:var(--red)">' + fmt(p.returnQty) + '</b><span>قطعة مرتجعة</span></div>' +
+          '<div><b style="color:var(--gold-d)">' + fmt(p.collected) + '</b><span>تحصيل</span></div><div><b>' + p.newCustomers + '</b><span>عملاء جدد</span></div></div>' +
           '<div class="planLine"><span>خط السير: ' + p.plannedDone + ' من ' + p.planned + '</span><span>' + pctTxt_(p.planPct) + '</span></div>' +
           '<div class="bar green"><i style="width:' + (p.planPct || 0) + '%"></i></div>' +
           '<div class="flagRow">' +
@@ -2898,7 +3236,8 @@
     if(r.repFilter){
       html += '<div class="card"><div class="cardTitle">يوم بيوم</div>' + (r.daily.length ? r.daily.map(function(d){
         return '<div class="listRow" data-day="' + d.date + '" style="cursor:pointer;"><div class="lMain"><div class="lName">' + escapeHtml(d.weekday + ' ' + d.date) + '</div>' +
-          '<div class="lSub">' + d.visits + ' زيارة • ' + d.orders + ' طلبية • خط السير ' + d.plannedDone + '/' + d.planned +
+          '<div class="lSub">' + d.visits + ' زيارة • ' + d.orders + ' طلبية' + (d.returns ? ' • ' + d.returns + ' مرتجع' : '') +
+          (d.collected ? ' • تحصيل ' + fmt(d.collected) : '') + ' • خط السير ' + d.plannedDone + '/' + d.planned +
           (d.first ? ' • من ' + d.first + ' لـ ' + d.last : '') + '</div></div>' + (state.isAdmin ? '<div class="lNum">🗺</div>' : '') + '</div>';
       }).join('') : '<div class="empty">مفيش زيارات</div>') + '</div>';
       html += '<div class="card"><div class="cardTitle">الزيارات</div>' + (r.visits.length ? r.visits.map(function(v){
@@ -2907,7 +3246,7 @@
         else if(v.distance != null && v.distance > FAR_METERS_) flags.push('<span class="chip red">بعيد ' + fmtDist_(v.distance) + '</span>');
         if(!v.inPlan) flags.push('<span class="chip">خارج الخط</span>');
         return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(v.name) + '</div>' +
-          '<div class="lSub">' + escapeHtml(v.date + ' ' + v.time) + ' • ' + (v.result === 'طلبية' ? '✔ طلبية' : '✋ ' + escapeHtml(v.reason)) +
+          '<div class="lSub">' + escapeHtml(v.date + ' ' + v.time) + ' • ' + (v.hasOrder || v.returnId || v.amount ? escapeHtml(v.result) + (v.amount ? ' (' + fmt(v.amount) + ' ج)' : '') : '✋ ' + escapeHtml(v.reason)) +
           (v.notes ? ' • ' + escapeHtml(v.notes) : '') + '</div><div class="cMeta" style="display:flex; gap:5px; flex-wrap:wrap; margin-top:4px;">' + flags.join('') + '</div></div></div>';
       }).join('') : '<div class="empty">مفيش زيارات</div>') + '</div>';
     }
@@ -2978,16 +3317,17 @@
         }).join('');
         custSel.value = cust;
         let html = '<div class="tiles"><div class="tile green"><b>' + r.ordersCount + '</b><span>طلبية</span></div>' +
-          '<div class="tile"><b>' + fmt(r.totalQty) + '</b><span>قطعة</span></div>' +
-          '<div class="tile gold"><b>' + r.items.length + '</b><span>صنف</span></div></div>';
+          '<div class="tile"><b>' + fmt(r.totalQty) + '</b><span>قطعة مطلوبة</span></div>' +
+          '<div class="tile red"><b>' + fmt(r.totalReturned) + '</b><span>قطعة مرتجعة</span></div></div>';
         html += '<div class="card"><div class="cardTitle">الأصناف</div>' + (r.items.length ? r.items.map(function(it){
           return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(it.name) + '</div>' +
-            '<div class="lSub">' + escapeHtml(it.code) + ' • ' + it.orders + ' طلبية • ' + it.customers + ' تاجر</div></div>' +
-            '<div class="lNum">' + fmt(it.qty) + '<small>قطعة</small></div></div>';
+            '<div class="lSub">' + escapeHtml(it.code) + ' • ' + it.orders + ' طلبية • ' + it.customers + ' تاجر' +
+            (it.returned ? ' • <span style="color:var(--red); font-weight:800">مرتجع ' + fmt(it.returned) + '</span>' : '') + '</div></div>' +
+            '<div class="lNum">' + fmt(it.qty) + '<small>مطلوب</small></div></div>';
         }).join('') : '<div class="empty">مفيش طلبيات في الفترة دي</div>') + '</div>';
         if(!cust && r.customers.length){
           html += '<div class="card"><div class="cardTitle">أكتر التجار طلبًا</div>' + r.customers.slice(0, 30).map(function(c){
-            return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(c.name) + '</div><div class="lSub">' + c.orders + ' طلبية</div></div>' +
+            return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(c.name) + '</div><div class="lSub">' + c.orders + ' طلبية' + (c.returned ? ' • <span style="color:var(--red)">مرتجع ' + fmt(c.returned) + '</span>' : '') + '</div></div>' +
               '<div class="lNum">' + fmt(c.qty) + '<small>قطعة</small></div></div>';
           }).join('') + '</div>';
         }
@@ -3061,15 +3401,15 @@
           if(x.shopLat != null && x.distance > FAR_METERS_){
             L.polyline([[x.lat, x.lng], [x.shopLat, x.shopLng]], { color: '#b83a3a', weight: 2, dashArray: '6 6' }).addTo(m);
           }
-          L.marker([x.lat, x.lng], { icon: pin_(x.result === 'طلبية' ? 'order' : 'noorder', String(x.n)), zIndexOffset: 500 }).addTo(m)
+          L.marker([x.lat, x.lng], { icon: pin_(x.hasOrder ? 'order' : 'noorder', String(x.n)), zIndexOffset: 500 }).addTo(m)
             .bindPopup('<b>' + x.n + '. ' + escapeHtml(x.name) + '</b><br>' + escapeHtml(x.time) + ' — ' +
-              (x.result === 'طلبية' ? 'طلبية' : escapeHtml(x.reason)) + (x.distance != null ? '<br>بعد عن المحل: ' + fmtDist_(x.distance) : ''));
+              (x.hasOrder || x.returnId || x.amount ? escapeHtml(x.result) : escapeHtml(x.reason)) + (x.distance != null ? '<br>بعد عن المحل: ' + fmtDist_(x.distance) : ''));
           pts.push([x.lat, x.lng]);
         });
         if(pts.length) m.fitBounds(pts, { padding: [30, 30], maxZoom: 16 });
         const first = r.visits[0], last = r.visits[r.visits.length - 1];
         let html = '<div class="tiles"><div class="tile"><b>' + r.visits.length + '</b><span>زيارة</span></div>' +
-          '<div class="tile green"><b>' + r.visits.filter(function(x){ return x.result === 'طلبية'; }).length + '</b><span>طلبية</span></div>' +
+          '<div class="tile green"><b>' + r.visits.filter(function(x){ return x.hasOrder; }).length + '</b><span>طلبية</span></div>' +
           '<div class="tile red"><b>' + r.missed.length + '</b><span>متخطط ماتزارش</span></div></div>';
         html += '<div class="note" style="margin-bottom:10px;">' + escapeHtml(r.weekday + ' ' + r.date) +
           (first ? ' — أول زيارة ' + first.time + ' وآخر زيارة ' + last.time : '') +
@@ -3080,7 +3420,7 @@
           else if(x.distance != null && x.distance > FAR_METERS_) flags.push('بعيد ' + fmtDist_(x.distance));
           if(!x.inPlan) flags.push('خارج الخط');
           return '<div class="listRow"><div class="lNum" style="font-size:15px;">' + x.n + '</div><div class="lMain"><div class="lName">' + escapeHtml(x.name) + '</div>' +
-            '<div class="lSub">' + escapeHtml(x.time) + ' • ' + (x.result === 'طلبية' ? '✔ طلبية' : '✋ ' + escapeHtml(x.reason)) +
+            '<div class="lSub">' + escapeHtml(x.time) + ' • ' + (x.hasOrder || x.returnId || x.amount ? escapeHtml(x.result) : '✋ ' + escapeHtml(x.reason)) +
             (flags.length ? ' • <span style="color:var(--red)">' + flags.map(escapeHtml).join(' • ') + '</span>' : '') + '</div></div></div>';
         }).join('') : '<div class="empty">مفيش زيارات اليوم ده</div>') + '</div>';
         if(r.missed.length){
@@ -3123,7 +3463,7 @@
             const ago = x.minutesAgo == null ? (x.time ? 'آخر زيارة ' + x.time : 'مفيش موقع النهارده') :
               x.minutesAgo < 2 ? 'دلوقتي' : 'من ' + (x.minutesAgo < 60 ? x.minutesAgo + ' دقيقة' : Math.floor(x.minutesAgo / 60) + ' ساعة');
             return '<div class="listRow" data-rep="' + escapeHtml(x.rep) + '" style="cursor:pointer;"><div class="lMain"><div class="lName">' + escapeHtml(x.rep) + '</div>' +
-              '<div class="lSub">📍 ' + escapeHtml(ago) + ' • ' + x.visits + ' زيارة • ' + x.orders + ' طلبية</div></div><div class="lNum">🗺</div></div>';
+              '<div class="lSub">📍 ' + escapeHtml(ago) + ' • ' + x.visits + ' زيارة • ' + x.orders + ' طلبية' + (x.collected ? ' • تحصيل ' + fmt(x.collected) : '') + '</div></div><div class="lNum">🗺</div></div>';
           }).join('') : '<div class="empty">مفيش مناديب</div>') + '</div>';
         document.querySelectorAll('#liveOut .listRow').forEach(function(row){
           row.onclick = function(){ openMap_(row.dataset.rep, ymd_(bizToday_())); };
@@ -3144,38 +3484,71 @@
     try{
       showLoading(true);
       const r = await callApi('exportOrders', [state.auth, document.getElementById('eFrom').value, document.getElementById('eTo').value, document.getElementById('eRep').value]);
-      if(!r.lines.length){ showLoading(false); showAlertModal_('مفيش طلبيات في الفترة دي', 'error'); return; }
+      const pays = r.payments || [];
+      if(!r.lines.length && !pays.length){ showLoading(false); showAlertModal_('مفيش طلبيات ولا مرتجعات ولا تحصيل في الفترة دي', 'error'); return; }
       await ensureExcelJsLoaded_();
       const wb = new ExcelJS.Workbook();
-      const ws = wb.addWorksheet('الطلبيات', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
-      const cols = [['رقم الطلبية', 16], ['التاريخ', 12], ['الوقت', 8], ['المندوب', 16], ['كود التاجر', 12], ['اسم التاجر', 26], ['كود الصنف', 12], ['اسم الصنف', 32], ['الكمية', 9], ['ملاحظات', 30]];
+      // ---- الطلبيات والمرتجعات: فاصل بين كل مستند والتاني، والمرتجع بالأحمر وكميته بالسالب ----
+      const ws = wb.addWorksheet('الطلبيات والمرتجعات', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
+      const cols = [['رقم المستند', 16], ['النوع', 9], ['التاريخ', 12], ['الوقت', 8], ['المندوب', 16], ['كود التاجر', 13], ['اسم التاجر', 26],
+        ['كود الصنف', 12], ['اسم الصنف', 32], ['الكمية', 9], ['سبب المرتجع', 18], ['حالة المرتجع', 11], ['ملاحظات', 28]];
       ws.columns = cols.map(function(c){ return { header: c[0], width: c[1] }; });
-      ws.getRow(1).eachCell(function(c){ c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL_NAVY_ } }; c.alignment = { horizontal: 'center' }; });
+      ws.getRow(1).eachCell(function(c){ c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = xlFill_(XL_NAVY_); c.alignment = { horizontal: 'center' }; });
+      const SEP_ = { style: 'medium', color: { argb: 'FF0C1730' } };
       let lastId = null;
-      const orders = {};
+      const docs = { order: {}, ret: {} };
       r.lines.forEach(function(l){
-        if(lastId !== null && l.orderId !== lastId) ws.addRow([]); // سطر فاضي بين كل طلبية والتانية
+        const isRet = l.type === 'مرتجع';
+        const first = l.orderId !== lastId;
+        if(lastId !== null && first){
+          const sep = ws.addRow([]); // سطر فاضي بين كل مستند والتاني
+          sep.height = 8;
+        }
         lastId = l.orderId;
-        orders[l.orderId] = true;
-        ws.addRow([l.orderId, l.date, l.time, l.rep, l.customerCode, l.customerName, l.itemCode, l.itemName, l.qty, l.notes]);
+        (isRet ? docs.ret : docs.order)[l.orderId] = true;
+        const row = ws.addRow([l.orderId, l.type, l.date, l.time, l.rep, l.customerCode, l.customerName, l.itemCode, l.itemName, l.qty,
+          isRet ? l.reason : '', isRet ? l.condition : '', l.notes]);
+        row.eachCell({ includeEmpty: true }, function(c, n){
+          if(n > cols.length) return;
+          if(isRet){ c.font = { color: { argb: XL_RED_ }, bold: n === 10 || n === 2 }; c.fill = xlFill_(XL_RED_BG_); }
+          if(first) c.border = { top: SEP_ };
+        });
       });
+      // ---- التحصيلات ----
+      const ps = wb.addWorksheet('التحصيلات', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
+      ps.columns = [['رقم التحصيل', 16], ['التاريخ', 12], ['الوقت', 8], ['المندوب', 16], ['كود التاجر', 13], ['اسم التاجر', 26], ['المبلغ', 12], ['طريقة الدفع', 16], ['تاريخ الشيك', 13], ['ملاحظات', 28]]
+        .map(function(c){ return { header: c[0], width: c[1] }; });
+      ps.getRow(1).eachCell(function(c){ c.font = { bold: true }; c.fill = xlFill_(XL_GOLD_); c.alignment = { horizontal: 'center' }; });
+      let payTotal = 0;
+      pays.forEach(function(x){
+        ps.addRow([x.paymentId, x.date, x.time, x.rep, x.customerCode, x.customerName, x.amount, x.method, x.chequeDate, x.notes]);
+        payTotal += x.amount;
+      });
+      if(pays.length){
+        const tr = ps.addRow(['', '', '', '', '', 'الإجمالي', Math.round(payTotal * 100) / 100]);
+        tr.font = { bold: true };
+        ps.getColumn(7).numFmt = '#,##0.00';
+      }
+      // ---- إجمالي الأصناف ----
       const sum = wb.addWorksheet('إجمالي الأصناف', { views: [{ rightToLeft: true }] });
-      sum.columns = [{ header: 'كود الصنف', width: 14 }, { header: 'اسم الصنف', width: 34 }, { header: 'الكمية', width: 10 }, { header: 'عدد الطلبيات', width: 14 }];
-      sum.getRow(1).eachCell(function(c){ c.font = { bold: true }; c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: XL_GOLD_ } }; });
+      sum.columns = [{ header: 'كود الصنف', width: 14 }, { header: 'اسم الصنف', width: 34 }, { header: 'مطلوب', width: 10 }, { header: 'مرتجع', width: 10 }, { header: 'الصافي', width: 10 }];
+      sum.getRow(1).eachCell(function(c){ c.font = { bold: true }; c.fill = xlFill_(XL_GOLD_); });
       const agg = {};
       r.lines.forEach(function(l){
         const k = '#' + (l.itemCode || l.itemName);
-        const a = agg[k] || (agg[k] = { code: l.itemCode, name: l.itemName, qty: 0, orders: {} });
-        a.qty += l.qty; a.orders[l.orderId] = true;
+        const x = agg[k] || (agg[k] = { code: l.itemCode, name: l.itemName, qty: 0, ret: 0 });
+        if(l.type === 'مرتجع') x.ret += Math.abs(l.qty); else x.qty += l.qty;
       });
-      Object.keys(agg).map(function(k){ return agg[k]; }).sort(function(a, b){ return b.qty - a.qty; }).forEach(function(a){
-        sum.addRow([a.code, a.name, a.qty, Object.keys(a.orders).length]);
+      Object.keys(agg).map(function(k){ return agg[k]; }).sort(function(a, b){ return b.qty - a.qty; }).forEach(function(x){
+        const row = sum.addRow([x.code, x.name, x.qty, x.ret ? -x.ret : 0, x.qty - x.ret]);
+        if(x.ret) row.getCell(4).font = { color: { argb: XL_RED_ }, bold: true };
       });
       const buf = await wb.xlsx.writeBuffer();
       const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const name = 'طلبيات ' + (r.rep ? r.rep + ' ' : '') + safeDateForFile(r.from) + (r.to !== r.from ? ' إلى ' + safeDateForFile(r.to) : '') + '.xlsx';
       showLoading(false);
-      document.getElementById('exportOut').innerHTML = '<div class="msg success">' + Object.keys(orders).length + ' طلبية — ' + r.lines.length + ' سطر ✔</div>';
+      document.getElementById('exportOut').innerHTML = '<div class="msg success">' + Object.keys(docs.order).length + ' طلبية — ' +
+        Object.keys(docs.ret).length + ' مرتجع — ' + pays.length + ' تحصيل (' + fmt(payTotal) + ' ج) ✔</div>';
       await shareOrDownload_(blob, name, mode);
     }catch(err){ onError(err); }
   }
