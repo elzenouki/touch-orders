@@ -1,6 +1,6 @@
 // طلبيات تاتش — Service Worker
 // غيّر رقم الإصدار ده مع كل تحديث للتطبيق عشان المناديب يظهرلهم شريط "فيه تحديث جديد"
-const CACHE = 'touch-orders-v1.2.1';
+const CACHE = 'touch-orders-v1.3.0';
 const SHELL = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
