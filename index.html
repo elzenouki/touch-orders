@@ -853,6 +853,39 @@
   .batchRow b{color:var(--navy);}
   .batchRow .bMeta{flex:1; color:var(--muted2); font-weight:700;}
   .batchRow button{border:1px solid var(--border); background:var(--card2); border-radius:9px; padding:6px 10px; font-family:inherit; font-weight:800; font-size:12.5px; color:var(--navy); cursor:pointer;}
+  /* ===== تقرير آخر اليوم PDF ===== */
+  #pdfStage{position:fixed; left:-12000px; top:0; width:794px; z-index:-1; pointer-events:none;}
+  .pdfPage{width:794px; height:1123px; box-sizing:border-box; padding:30px 34px 22px; background:#fff; color:#0C1730; direction:rtl;
+    font-family:'Cairo','Tajawal','Segoe UI',Tahoma,Arial,sans-serif; display:flex; flex-direction:column; margin-bottom:10px;}
+  .pdfPage .pTop{display:flex; justify-content:space-between; font-size:11px; color:#8B8676; border-bottom:2px solid #C9A24B; padding-bottom:6px; margin-bottom:12px; font-weight:700;}
+  .pdfPage .pBody{flex:1; overflow:hidden;}
+  .pdfPage .pFoot{font-size:10px; color:#A39E8F; text-align:center; border-top:1px solid #EEE7D6; padding-top:6px;}
+  .pdfPage .pTitle{display:flex; justify-content:space-between; align-items:center; background:#0C1730; color:#fff; border-radius:14px; padding:16px 22px; margin-bottom:12px;}
+  .pdfPage .pT1{font-size:14px; color:#E6C677; font-weight:800;}
+  .pdfPage .pT2{font-size:26px; font-weight:900; line-height:1.3;}
+  .pdfPage .pT3{text-align:left; font-size:13px; color:#D9DDE8; line-height:1.6;}
+  .pdfPage .pT3 b{font-size:17px; color:#fff;}
+  .pdfPage .pTiles{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:10px;}
+  .pdfPage .pTile{border:1px solid #E5DFCF; border-radius:12px; padding:9px 4px; text-align:center; background:#FBF9F3;}
+  .pdfPage .pTile b{display:block; font-size:21px; font-weight:900;}
+  .pdfPage .pTile span{font-size:11.5px; color:#6B6658; font-weight:700;}
+  .pdfPage .pTile.g b{color:#1F7A47;} .pdfPage .pTile.r b{color:#B83A3A;} .pdfPage .pTile.y b{color:#9A7420;}
+  .pdfPage .pNote{background:#FFF6E3; border:1px solid #F0DDB0; color:#7A5A12; border-radius:10px; padding:7px 12px; font-size:12px; font-weight:700; margin-bottom:6px;}
+  .pdfPage .pSec{font-size:15.5px; font-weight:900; margin:14px 0 6px; padding-right:9px; border-right:4px solid #C9A24B;}
+  .pdfPage .pRow{display:grid; gap:8px; align-items:center; font-size:12.5px; padding:6px 8px; border-bottom:1px solid #EEE7D6;}
+  .pdfPage .pRow.alt{background:#F7F5EF;}
+  .pdfPage .pRow small{display:block; font-size:10.5px; color:#8B8676; font-weight:600;}
+  .pdfPage .pRow .n{direction:ltr; text-align:right;}
+  .pdfPage .pRow .sm{font-size:11px; color:#5C5849;}
+  .pdfPage .pRow .g{color:#1F7A47; font-weight:800;} .pdfPage .pRow .r{color:#B83A3A; font-weight:800;} .pdfPage .pRow .m{color:#6B6658; font-weight:700;}
+  .pdfPage .pHead{background:#0C1730; color:#fff; font-weight:800; font-size:11.5px; border-radius:8px 8px 0 0; border:none;}
+  .pdfPage .cV{grid-template-columns:24px 46px 1.5fr 1.6fr 74px 1.3fr;}
+  .pdfPage .cP{grid-template-columns:60px 1.6fr 1.2fr 100px;}
+  .pdfPage .cM{grid-template-columns:24px 1.7fr 1fr 110px 100px;}
+  .pdfPage .pEmpty{font-size:12.5px; color:#8B8676; padding:8px 10px; background:#FBF9F3; border-radius:8px;}
+  .pdfPage .pEmpty.ok{color:#1F7A47; font-weight:800; background:#EAF5EE;}
+  .pdfPage .pSum{font-size:12.5px; padding:8px 10px; background:#FAF3E1; border-radius:0 0 8px 8px; text-align:left;}
+  .bigAction.dayRepBtn{flex-basis:100%; border-style:solid; border-color:#1F7A47; background:#EAF5EE; color:#1F7A47;}
 </style>
 </head>
 <body>
@@ -949,6 +982,7 @@
         <button class="bigAction" onclick="openScreen('customers')">🔎 زيارة تاجر تاني</button>
         <button class="bigAction newCust" onclick="openScreen('newcust')">＋ عميل جديد</button>
         <button class="bigAction phoneBtn" onclick="openScreen('phone')">📞 طلبية أو مرتجع بالتليفون (من غير زيارة)</button>
+        <button class="bigAction dayRepBtn" onclick="openDayReport_('', '')">📄 تقرير آخر اليوم — PDF للواتساب</button>
       </div>
       <div class="subHeader"><span class="lbl">خدمات إضافية</span><span class="line"></span></div>
       <div class="subPanel">
@@ -2012,7 +2046,7 @@
   // ================================================================
   //                 طلبيات تاتش — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.2.1';
+  const APP_VERSION_ = 'v1.3.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;               // نفس الرقم اللي في السيرفر
   const SHOP_FIX_MAX_ACC_ = 100;         // أقصى دقة (متر) لتثبيت موقع محل — نفس السيرفر
@@ -3270,7 +3304,8 @@
       html += r.reps.map(function(p){
         return '<div class="repCard"><div class="rTop"><span class="rName">' + escapeHtml(p.rep) + '</span>' +
           '<span><button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="detail">التفاصيل</button> ' +
-          '<button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="map">🗺 الخريطة</button></span></div>' +
+          '<button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="map">🗺 الخريطة</button> ' +
+          '<button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="pdf">📄 PDF</button></span></div>' +
           '<div class="rGrid"><div><b>' + p.visits + '</b><span>زيارة</span></div><div><b>' + p.orders + '</b><span>طلبية</span></div>' +
           '<div><b>' + p.conversion + '%</b><span>نسبة الطلب</span></div><div><b>' + fmt(p.qty) + '</b><span>قطعة</span></div></div>' +
           '<div class="rGrid"><div><b style="color:var(--red)">' + p.returns + '</b><span>مرتجع</span></div><div><b style="color:var(--red)">' + fmt(p.returnQty) + '</b><span>قطعة مرتجعة</span></div>' +
@@ -3315,6 +3350,7 @@
     out.querySelectorAll('.rLink').forEach(function(b){
       b.onclick = function(){
         if(b.dataset.act === 'map'){ openMap_(b.dataset.rep, dmyToYmd_(r.to)); return; }
+        if(b.dataset.act === 'pdf'){ openDayReport_(b.dataset.rep, r.to); return; }
         document.getElementById('rRep').value = b.dataset.rep;
         loadReport_();
       };
@@ -3578,10 +3614,14 @@
       const isRet = l.type === 'مرتجع';
       if(l.orderId !== lastId){
         if(lastId !== null){
-          // سطر فاصل غامق بين كل مستند والتاني (فاضي من غير بيانات — مايأثرش على النسخ واللصق)
+          // مسافة واسعة بين كل مستند والتاني: سطر فاضي عالي بخط غامق تقيل فوقه وتحته (من غير بيانات — مايأثرش على النسخ واللصق)
           const sep = ws.addRow([]);
-          sep.height = 7;
-          for(let k = 1; k <= cols.length; k++) sep.getCell(k).fill = xlFill_('FF8B8676');
+          sep.height = 30;
+          for(let k = 1; k <= cols.length; k++){
+            const c = sep.getCell(k);
+            c.fill = xlFill_('FFFFFFFF');
+            c.border = { top: { style: 'thick', color: { argb: XL_NAVY_ } }, bottom: { style: 'thick', color: { argb: XL_NAVY_ } } };
+          }
         }
         docNo++;
         lastId = l.orderId;
@@ -3758,6 +3798,159 @@
     let st = state.gps === 'on' ? '✔ الموقع شغال على الجهاز ده.<br><br>' : state.gps === 'off' ? '⚠️ الموقع مقفول دلوقتي.<br><br>' : '';
     document.getElementById('gpsHelpText').innerHTML = st + gpsHelpText_() +
       '<br><br>التطبيق بيسجل مكانك كل 3 دقايق <b>وهو مفتوح بس</b>، ومع كل زيارة.';
+  }
+
+  // ================== تقرير آخر اليوم PDF (للواتساب) ==================
+  // بيتعمل على الموبايل نفسه: صفحات A4 HTML → صورة (html2canvas) → PDF (jsPDF)، وبعدين مشاركة واتساب.
+  function ensureJsPdfLoaded_(){
+    return loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  function openDayReport_(rep, dmy){
+    if(!state.isAdmin && state.auth){
+      const pend = queueGet_().filter(function(q){ return q.email === state.auth.email; }).length;
+      if(pend){
+        showAlertModal_('فيه ' + pend + ' زيارة لسه على الموبايل وماتبعتتش (النت) — مش هتظهر في التقرير.\nاستنى لما تتبعت وبعدين اعمل التقرير.', 'error');
+        flushQueue_(true);
+        return;
+      }
+    }
+    showLoading(true);
+    callApi('getDayReport', [state.auth, rep || '', dmy || ''])
+      .then(function(r){ return Promise.all([ensureHtml2CanvasLoaded_(), ensureJsPdfLoaded_()]).then(function(){ return buildDayPdf_(r); }).then(function(blob){ return { r: r, blob: blob }; }); })
+      .then(function(x){
+        showLoading(false);
+        const name = 'تقرير ' + x.r.rep + ' - ' + x.r.date.replace(/\//g, '-') + '.pdf';
+        window.__dayPdf = { name: name, size: x.blob.size, pages: x.blob.__pages };
+        const t = x.r.totals;
+        return confirmModal_('📄 <b>تقرير ' + escapeHtml(x.r.rep) + ' — ' + escapeHtml(x.r.weekday + ' ' + x.r.date) + '</b> جاهز<br><br>' +
+          t.visits + ' زيارة • ' + t.orders + ' طلبية • تحصيل ' + fmt(t.collected) + ' ج<br>خط السير: ' + t.plannedDone + ' من ' + t.planned +
+          (x.r.missed.length ? ' — <b style="color:var(--red)">' + x.r.missed.length + ' ماتزاروش</b>' : ''), '📤 ابعته واتساب', '⬇ تنزيل')
+          .then(function(share){ return shareOrDownload_(x.blob, name, share ? 'share' : 'download'); });
+      })
+      .catch(function(err){ showLoading(false); onError(err); });
+  }
+  function dayPdfBlocks_(r){
+    const t = r.totals;
+    const e = escapeHtml;
+    const B = [];
+    const sec = function(title, head, cls){ return { sec: true, html: '<div class="pSec">' + title + '</div>', head: head ? '<div class="pRow pHead ' + cls + '">' + head + '</div>' : '' }; };
+    B.push({ html: '<div class="pTitle"><div><div class="pT1">تقرير آخر اليوم</div><div class="pT2">' + e(r.rep) + '</div></div>' +
+      '<div class="pT3">' + e(r.weekday) + '<br><b>' + e(r.date) + '</b>' + (r.first ? '<br>من ' + e(r.first) + ' لـ ' + e(r.last) : '') + '</div></div>' });
+    const tile = function(v, l, c){ return '<div class="pTile ' + (c || '') + '"><b>' + v + '</b><span>' + l + '</span></div>'; };
+    B.push({ html: '<div class="pTiles">' + tile(t.visits, 'زيارة') + tile(t.orders, 'طلبية', 'g') + tile(t.noOrder, 'بدون طلب') +
+      tile(t.returns, 'مرتجع', 'r') + tile(fmt(t.collected), 'تحصيل (ج)', 'y') + tile(t.plannedDone + '/' + t.planned, 'خط السير', t.plannedDone < t.planned ? 'r' : 'g') + '</div>' });
+    const flags = [];
+    if(t.offPlan) flags.push(t.offPlan + ' زيارة خارج خط السير');
+    if(t.far) flags.push(t.far + ' بعيد عن المحل');
+    if(t.noLocation) flags.push(t.noLocation + ' من غير موقع');
+    if(r.newCustomers.length) flags.push('عملاء جدد: ' + r.newCustomers.map(e).join('، '));
+    if(flags.length) B.push({ html: '<div class="pNote">' + flags.join(' • ') + '</div>' });
+
+    // الزيارات
+    const vs = sec('🚶 زيارات اليوم (' + r.visits.length + ')', '<span>#</span><span>الوقت</span><span>التاجر</span><span>النتيجة</span><span>تحصيل</span><span>ملاحظات</span>', 'cV');
+    B.push(vs);
+    if(!r.visits.length) B.push({ html: '<div class="pEmpty">مفيش زيارات</div>' });
+    r.visits.forEach(function(v, i){
+      const res = [];
+      if(v.orderLines) res.push('<span class="g">🧾 طلبية ' + v.orderLines + ' صنف / ' + fmt(v.orderQty) + ' قطعة</span>');
+      if(v.returnLines) res.push('<span class="r">↩ مرتجع ' + fmt(v.returnQty) + ' قطعة</span>');
+      if(!v.orderLines && v.reason) res.push('<span class="m">✋ ' + e(v.reason) + '</span>');
+      const fl = [];
+      if(!v.hasLocation) fl.push('<span class="r">من غير موقع</span>');
+      else if(v.far) fl.push('<span class="r">بعيد ' + Math.round(v.distance) + 'م</span>');
+      if(!v.inPlan) fl.push('<span class="m">خارج الخط</span>');
+      if(v.notes) fl.push(e(v.notes));
+      B.push({ cont: vs, html: '<div class="pRow cV' + (i % 2 ? ' alt' : '') + '"><span>' + (i + 1) + '</span><span class="n">' + e(v.time) + '</span><span><b>' + e(v.name) + '</b><small>' + e(v.code) + '</small></span>' +
+        '<span>' + (res.join('<br>') || e(v.result)) + '</span><span class="n">' + (v.amount ? fmt(v.amount) + '<small>' + e(v.method) + '</small>' : '—') + '</span><span class="sm">' + fl.join(' • ') + '</span></div>' });
+    });
+
+    // التليفوني
+    if(r.phone.length){
+      const ps = sec('📞 طلبات ومرتجعات بالتليفون (' + r.phone.length + ')', '<span>الوقت</span><span>التاجر</span><span>النوع</span><span>الكمية</span>', 'cP');
+      B.push(ps);
+      r.phone.forEach(function(d, i){
+        B.push({ cont: ps, html: '<div class="pRow cP' + (i % 2 ? ' alt' : '') + '"><span class="n">' + e(d.time) + '</span><span><b>' + e(d.name) + '</b><small>' + e(d.code) + '</small></span>' +
+          '<span class="' + (d.type === 'مرتجع' ? 'r' : 'g') + '">' + e(d.type) + ' — ' + d.lines + ' صنف</span><span>' + fmt(d.qty) + ' قطعة</span></div>' });
+      });
+    }
+
+    // التحصيل
+    const cs = sec('💰 تحصيل اليوم — ' + fmt(t.collected) + ' ج', r.payments.length ? '<span>الوقت</span><span>التاجر</span><span>طريقة الدفع</span><span>المبلغ</span>' : '', 'cP');
+    B.push(cs);
+    if(!r.payments.length) B.push({ html: '<div class="pEmpty">مفيش تحصيل النهارده</div>' });
+    r.payments.forEach(function(p, i){
+      B.push({ cont: cs, html: '<div class="pRow cP' + (i % 2 ? ' alt' : '') + '"><span class="n">' + e(p.time) + '</span><span><b>' + e(p.name) + '</b><small>' + e(p.code) + '</small></span>' +
+        '<span>' + e(p.method) + (p.chequeDate ? '<small>شيك ' + e(p.chequeDate) + '</small>' : '') + '</span><span class="n"><b>' + fmt(p.amount) + '</b></span></div>' });
+    });
+    if(r.byMethod.length > 1 || r.payments.length) B.push({ html: '<div class="pSum">' + r.byMethod.map(function(m){ return e(m.method) + ': <b>' + fmt(m.amount) + '</b>'; }).join(' &nbsp;•&nbsp; ') + ' &nbsp;—&nbsp; الإجمالي: <b>' + fmt(t.collected) + ' ج</b></div>' });
+
+    // ماتزاروش
+    const ms = sec('⚠️ عملاء في خط السير ماتزاروش (' + r.missed.length + ' من ' + t.planned + ')', r.missed.length ? '<span>#</span><span>التاجر</span><span>المنطقة</span><span>التليفون</span><span>آخر زيارة</span>' : '', 'cM');
+    B.push(ms);
+    if(!r.missed.length) B.push({ html: '<div class="pEmpty ok">' + (t.planned ? '✔ زار كل عملاء خط السير' : 'مفيش عملاء في خط سير اليوم ده') + '</div>' });
+    r.missed.forEach(function(m, i){
+      B.push({ cont: ms, html: '<div class="pRow cM' + (i % 2 ? ' alt' : '') + '"><span>' + (i + 1) + '</span><span><b>' + e(m.name) + '</b><small>' + e(m.code) + '</small></span><span>' + e(m.area || '—') + '</span>' +
+        '<span class="n">' + e(m.phone || '—') + '</span><span class="n">' + e(m.lastVisit || 'عمره ما اتزار') + '</span></div>' });
+    });
+    return B;
+  }
+  async function buildDayPdf_(r){
+    const stage = document.createElement('div');
+    stage.id = 'pdfStage';
+    document.body.appendChild(stage);
+    try{
+      const blocks = dayPdfBlocks_(r);
+      const pages = [];
+      let body = null;
+      const newPage = function(){
+        const pg = document.createElement('div');
+        pg.className = 'pdfPage';
+        pg.innerHTML = '<div class="pTop"><span>طلبيات تاتش — تقرير ' + escapeHtml(r.rep) + ' — ' + escapeHtml(r.weekday + ' ' + r.date) + '</span><span class="pNo"></span></div><div class="pBody"></div>' +
+          '<div class="pFoot">اتعمل ' + ymdToDmy_(ymd_(new Date())) + ' الساعة ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0') + ' — طلبيات تاتش</div>';
+        stage.appendChild(pg);
+        pages.push(pg);
+        body = pg.querySelector('.pBody');
+      };
+      const fits = function(){ return body.scrollHeight <= body.clientHeight + 1; };
+      const add = function(html){ const w = document.createElement('div'); w.innerHTML = html; const el = w.firstChild; body.appendChild(el); return el; };
+      newPage();
+      const place = function(html, prefixOnNew){
+        let el = add('<div>' + html + '</div>');
+        if(!fits() && body.children.length > 1){
+          body.removeChild(el);
+          newPage();
+          add('<div>' + (prefixOnNew || '') + html + '</div>');
+        }
+      };
+      for(let i = 0; i < blocks.length; i++){
+        const b = blocks[i];
+        if(b.sec){
+          // عنوان القسم مايتسابش لوحده آخر الصفحة: بيتحط مع أول سطر فيه
+          const next = blocks[i + 1] && blocks[i + 1].cont === b ? blocks[i + 1] : null;
+          place(b.html + b.head + (next ? next.html : ''));
+          if(next) i++;
+        } else if(b.cont){
+          // سطر من قسم كمل في صفحة جديدة: بيتعاد عنوان القسم ورأس الجدول
+          place(b.html, b.cont.html.replace('</div>', ' — تكملة</div>') + b.cont.head);
+        } else {
+          place(b.html);
+        }
+      }
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      const JsPDF = window.jspdf.jsPDF;
+      const pdf = new JsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+      for(let p = 0; p < pages.length; p++){
+        pages[p].querySelector('.pNo').textContent = 'صفحة ' + (p + 1) + ' من ' + pages.length;
+        const canvas = await html2canvas(pages[p], { scale: 2, backgroundColor: '#ffffff', logging: false });
+        if(p) pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297);
+      }
+      const blob = pdf.output('blob');
+      blob.__pages = pages.length;
+      return blob;
+    } finally {
+      stage.remove();
+    }
   }
 
   // ============ تسجيل الـ Service Worker + اكتشاف التحديثات تلقائيًا ============
