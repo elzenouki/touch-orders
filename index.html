@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title> نظام المبيعات - المناديب الخارجيين </title>
+<title>TOUCH EL ZENOUKI - المناديب الخارجيين</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0c1730">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="طلبيات تاتش">
+<meta name="apple-mobile-web-app-title" content="TOUCH EL ZENOUKI">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -676,7 +676,7 @@
     .spinnerOverlay{ backdrop-filter:none; }
   }
 
-  /* ================== طلبيات تاتش — إضافات ================== */
+  /* ================== TOUCH EL ZENOUKI — إضافات ================== */
   .statRow{display:flex; gap:8px; margin-top:16px; position:relative;}
   .statBox{flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(214,164,40,.28); border-radius:13px; padding:9px 6px; text-align:center;}
   .statBox b{display:block; font-size:21px; font-weight:900; color:#fff; line-height:1.2; direction:ltr;}
@@ -896,7 +896,7 @@
   <div class="headerLeft">
     <div>
       <span class="kicker">المناديب الخارجيين</span>
-      <h1 id="pageTitle">طلبيات تاتش</h1>
+      <h1 id="pageTitle">TOUCH EL ZENOUKI</h1>
       <span class="brandLine"></span>
       <div class="sub" id="pageSub">جاري التحميل...</div>
     </div>
@@ -1889,7 +1889,7 @@
     try{
       createP = navigator.credentials.create({ publicKey: {
         challenge: pkB64uToBuf_(r.challenge),
-        rp: { name: 'طلبيات تاتش' },
+        rp: { name: 'TOUCH EL ZENOUKI' },
         user: { id: pkB64uToBuf_(r.userId), name: r.userName, displayName: r.displayName || r.userName },
         pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
         authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'preferred' },
@@ -2046,9 +2046,9 @@
   }
 
   // ================================================================
-  //                 طلبيات تاتش — منطق التطبيق
+  //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.4.0';
+  const APP_VERSION_ = 'v1.4.1';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر               // نفس الرقم اللي في السيرفر
@@ -2194,7 +2194,7 @@
     clearMsg();
     state.screen = null;
     state.visit = null;
-    setTitle_('طلبيات تاتش');
+    setTitle_('TOUCH EL ZENOUKI');
     setView('viewHome');
     if(state.isAdmin){
       if(!state.repOptions.length){
@@ -3929,8 +3929,8 @@
       const newPage = function(){
         const pg = document.createElement('div');
         pg.className = 'pdfPage';
-        pg.innerHTML = '<div class="pTop"><span>طلبيات تاتش — تقرير ' + escapeHtml(r.rep) + ' — ' + escapeHtml(r.weekday + ' ' + r.date) + '</span><span class="pNo"></span></div><div class="pBody"></div>' +
-          '<div class="pFoot">اتعمل ' + ymdToDmy_(ymd_(new Date())) + ' الساعة ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0') + ' — طلبيات تاتش</div>';
+        pg.innerHTML = '<div class="pTop"><span>TOUCH EL ZENOUKI — تقرير ' + escapeHtml(r.rep) + ' — ' + escapeHtml(r.weekday + ' ' + r.date) + '</span><span class="pNo"></span></div><div class="pBody"></div>' +
+          '<div class="pFoot">اتعمل ' + ymdToDmy_(ymd_(new Date())) + ' الساعة ' + String(new Date().getHours()).padStart(2, '0') + ':' + String(new Date().getMinutes()).padStart(2, '0') + ' — TOUCH EL ZENOUKI</div>';
         stage.appendChild(pg);
         pages.push(pg);
         body = pg.querySelector('.pBody');
