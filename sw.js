@@ -1,14 +1,15 @@
-// طلبيات تاتش — Service Worker
+// TOUCH EL ZENOUKI — Service Worker
 // غيّر رقم الإصدار ده مع كل تحديث للتطبيق عشان المناديب يظهرلهم شريط "فيه تحديث جديد"
-const CACHE = 'touch-orders-v1.4.0';
-const SHELL = ['./', './index.html', './manifest.json', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE_PREFIX = 'touch-orders-v';
+const CACHE = CACHE_PREFIX + '1.4.1';
+const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k.indexOf(CACHE_PREFIX) === 0).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
