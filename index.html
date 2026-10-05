@@ -1312,6 +1312,12 @@
       <button class="primary" id="pkProfileBtn" onclick="openPasskeyOffer_(true)">فعّل الدخول بالبصمة على الجهاز ده</button>
       <button class="ghost" id="pkClearBtn" hidden onclick="handlePasskeyClear_()">امسح البصمات المتسجلة</button>
     </div>
+    <div class="card" id="micCard">
+      <div class="cardTitle">🎤 فحص المايك</div>
+      <div class="note" id="micDiag"></div>
+      <button class="ghost" onclick="micTest_()">🎤 جرّب المايك دلوقتي</button>
+      <div id="micTestOut" style="margin-top:10px;"></div>
+    </div>
     <div class="card" id="gpsHelpCard">
       <div class="cardTitle">📍 الموقع</div>
       <div class="note" id="gpsHelpText"></div>
@@ -2129,7 +2135,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.6.2';
+  const APP_VERSION_ = 'v1.6.3';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر               // نفس الرقم اللي في السيرفر
@@ -3275,8 +3281,43 @@
     mic_.finals = '';
     mic_.restarts = 0;
     setMicUi_(true);
-    setAiStatus_('لحظة... بفتح المايك');
-    listenOnce_(); // لازم يبدأ في نفس لحظة الدوسة (بعض الموبايلات بترفض لو اتأخر)
+    if(micKnownOk_()){
+      setAiStatus_('لحظة... بفتح المايك');
+      listenOnce_(); // الإذن متاخد قبل كده — نبدأ في نفس لحظة الدوسة
+      return;
+    }
+    // أول مرة على الموبايل ده: نطلب إذن الميكروفون صريح الأول (بيطلّع رسالة "اسمح")، وبعدين نبدأ نسمع
+    setAiStatus_('اسمح للتطبيق بالميكروفون من الرسالة اللي هتظهر...');
+    ensureMicPermission_()
+      .then(function(){ if(mic_.on && !mic_.cancelled){ setAiStatus_('لحظة... بفتح المايك'); listenOnce_(); } })
+      .catch(function(err){ micFail_(err.message); });
+  }
+  const MIC_OK_KEY_ = 'tf_mic_ok';
+  function micKnownOk_(){ try{ return localStorage.getItem(MIC_OK_KEY_) === '1'; }catch(e){ return false; } }
+  function micSetOk_(ok){ try{ if(ok) localStorage.setItem(MIC_OK_KEY_, '1'); else localStorage.removeItem(MIC_OK_KEY_); }catch(e){} }
+  // بيطلب إذن الميكروفون ويقفله على طول (بس عشان الموبايل يسأل "تسمح؟")
+  function ensureMicPermission_(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.resolve();
+    return navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(function(st){ st.getTracks().forEach(function(t){ t.stop(); }); })
+      .catch(function(err){
+        const n = (err && err.name) || '';
+        micSetOk_(false);
+        if(n === 'NotAllowedError' || n === 'SecurityError' || n === 'PermissionDeniedError') throw new Error('التطبيق مش مسموح له بالميكروفون — ' + micPermHelp_());
+        if(n === 'NotFoundError' || n === 'DevicesNotFoundError') throw new Error('مفيش ميكروفون شغال على الموبايل ده');
+        if(n === 'NotReadableError' || n === 'TrackStartError') throw new Error('الميكروفون مشغول — اقفل أي مكالمة أو تطبيق بيسجّل وجرّب تاني');
+        throw new Error('مش قادر أفتح الميكروفون (' + (n || err) + ') — ' + KB_MIC_HINT_);
+      });
+  }
+  // نص واضح لكل كود غلط من خاصية الكلام
+  function micErrText_(er){
+    if(er === 'not-allowed') return 'التطبيق مش مسموح له بالميكروفون — ' + micPermHelp_();
+    if(er === 'service-not-allowed') return 'خاصية تحويل الكلام مقفولة على الموبايل ده — ' + KB_MIC_HINT_;
+    if(er === 'network') return 'خاصية الكلام محتاجة نت كويس — اتأكد من النت، أو ' + KB_MIC_HINT_;
+    if(er === 'audio-capture') return 'مش قادر أوصل للميكروفون — يمكن تطبيق تاني ماسكه (مكالمة أو تسجيل). اقفله وجرّب تاني';
+    if(er === 'language-not-supported') return 'العربي مش متاح في خاصية الكلام على الموبايل ده — ' + KB_MIC_HINT_;
+    if(er === 'no-speech') return 'الميكروفون فتح بس مسمعش كلام — قرّب الموبايل واتكلم بصوت أعلى';
+    return 'المايك وقف (' + er + ') — ' + KB_MIC_HINT_;
   }
   function listenOnce_(){
     const ta = document.getElementById('aiText');
@@ -3291,6 +3332,7 @@
     mic_.started = false;
     rec.onstart = function(){
       mic_.started = true;
+      micSetOk_(true);
       clearTimeout(mic_.watchdog);
       setAiStatus_('🔴 بسمعك... قول الطلبية ودوس ⏹ لما تخلص');
     };
@@ -3307,11 +3349,9 @@
       const er = (e && e.error) || '';
       if(er === 'no-speech' || er === 'aborted') return; // بيكمّل يسمع لوحده
       if(er === 'language-not-supported' && mic_.lang !== 'ar'){ mic_.lang = 'ar'; return; }
-      if(er === 'not-allowed'){ mic_.rec = null; micAskPermission_(); return; }
-      if(er === 'service-not-allowed') micFail_('المايك الداخلي مش متاح على الموبايل ده — ' + KB_MIC_HINT_);
-      else if(er === 'network') micFail_('المايك محتاج نت كويس عشان يحوّل الكلام — اتأكد من النت، أو ' + KB_MIC_HINT_);
-      else if(er === 'audio-capture') micFail_('مش قادر أوصل للمايك — يمكن تطبيق تاني ماسكه (مكالمة أو تسجيل). اقفله وجرّب تاني');
-      else micFail_('المايك وقف (' + er + ') — ' + KB_MIC_HINT_);
+      if(er === 'not-allowed'){ mic_.rec = null; micSetOk_(false); micAskPermission_(); return; }
+      if(er === 'service-not-allowed') micSetOk_(false);
+      micFail_(micErrText_(er));
     };
     rec.onend = function(){
       if(mic_.rec !== rec) return;
@@ -3331,7 +3371,7 @@
     catch(e){ mic_.rec = null; micFail_('مش قادر أبدأ المايك — ' + KB_MIC_HINT_); return; }
     clearTimeout(mic_.watchdog);
     mic_.watchdog = setTimeout(function(){
-      if(mic_.rec === rec && !mic_.started) micFail_('المايك مارضيش يفتح — ' + KB_MIC_HINT_);
+      if(mic_.rec === rec && !mic_.started){ micSetOk_(false); micFail_('المايك مارضيش يفتح — جرّب "فحص المايك" من إعداداتي، أو ' + KB_MIC_HINT_); }
     }, 5000);
   }
   // لو الإذن مرفوض: بنطلبه صريح مرة (ده بيطلّع رسالة "اسمح بالميكروفون")، ولو اتسمح بنكمّل على طول
@@ -3343,10 +3383,10 @@
       navigator.mediaDevices.getUserMedia({ audio: true }).then(function(st){
         st.getTracks().forEach(function(t){ t.stop(); });
         if(mic_.on && !mic_.cancelled) listenOnce_();
-      }).catch(function(){ micFail_('التطبيق مش مسموح له بالمايك — ' + micPermHelp_()); });
+      }).catch(function(){ micFail_(micErrText_('not-allowed')); });
       return;
     }
-    micFail_('التطبيق مش مسموح له بالمايك — ' + micPermHelp_());
+    micFail_(micErrText_('not-allowed'));
   }
   function stopMic_(cancel){
     if(cancel) mic_.cancelled = true;
@@ -4567,6 +4607,72 @@
     let st = state.gps === 'on' ? '✔ الموقع شغال على الجهاز ده.<br><br>' : state.gps === 'off' ? '⚠️ الموقع مقفول دلوقتي.<br><br>' : '';
     document.getElementById('gpsHelpText').innerHTML = st + gpsHelpText_() +
       '<br><br>التطبيق بيسجل مكانك كل 3 دقايق <b>وهو مفتوح بس</b>، ومع كل زيارة.';
+    renderMicDiag_();
+  }
+  // كل اللي ممكن يوقّف المايك على الموبايل ده، في مكان واحد
+  function renderMicDiag_(){
+    const box = document.getElementById('micDiag');
+    document.getElementById('micTestOut').innerHTML = '';
+    const ok = function(b){ return b ? '✔' : '❌'; };
+    const ua = navigator.userAgent || '';
+    const where = isInAppBrowser_() ? '❌ جوه واتساب/فيسبوك — افتحه من Chrome أو من أيقونة التطبيق' : isStandaloneApp_() ? '✔ أيقونة التطبيق' : '✔ المتصفح';
+    const lines = [
+      'إصدار التطبيق: <b>' + APP_VERSION_ + '</b>',
+      'الجهاز: <b>' + (isIOS_() ? 'آيفون' : /Android/i.test(ua) ? 'أندرويد' : 'كمبيوتر/تاني') + '</b>',
+      'فاتح من: ' + where,
+      ok(!!speechCtor_()) + ' المتصفح فيه خاصية تحويل الكلام' + (speechCtor_() ? '' : ' — استخدم 🎤 اللي في الكيبورد'),
+      ok(window.isSecureContext) + ' اتصال آمن (https)',
+      ok(navigator.onLine) + ' النت',
+      '<span id="micPermLine">⏳ إذن الميكروفون: بشوف...</span>',
+    ];
+    box.innerHTML = lines.join('<br>');
+    const setPerm = function(t){ const el = document.getElementById('micPermLine'); if(el) el.innerHTML = t; };
+    if(navigator.permissions && navigator.permissions.query){
+      navigator.permissions.query({ name: 'microphone' }).then(function(r){
+        setPerm(r.state === 'granted' ? '✔ إذن الميكروفون: مسموح'
+          : r.state === 'denied' ? '❌ إذن الميكروفون: مرفوض — ' + micPermHelp_()
+          : '⚠️ إذن الميكروفون: لسه ماتطلبش — دوس "جرّب المايك" ووافق على الرسالة');
+      }).catch(function(){ setPerm('ℹ️ إذن الميكروفون: الموبايل مش بيقول — دوس "جرّب المايك" وهتعرف'); });
+    } else setPerm('ℹ️ إذن الميكروفون: الموبايل مش بيقول — دوس "جرّب المايك" وهتعرف');
+  }
+  // تجربة حقيقية: بيطلب الإذن، ويسمع كلمة، ويقولك سمع إيه أو الغلط بالظبط
+  function micTest_(){
+    const out = document.getElementById('micTestOut');
+    const say = function(t, kind){ out.innerHTML = '<div class="msg ' + (kind || 'success') + '" style="margin:0;">' + escapeHtml(t) + '</div>'; };
+    const SR = speechCtor_();
+    if(!SR){ say('❌ المتصفح ده مفيهوش خاصية تحويل الكلام — ' + KB_MIC_HINT_, 'error'); return; }
+    if(isInAppBrowser_()){ say('❌ انت فاتح من جوه واتساب/فيسبوك — افتح التطبيق من Chrome أو من أيقونته', 'error'); return; }
+    say('⏳ بطلب إذن الميكروفون — وافق على الرسالة لو ظهرت...');
+    ensureMicPermission_().then(function(){
+      let rec;
+      try{ rec = new SR(); }catch(e){ say('❌ مش قادر أشغّل خاصية الكلام: ' + e.message, 'error'); return; }
+      rec.lang = 'ar-EG';
+      rec.continuous = false;
+      rec.interimResults = false;
+      let got = '', errc = '', started = false;
+      const timer = setTimeout(function(){
+        try{ rec.abort(); }catch(e){}
+        if(!got && !errc) say(started ? '⚠️ الميكروفون فتح بس مسمعش كلام — جرّب تاني واتكلم أول ما تشوف 🔴' : '❌ خاصية الكلام ماردتش خالص — ' + KB_MIC_HINT_, 'error');
+      }, 9000);
+      rec.onstart = function(){ started = true; say('🔴 قول أي كلمة دلوقتي... (مثلاً: ستة سخان)'); };
+      rec.onresult = function(e){ got = e.results[0][0].transcript; };
+      rec.onerror = function(e){ errc = (e && e.error) || 'unknown'; };
+      rec.onend = function(){
+        clearTimeout(timer);
+        if(got){ micSetOk_(true); say('✔ المايك شغال — سمعت: «' + got + '»'); }
+        else if(errc && errc !== 'aborted'){ if(errc === 'not-allowed' || errc === 'service-not-allowed') micSetOk_(false); say('❌ ' + micErrText_(errc) + '  (كود: ' + errc + ')', 'error'); }
+        else if(started) say('⚠️ الميكروفون فتح بس مسمعش كلام — جرّب تاني واتكلم أول ما تشوف 🔴', 'error');
+        renderMicPermOnly_();
+      };
+      try{ rec.start(); }catch(e){ clearTimeout(timer); say('❌ ' + e.message, 'error'); }
+    }).catch(function(err){ say('❌ ' + err.message, 'error'); renderMicPermOnly_(); });
+  }
+  function renderMicPermOnly_(){
+    if(!navigator.permissions || !navigator.permissions.query) return;
+    navigator.permissions.query({ name: 'microphone' }).then(function(r){
+      const el = document.getElementById('micPermLine');
+      if(el) el.innerHTML = r.state === 'granted' ? '✔ إذن الميكروفون: مسموح' : r.state === 'denied' ? '❌ إذن الميكروفون: مرفوض — ' + micPermHelp_() : '⚠️ إذن الميكروفون: لسه ماتطلبش';
+    }).catch(function(){});
   }
 
   // ================== تقرير آخر اليوم PDF (للواتساب) ==================
