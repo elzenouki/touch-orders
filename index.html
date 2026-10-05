@@ -888,15 +888,26 @@
   .bigAction.dayRepBtn{flex-basis:100%; border-style:solid; border-color:#1F7A47; background:#EAF5EE; color:#1F7A47;}
   textarea.needFill{border-color:var(--red) !important; box-shadow:0 0 0 3px rgba(184,58,58,.15);}
   #visitNotesLbl{font-weight:800;}
-  .pickList{max-height:52vh; overflow-y:auto; margin:0 -4px; padding:0 4px; -webkit-overflow-scrolling:touch;}
-  .pickHead{font-size:12.5px; font-weight:900; color:var(--muted2); margin:10px 2px 4px;}
-  .pickRow{display:flex; align-items:center; gap:8px; padding:9px 8px; border-bottom:1px solid var(--border);}
-  .pickRow.on{background:var(--green-bg); border-radius:10px; border-bottom-color:transparent; margin-bottom:2px;}
-  .pickRow .pName{flex:1; min-width:0; font-weight:800; font-size:15px; color:var(--navy); line-height:1.4; cursor:pointer;}
-  .pickRow .pName small{display:block; font-size:11.5px; color:var(--muted); font-weight:600; direction:ltr; text-align:right;}
-  .pickRow .qb{width:42px; height:42px; border-radius:11px; border:1px solid var(--border); background:#fff; font-size:22px; font-weight:900; color:var(--navy); font-family:inherit; cursor:pointer; flex:none;}
-  .pickRow .qb.plus{background:var(--green); border-color:var(--green); color:#fff;}
-  .pickRow .qv{width:56px; text-align:center; margin:0; padding:8px 2px; font-weight:900; font-size:16px; flex:none;}
+  /* ورقة الطلبية + فلاتر */
+  .ofLbl{font-size:11.5px; font-weight:800; color:var(--muted2); margin:2px 2px 3px;}
+  .ofChips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 7px; scrollbar-width:none;}
+  .ofChips::-webkit-scrollbar{display:none;}
+  .ofChip{flex:none; border:1px solid var(--border); background:var(--card2); border-radius:18px; padding:6px 12px; font-family:inherit; font-weight:800; font-size:13.5px; color:var(--text); white-space:nowrap; cursor:pointer;}
+  .ofChip.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .ofChip.sel{border-color:#bfe3cf; color:var(--green); background:var(--green-bg);}
+  .ofChip.sel.on{background:var(--green); border-color:var(--green); color:#fff;}
+  .ofChip small{opacity:.7; font-weight:700; margin-inline-start:3px;}
+  .ofCount{font-size:12px; font-weight:800; color:var(--muted2); margin:2px 2px 6px; display:flex; justify-content:space-between;}
+  .ofPaper{max-height:58vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:#fffdf6; border:1px solid #ece4cf; border-radius:10px;}
+  .ofRow{display:flex; align-items:center; gap:8px; min-height:50px; padding:0 0 0 8px; border-bottom:1px solid #e3e9f3;}
+  .ofRow.on{background:rgba(43,122,79,.07);}
+  .ofNo{width:32px; flex:none; align-self:stretch; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#b33; border-left:2px solid #f1b9b9;}
+  .ofName{flex:1; min-width:0; font-size:14px; font-weight:800; color:#2a3a6c; line-height:1.3; padding:5px 0; cursor:pointer;}
+  .ofName small{display:block; font-size:10.5px; color:var(--muted); font-weight:600; direction:ltr; text-align:right;}
+  input.ofIn{width:66px; height:38px; margin:0; padding:0 4px; border:1.5px solid #9fb0d0; border-radius:8px; text-align:center; font-family:inherit; font-size:18px; font-weight:900; color:#1d3fa0; background:#fff; flex:none;}
+  input.ofIn:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.18);}
+  .ofRow.on input.ofIn{border-color:var(--green); color:var(--green); background:var(--green-bg);}
+  .ofEmpty{padding:18px; text-align:center; color:var(--muted); font-weight:800;}
   .orderBar{position:fixed; bottom:0; inset-inline:0; z-index:40; display:flex; align-items:center; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:var(--navy); color:#fff; font-weight:800; font-size:14.5px; box-shadow:0 -4px 14px rgba(0,0,0,.25);}
   .orderBar span{flex:1;}
   .orderBar button{border:none; border-radius:10px; padding:10px 18px; font-family:inherit; font-weight:900; font-size:14.5px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy); cursor:pointer;}
@@ -914,10 +925,6 @@
   .aiFoot{padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--border); background:#fff; display:flex; gap:8px;}
   .aiFoot button{margin-top:0;}
   .aiFoot:empty{display:none;}
-  .micBtn{width:108px; height:108px; border-radius:50%; border:none; margin:4px auto 8px; display:flex; align-items:center; justify-content:center; font-size:42px; background:var(--navy); color:#fff; cursor:pointer; box-shadow:0 6px 18px rgba(12,23,48,.3);}
-  .micBtn.on{background:var(--red); animation:micPulse 1.3s ease-in-out infinite;}
-  .micBtn:disabled{opacity:.5;}
-  @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(184,58,58,.45);}50%{box-shadow:0 0 0 18px rgba(184,58,58,0);}}
   .aiStatus{text-align:center; font-size:13.5px; font-weight:800; color:var(--muted2); margin-bottom:10px; line-height:1.7;}
   .aiStatus.err{color:var(--red);}
   .aiLine{background:#fff; border:1px solid var(--border); border-radius:13px; padding:10px; margin-bottom:8px;}
@@ -1124,13 +1131,14 @@
       <button type="button" class="modeBtn none" id="modeNone" onclick="toggleMode_('none')">✋ مافيش طلب</button>
     </div>
     <div class="card secCard" id="orderBox">
-      <div class="secTitle green">🧾 الطلبية — دوس ＋ جنب الصنف</div>
-      <div class="aiTools">
-        <button type="button" onclick="openVoice_()"><span>🎤</span>قول أو الصق الطلبية</button>
-        <button type="button" id="shelfToolBtn" onclick="openShelf_()"><span>📊</span>عد رف التاجر</button>
+      <div class="secTitle green">🧾 ورقة الطلبية — اكتب الكمية قدام الصنف</div>
+      <div class="aiTools" style="grid-template-columns:1fr;">
+        <button type="button" id="shelfToolBtn" onclick="openShelf_()" style="flex-direction:row; gap:8px; padding:10px;"><span>📊</span>عد رف التاجر واطلب على قده</button>
       </div>
-      <input type="search" id="pickSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off" oninput="renderOrderLines_()">
-      <div id="pickList" class="pickList"></div>
+      <input type="search" id="pickSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off">
+      <div id="ofFilters"></div>
+      <div class="ofCount" id="ofCount"></div>
+      <div id="pickList" class="ofPaper"></div>
       <div class="orderSum" id="orderSum" hidden><span id="orderSumItems"></span><span id="orderSumQty"></span></div>
     </div>
     <div class="card secCard retCard" id="retBox" hidden>
@@ -1311,12 +1319,6 @@
       <div class="pkProfileStatus" id="pkProfileStatus"></div>
       <button class="primary" id="pkProfileBtn" onclick="openPasskeyOffer_(true)">فعّل الدخول بالبصمة على الجهاز ده</button>
       <button class="ghost" id="pkClearBtn" hidden onclick="handlePasskeyClear_()">امسح البصمات المتسجلة</button>
-    </div>
-    <div class="card" id="micCard">
-      <div class="cardTitle">🎤 فحص المايك</div>
-      <div class="note" id="micDiag"></div>
-      <button class="ghost" onclick="micTest_()">🎤 جرّب المايك دلوقتي</button>
-      <div id="micTestOut" style="margin-top:10px;"></div>
     </div>
     <div class="card" id="gpsHelpCard">
       <div class="cardTitle">📍 الموقع</div>
@@ -2135,7 +2137,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.6.3';
+  const APP_VERSION_ = 'v1.7.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر               // نفس الرقم اللي في السيرفر
@@ -2921,59 +2923,160 @@
       (itemMatches_(typed).length === 1 ? itemMatches_(typed)[0] : null);
   }
   function readQty_(id){ return Number(normalizeDigits(document.getElementById(id).value || '').replace(/[^\d.]/g, '')); }
-  // ---------- شاشة الطلبية السهلة: كل الأصناف قدامه و +/− جنب كل صنف ----------
-  const PICK_MAX_ = 80;
+  // ---------- ورقة الطلبية + فلاتر سريعة ----------
+  // كل الأصناف بترتيب تاب الأصناف، وقدام كل صنف خانة يكتب فيها الكمية (زي الورقة المطبوعة).
+  // الفلاتر (النوع / الشكل / المقاس) بتطلع لوحدها من أسامي الأصناف، وبتخفي السطور بس — الأرقام اللي اتكتبت مابتضيعش.
   function lineKey_(x){ return x.code || x.name; }
   function findLine_(key){ return state.visit.lines.find(function(l){ return lineKey_(l) === key; }); }
-  function pickRowHtml_(a, qty){
-    return '<div class="pickRow' + (qty ? ' on' : '') + '" data-k="' + escapeHtml(lineKey_(a)) + '">' +
-      '<div class="pName" data-act="plus">' + escapeHtml(a.name) + (a.code ? '<small>' + escapeHtml(a.code) + '</small>' : '') + '</div>' +
-      (qty ? '<button type="button" class="qb" data-act="minus">−</button>' +
-        '<input type="text" class="qv ltrNum" inputmode="numeric" dir="ltr" value="' + qty + '">' : '') +
-      '<button type="button" class="qb plus" data-act="plus">＋</button></div>';
+  const OF_UNITS_ = ['لتر', 'ليتر', 'بوصه', 'انش', 'وات', 'واط', 'ريشه', 'ريش', 'سم', 'مم', 'حصان', 'كيلو', 'سرعه', 'سرعات', 'شمعه', 'عين', 'قطعه', 'متر'];
+  var _ofMeta_ = null, _ofSrc_ = null;
+  function ofStrip_(w){ return w.length > 3 && w.indexOf('ال') === 0 ? w.slice(2) : w; }
+  function ofMeta_(){
+    const as = (state.rep && state.rep.asnaf) || [];
+    if(_ofSrc_ === as && _ofMeta_) return _ofMeta_;
+    _ofSrc_ = as;
+    _ofMeta_ = as.map(function(a, i){
+      const raw = normalizeDigits(String(a.name)).replace(/(\d)([^\d.\s])/g, '$1 $2').replace(/([^\d.\s])(\d)/g, '$1 $2').split(/\s+/).filter(Boolean);
+      const nrm = raw.map(function(w){ return normAr_(w); });
+      const wi = [];
+      nrm.forEach(function(w, k){ if(!/^\d/.test(w) && OF_UNITS_.indexOf(w) === -1 && w.length > 1) wi.push(k); });
+      const sizes = [];
+      nrm.forEach(function(w, k){
+        if(!/^\d+(\.\d+)?$/.test(w)) return;
+        const u = nrm[k + 1] && OF_UNITS_.indexOf(nrm[k + 1]) !== -1;
+        sizes.push({ k: w + (u ? ' ' + nrm[k + 1] : ''), l: w + (u ? ' ' + raw[k + 1] : '') });
+      });
+      return {
+        a: a, key: a.code || a.name,
+        type: wi.length ? ofStrip_(nrm[wi[0]]) : '', typeLbl: wi.length ? raw[wi[0]] : '',
+        shape: wi.length > 1 ? ofStrip_(nrm[wi[1]]) : '', shapeLbl: wi.length > 1 ? raw[wi[1]] : '',
+        sizes: sizes, hay: normAr_(normalizeDigits(a.name + ' ' + (a.code || ''))),
+      };
+    });
+    return _ofMeta_;
+  }
+  function ofMatch_(m, f, q){
+    if(f.sel && !findLine_(m.key)) return false;
+    if(f.t && m.type !== f.t) return false;
+    if(f.m && m.shape !== f.m) return false;
+    if(f.s && !m.sizes.some(function(z){ return z.k === f.s; })) return false;
+    if(q && !q.split(' ').every(function(w){ return m.hay.indexOf(w) !== -1; })) return false;
+    return true;
+  }
+  function ofDistinct_(list, key, lbl){
+    const seen = {}, out = [];
+    list.forEach(function(m){
+      const vals = key === 'sizes' ? m.sizes.map(function(z){ return { k: z.k, l: z.l }; }) : (m[key] ? [{ k: m[key], l: m[lbl] }] : []);
+      vals.forEach(function(z){ if(seen[z.k]) seen[z.k].n++; else { seen[z.k] = { k: z.k, l: z.l, n: 1 }; out.push(seen[z.k]); } });
+    });
+    return out;
+  }
+  function renderOfFilters_(){
+    const v = state.visit;
+    if(!v) return;
+    const f = v.of;
+    const metas = ofMeta_();
+    const chip = function(k, val, label, on, extra){
+      return '<button type="button" class="ofChip' + (extra || '') + (on ? ' on' : '') + '" data-of="' + k + '" data-v="' + escapeHtml(val) + '">' + label + '</button>';
+    };
+    const types = ofDistinct_(metas, 'type', 'typeLbl').sort(function(a, b){ return b.n - a.n; });
+    let html = '<div class="ofChips">' + chip('all', '', 'الكل', !f.t && !f.sel) +
+      chip('sel', '', '✔ اللي اتكتب <small>' + v.lines.length + '</small>', f.sel, ' sel') +
+      types.map(function(t){ return chip('t', t.k, escapeHtml(t.l) + ' <small>' + t.n + '</small>', f.t === t.k); }).join('') + '</div>';
+    if(f.t){
+      const ofType = metas.filter(function(m){ return m.type === f.t; });
+      const shapes = ofDistinct_(ofType, 'shape', 'shapeLbl');
+      if(shapes.length > 1) html += '<div class="ofLbl">الشكل</div><div class="ofChips">' + shapes.map(function(x){ return chip('m', x.k, escapeHtml(x.l), f.m === x.k); }).join('') + '</div>';
+      const pool = ofType.filter(function(m){ return !f.m || m.shape === f.m; });
+      const sizes = ofDistinct_(pool, 'sizes').sort(function(a, b){ return parseFloat(a.k) - parseFloat(b.k); });
+      if(sizes.length > 1) html += '<div class="ofLbl">المقاس</div><div class="ofChips">' + sizes.map(function(x){ return chip('s', x.k, escapeHtml(x.l), f.s === x.k); }).join('') + '</div>';
+    }
+    document.getElementById('ofFilters').innerHTML = html;
+  }
+  function ofApply_(){
+    const v = state.visit;
+    if(!v) return;
+    const q = normAr_(normalizeDigits(document.getElementById('pickSearch').value || '')).replace(/\s+/g, ' ').trim();
+    const metas = ofMeta_();
+    const byKey = {};
+    metas.forEach(function(m){ byKey[m.key] = m; });
+    let shown = 0;
+    document.querySelectorAll('#pickList .ofRow').forEach(function(row){
+      const ok = ofMatch_(byKey[row.dataset.k], v.of, q);
+      row.hidden = !ok;
+      if(ok) shown++;
+    });
+    const empty = document.getElementById('ofEmpty');
+    if(empty) empty.hidden = shown > 0;
+    const filtered = v.of.t || v.of.sel || q;
+    document.getElementById('ofCount').innerHTML = '<span>' + (filtered ? 'ظاهر ' + shown + ' من ' + metas.length + ' صنف' : metas.length + ' صنف') + '</span>' +
+      (v.lines.length ? '<span style="color:var(--green)">✔ مكتوب ' + v.lines.length + ' صنف</span>' : '');
   }
   function renderOrderLines_(){
     const v = state.visit;
     if(!v) return;
-    const q = document.getElementById('pickSearch').value || '';
-    const chosenKeys = {};
-    v.lines.forEach(function(l){ chosenKeys[lineKey_(l)] = true; });
-    let html = '';
-    if(v.lines.length){
-      html += '<div class="pickHead">✔ في الطلبية (' + v.lines.length + ')</div>' +
-        v.lines.map(function(l){ return pickRowHtml_(l, l.qty); }).join('');
-    }
-    const rest = itemMatches_(q, PICK_MAX_ + v.lines.length)
-      .filter(function(a){ return !chosenKeys[lineKey_(a)]; }).slice(0, PICK_MAX_);
-    html += '<div class="pickHead">' + (q.trim() ? 'نتيجة البحث' : 'الأصناف') + '</div>' +
-      (rest.length ? rest.map(function(a){ return pickRowHtml_(a, 0); }).join('') : '<div class="acEmpty">مفيش صنف بالاسم ده</div>');
-    document.getElementById('pickList').innerHTML = html;
+    if(!v.of) v.of = { t: '', m: '', s: '', sel: false };
+    const metas = ofMeta_();
+    document.getElementById('pickList').innerHTML = metas.map(function(m, n){
+      const l = findLine_(m.key);
+      return '<div class="ofRow' + (l ? ' on' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
+        '<span class="ofNo">' + (n + 1) + '</span>' +
+        '<span class="ofName">' + escapeHtml(m.a.name) + (m.a.code ? '<small>' + escapeHtml(m.a.code) + '</small>' : '') + '</span>' +
+        '<input type="text" class="ofIn" inputmode="numeric" dir="ltr" enterkeyhint="next" autocomplete="off" aria-label="كمية ' + escapeHtml(m.a.name) + '" value="' + (l ? l.qty : '') + '">' +
+        '</div>';
+    }).join('') + '<div class="ofEmpty" id="ofEmpty" hidden>مفيش صنف بالفلتر ده — دوس "الكل"</div>';
+    renderOfFilters_();
+    ofApply_();
     updateOrderSum_();
   }
-  function changeQty_(row, qty){
+  function setLineQty_(key, qty){
     const v = state.visit;
-    if(!v || !row) return;
-    const key = row.dataset.k;
-    qty = Math.max(0, Math.floor(Number(qty) || 0));
     const l = findLine_(key);
-    const a = l || ((state.rep && state.rep.asnaf) || []).find(function(x){ return lineKey_(x) === key; });
-    if(!a) return;
     if(l && !qty) v.lines.splice(v.lines.indexOf(l), 1);
     else if(l) l.qty = qty;
-    else if(qty) v.lines.push({ code: a.code, name: a.name, qty: qty });
-    row.outerHTML = pickRowHtml_(a, qty); // بنحدّث الصف ده بس — من غير ما نرسم القايمة كلها
-    updateOrderSum_();
+    else if(qty){
+      const m = ofMeta_().find(function(x){ return x.key === key; });
+      if(m) v.lines.push({ code: m.a.code, name: m.a.name, qty: qty });
+    }
   }
-  document.getElementById('pickList').addEventListener('click', function(e){
-    const t = e.target.closest('[data-act]');
-    if(!t) return;
-    const row = t.closest('.pickRow');
-    const l = findLine_(row.dataset.k);
-    changeQty_(row, (l ? l.qty : 0) + (t.dataset.act === 'plus' ? 1 : -1));
+  document.getElementById('pickList').addEventListener('input', function(e){
+    const inp = e.target;
+    if(!inp.classList.contains('ofIn') || !state.visit) return;
+    const d = normalizeDigits(inp.value).replace(/[^\d]/g, '').slice(0, 5);
+    if(d !== inp.value) inp.value = d;
+    const row = inp.closest('.ofRow');
+    setLineQty_(row.dataset.k, Number(d) || 0);
+    row.classList.toggle('on', Number(d) > 0);
+    renderOfFilters_();
+    ofApply_();
+    updateOrderSum_();
   });
-  document.getElementById('pickList').addEventListener('change', function(e){
-    if(!e.target.classList.contains('qv')) return;
-    changeQty_(e.target.closest('.pickRow'), normalizeDigits(e.target.value).replace(/[^\d]/g, ''));
+  // Enter = الصنف اللي بعده (من اللي ظاهرين بس)
+  document.getElementById('pickList').addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' || !e.target.classList.contains('ofIn')) return;
+    e.preventDefault();
+    const all = Array.from(document.querySelectorAll('#pickList .ofRow:not([hidden]) .ofIn'));
+    const next = all[all.indexOf(e.target) + 1];
+    if(next){ next.focus(); next.select(); } else e.target.blur();
+  });
+  document.getElementById('pickList').addEventListener('click', function(e){
+    const nm = e.target.closest('.ofName');
+    if(nm){ const inp = nm.parentNode.querySelector('.ofIn'); inp.focus(); inp.select(); }
+  });
+  document.getElementById('pickSearch').addEventListener('input', ofApply_);
+  document.getElementById('ofFilters').addEventListener('click', function(e){
+    const b = e.target.closest('[data-of]');
+    const v = state.visit;
+    if(!b || !v) return;
+    const k = b.dataset.of, val = b.dataset.v;
+    if(k === 'all'){ v.of = { t: '', m: '', s: '', sel: false }; document.getElementById('pickSearch').value = ''; }
+    else if(k === 'sel') v.of.sel = !v.of.sel;
+    else if(k === 't'){ v.of.t = v.of.t === val ? '' : val; v.of.m = ''; v.of.s = ''; }
+    else if(k === 'm'){ v.of.m = v.of.m === val ? '' : val; v.of.s = ''; }
+    else if(k === 's') v.of.s = v.of.s === val ? '' : val;
+    renderOfFilters_();
+    ofApply_();
+    document.getElementById('pickList').scrollTop = 0;
   });
   function updateOrderSum_(){
     const v = state.visit;
@@ -2989,209 +3092,7 @@
     document.body.classList.toggle('hasBar', show);
     if(show) document.getElementById('orderBarText').textContent = '🧾 ' + n + ' صنف • ' + fmt(total) + ' قطعة';
   }
-  // ================== فهم الطلبية من الكلام — على الموبايل نفسه، من غير أي خدمة برا ==================
-  // بيقسّم الكلام لسطور (عند "و" قبل رقم، الفاصلة، السطر الجديد، أو كلمة "مرتجع")، ويطابق كل سطر على
-  // تاب الأصناف (بالكلمات والأرقام اللي في اسم الصنف)، والرقم اللي فاضل هو الكمية.
-  const OP_NUM_WORDS_ = {
-    'واحد': 1, 'واحده': 1, 'وحده': 1, 'اتنين': 2, 'اثنين': 2, 'اتنان': 2, 'اثنان': 2, 'تنين': 2,
-    'تلاته': 3, 'ثلاثه': 3, 'تلات': 3, 'ثلاث': 3, 'اربعه': 4, 'اربع': 4, 'خمسه': 5, 'خمس': 5,
-    'سته': 6, 'ست': 6, 'سبعه': 7, 'سبع': 7, 'تمانيه': 8, 'ثمانيه': 8, 'تماني': 8, 'تمن': 8,
-    'تسعه': 9, 'تسع': 9, 'عشره': 10, 'عشر': 10, 'حداشر': 11, 'احداشر': 11, 'اتناشر': 12, 'اثناشر': 12,
-    'تلتاشر': 13, 'تلاتاشر': 13, 'اربعتاشر': 14, 'اربعطاشر': 14, 'خمستاشر': 15, 'خمسطاشر': 15,
-    'ستاشر': 16, 'سطاشر': 16, 'سبعتاشر': 17, 'سبعطاشر': 17, 'تمنتاشر': 18, 'تمنطاشر': 18, 'تسعتاشر': 19, 'تسعطاشر': 19,
-    'عشرين': 20, 'تلاتين': 30, 'ثلاثين': 30, 'اربعين': 40, 'خمسين': 50, 'ستين': 60, 'سبعين': 70,
-    'تمانين': 80, 'ثمانين': 80, 'تسعين': 90, 'ميه': 100, 'مايه': 100, 'مائه': 100, 'ميت': 100,
-  };
-  const OP_UNITS_ = ['لتر', 'ليتر', 'بوصه', 'انش', 'وات', 'واط', 'ريشه', 'ريش', 'سم', 'سنتي', 'مم', 'حصان', 'كيلو', 'سرعه', 'سرعات', 'شمعه', 'عين'];
-  const OP_STOP_ = ['عدد', 'كميه', 'قطعه', 'قطع', 'حته', 'حتت', 'من', 'يا', 'حاج', 'ياحاج', 'عايزين', 'عاوزين', 'لو', 'سمحت', 'كمان', 'برضو', 'بس', 'تمام', 'و', 'في', 'على', 'علي', 'ده', 'دي', 'دول', 'نوع', 'موديل', 'x', '×'];
-  const OP_RET_WORDS_ = ['مرتجع', 'مرتجعات', 'رجع', 'رجعلي', 'راجع', 'ارجاع', 'هيرجع', 'رجعت'];
-  const OP_ORD_WORDS_ = ['طلبيه', 'الطلبيه', 'عايز', 'عاوز', 'هات', 'ابعت', 'محتاج', 'ابعتلي', 'هاتلي'];
-  const OP_DAMAGED_ = ['تالف', 'تالفه', 'بايظ', 'بايظه', 'مكسور', 'مكسوره', 'مضروب', 'مضروبه', 'خربان'];
-
-  function opNorm_(s){
-    return String(s == null ? '' : s)
-      .replace(/[٠-٩]/g, function(d){ return String(d.charCodeAt(0) - 0x0660); })
-      .replace(/[۰-۹]/g, function(d){ return String(d.charCodeAt(0) - 0x06F0); })
-      .replace(/[ً-ْـ]/g, '')
-      .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
-      .toLowerCase();
-  }
-  // "الغلايات" → "غلاي" — جذر بسيط عشان المفرد والجمع وأداة التعريف يتطابقوا
-  function opStem_(w){
-    let s = w;
-    if(s.length > 4 && s.indexOf('ال') === 0) s = s.slice(2);
-    if(s.length > 4 && s.indexOf('وال') === 0) s = s.slice(3);
-    s = s.replace(/(ات|ين|ون|ه|ي)$/, '');
-    return s.length > 4 ? s.slice(0, 4) : s;
-  }
-  function opLev1_(a, b){ // هل الفرق حرف واحد بالكتير؟
-    if(Math.abs(a.length - b.length) > 1) return false;
-    let i = 0, j = 0, d = 0;
-    while(i < a.length && j < b.length){
-      if(a[i] === b[j]){ i++; j++; continue; }
-      if(++d > 1) return false;
-      if(a.length > b.length) i++; else if(b.length > a.length) j++; else { i++; j++; }
-    }
-    return d + (a.length - i) + (b.length - j) <= 1;
-  }
-  function opWordMatch_(a, b){
-    if(a === b) return true;
-    if(a.length < 3 || b.length < 3) return false;
-    const sa = opStem_(a), sb = opStem_(b);
-    if(sa === sb && sa.length >= 3) return true;
-    return Math.min(a.length, b.length) >= 4 && opLev1_(a.replace(/^ال/, ''), b.replace(/^ال/, ''));
-  }
-  var _opCat_ = null, _opCatSrc_ = null;
-  function opCatalog_(asnaf){
-    if(_opCatSrc_ === asnaf && _opCat_) return _opCat_;
-    _opCatSrc_ = asnaf;
-    _opCat_ = asnaf.map(function(a){
-      const t = opNorm_(a.name).replace(/(\d)([^\d.\s])/g, '$1 $2').replace(/([^\d.\s])(\d)/g, '$1 $2');
-      const toks = t.split(/[^؀-ۿa-z0-9.]+/).filter(Boolean);
-      return {
-        a: a,
-        words: toks.filter(function(w){ return !/^\d/.test(w) && w.length >= 2 && OP_UNITS_.indexOf(w) === -1; }),
-        nums: toks.filter(function(w){ return /^\d+(\.\d+)?$/.test(w); }).map(Number),
-        code: opNorm_(a.code).replace(/[\s\-]+/g, ''),
-        codeNum: (String(a.code || '').match(/\d+/g) || []).join(''),
-      };
-    });
-    return _opCat_;
-  }
-  // الكلام → كلمات وأرقام (الأرقام المكتوبة بالحروف بتتحول لأرقام)
-  function opTokens_(text){
-    let t = opNorm_(text)
-      .replace(/[\n\r،,؛;!?؟]+/g, ' | ')
-      .replace(/(\d)\.(?!\d)/g, '$1 | ').replace(/(^|[^\d])\.(?!\d)/g, '$1 | ')
-      .replace(/(\d)([^\d.\s|])/g, '$1 $2').replace(/([^\d.\s|])(\d)/g, '$1 $2')
-      .replace(/[^؀-ۿa-z0-9.|×x\-]+/g, ' ');
-    const raw = t.split(/\s+/).filter(Boolean);
-    const out = [];
-    raw.forEach(function(w){
-      if(OP_NUM_WORDS_[w] !== undefined){ out.push(OP_NUM_WORDS_[w]); return; }
-      if(w.length > 2 && w[0] === 'و' && OP_NUM_WORDS_[w.slice(1)] !== undefined){ out.push('و'); out.push(OP_NUM_WORDS_[w.slice(1)]); return; }
-      if(/^\d+(\.\d+)?$/.test(w)){ out.push(Number(w)); return; }
-      if(w === 'ونص'){ out.push('و'); out.push('نص'); return; }
-      if(w === 'دسته' || w === 'دستة' || w === 'ودسته'){
-        const p = out[out.length - 1];
-        if(w === 'ودسته') out.push('و');
-        if(typeof p === 'number' && w !== 'ودسته') out[out.length - 1] = p * 12;
-        else if(p === 'نص'){ out[out.length - 1] = 6; }
-        else out.push(12);
-        return;
-      }
-      out.push(w);
-    });
-    // "خمسه وعشرين" = 25 ، "ميه وعشرين" = 120
-    for(let i = 0; i + 2 < out.length; i++){
-      const a = out[i], b = out[i + 1], c = out[i + 2];
-      if(typeof a === 'number' && b === 'و' && typeof c === 'number' &&
-        ((a < 10 && c >= 20 && c < 100 && c % 10 === 0) || (a % 100 === 0 && c < 100))){
-        out.splice(i, 3, a + c);
-        i--;
-      }
-    }
-    return out;
-  }
-  function opIsUnit_(w){ return typeof w === 'string' && OP_UNITS_.indexOf(w.replace(/^ال/, '')) !== -1; }
-  function opBare_(w){ return w.replace(/^و(?=ال|.{3,})/, '').replace(/^ال(?=.{3,})/, ''); }
-  // تقسيم لسطور: كل سطر صنف واحد
-  function opSegments_(tokens){
-    const segs = [];
-    let mode = 'order', cur = [];
-    const flush = function(){ if(cur.length) segs.push({ mode: mode, toks: cur }); cur = []; };
-    for(let i = 0; i < tokens.length; i++){
-      const w = tokens[i];
-      if(w === '|'){ flush(); continue; }
-      if(typeof w === 'string'){
-        const b = opBare_(w);
-        if(OP_RET_WORDS_.indexOf(b) !== -1 || OP_RET_WORDS_.indexOf(w) !== -1){ flush(); mode = 'return'; continue; }
-        if(OP_ORD_WORDS_.indexOf(b) !== -1 || OP_ORD_WORDS_.indexOf(w) !== -1){ flush(); mode = 'order'; continue; }
-        if(w === 'و' && typeof tokens[i + 1] === 'number'){ flush(); continue; }
-      }
-      if(typeof w === 'number' && cur.length){
-        // رقم بعده اسم صنف (مش وحدة زي لتر/بوصة)، والسطر الحالي فيه صنف وكمية بالفعل → سطر جديد
-        const next = tokens[i + 1];
-        const hasWord = cur.some(function(x){ return typeof x === 'string' && x !== 'و'; });
-        const hasQty = cur.some(function(x, k){ return typeof x === 'number' && !opIsUnit_(cur[k + 1]); });
-        const prev = cur[cur.length - 1];
-        const afterQtyWord = ['عدد', 'كميه', 'x', '×', '-'].indexOf(prev) !== -1;
-        if(hasWord && hasQty && !afterQtyWord && typeof next === 'string' && !opIsUnit_(next) && next !== '|' && next !== 'و'){ flush(); }
-      }
-      cur.push(w);
-    }
-    flush();
-    return segs;
-  }
-  function opReason_(segText, reasons){
-    let best = '', bestScore = 0;
-    reasons.forEach(function(r){
-      const ws = opNorm_(r).split(/\s+/).map(opBare_).filter(function(w){ return w.length >= 3; });
-      if(!ws.length) return;
-      const hit = ws.filter(function(w){ return segText.some(function(s){ return opWordMatch_(opBare_(s), w); }); }).length;
-      const sc = hit / ws.length;
-      if(sc > bestScore){ bestScore = sc; best = r; }
-    });
-    return bestScore >= 0.5 ? best : '';
-  }
-  function parseOrderText_(text, asnaf, reasons){
-    const cat = opCatalog_(asnaf || []);
-    const lines = [];
-    opSegments_(opTokens_(text)).forEach(function(seg){
-      const toks = seg.toks;
-      const words = toks.filter(function(w){ return typeof w === 'string'; });
-      const nums = [];
-      toks.forEach(function(w, k){ if(typeof w === 'number') nums.push({ v: w, k: k, unit: opIsUnit_(toks[k + 1]), used: false }); });
-      const content = words.map(opBare_).filter(function(w){ return w.length >= 2 && OP_STOP_.indexOf(w) === -1 && OP_UNITS_.indexOf(w) === -1; });
-      const joined = words.join('').replace(/[-\s]/g, '');
-      // مطابقة الأصناف
-      const scored = [];
-      cat.forEach(function(c){
-        let sc = 0, wHit = 0;
-        c.words.forEach(function(w, wi){
-          if(content.some(function(s){ return opWordMatch_(s, opBare_(w)); })){ sc += wi === 0 ? 2 : 1; wHit++; }
-        });
-        let numHit = [];
-        c.nums.forEach(function(n){ const m = nums.find(function(x){ return x.v === n; }); if(m){ sc += 1.5; numHit.push(m); } });
-        nums.forEach(function(x){ if(x.unit && c.nums.length && c.nums.indexOf(x.v) === -1) sc -= 1; });
-        const codeHit = c.code && c.code.length >= 2 && (joined.indexOf(c.code) !== -1 || (c.codeNum.length >= 3 && nums.some(function(x){ return String(x.v) === c.codeNum; })));
-        if(codeHit) sc += 6;
-        if(wHit || codeHit) scored.push({ c: c, sc: sc, numHit: numHit, codeHit: codeHit });
-      });
-      scored.sort(function(a, b){ return b.sc - a.sc; });
-      const top = scored.length ? scored[0].sc : 0;
-      const best = scored.filter(function(x){ return x.sc >= top - 0.01; });
-      const pick = best.length === 1 ? best[0] : null;
-      // الأرقام اللي هي جزء من اسم الصنف (50 لتر، 18 بوصة، كود الصنف) مش كمية
-      if(pick){
-        pick.numHit.forEach(function(m){ m.used = true; });
-        if(pick.codeHit) nums.forEach(function(x){ if(String(x.v) === pick.c.codeNum) x.used = true; });
-      }
-      const free = nums.filter(function(x){ return !x.used && !x.unit; });
-      let qty = 1;
-      if(free.length){
-        const afterAdad = free.find(function(x){ return ['عدد', 'كميه', 'x', '×'].indexOf(toks[x.k - 1]) !== -1; });
-        qty = (afterAdad || free.find(function(x){ return x.k === 0; }) || free[0]).v;
-      }
-      if(!pick && !best.length && !nums.length) return; // كلام مالوش علاقة (سلام، يا حاج...)
-      if(!pick && !best.length && !content.length) return;
-      const ret = seg.mode === 'return';
-      const heard = toks.filter(function(w){ return w !== 'و'; }).join(' ');
-      lines.push({
-        type: ret ? 'return' : 'order',
-        code: pick ? pick.c.a.code : '', name: pick ? pick.c.a.name : '',
-        qty: Math.max(1, Math.min(99999, Math.round(qty))),
-        reason: ret ? opReason_(words, reasons || []) : '',
-        condition: ret && words.some(function(w){ return OP_DAMAGED_.indexOf(opBare_(w)) !== -1; }) ? 'تالف' : 'سليم',
-        heard: heard,
-        options: pick ? [] : best.slice(0, 5).map(function(x){ return { code: x.c.a.code, name: x.c.a.name }; }),
-      });
-    });
-    return lines;
-  }
-
-  // ================== شاشة "قول أو الصق الطلبية" + عد الرف ==================
-  // كله بيشتغل على الموبايل نفسه: المايك بيستخدم خاصية الكلام اللي في الموبايل/المتصفح، والفهم بالكود اللي فوق.
+  // ================== شاشة من تحت (بتستخدمها "عد رف التاجر") ==================
   var ai_ = { mode: '', lines: [] };
   function openAiSheet_(mode, title){
     ai_ = { mode: mode, lines: [] };
@@ -3202,7 +3103,6 @@
     document.body.style.overflow = 'hidden';
   }
   function closeAi_(){
-    stopMic_(true);
     document.getElementById('aiOverlay').hidden = true;
     document.body.style.overflow = '';
     ai_.mode = '';
@@ -3228,308 +3128,9 @@
     if(el){ el.textContent = t; el.className = 'aiStatus' + (err ? ' err' : ''); }
   }
 
-  // ---------- 🎤 قول أو الصق الطلبية ----------
-  function openVoice_(){
-    if(!state.visit) return;
-    openAiSheet_('voice', '🎤 قول أو الصق الطلبية');
-    const hasMic = !!speechCtor_();
-    document.getElementById('aiBody').innerHTML =
-      (hasMic ? '<button type="button" class="micBtn" id="micBtn" onclick="toggleMic_()">🎤</button>' : '') +
-      '<div class="aiStatus" id="aiStatus">' + (hasMic
-        ? 'دوس المايك وقول الطلبية — مثلاً: «ستة سخان خمسين لتر و12 مروحة ستاند، ومرتجع اتنين مكواة عيب صناعة»'
-        : 'اكتب الطلبية أو الصق رسالة التاجر — أو دوس على 🎤 اللي في الكيبورد واتكلم') + '</div>' +
-      '<label>الطلبية (اكتب، أو الصق رسالة التاجر من واتساب)</label>' +
-      '<textarea id="aiText" placeholder="مثلاً:\n6 سخان 50 لتر\n12 مروحة ستاند 18\nمرتجع 2 مكواة عيب صناعة"></textarea>' +
-      '<div id="aiRes"></div>';
-    renderAiFoot_();
-  }
-  // ---------- المايك ----------
-  // بيسمع جملة جملة (continuous=false) ويكمّل لوحده لحد ما المندوب يدوس ⏹ — ده أثبت على موبايلات أندرويد
-  // من وضع السمع المستمر اللي بيقف لوحده. وأي مشكلة (إذن، نت، متصفح مش بيدعم) بتطلع رسالة واضحة.
-  var mic_ = { on: false, rec: null, cancelled: false, base: '', finals: '', started: false, watchdog: null, lang: 'ar-EG', restarts: 0, askedPerm: false };
-  const KB_MIC_HINT_ = 'استخدم 🎤 اللي في كيبورد الموبايل: دوس في خانة الطلبية، وبعدين على المايك اللي في الكيبورد';
-  function speechCtor_(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
-  function setMicUi_(on){
-    mic_.on = on;
-    const b = document.getElementById('micBtn');
-    if(b){ b.classList.toggle('on', on); b.textContent = on ? '⏹' : '🎤'; }
-  }
-  function micPermHelp_(){
-    return isIOS_()
-      ? 'من إعدادات الآيفون ← Safari ← الميكروفون ← سماح، وبعدين اقفل التطبيق وافتحه تاني'
-      : 'دوس على 🔒 جنب اللينك ← الأذونات ← الميكروفون ← سماح (أو إعدادات الموبايل ← التطبيقات ← Chrome ← الأذونات ← الميكروفون)';
-  }
-  function micFail_(msg){
-    mic_.cancelled = true;
-    clearTimeout(mic_.watchdog);
-    const r = mic_.rec;
-    mic_.rec = null;
-    if(r){ try{ r.abort(); }catch(e){} }
-    setMicUi_(false);
-    setAiStatus_(msg, true);
-    showMsg(msg, 'error');
-  }
-  function toggleMic_(){ if(mic_.on) stopMic_(false); else startMic_(); }
-  function startMic_(){
-    const ta = document.getElementById('aiText');
-    if(!ta) return;
-    if(!speechCtor_()){ micFail_('المايك مش مدعوم في المتصفح ده — ' + KB_MIC_HINT_); return; }
-    if(isInAppBrowser_()){ micFail_('انت فاتح التطبيق من جوه واتساب/فيسبوك والمايك مش بيشتغل هناك — افتحه من Chrome أو من أيقونة التطبيق، أو ' + KB_MIC_HINT_); return; }
-    if(!navigator.onLine){ micFail_('المايك محتاج نت عشان يحوّل الكلام — ' + KB_MIC_HINT_ + '، أو اكتب الطلبية'); return; }
-    mic_.cancelled = false;
-    mic_.base = ta.value.trim() ? ta.value.trim() + '\n' : '';
-    mic_.finals = '';
-    mic_.restarts = 0;
-    setMicUi_(true);
-    if(micKnownOk_()){
-      setAiStatus_('لحظة... بفتح المايك');
-      listenOnce_(); // الإذن متاخد قبل كده — نبدأ في نفس لحظة الدوسة
-      return;
-    }
-    // أول مرة على الموبايل ده: نطلب إذن الميكروفون صريح الأول (بيطلّع رسالة "اسمح")، وبعدين نبدأ نسمع
-    setAiStatus_('اسمح للتطبيق بالميكروفون من الرسالة اللي هتظهر...');
-    ensureMicPermission_()
-      .then(function(){ if(mic_.on && !mic_.cancelled){ setAiStatus_('لحظة... بفتح المايك'); listenOnce_(); } })
-      .catch(function(err){ micFail_(err.message); });
-  }
-  const MIC_OK_KEY_ = 'tf_mic_ok';
-  function micKnownOk_(){ try{ return localStorage.getItem(MIC_OK_KEY_) === '1'; }catch(e){ return false; } }
-  function micSetOk_(ok){ try{ if(ok) localStorage.setItem(MIC_OK_KEY_, '1'); else localStorage.removeItem(MIC_OK_KEY_); }catch(e){} }
-  // بيطلب إذن الميكروفون ويقفله على طول (بس عشان الموبايل يسأل "تسمح؟")
-  function ensureMicPermission_(){
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.resolve();
-    return navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(function(st){ st.getTracks().forEach(function(t){ t.stop(); }); })
-      .catch(function(err){
-        const n = (err && err.name) || '';
-        micSetOk_(false);
-        if(n === 'NotAllowedError' || n === 'SecurityError' || n === 'PermissionDeniedError') throw new Error('التطبيق مش مسموح له بالميكروفون — ' + micPermHelp_());
-        if(n === 'NotFoundError' || n === 'DevicesNotFoundError') throw new Error('مفيش ميكروفون شغال على الموبايل ده');
-        if(n === 'NotReadableError' || n === 'TrackStartError') throw new Error('الميكروفون مشغول — اقفل أي مكالمة أو تطبيق بيسجّل وجرّب تاني');
-        throw new Error('مش قادر أفتح الميكروفون (' + (n || err) + ') — ' + KB_MIC_HINT_);
-      });
-  }
-  // نص واضح لكل كود غلط من خاصية الكلام
-  function micErrText_(er){
-    if(er === 'not-allowed') return 'التطبيق مش مسموح له بالميكروفون — ' + micPermHelp_();
-    if(er === 'service-not-allowed') return 'خاصية تحويل الكلام مقفولة على الموبايل ده — ' + KB_MIC_HINT_;
-    if(er === 'network') return 'خاصية الكلام محتاجة نت كويس — اتأكد من النت، أو ' + KB_MIC_HINT_;
-    if(er === 'audio-capture') return 'مش قادر أوصل للميكروفون — يمكن تطبيق تاني ماسكه (مكالمة أو تسجيل). اقفله وجرّب تاني';
-    if(er === 'language-not-supported') return 'العربي مش متاح في خاصية الكلام على الموبايل ده — ' + KB_MIC_HINT_;
-    if(er === 'no-speech') return 'الميكروفون فتح بس مسمعش كلام — قرّب الموبايل واتكلم بصوت أعلى';
-    return 'المايك وقف (' + er + ') — ' + KB_MIC_HINT_;
-  }
-  function listenOnce_(){
-    const ta = document.getElementById('aiText');
-    const SR = speechCtor_();
-    if(!ta || !SR) return;
-    let rec;
-    try{ rec = new SR(); }catch(e){ micFail_('المايك مش متاح هنا — ' + KB_MIC_HINT_); return; }
-    rec.lang = mic_.lang;
-    rec.continuous = false;
-    rec.interimResults = true;
-    rec.maxAlternatives = 1;
-    mic_.started = false;
-    rec.onstart = function(){
-      mic_.started = true;
-      micSetOk_(true);
-      clearTimeout(mic_.watchdog);
-      setAiStatus_('🔴 بسمعك... قول الطلبية ودوس ⏹ لما تخلص');
-    };
-    rec.onresult = function(e){
-      let interim = '';
-      for(let i = e.resultIndex; i < e.results.length; i++){
-        const tr = e.results[i][0].transcript;
-        if(e.results[i].isFinal) mic_.finals += tr + ' ';
-        else interim += tr;
-      }
-      ta.value = (mic_.base + mic_.finals + interim).trim();
-    };
-    rec.onerror = function(e){
-      const er = (e && e.error) || '';
-      if(er === 'no-speech' || er === 'aborted') return; // بيكمّل يسمع لوحده
-      if(er === 'language-not-supported' && mic_.lang !== 'ar'){ mic_.lang = 'ar'; return; }
-      if(er === 'not-allowed'){ mic_.rec = null; micSetOk_(false); micAskPermission_(); return; }
-      if(er === 'service-not-allowed') micSetOk_(false);
-      micFail_(micErrText_(er));
-    };
-    rec.onend = function(){
-      if(mic_.rec !== rec) return;
-      mic_.rec = null;
-      clearTimeout(mic_.watchdog);
-      if(mic_.cancelled) return;
-      if(mic_.on){
-        // المندوب لسه مادسش ⏹ — نكمّل نسمع (لحد 3 دقايق تقريبًا)
-        if(++mic_.restarts > 30){ setMicUi_(false); finishMic_(); return; }
-        listenOnce_();
-        return;
-      }
-      finishMic_();
-    };
-    mic_.rec = rec;
-    try{ rec.start(); }
-    catch(e){ mic_.rec = null; micFail_('مش قادر أبدأ المايك — ' + KB_MIC_HINT_); return; }
-    clearTimeout(mic_.watchdog);
-    mic_.watchdog = setTimeout(function(){
-      if(mic_.rec === rec && !mic_.started){ micSetOk_(false); micFail_('المايك مارضيش يفتح — جرّب "فحص المايك" من إعداداتي، أو ' + KB_MIC_HINT_); }
-    }, 5000);
-  }
-  // لو الإذن مرفوض: بنطلبه صريح مرة (ده بيطلّع رسالة "اسمح بالميكروفون")، ولو اتسمح بنكمّل على طول
-  function micAskPermission_(){
-    clearTimeout(mic_.watchdog);
-    if(!mic_.askedPerm && navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-      mic_.askedPerm = true;
-      setAiStatus_('اسمح للتطبيق بالميكروفون من الرسالة اللي ظهرت...');
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(function(st){
-        st.getTracks().forEach(function(t){ t.stop(); });
-        if(mic_.on && !mic_.cancelled) listenOnce_();
-      }).catch(function(){ micFail_(micErrText_('not-allowed')); });
-      return;
-    }
-    micFail_(micErrText_('not-allowed'));
-  }
-  function stopMic_(cancel){
-    if(cancel) mic_.cancelled = true;
-    const wasOn = mic_.on;
-    setMicUi_(false);
-    clearTimeout(mic_.watchdog);
-    if(mic_.rec){
-      try{ mic_.rec.stop(); }
-      catch(e){ mic_.rec = null; if(!cancel) finishMic_(); }
-    } else if(wasOn && !cancel){
-      finishMic_();
-    }
-  }
-  function finishMic_(){
-    const ta = document.getElementById('aiText');
-    if(ta && ta.value.trim()) aiParseText_();
-    else setAiStatus_('مسمعتش حاجة — دوس المايك واتكلم، أو ' + KB_MIC_HINT_, true);
-  }
-  function aiParseText_(){
-    const ta = document.getElementById('aiText');
-    const text = ((ta && ta.value) || '').trim();
-    if(text.length < 2){ setAiStatus_('قول أو اكتب الطلبية الأول', true); return; }
-    const lines = parseOrderText_(text, (state.rep && state.rep.asnaf) || [], (state.rep && state.rep.returnReasons) || []);
-    ai_.lines = lines;
-    if(!lines.length){
-      setAiStatus_('مالقيتش أصناف في الكلام ده — اكتب اسم الصنف زي ما هو في القايمة، أو كمّل يدوي', true);
-    } else {
-      const bad = lines.filter(function(l){ return !l.name; }).length;
-      setAiStatus_(bad ? '⚠️ فيه ' + bad + ' سطر محتاج تختار الصنف بتاعه — اللي باللون الأصفر' : '✔ راجع الأصناف والكميات وبعدين دوس "ضيف"');
-    }
-    renderAiLines_();
-    renderAiFoot_();
-  }
-
-  // ---------- مراجعة السطور قبل ما تتضاف ----------
-  function renderAiLines_(){
-    const box = document.getElementById('aiRes');
-    if(!box) return;
-    if(!ai_.lines.length){ box.innerHTML = ''; return; }
-    const reasons = (state.rep && state.rep.returnReasons) || [];
-    box.innerHTML = ai_.lines.map(function(l, i){
-      const ret = l.type === 'return';
-      let nameHtml;
-      if(l.name){
-        nameHtml = '<div class="aName">' + escapeHtml(l.name) + (l.code ? ' <span class="oCode">' + escapeHtml(l.code) + '</span>' : '') + '</div>';
-      } else if(l.options && l.options.length){
-        nameHtml = '<select class="aName" data-i="' + i + '" data-f="pick"><option value="">اختار الصنف...</option>' +
-          l.options.map(function(o){ return '<option value="' + escapeHtml(o.code || o.name) + '">' + escapeHtml(o.name) + '</option>'; }).join('') + '</select>';
-      } else {
-        nameHtml = '<input class="aName" list="aiAsnafList" data-i="' + i + '" data-f="find" placeholder="مش لاقيه — اكتب اسم الصنف">';
-      }
-      return '<div class="aiLine' + (ret ? ' ret' : '') + (l.name ? '' : ' bad') + '">' +
-        '<div class="aTop"><button type="button" class="aType" data-i="' + i + '" data-f="type">' + (ret ? '↩ مرتجع' : '🧾 طلبية') + '</button>' +
-        nameHtml + '<button type="button" class="rm" data-i="' + i + '" data-f="rm">✕</button></div>' +
-        (l.heard ? '<div class="aHeard">اتفهم من: «' + escapeHtml(l.heard) + '»</div>' : '') +
-        '<div class="aRow2"><div class="stepper"><button type="button" data-i="' + i + '" data-f="minus">−</button>' +
-        '<input type="text" class="ltrNum" inputmode="numeric" data-i="' + i + '" data-f="qty" value="' + l.qty + '">' +
-        '<button type="button" data-i="' + i + '" data-f="plus">+</button></div>' +
-        (ret ? '<select data-i="' + i + '" data-f="reason"><option value="">سبب المرتجع...</option>' +
-            reasons.map(function(r){ return '<option' + (r === l.reason ? ' selected' : '') + '>' + escapeHtml(r) + '</option>'; }).join('') + '</select>' +
-          '<select data-i="' + i + '" data-f="cond" style="flex:0 0 92px; min-width:0;"><option' + (l.condition !== 'تالف' ? ' selected' : '') + '>سليم</option><option' + (l.condition === 'تالف' ? ' selected' : '') + '>تالف</option></select>' : '') +
-        '</div></div>';
-    }).join('');
-  }
-  function renderAiFoot_(){
-    const f = document.getElementById('aiFoot');
-    if(!f || ai_.mode !== 'voice') return;
-    f.innerHTML = ai_.lines.length
-      ? '<button type="button" class="ghost" style="flex:1" onclick="aiRedo_()">↺ عدّل الكلام</button>' +
-        '<button type="button" class="finalize" style="flex:2" onclick="aiApply_()">＋ ضيف ' + ai_.lines.length + ' سطر للزيارة</button>'
-      : '<button type="button" class="finalize" onclick="aiParseText_()">✔ افهم الطلبية</button>';
-  }
-  function aiRedo_(){
-    ai_.lines = [];
-    renderAiLines_();
-    renderAiFoot_();
-    setAiStatus_('عدّل الكلام اللي فوق أو قول تاني، وبعدين دوس "افهم الطلبية"');
-    const ta = document.getElementById('aiText');
-    if(ta) ta.focus();
-  }
-  document.getElementById('aiBody').addEventListener('click', function(e){
-    const t = e.target.closest('[data-f]');
-    if(!t || t.tagName === 'SELECT' || t.tagName === 'INPUT') return;
-    const i = Number(t.dataset.i);
-    const l = ai_.lines[i];
-    if(!l) return;
-    const f = t.dataset.f;
-    if(f === 'rm') ai_.lines.splice(i, 1);
-    else if(f === 'type') l.type = l.type === 'return' ? 'order' : 'return';
-    else if(f === 'plus') l.qty += 1;
-    else if(f === 'minus') l.qty = Math.max(1, l.qty - 1);
-    else return;
-    renderAiLines_();
-    renderAiFoot_();
-  });
   document.getElementById('aiBody').addEventListener('change', function(e){
-    const t = e.target;
-    if(t.id === 'shelfAdd'){ shelfAddItem_(t.value); return; }
-    const f = t.dataset && t.dataset.f;
-    if(!f || t.dataset.i === undefined) return;
-    const l = ai_.lines[Number(t.dataset.i)];
-    if(!l) return;
-    if(f === 'qty'){ const q = Number(normalizeDigits(t.value).replace(/[^\d]/g, '')); l.qty = q > 0 ? q : 1; }
-    else if(f === 'reason') l.reason = t.value;
-    else if(f === 'cond') l.condition = t.value;
-    else if(f === 'pick'){
-      const o = (l.options || []).find(function(x){ return (x.code || x.name) === t.value; });
-      if(o){ l.code = o.code; l.name = o.name; }
-    } else if(f === 'find'){
-      const a = findAsnafLoose_(t.value);
-      if(!a){ showMsg('الصنف «' + t.value + '» مش موجود — اختار من القايمة اللي بتظهر وانت بتكتب', 'error'); return; }
-      l.code = a.code; l.name = a.name;
-    } else return;
-    renderAiLines_();
-    renderAiFoot_();
+    if(e.target.id === 'shelfAdd') shelfAddItem_(e.target.value);
   });
-  function aiApply_(){
-    const v = state.visit;
-    if(!v) return;
-    if(ai_.lines.some(function(l){ return !l.name; })){ showMsg('فيه سطر لسه مااخترتلوش الصنف (الأصفر) — اختاره أو امسحه بـ ✕', 'error'); return; }
-    const noReason = ai_.lines.find(function(l){ return l.type === 'return' && !l.reason; });
-    if(noReason){ showMsg('اختار سبب المرتجع لـ ' + noReason.name, 'error'); return; }
-    let nO = 0, nR = 0;
-    ai_.lines.forEach(function(l){
-      const key = l.code || l.name;
-      if(l.type === 'return'){
-        const ex = v.rets.find(function(r){ return (r.code || r.name) === key && r.reason === l.reason && r.condition === l.condition; });
-        if(ex) ex.qty += l.qty; else v.rets.push({ code: l.code, name: l.name, qty: l.qty, reason: l.reason, condition: l.condition });
-        nR++;
-      } else {
-        const ex = v.lines.find(function(x){ return (x.code || x.name) === key; });
-        if(ex) ex.qty += l.qty; else v.lines.push({ code: l.code, name: l.name, qty: l.qty });
-        nO++;
-      }
-    });
-    if(nO){ v.modes.order = true; v.modes.none = false; }
-    if(nR){ v.modes.ret = true; v.modes.none = false; }
-    closeAi_();
-    renderModes_();
-    renderOrderLines_();
-    renderRetLines_();
-    showMsg('اتضاف ' + [nO ? nO + ' صنف للطلبية' : '', nR ? nR + ' صنف للمرتجع' : ''].filter(Boolean).join(' + ') + ' ✔ — راجعهم قبل التسجيل', 'success');
-  }
 
   // ---------- 📊 عد رف التاجر → طلبية مقترحة ----------
   function openShelf_(){
@@ -4607,74 +4208,7 @@
     let st = state.gps === 'on' ? '✔ الموقع شغال على الجهاز ده.<br><br>' : state.gps === 'off' ? '⚠️ الموقع مقفول دلوقتي.<br><br>' : '';
     document.getElementById('gpsHelpText').innerHTML = st + gpsHelpText_() +
       '<br><br>التطبيق بيسجل مكانك كل 3 دقايق <b>وهو مفتوح بس</b>، ومع كل زيارة.';
-    renderMicDiag_();
   }
-  // كل اللي ممكن يوقّف المايك على الموبايل ده، في مكان واحد
-  function renderMicDiag_(){
-    const box = document.getElementById('micDiag');
-    document.getElementById('micTestOut').innerHTML = '';
-    const ok = function(b){ return b ? '✔' : '❌'; };
-    const ua = navigator.userAgent || '';
-    const where = isInAppBrowser_() ? '❌ جوه واتساب/فيسبوك — افتحه من Chrome أو من أيقونة التطبيق' : isStandaloneApp_() ? '✔ أيقونة التطبيق' : '✔ المتصفح';
-    const lines = [
-      'إصدار التطبيق: <b>' + APP_VERSION_ + '</b>',
-      'الجهاز: <b>' + (isIOS_() ? 'آيفون' : /Android/i.test(ua) ? 'أندرويد' : 'كمبيوتر/تاني') + '</b>',
-      'فاتح من: ' + where,
-      ok(!!speechCtor_()) + ' المتصفح فيه خاصية تحويل الكلام' + (speechCtor_() ? '' : ' — استخدم 🎤 اللي في الكيبورد'),
-      ok(window.isSecureContext) + ' اتصال آمن (https)',
-      ok(navigator.onLine) + ' النت',
-      '<span id="micPermLine">⏳ إذن الميكروفون: بشوف...</span>',
-    ];
-    box.innerHTML = lines.join('<br>');
-    const setPerm = function(t){ const el = document.getElementById('micPermLine'); if(el) el.innerHTML = t; };
-    if(navigator.permissions && navigator.permissions.query){
-      navigator.permissions.query({ name: 'microphone' }).then(function(r){
-        setPerm(r.state === 'granted' ? '✔ إذن الميكروفون: مسموح'
-          : r.state === 'denied' ? '❌ إذن الميكروفون: مرفوض — ' + micPermHelp_()
-          : '⚠️ إذن الميكروفون: لسه ماتطلبش — دوس "جرّب المايك" ووافق على الرسالة');
-      }).catch(function(){ setPerm('ℹ️ إذن الميكروفون: الموبايل مش بيقول — دوس "جرّب المايك" وهتعرف'); });
-    } else setPerm('ℹ️ إذن الميكروفون: الموبايل مش بيقول — دوس "جرّب المايك" وهتعرف');
-  }
-  // تجربة حقيقية: بيطلب الإذن، ويسمع كلمة، ويقولك سمع إيه أو الغلط بالظبط
-  function micTest_(){
-    const out = document.getElementById('micTestOut');
-    const say = function(t, kind){ out.innerHTML = '<div class="msg ' + (kind || 'success') + '" style="margin:0;">' + escapeHtml(t) + '</div>'; };
-    const SR = speechCtor_();
-    if(!SR){ say('❌ المتصفح ده مفيهوش خاصية تحويل الكلام — ' + KB_MIC_HINT_, 'error'); return; }
-    if(isInAppBrowser_()){ say('❌ انت فاتح من جوه واتساب/فيسبوك — افتح التطبيق من Chrome أو من أيقونته', 'error'); return; }
-    say('⏳ بطلب إذن الميكروفون — وافق على الرسالة لو ظهرت...');
-    ensureMicPermission_().then(function(){
-      let rec;
-      try{ rec = new SR(); }catch(e){ say('❌ مش قادر أشغّل خاصية الكلام: ' + e.message, 'error'); return; }
-      rec.lang = 'ar-EG';
-      rec.continuous = false;
-      rec.interimResults = false;
-      let got = '', errc = '', started = false;
-      const timer = setTimeout(function(){
-        try{ rec.abort(); }catch(e){}
-        if(!got && !errc) say(started ? '⚠️ الميكروفون فتح بس مسمعش كلام — جرّب تاني واتكلم أول ما تشوف 🔴' : '❌ خاصية الكلام ماردتش خالص — ' + KB_MIC_HINT_, 'error');
-      }, 9000);
-      rec.onstart = function(){ started = true; say('🔴 قول أي كلمة دلوقتي... (مثلاً: ستة سخان)'); };
-      rec.onresult = function(e){ got = e.results[0][0].transcript; };
-      rec.onerror = function(e){ errc = (e && e.error) || 'unknown'; };
-      rec.onend = function(){
-        clearTimeout(timer);
-        if(got){ micSetOk_(true); say('✔ المايك شغال — سمعت: «' + got + '»'); }
-        else if(errc && errc !== 'aborted'){ if(errc === 'not-allowed' || errc === 'service-not-allowed') micSetOk_(false); say('❌ ' + micErrText_(errc) + '  (كود: ' + errc + ')', 'error'); }
-        else if(started) say('⚠️ الميكروفون فتح بس مسمعش كلام — جرّب تاني واتكلم أول ما تشوف 🔴', 'error');
-        renderMicPermOnly_();
-      };
-      try{ rec.start(); }catch(e){ clearTimeout(timer); say('❌ ' + e.message, 'error'); }
-    }).catch(function(err){ say('❌ ' + err.message, 'error'); renderMicPermOnly_(); });
-  }
-  function renderMicPermOnly_(){
-    if(!navigator.permissions || !navigator.permissions.query) return;
-    navigator.permissions.query({ name: 'microphone' }).then(function(r){
-      const el = document.getElementById('micPermLine');
-      if(el) el.innerHTML = r.state === 'granted' ? '✔ إذن الميكروفون: مسموح' : r.state === 'denied' ? '❌ إذن الميكروفون: مرفوض — ' + micPermHelp_() : '⚠️ إذن الميكروفون: لسه ماتطلبش';
-    }).catch(function(){});
-  }
-
   // ================== تقرير آخر اليوم PDF (للواتساب) ==================
   // بيتعمل على الموبايل نفسه: صفحات A4 HTML → صورة (html2canvas) → PDF (jsPDF)، وبعدين مشاركة واتساب.
   function ensureJsPdfLoaded_(){
