@@ -908,6 +908,23 @@
   input.ofIn:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.18);}
   .ofRow.on input.ofIn{border-color:var(--green); color:var(--green); background:var(--green-bg);}
   .ofEmpty{padding:18px; text-align:center; color:var(--muted); font-weight:800;}
+  .ofRow{-webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
+  .ofRow.act{background:var(--gold-bg); box-shadow:inset 0 0 0 2px var(--gold);}
+  .ofRow.act input.ofIn{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.25); background:#fff; color:var(--navy);}
+  input.ofIn{caret-color:transparent; cursor:pointer;}
+  /* كيبورد الأرقام بتاع التطبيق — أصغر بكتير من كيبورد الموبايل */
+  .ofPad{position:fixed; left:0; right:0; bottom:0; z-index:45; background:#d6d9e0; padding:5px 6px calc(6px + env(safe-area-inset-bottom)); box-shadow:0 -6px 18px rgba(12,23,48,.22); max-width:640px; margin:0 auto;}
+  .ofPadTop{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 4px 4px; font-size:12.5px; font-weight:800; color:var(--navy);}
+  .ofPadTop span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .ofPadTop b{flex:none; color:var(--green);}
+  .ofPadNums{display:grid; grid-template-columns:repeat(10,1fr); gap:4px; direction:ltr;}
+  .ofPadAct{display:grid; grid-template-columns:1fr 1fr 1.2fr 1.6fr 1.2fr; gap:4px; margin-top:4px;}
+  .ofPad button{height:44px; border:none; border-radius:8px; background:#fff; font-family:inherit; font-size:20px; font-weight:900; color:#1c2130; box-shadow:0 1px 0 #9aa0ad; padding:0; cursor:pointer;}
+  .ofPadAct button{font-size:13.5px; background:#bcc1cb;}
+  .ofPadAct button.g{background:var(--green); color:#fff;}
+  .ofPadAct button.d{background:var(--navy); color:#fff;}
+  body.padOpen .header{position:relative;}
+  body.padOpen .wrap{padding-bottom:150px;}
   .orderBar{position:fixed; bottom:0; inset-inline:0; z-index:40; display:flex; align-items:center; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:var(--navy); color:#fff; font-weight:800; font-size:14.5px; box-shadow:0 -4px 14px rgba(0,0,0,.25);}
   .orderBar span{flex:1;}
   .orderBar button{border:none; border-radius:10px; padding:10px 18px; font-family:inherit; font-weight:900; font-size:14.5px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy); cursor:pointer;}
@@ -1336,6 +1353,15 @@
     </div>
   </div>
   <datalist id="aiAsnafList"></datalist>
+  <div id="ofPad" class="ofPad" hidden>
+    <div class="ofPadTop"><span id="ofPadName"></span><b id="ofPadSum"></b></div>
+    <div class="ofPadNums">
+      <button type="button" data-pk="1">1</button><button type="button" data-pk="2">2</button><button type="button" data-pk="3">3</button><button type="button" data-pk="4">4</button><button type="button" data-pk="5">5</button><button type="button" data-pk="6">6</button><button type="button" data-pk="7">7</button><button type="button" data-pk="8">8</button><button type="button" data-pk="9">9</button><button type="button" data-pk="0">0</button>
+    </div>
+    <div class="ofPadAct">
+      <button type="button" data-pk="del">⌫</button><button type="button" data-pk="clr">مسح</button><button type="button" data-pk="prev">↑ قبله</button><button type="button" class="g" data-pk="next">التالي ↓</button><button type="button" class="d" data-pk="done">تم ✔</button>
+    </div>
+  </div>
   <div id="orderBar" class="orderBar" hidden><span id="orderBarText"></span><button type="button" onclick="goToSubmit_()">التالي ⬇</button></div>
   <div id="offlineBanner" class="offlineBanner" hidden>📶 مفيش اتصال بالإنترنت — الزيارات اللي هتسجلها هتتحفظ على الموبايل وتتبعت أول ما النت يرجع</div>
   <div id="updateBanner" class="updateBanner" hidden>
@@ -2137,7 +2163,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.7.0';
+  const APP_VERSION_ = 'v1.7.1';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر               // نفس الرقم اللي في السيرفر
@@ -2165,7 +2191,7 @@
     document.getElementById('backBtn').hidden = home;
     // جوه الشاشات الهيدر بيصغر (من غير الحديث) عشان المساحة تبقى للشغل
     document.body.classList.toggle('inner', !home);
-    if(name !== 'viewVisit'){ document.getElementById('orderBar').hidden = true; document.body.classList.remove('hasBar'); if(typeof ai_ !== 'undefined' && ai_.mode) closeAi_(); }
+    if(name !== 'viewVisit'){ document.getElementById('orderBar').hidden = true; document.body.classList.remove('hasBar'); if(typeof ai_ !== 'undefined' && ai_.mode) closeAi_(); if(typeof ofPadClose_ === 'function') ofPadClose_(); }
     window.scrollTo(0, 0);
   }
   function setTitle_(title, sub){
@@ -3022,9 +3048,10 @@
       return '<div class="ofRow' + (l ? ' on' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
         '<span class="ofNo">' + (n + 1) + '</span>' +
         '<span class="ofName">' + escapeHtml(m.a.name) + (m.a.code ? '<small>' + escapeHtml(m.a.code) + '</small>' : '') + '</span>' +
-        '<input type="text" class="ofIn" inputmode="numeric" dir="ltr" enterkeyhint="next" autocomplete="off" aria-label="كمية ' + escapeHtml(m.a.name) + '" value="' + (l ? l.qty : '') + '">' +
+        '<input type="text" class="ofIn" inputmode="none" readonly tabindex="-1" dir="ltr" autocomplete="off" aria-label="كمية ' + escapeHtml(m.a.name) + '" value="' + (l ? l.qty : '') + '">' +
         '</div>';
     }).join('') + '<div class="ofEmpty" id="ofEmpty" hidden>مفيش صنف بالفلتر ده — دوس "الكل"</div>';
+    ofPadClose_();
     renderOfFilters_();
     ofApply_();
     updateOrderSum_();
@@ -3060,9 +3087,80 @@
     if(next){ next.focus(); next.select(); } else e.target.blur();
   });
   document.getElementById('pickList').addEventListener('click', function(e){
-    const nm = e.target.closest('.ofName');
-    if(nm){ const inp = nm.parentNode.querySelector('.ofIn'); inp.focus(); inp.select(); }
+    const row = e.target.closest('.ofRow');
+    if(row) ofPadOpen_(row);
   });
+  // ---------- كيبورد الأرقام بتاع التطبيق ----------
+  var ofPad_ = { row: null, buf: '' };
+  function ofPadIsOpen_(){ return !document.getElementById('ofPad').hidden; }
+  function ofPadOpen_(row){
+    if(ofPad_.row && ofPad_.row !== row) ofPad_.row.classList.remove('act');
+    ofPad_.row = row;
+    ofPad_.buf = '';
+    row.classList.add('act');
+    const pad = document.getElementById('ofPad');
+    pad.hidden = false;
+    document.body.classList.add('padOpen');
+    const ae = document.activeElement;
+    if(ae && (ae.id === 'pickSearch' || ae.classList.contains('ofIn'))) ae.blur(); // مايفتحش كيبورد الموبايل
+    ofPadInfo_();
+    updateOrderSum_();
+    // الصنف يبان فوق الكيبورد
+    row.scrollIntoView({ block: 'nearest' });
+    const r = row.getBoundingClientRect();
+    const limit = window.innerHeight - pad.offsetHeight - 10;
+    if(r.bottom > limit) window.scrollBy(0, r.bottom - limit);
+    else if(r.top < 10) window.scrollBy(0, r.top - 10);
+  }
+  function ofPadClose_(){
+    if(ofPad_.row) ofPad_.row.classList.remove('act');
+    ofPad_.row = null;
+    ofPad_.buf = '';
+    const pad = document.getElementById('ofPad');
+    if(!pad || pad.hidden) return;
+    pad.hidden = true;
+    document.body.classList.remove('padOpen');
+    if(state.visit) updateOrderSum_();
+  }
+  function ofPadInfo_(){
+    const row = ofPad_.row;
+    if(!row) return;
+    const nm = row.querySelector('.ofName');
+    document.getElementById('ofPadName').textContent = (nm.firstChild ? nm.firstChild.textContent : '') + ' ← ' + (row.querySelector('.ofIn').value || '0');
+    const n = state.visit.lines.length;
+    const tot = state.visit.lines.reduce(function(a, l){ return a + l.qty; }, 0);
+    document.getElementById('ofPadSum').textContent = n ? '🧾 ' + n + ' صنف • ' + fmt(tot) + ' قطعة' : '';
+  }
+  function ofPadMove_(dir){
+    const rows = Array.from(document.querySelectorAll('#pickList .ofRow:not([hidden])'));
+    const i = rows.indexOf(ofPad_.row);
+    const next = rows[i + dir];
+    if(next) ofPadOpen_(next);
+    else if(dir > 0) ofPadClose_();
+  }
+  document.getElementById('ofPad').addEventListener('pointerdown', function(e){ e.preventDefault(); }); // مايسرقش التركيز
+  document.getElementById('ofPad').addEventListener('click', function(e){
+    const b = e.target.closest('[data-pk]');
+    const row = ofPad_.row;
+    if(!b || !row || !state.visit) return;
+    const k = b.dataset.pk;
+    if(k === 'done'){ ofPadClose_(); return; }
+    if(k === 'next'){ ofPadMove_(1); return; }
+    if(k === 'prev'){ ofPadMove_(-1); return; }
+    const inp = row.querySelector('.ofIn');
+    let val = inp.value;
+    if(k === 'clr'){ ofPad_.buf = ''; val = ''; }
+    else if(k === 'del'){ ofPad_.buf = (ofPad_.buf || val).slice(0, -1); val = ofPad_.buf; }
+    else { ofPad_.buf = (ofPad_.buf + k).replace(/^0+(?=\d)/, '').slice(0, 5); val = ofPad_.buf; }
+    if(val === '0') val = '';
+    inp.value = val;
+    setLineQty_(row.dataset.k, Number(val) || 0);
+    row.classList.toggle('on', Number(val) > 0);
+    renderOfFilters_();
+    ofPadInfo_();
+    updateOrderSum_();
+  });
+  document.getElementById('pickSearch').addEventListener('focus', ofPadClose_);
   document.getElementById('pickSearch').addEventListener('input', ofApply_);
   document.getElementById('ofFilters').addEventListener('click', function(e){
     const b = e.target.closest('[data-of]');
@@ -3087,7 +3185,7 @@
     document.getElementById('orderSumQty').textContent = 'إجمالي ' + fmt(total) + ' قطعة';
     const sb = document.getElementById('shelfToolBtn');
     if(sb && v){ sb.hidden = !!v.phone; sb.classList.toggle('done', !!(v.shelf && v.shelf.length)); }
-    const show = n > 0 && state.screen === 'visit' && v.modes.order;
+    const show = n > 0 && state.screen === 'visit' && v.modes.order && !ofPadIsOpen_();
     document.getElementById('orderBar').hidden = !show;
     document.body.classList.toggle('hasBar', show);
     if(show) document.getElementById('orderBarText').textContent = '🧾 ' + n + ' صنف • ' + fmt(total) + ' قطعة';
