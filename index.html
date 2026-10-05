@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
   :root{
     --bg:#f7f6f2; --card:#ffffff; --card2:#faf8f3; --border:#e4dfd1;
@@ -378,7 +378,7 @@
   .empty{text-align:center; color:var(--muted); font-size:14.5px; padding:26px 0;}
   .spinnerOverlay{
     position:fixed; inset:0; z-index:300;
-    background:rgba(12,23,48,.28); backdrop-filter:blur(1.5px);
+    background:rgba(12,23,48,.28);
     display:flex; align-items:center; justify-content:center;
   }
   .spinnerOverlay .spinnerBox{
@@ -888,6 +888,19 @@
   .bigAction.dayRepBtn{flex-basis:100%; border-style:solid; border-color:#1F7A47; background:#EAF5EE; color:#1F7A47;}
   textarea.needFill{border-color:var(--red) !important; box-shadow:0 0 0 3px rgba(184,58,58,.15);}
   #visitNotesLbl{font-weight:800;}
+  .pickList{max-height:52vh; overflow-y:auto; margin:0 -4px; padding:0 4px; -webkit-overflow-scrolling:touch;}
+  .pickHead{font-size:12.5px; font-weight:900; color:var(--muted2); margin:10px 2px 4px;}
+  .pickRow{display:flex; align-items:center; gap:8px; padding:9px 8px; border-bottom:1px solid var(--border);}
+  .pickRow.on{background:var(--green-bg); border-radius:10px; border-bottom-color:transparent; margin-bottom:2px;}
+  .pickRow .pName{flex:1; min-width:0; font-weight:800; font-size:15px; color:var(--navy); line-height:1.4; cursor:pointer;}
+  .pickRow .pName small{display:block; font-size:11.5px; color:var(--muted); font-weight:600; direction:ltr; text-align:right;}
+  .pickRow .qb{width:42px; height:42px; border-radius:11px; border:1px solid var(--border); background:#fff; font-size:22px; font-weight:900; color:var(--navy); font-family:inherit; cursor:pointer; flex:none;}
+  .pickRow .qb.plus{background:var(--green); border-color:var(--green); color:#fff;}
+  .pickRow .qv{width:56px; text-align:center; margin:0; padding:8px 2px; font-weight:900; font-size:16px; flex:none;}
+  .orderBar{position:fixed; bottom:0; inset-inline:0; z-index:40; display:flex; align-items:center; gap:10px; padding:10px 16px calc(10px + env(safe-area-inset-bottom)); background:var(--navy); color:#fff; font-weight:800; font-size:14.5px; box-shadow:0 -4px 14px rgba(0,0,0,.25);}
+  .orderBar span{flex:1;}
+  .orderBar button{border:none; border-radius:10px; padding:10px 18px; font-family:inherit; font-weight:900; font-size:14.5px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy); cursor:pointer;}
+  body.hasBar .wrap{padding-bottom:90px;}
 </style>
 </head>
 <body>
@@ -1069,20 +1082,9 @@
       <button type="button" class="modeBtn none" id="modeNone" onclick="toggleMode_('none')">✋ مافيش طلب</button>
     </div>
     <div class="card secCard" id="orderBox">
-      <div class="secTitle green">🧾 الطلبية</div>
-      <label>الصنف</label>
-      <div class="acWrap">
-        <input type="text" id="itemInput" class="acInput" placeholder="اكتب اسم الصنف أو الكود..." autocomplete="off">
-        <div class="acList" id="itemList" hidden></div>
-      </div>
-      <div class="qtyRow">
-        <div>
-          <label>الكمية</label>
-          <input type="text" id="qtyInput" class="ltrNum" inputmode="numeric" dir="ltr" placeholder="0">
-        </div>
-        <button class="addBtn" onclick="addOrderLine_()">＋ إضافة للطلبية</button>
-      </div>
-      <div id="orderLines"></div>
+      <div class="secTitle green">🧾 الطلبية — دوس ＋ جنب الصنف</div>
+      <input type="search" id="pickSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off" oninput="renderOrderLines_()">
+      <div id="pickList" class="pickList"></div>
       <div class="orderSum" id="orderSum" hidden><span id="orderSumItems"></span><span id="orderSumQty"></span></div>
     </div>
     <div class="card secCard retCard" id="retBox" hidden>
@@ -1272,6 +1274,7 @@
     <div class="appVersionNote" id="appVersionNote" style="text-align:center;"></div>
   </div>
 
+  <div id="orderBar" class="orderBar" hidden><span id="orderBarText"></span><button type="button" onclick="goToSubmit_()">التالي ⬇</button></div>
   <div id="offlineBanner" class="offlineBanner" hidden>📶 مفيش اتصال بالإنترنت — الزيارات اللي هتسجلها هتتحفظ على الموبايل وتتبعت أول ما النت يرجع</div>
   <div id="updateBanner" class="updateBanner" hidden>
     <span>🔄 فيه تحديث جديد للتطبيق</span>
@@ -1336,15 +1339,19 @@
       .catch(function(err){ logSpeed_(action, performance.now() - t0, serverMs, false); throw err; });
   }
   function callApiRaw_(action, args){
+    // مهلة 40 ثانية: لو السيرفر مارجعش، بتطلع رسالة بدل ما اللودينج يفضل يلف على طول
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 40000) : null;
     return fetch(WEBAPP_URL, {
       method: 'POST',
-      // text/plain مهم عشان المتصفح ميبعتش طلب OPTIONS (preflight) قبل الطلب الحقيقي —
-      // Apps Script مش بيعرف يرد على OPTIONS، فلو بعتنا application/json هنا هيفشل الطلب.
+      // text/plain مهم عشان المتصفح ميبعتش طلب OPTIONS (preflight) — Apps Script مش بيرد عليه
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: action, args: args || [] }),
+      signal: ctrl ? ctrl.signal : undefined,
     })
       .then(function(res){ return res.json(); })
       .then(function(data){
+        if(timer) clearTimeout(timer);
         if(!data || data.ok !== true){
           const e = new Error((data && data.error) || 'حصل خطأ غير متوقع، حاول تاني');
           e.code = (data && data.code) || '';
@@ -1353,11 +1360,13 @@
         return { result: data.result, ms: data.ms };
       })
       .catch(function(err){
-        // TypeError = النت فاصل. SyntaxError = الرد مش JSON (صفحة دخول واي فاي، أو جوجل رجّع صفحة خطأ)
-        if(err instanceof TypeError || err instanceof SyntaxError){
-          // الغالب مشكلة إنترنت أو الرابط اتغيّر
-          const netErr = new Error('تعذر الاتصال بالسيرفر — تأكد إنك متصل بالإنترنت وحاول تاني');
-          netErr.isNetwork = true; // عشان نفرّق بين "النت فاصل" و"الدخول مرفوض"
+        if(timer) clearTimeout(timer);
+        // TypeError = النت فاصل. SyntaxError = الرد مش JSON. AbortError = السيرفر اتأخر
+        if(err instanceof TypeError || err instanceof SyntaxError || (err && err.name === 'AbortError')){
+          const netErr = new Error(err && err.name === 'AbortError'
+            ? 'السيرفر اتأخر في الرد — النت ضعيف، حاول تاني'
+            : 'تعذر الاتصال بالسيرفر — تأكد إنك متصل بالإنترنت وحاول تاني');
+          netErr.isNetwork = true;
           throw netErr;
         }
         throw err;
@@ -1397,7 +1406,24 @@
     const el = document.getElementById('globalMsg');
     el.innerHTML = '<div class="msg ' + type + '">' + escapeHtml(text) + '</div>';
     if(type === 'success'){ setTimeout(()=>{ el.innerHTML=''; }, 2500); }
+    // أي خطأ بيطلع رسالة واضحة في نص الشاشة (مش بس فوق الصفحة) + اهتزازة بسيطة
+    if(type === 'error'){
+      showAlertModal_(text, 'error');
+      try{ if(navigator.vibrate) navigator.vibrate(120); }catch(e){}
+    }
   }
+  // أي خطأ غير متوقع في التطبيق نفسه يطلع رسالة بدل ما الشاشة تقف ساكتة
+  window.addEventListener('error', function(e){
+    if(!e || !e.message || e.message === 'Script error.') return;
+    showLoading(false);
+    showAlertModal_('حصل خطأ في التطبيق — جرّب تاني، ولو اتكرر ابعت صورة الرسالة دي:\n' + e.message, 'error');
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    const m = e && e.reason && (e.reason.message || String(e.reason));
+    if(!m) return;
+    showLoading(false);
+    showAlertModal_(m, 'error');
+  });
   function clearMsg(){ document.getElementById('globalMsg').innerHTML = ''; }
   // نافذة تنبيه منبثقة واضحة (z-index أعلى من أي مودال تاني في الصفحة، حتى مودال مراجعة الفاتورة)
   // — بتتأكد إن أي رسالة خطأ هتظهر فوق أي حاجة تانية على الشاشة، ومش هتضيع تحت مودال التأكيد
@@ -2008,6 +2034,7 @@
   // بيعرض الحديث كلمة كلمة (كل كلمة بتظهر بعد اللي قبلها بلحظة بسيطة) بدل التبديل المفاجئ —
   // "المرجع" بيبان بعد ما كل الكلمات تخلص ظهورها
   function showRandomHadith_(){
+    if(document.body.classList.contains('inner')) return; // مفيش داعي نحرّك الحديث وهو مستخبي
     const box = document.getElementById('hadithBox');
     const textEl = document.getElementById('hadithText');
     const refEl = document.getElementById('hadithRef');
@@ -2048,7 +2075,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.4.1';
+  const APP_VERSION_ = 'v1.5.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر               // نفس الرقم اللي في السيرفر
@@ -2076,6 +2103,7 @@
     document.getElementById('backBtn').hidden = home;
     // جوه الشاشات الهيدر بيصغر (من غير الحديث) عشان المساحة تبقى للشغل
     document.body.classList.toggle('inner', !home);
+    if(name !== 'viewVisit'){ document.getElementById('orderBar').hidden = true; document.body.classList.remove('hasBar'); }
     window.scrollTo(0, 0);
   }
   function setTitle_(title, sub){
@@ -2202,7 +2230,8 @@
       }
     } else {
       renderRepHome_();
-      loadRepData_();
+      // بيانات المندوب بتتحدث محليًا مع كل زيارة — مش محتاجين نكلم السيرفر كل ما يرجع لخط السير
+      if(!state.rep || Date.now() - (state.repLoadedAt || 0) > 120000) loadRepData_();
       startTracking_();
       flushQueue_(false);
     }
@@ -2401,6 +2430,7 @@
     return callApi('bootstrapRep', [state.auth])
       .then(function(d){
         state.rep = d;
+        state.repLoadedAt = Date.now();
         localCacheSet_('rep', d);
         if(state.screen === null && !state.isAdmin) renderRepHome_();
         if(state.screen === 'customers') renderCustomers_();
@@ -2653,7 +2683,7 @@
     if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '">🧭 الاتجاهات</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
-    ['visitNotes', 'itemInput', 'qtyInput', 'retItemInput', 'retQtyInput', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['visitNotes', 'pickSearch', 'retItemInput', 'retQtyInput', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
     const rr = (state.rep && state.rep.returnReasons) || [];
     document.getElementById('retReason').innerHTML = '<option value="">اختار السبب...</option>' +
       rr.map(function(r){ return '<option>' + escapeHtml(r) + '</option>'; }).join('');
@@ -2747,6 +2777,7 @@
     if(m.ret) parts.push('المرتجع');
     if(m.pay) parts.push('التحصيل');
     document.getElementById('submitVisitBtn').textContent = '✔ سجّل ' + (parts.length ? parts.join(' و') : 'الزيارة');
+    updateOrderSum_();
   }
   function renderReasons_(){
     const reasons = (state.rep && state.rep.reasons) || [];
@@ -2778,18 +2809,18 @@
 
   // ---------- اختيار الصنف (بحث سريع) — نفس الطريقة للطلبية والمرتجع ----------
   function normAr_(s){ return String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim(); }
-  function itemMatches_(q){
+  function itemMatches_(q, limit){
     const asnaf = (state.rep && state.rep.asnaf) || [];
+    const max = limit || 40;
     const nq = normAr_(normalizeDigits(q));
-    if(!nq) return asnaf.slice(0, 40);
+    if(!nq) return asnaf.slice(0, max);
     const words = nq.split(' ');
     return asnaf.filter(function(a){
       const n = normAr_(a.name), c = normAr_(a.code);
       return c.indexOf(nq) === 0 || words.every(function(w){ return n.indexOf(w) !== -1; });
-    }).slice(0, 40);
+    }).slice(0, max);
   }
   const AC_ = {
-    order: { input: 'itemInput', list: 'itemList', qty: 'qtyInput', sel: 'sel', add: function(){ addOrderLine_(); } },
     ret: { input: 'retItemInput', list: 'retItemList', qty: 'retQtyInput', sel: 'retSel', add: function(){ addReturnLine_(); } },
   };
   function renderItemList_(cfg){
@@ -2830,43 +2861,77 @@
       (itemMatches_(typed).length === 1 ? itemMatches_(typed)[0] : null);
   }
   function readQty_(id){ return Number(normalizeDigits(document.getElementById(id).value || '').replace(/[^\d.]/g, '')); }
-  function addOrderLine_(silent){
-    const v = state.visit;
-    const a = resolveTypedItem_(AC_.order);
-    const qty = readQty_('qtyInput');
-    if(!a){ if(!silent) showMsg('اختار الصنف من القايمة', 'error'); return false; }
-    if(!(qty > 0)){ if(!silent) showMsg('اكتب الكمية', 'error'); document.getElementById('qtyInput').focus(); return false; }
-    const ex = v.lines.find(function(l){ return (l.code || l.name) === (a.code || a.name); });
-    if(ex) ex.qty += qty; else v.lines.push({ code: a.code, name: a.name, qty: qty });
-    v.sel = null;
-    document.getElementById('itemInput').value = '';
-    document.getElementById('qtyInput').value = '';
-    clearMsg();
-    renderOrderLines_();
-    return true;
+  // ---------- شاشة الطلبية السهلة: كل الأصناف قدامه و +/− جنب كل صنف ----------
+  const PICK_MAX_ = 80;
+  function lineKey_(x){ return x.code || x.name; }
+  function findLine_(key){ return state.visit.lines.find(function(l){ return lineKey_(l) === key; }); }
+  function pickRowHtml_(a, qty){
+    return '<div class="pickRow' + (qty ? ' on' : '') + '" data-k="' + escapeHtml(lineKey_(a)) + '">' +
+      '<div class="pName" data-act="plus">' + escapeHtml(a.name) + (a.code ? '<small>' + escapeHtml(a.code) + '</small>' : '') + '</div>' +
+      (qty ? '<button type="button" class="qb" data-act="minus">−</button>' +
+        '<input type="text" class="qv ltrNum" inputmode="numeric" dir="ltr" value="' + qty + '">' : '') +
+      '<button type="button" class="qb plus" data-act="plus">＋</button></div>';
   }
   function renderOrderLines_(){
     const v = state.visit;
-    const box = document.getElementById('orderLines');
-    box.innerHTML = v.lines.map(function(l, i){
-      return '<div class="orderLine"><div class="oName">' + escapeHtml(l.name) + (l.code ? ' <span class="oCode">' + escapeHtml(l.code) + '</span>' : '') + '</div>' +
-        '<div class="stepper"><button type="button" onclick="stepLine_(' + i + ',-1)">−</button>' +
-        '<input type="text" class="ltrNum" inputmode="numeric" value="' + l.qty + '" onchange="setLineQty_(' + i + ', this.value)">' +
-        '<button type="button" onclick="stepLine_(' + i + ',1)">+</button></div>' +
-        '<button type="button" class="rm" onclick="removeLine_(' + i + ')">✕</button></div>';
-    }).join('');
-    const total = v.lines.reduce(function(s, l){ return s + l.qty; }, 0);
-    document.getElementById('orderSum').hidden = !v.lines.length;
-    document.getElementById('orderSumItems').textContent = v.lines.length + ' صنف';
+    if(!v) return;
+    const q = document.getElementById('pickSearch').value || '';
+    const chosenKeys = {};
+    v.lines.forEach(function(l){ chosenKeys[lineKey_(l)] = true; });
+    let html = '';
+    if(v.lines.length){
+      html += '<div class="pickHead">✔ في الطلبية (' + v.lines.length + ')</div>' +
+        v.lines.map(function(l){ return pickRowHtml_(l, l.qty); }).join('');
+    }
+    const rest = itemMatches_(q, PICK_MAX_ + v.lines.length)
+      .filter(function(a){ return !chosenKeys[lineKey_(a)]; }).slice(0, PICK_MAX_);
+    html += '<div class="pickHead">' + (q.trim() ? 'نتيجة البحث' : 'الأصناف') + '</div>' +
+      (rest.length ? rest.map(function(a){ return pickRowHtml_(a, 0); }).join('') : '<div class="acEmpty">مفيش صنف بالاسم ده</div>');
+    document.getElementById('pickList').innerHTML = html;
+    updateOrderSum_();
+  }
+  function changeQty_(row, qty){
+    const v = state.visit;
+    if(!v || !row) return;
+    const key = row.dataset.k;
+    qty = Math.max(0, Math.floor(Number(qty) || 0));
+    const l = findLine_(key);
+    const a = l || ((state.rep && state.rep.asnaf) || []).find(function(x){ return lineKey_(x) === key; });
+    if(!a) return;
+    if(l && !qty) v.lines.splice(v.lines.indexOf(l), 1);
+    else if(l) l.qty = qty;
+    else if(qty) v.lines.push({ code: a.code, name: a.name, qty: qty });
+    row.outerHTML = pickRowHtml_(a, qty); // بنحدّث الصف ده بس — من غير ما نرسم القايمة كلها
+    updateOrderSum_();
+  }
+  document.getElementById('pickList').addEventListener('click', function(e){
+    const t = e.target.closest('[data-act]');
+    if(!t) return;
+    const row = t.closest('.pickRow');
+    const l = findLine_(row.dataset.k);
+    changeQty_(row, (l ? l.qty : 0) + (t.dataset.act === 'plus' ? 1 : -1));
+  });
+  document.getElementById('pickList').addEventListener('change', function(e){
+    if(!e.target.classList.contains('qv')) return;
+    changeQty_(e.target.closest('.pickRow'), normalizeDigits(e.target.value).replace(/[^\d]/g, ''));
+  });
+  function updateOrderSum_(){
+    const v = state.visit;
+    const n = v ? v.lines.length : 0;
+    const total = n ? v.lines.reduce(function(s, l){ return s + l.qty; }, 0) : 0;
+    document.getElementById('orderSum').hidden = !n;
+    document.getElementById('orderSumItems').textContent = n + ' صنف';
     document.getElementById('orderSumQty').textContent = 'إجمالي ' + fmt(total) + ' قطعة';
+    const show = n > 0 && state.screen === 'visit' && v.modes.order;
+    document.getElementById('orderBar').hidden = !show;
+    document.body.classList.toggle('hasBar', show);
+    if(show) document.getElementById('orderBarText').textContent = '🧾 ' + n + ' صنف • ' + fmt(total) + ' قطعة';
   }
-  function stepLine_(i, d){ const l = state.visit.lines[i]; l.qty = Math.max(1, l.qty + d); renderOrderLines_(); }
-  function setLineQty_(i, val){
-    const q = Number(normalizeDigits(val).replace(/[^\d.]/g, ''));
-    if(q > 0) state.visit.lines[i].qty = q;
-    renderOrderLines_();
+  function goToSubmit_(){
+    const el = document.getElementById(state.visit && state.visit.phone ? 'submitVisitBtn' : 'visitNotes');
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if(state.visit && !state.visit.phone) setTimeout(function(){ el.focus(); }, 450);
   }
-  function removeLine_(i){ state.visit.lines.splice(i, 1); renderOrderLines_(); }
 
   // ---------- المرتجع ----------
   function addReturnLine_(silent){
@@ -2908,7 +2973,6 @@
     clearMsg();
     const m = v.modes;
     // صنف مكتوب ومتضافش — نضيفه لوحده
-    if(m.order && document.getElementById('itemInput').value.trim() && document.getElementById('qtyInput').value.trim()) addOrderLine_(true);
     if(m.ret && document.getElementById('retItemInput').value.trim() && document.getElementById('retQtyInput').value.trim()){
       if(!addReturnLine_(false)) return;
     }
