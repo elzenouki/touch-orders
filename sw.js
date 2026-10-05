@@ -2,10 +2,11 @@
 // الصفحة بتتجاب من النت الأول دايمًا (عشان أي تحديث يوصل للمناديب على طول)،
 // ولو مفيش نت بيفتح آخر نسخة متخزنة — فالتطبيق يفضل يفتح من غير نت.
 // طلبات السيرفر (Google Apps Script) والخطوط والمكتبات مش بيلمسها خالص.
-const CACHE = 'touch-orders-v1.7.2';
+const CACHE = 'touch-orders-v1.7.1';
 const CORE = ['./', './index.html', './manifest.json', './icon-192.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting(); // النسخة الجديدة تشتغل على طول من غير ما تستنى قفل التطبيق
   e.waitUntil(
     caches.open(CACHE).then((c) =>
       // كل ملف لوحده — لو ملف مش موجود مايوقفش التثبيت
