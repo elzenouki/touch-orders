@@ -12,6 +12,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TOUCH EL ZENOUKI">
 <meta name="mobile-web-app-capable" content="yes">
+<!-- فتح الاتصال بسيرفر جوجل من أول لحظة — أول طلب للسيرفر بيوفر جزء من الثانية -->
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -27,6 +30,7 @@
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
+  html{background:var(--bg);}
   body{
     margin:0; color:var(--text);
     background:
@@ -53,41 +57,33 @@
     background:linear-gradient(90deg, transparent 0%, var(--gold-light) 15%, var(--gold) 50%, var(--gold-light) 85%, transparent 100%);
     opacity:.85;
   }
-  .headerLeft{display:flex; align-items:center; gap:12px;}
+  .headerLeft{display:flex; align-items:center; gap:12px; order:1;}
   .header .kicker{
     display:block; font-size:11px; color:var(--gold-light); font-weight:800;
     text-transform:uppercase; letter-spacing:1.6px; margin-bottom:6px; opacity:.9;
   }
-  .header h1{
-    margin:0; font-size:22px; font-weight:900; color:#ffffff;
-    letter-spacing:.3px;
-  }
+  .header h1{margin:0; font-size:22px; font-weight:900; color:#ffffff; letter-spacing:.3px;}
   .header .brandLine{
     display:block; width:38px; height:2px; margin-top:7px;
-    background:linear-gradient(90deg, var(--gold-light), var(--gold));
-    border-radius:2px;
+    background:linear-gradient(90deg, var(--gold-light), var(--gold)); border-radius:2px;
   }
   .header .sub{font-size:13px; color:#aab4d4; margin-top:9px; font-weight:500; letter-spacing:.2px;}
   .backBtn{
     background:rgba(255,255,255,.05); color:var(--gold-light); border:1px solid rgba(214,164,40,.55);
     border-radius:10px; padding:9px 17px; font-size:14.5px; cursor:pointer; font-weight:700;
     letter-spacing:.2px; flex-shrink:0; position:relative; z-index:2; min-height:40px;
-    pointer-events:auto; align-self:center;
+    pointer-events:auto; align-self:center; order:3;
   }
   .backBtn:active{background:rgba(214,164,40,.14);}
   .hadithBox{
     flex:1; min-width:0; align-self:center; order:2;
     background:rgba(255,255,255,.06); border:1px solid rgba(214,164,40,.35);
-    border-radius:14px; padding:12px 18px; margin:0 4px;
-    text-align:center;
+    border-radius:14px; padding:12px 18px; margin:0 4px; text-align:center;
   }
-  .backBtn{order:3;}
-  .headerLeft{order:1;}
   .hadithBox .hadithText{
     display:block; color:#efe6c8; font-size:15.5px; font-weight:700; line-height:1.85;
     overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3;
   }
-  /* ظهور تدريجي كلمة كلمة — كل كلمة بتظهر بعد اللي قبلها بلحظة بسيطة (تأثير موجة) */
   .hadithBox .hadithText .word{
     display:inline-block; opacity:0; transform:translateY(6px);
     animation:hadithWordIn .45s ease forwards;
@@ -131,57 +127,12 @@
     content:''; position:absolute; inset-inline-start:0; bottom:0; height:3px; width:100%;
     background:linear-gradient(90deg, var(--gold) 0%, transparent 60%);
   }
-  /* الصف: direction:ltr عشان الصورة+الاسم يترسموا فعليًا على الشمال، وشريط الهدف على اليمين —
-     ثابت كده بغض النظر عن اتجاه الصفحة (rtl)؛ كل بلوك جواه بيظبط اتجاه نصه العربي لوحده */
-  .welcomeRow{display:flex; direction:ltr; align-items:center; justify-content:space-between; gap:14px; position:relative;}
-  .welcomeLeftGroup{display:flex; direction:ltr; align-items:center; gap:14px; min-width:0;}
-  .welcomeCard .badgeIcon{
-    position:relative; width:132px; height:132px; border-radius:28px; flex-shrink:0;
-    background:#fff; padding:7px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:40px; color:var(--gold-d);
-    box-shadow:0 8px 18px rgba(0,0,0,.28), inset 0 0 0 1px rgba(212,169,74,.5);
-    overflow:hidden;
-  }
-  .welcomeCard .badgeIcon img{ width:100%; height:100%; object-fit:cover; border-radius:21px; }
   .welcomeCard .wText{direction:rtl; text-align:right; min-width:0;}
   .welcomeCard .hi{font-size:14px; color:#a9b4d0; font-weight:600; letter-spacing:.3px; position:relative;}
-  /* الاسم بيظهر كامل دايمًا — لو طويل بيلف على سطر تاني بدل ما يتقص بـ "..." */
   .welcomeCard .name{
     font-size:22px; font-weight:900; color:#ffffff; margin-top:5px; position:relative; letter-spacing:.2px;
     white-space:normal; overflow-wrap:anywhere; line-height:1.35;
   }
-  .welcomeLeftGroup{flex:1;}
-  /* على الموبايل: الصورة وشريط الهدف في سطر، والترحيب + الاسم في سطر لوحده تحتهم بعرض الكارت كله */
-  @media (max-width:520px){
-    .welcomeRow{flex-wrap:wrap; row-gap:14px;}
-    .welcomeLeftGroup{display:contents;}
-    .welcomeCard .badgeIcon{order:1;}
-    .targetProgressWrap{order:2;}
-    .welcomeCard .wText{order:3; flex-basis:100%;}
-  }
-  /* شريط الهدف — دلوقتي ثابت على اليمين (طرف الصف التاني)، مش محتاج margin دفع بقى لأن الصف بقى
-     justify-content:space-between */
-  .targetProgressWrap{
-    position:relative; direction:rtl; flex:none; width:92px;
-    display:flex; flex-direction:column; align-items:flex-end; gap:5px;
-  }
-  .targetProgressPct{font-size:15px; font-weight:900; color:var(--gold-light); line-height:1;}
-  .targetProgressTrack{
-    width:100%; height:7px; border-radius:5px; background:rgba(255,255,255,.14); overflow:hidden;
-  }
-  .targetProgressFill{
-    height:100%; border-radius:5px; background:linear-gradient(90deg, var(--gold-light), var(--gold));
-    transition:width .5s ease, background .3s ease; width:0%;
-  }
-  .targetProgressCaption{font-size:9.5px; color:#a9b4d0; font-weight:700;}
-  .targetMoodRow{
-    margin-top:16px; padding-top:14px; border-top:1px dashed rgba(255,255,255,.14);
-    display:flex; align-items:center; gap:10px; position:relative;
-  }
-  .targetMoodEmoji{font-size:24px; flex:none; line-height:1;}
-  .targetMoodText{font-size:12.5px; font-weight:700; color:#c7cfe6; line-height:1.55;}
-  .targetMoodText b{color:var(--gold-light);}
   .sectionLabel{
     font-size:13px; color:var(--muted2); text-transform:uppercase; letter-spacing:1px;
     margin-bottom:14px; font-weight:800;
@@ -217,9 +168,7 @@
   .homeBtn.jard .icon{background:linear-gradient(135deg, var(--gold-bg), #f3e3bd);}
   .homeBtn .title{font-size:15px; font-weight:800; color:var(--navy);}
   .homeBtn .desc{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.4;}
-  .homeBtn .chev{display:none;}
 
-  /* ============ لوحة "خدمات إضافية" — تجميع باقي الأزرار في شبكة مربعة مصغّرة ============ */
   .subHeader{display:flex; align-items:center; gap:10px; margin:0 0 12px;}
   .subHeader .line{flex:1; height:1px; background:var(--border);}
   .subHeader .lbl{font-size:12px; font-weight:800; color:var(--muted2); white-space:nowrap; text-transform:uppercase; letter-spacing:.5px;}
@@ -241,20 +190,12 @@
   }
   .adminLink .title{font-size:11.5px; font-weight:700; color:var(--navy); line-height:1.3; min-height:28px; display:flex; align-items:center; justify-content:center;}
   .adminLink.ic-settings .icon{background:#eef1f7; color:var(--navy);}
-  .adminLink.ic-products .icon{background:var(--blue-bg); color:var(--blue);}
-  .adminLink.ic-suggest .icon{background:var(--gold-bg); color:var(--gold-d);}
   .adminLink.ic-mystats .icon{background:var(--green-bg); color:#2f8f5b;}
   .adminLink.ic-itemsales .icon{background:var(--blue-bg); color:var(--blue);}
-  .adminLink.ic-balances .icon{background:var(--gold-bg); color:var(--gold-d);}
-  .adminLink.ic-stale .icon{background:var(--red-bg); color:#c73e3e;}
-  .adminLink.ic-stalereasons .icon{background:var(--red-bg); color:#c73e3e;}
   .adminLink.ic-history .icon{background:#eef1f7; color:var(--navy);}
-  .adminLink.ic-prices .icon{background:var(--blue-bg); color:var(--blue);}
   .adminLink.ic-admin .icon{background:var(--gold-bg); color:var(--gold-d);}
   .adminLink.ic-logout .icon{background:var(--red-bg); color:#c73e3e;}
-  .adminLink.wide{
-    grid-column:1 / -1; flex-direction:row; padding:11px; gap:8px;
-  }
+  .adminLink.wide{grid-column:1 / -1; flex-direction:row; padding:11px; gap:8px;}
   .adminLink.wide .icon{margin-bottom:0; width:30px; height:30px;}
   .adminLink.wide .title{min-height:0;}
   label{display:block; font-size:14.5px; color:var(--muted2); margin-bottom:7px; font-weight:700;}
@@ -271,9 +212,6 @@
   .ltrNum{ direction:ltr; text-align:left; }
   .row2{display:flex; gap:10px;}
   .row2 > div{flex:1;}
-  /* إحساس بالضغط على أي زرار في التطبيق — من غير كده الزرار مكنش بيدي أي رد فعل بصري لحظة
-     الضغط عليه، فالمستخدم مكنش حاسس إنه دوس فعلاً (خصوصًا مع تأخير طبيعي في رد السيرفر) وكان
-     بيدوس تاني، أو يفتكر إن التطبيق واقف. */
   button, .homeBtn, .adminLink, .delBtn, .adminToggleBtn, .backBtn{
     transition: transform .08s ease, opacity .08s ease, background-color .12s ease, box-shadow .12s ease;
     -webkit-tap-highlight-color: transparent;
@@ -310,31 +248,10 @@
     box-shadow:0 4px 12px rgba(37,211,102,.25);
   }
   button.whatsapp:disabled{opacity:.4; cursor:not-allowed; box-shadow:none;}
-  .itemRow{
-    display:flex; justify-content:space-between; align-items:center;
-    background:var(--card2); border:1px solid var(--border); border-radius:13px;
-    padding:14px 16px; margin-bottom:9px;
-  }
-  .itemRow .name{font-weight:800; font-size:15.5px; color:var(--navy);}
-  .itemRow .meta{font-size:13.5px; color:var(--muted); margin-top:3px;}
-  .itemRow .total{font-weight:800; color:var(--gold-d); font-size:16px;}
-  .itemRow.neg .total{color:var(--red);}
   .delBtn{
     background:#ffffff; border:1px solid var(--border); color:var(--red);
     font-size:17px; cursor:pointer; padding:6px 12px; border-radius:9px; line-height:1;
   }
-  .totalBar{
-    display:flex; justify-content:space-between; align-items:center;
-    font-size:15.5px; font-weight:800; padding:16px 6px 6px;
-    border-top:1px dashed var(--border); margin-top:8px;
-    color:var(--muted2);
-  }
-  .totalBar .val{color:var(--gold-d); font-size:22px; font-weight:900;}
-  .badge{
-    display:inline-flex; align-items:center; gap:5px; font-size:13px; padding:6px 15px; border-radius:20px;
-    background:var(--card2); color:var(--muted2); border:1px solid var(--border); font-weight:700;
-  }
-  .badge.locked{color:var(--green); border-color:var(--green); background:var(--green-bg);}
   .repRow{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
     background:var(--card2); border:1px solid var(--border); border-radius:13px;
@@ -342,16 +259,11 @@
   }
   .repRow .name{font-weight:800; font-size:15.5px; color:var(--navy);}
   .repRow .email{font-size:13px; color:var(--muted); margin-top:3px; direction:ltr; text-align:right;}
-  .repBadge{
-    display:inline-flex; align-items:center; font-size:12.5px; padding:4px 12px; border-radius:20px;
-    background:var(--gold-bg); color:var(--gold-d); border:1px solid var(--gold); font-weight:800; margin-inline-start:8px;
-  }
   .adminToggleBtn{
     flex-shrink:0; padding:11px 16px; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer;
     border:1px solid var(--navy); background:transparent; color:var(--navy); white-space:nowrap;
     font-family:inherit;
   }
-  .adminToggleBtn.isAdminBtn{border-color:var(--red); color:var(--red);}
   .adminToggleBtn:disabled{opacity:.4; cursor:not-allowed;}
   .acWrap{position:relative;}
   .acInput{background:var(--card2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%238b8676" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>') no-repeat left 14px center/17px 17px;
@@ -370,9 +282,7 @@
   .acItem:active, .acItem.hover{background:var(--gold-bg); color:var(--gold-d);}
   .acItem .acCode{font-size:12.5px; color:var(--muted); font-weight:500; direction:ltr;}
   .acEmpty{padding:14px; text-align:center; color:var(--muted); font-size:14px;}
-  .msg{
-    padding:14px 18px; border-radius:12px; font-size:14.5px; margin-bottom:14px; font-weight:700;
-  }
+  .msg{padding:14px 18px; border-radius:12px; font-size:14.5px; margin-bottom:14px; font-weight:700;}
   .msg.error{background:var(--red-bg); color:#9c2f2f; border:1px solid #f0c9c9;}
   .msg.success{background:var(--green-bg); color:#1f6b45; border:1px solid #bfe3cf;}
   .empty{text-align:center; color:var(--muted); font-size:14.5px; padding:26px 0;}
@@ -411,27 +321,13 @@
     color:var(--navy); border:none; border-radius:10px; padding:9px 16px; font-weight:800;
     font-size:13px; cursor:pointer;
   }
-  .appVersionNote{
-    text-align:center; color:var(--muted); font-size:11.5px; margin-top:16px; letter-spacing:.3px;
-  }
-  .center{text-align:center;}
+  .appVersionNote{text-align:center; color:var(--muted); font-size:11.5px; margin-top:16px; letter-spacing:.3px;}
   [hidden]{display:none !important;}
-  .reviewOverlay{
-    position:fixed; inset:0; background:rgba(10,15,30,.55); z-index:50;
-    display:flex; align-items:flex-start; justify-content:center;
-    padding:18px 12px; overflow-y:auto;
-  }
-  .reviewModal{
-    background:#ffffff; width:100%; max-width:640px; border-radius:20px;
-    max-height:calc(100vh - 36px); display:flex; flex-direction:column; overflow:hidden;
-    box-shadow:0 10px 40px rgba(0,0,0,.35);
-  }
   .pkBigBtn{ display:flex; align-items:center; justify-content:center; gap:10px; font-size:17px; padding:16px; }
   .pkBigBtn .pkIcon{ font-size:22px; }
   .pkProfileBox{ margin-top:18px; padding-top:14px; border-top:1px dashed var(--border); }
   .pkProfileTitle{ font-weight:800; font-size:15px; margin-bottom:4px; }
   .pkProfileStatus{ font-size:13.5px; color:var(--muted2); font-weight:700; line-height:1.7; }
-  button.ghost.pkClearBtn{ margin-top:6px; font-size:13px; color:var(--red); border-color:var(--red-bg); background:transparent; }
   .alertOverlay{
     position:fixed; inset:0; background:rgba(10,15,30,.65); z-index:600;
     display:flex; align-items:center; justify-content:center; padding:20px;
@@ -453,124 +349,13 @@
     width:100%; background:linear-gradient(135deg, var(--gold-light), var(--gold)); color:var(--navy);
     border:none; border-radius:12px; padding:13px; font-weight:800; font-size:15px; cursor:pointer;
   }
-  .reviewHeader{
-    padding:20px 22px 16px;
-    background:linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
-    flex-shrink:0;
-  }
-  .reviewTitle{color:#ffffff; font-weight:900; font-size:17px;}
-  .reviewSub{color:#aab4d4; font-size:12.5px; margin-top:5px; font-weight:600;}
-  .reviewBody{padding:16px 22px; overflow-y:auto; flex:1;}
-  .reviewFooter{padding:16px 22px 20px; border-top:1px solid var(--border); flex-shrink:0;}
-  .reviewMetaBar{
-    display:flex; justify-content:space-between; margin-bottom:12px; font-size:13.5px;
-    color:var(--muted2); font-weight:700;
-  }
-  .reviewRow{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:12px 0; border-bottom:1px dashed var(--border);
-  }
-  .reviewRow .rName{font-weight:800; font-size:15px; color:var(--navy);}
-  .reviewRow .rMeta{font-size:13px; color:var(--muted); margin-top:2px;}
-  .reviewRow .rTotal{font-weight:800; font-size:15.5px; color:var(--gold-d);}
-  .reviewRow .rTotal.neg{color:var(--red);}
-  .reviewTotal{
-    display:flex; justify-content:space-between; align-items:center;
-    padding-top:16px; margin-top:6px; font-weight:900; font-size:18px; color:var(--gold-d);
-  }
-  .dayChipsWrap{display:flex; flex-wrap:wrap; margin-bottom:14px;}
-  .dayChip{
-    display:inline-flex; align-items:center; justify-content:center;
-    padding:9px 14px; border-radius:20px; border:1px solid var(--border);
-    background:var(--card2); color:var(--muted2); font-weight:700; font-size:13.5px;
-    cursor:pointer; margin:4px; user-select:none;
-  }
-  .dayChip.active{background:var(--gold-bg); border-color:var(--gold); color:var(--gold-d);}
-  .profilePhotoWrap{display:flex; flex-direction:column; align-items:center; margin-bottom:18px; gap:10px;}
-  .profilePhotoImg{
-    width:110px; height:110px; border-radius:50%; object-fit:cover;
-    border:3px solid var(--gold); background:var(--card2);
-  }
-  .profilePhotoPlaceholder{
-    width:110px; height:110px; border-radius:50%; background:var(--card2); border:2px dashed var(--border);
-    display:flex; align-items:center; justify-content:center; font-size:34px; color:var(--muted);
-  }
-  /* ============ كارت المنتج (الشكل الفاتح): صورة كاملة فوق + مربعات للأرقام + مميزات ============ */
-  .productCard{
-    background:#fff; border:1px solid var(--border); border-radius:20px; overflow:hidden;
-    margin-bottom:16px; box-shadow:0 6px 18px rgba(15,28,61,.07);
-  }
-  .pMedia{position:relative; height:280px; background:radial-gradient(circle at 50% 60%, #fff 0%, #f6efe0 60%, #eadcbc 100%);}
-  .pSlides{display:flex; height:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; direction:ltr;}
-  .pSlides::-webkit-scrollbar{display:none;}
-  .pSlide{flex:0 0 100%; height:100%; scroll-snap-align:center; display:flex; align-items:center; justify-content:center; padding:14px 14px 28px;}
-  /* multiply: أي خلفية بيضا في صورة المنتج بتختفي وتندمج مع خلفية الكارت (الصور الشفافة مش بتتأثر) */
-  .pSlide img{max-width:100%; max-height:100%; object-fit:contain; cursor:zoom-in; mix-blend-mode:multiply;}
-  .pMedia::after{content:''; position:absolute; left:50%; bottom:18px; width:46%; height:14px; margin-left:-23%; border-radius:50%; background:radial-gradient(rgba(0,0,0,.18), transparent 70%); pointer-events:none;}
-  .pNoPhoto{height:100%; display:flex; align-items:center; justify-content:center; font-size:58px; opacity:.5;}
-  .pNew{position:absolute; top:12px; right:12px; z-index:2; background:linear-gradient(135deg, var(--gold-light), var(--gold)); color:#fff; font-size:12px; font-weight:900; padding:4px 12px; border-radius:14px; box-shadow:0 4px 10px rgba(138,98,24,.3);}
-  .pDots{position:absolute; bottom:10px; left:0; right:0; direction:ltr; display:flex; justify-content:center; gap:5px; pointer-events:none;}
-  .pDots i{width:6px; height:6px; border-radius:50%; background:#d9cfb6; transition:all .3s;}
-  .pDots i.on{width:16px; border-radius:4px; background:var(--gold);}
+  /* (بقايا من كارت المنتج — متسابة لأنها بتأثر على شكل تقرير PDF آخر اليوم) */
   .pBody{padding:15px 15px 16px;}
-  .productCard .pTitle{font-size:20px; font-weight:900; color:var(--navy); line-height:1.35;}
-  .pTag{font-size:13.5px; font-weight:700; color:var(--gold-d); margin-top:1px;}
   .pTiles{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0 4px;}
   .pTile{background:var(--gold-bg); border:1px solid rgba(182,134,47,.3); border-radius:13px; padding:9px 11px; min-width:0;}
   .pTile b{display:block; font-size:18px; font-weight:900; color:var(--navy); line-height:1.25;}
   .pTile span{font-size:12px; font-weight:700; color:var(--gold-d);}
-  .pTile.wide{grid-column:1 / -1;}
   .pSec{font-size:12.5px; font-weight:900; color:var(--muted); margin:12px 0 7px;}
-  .pFeats{display:flex; flex-wrap:wrap; gap:6px;}
-  .pFeats span{font-size:12.5px; font-weight:700; color:var(--text); background:#f4f2ec; border:1px solid var(--border); border-radius:16px; padding:4px 11px;}
-  .pFeats span::before{content:'✓ '; color:var(--green); font-weight:900;}
-  .pAdminRow{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px dashed var(--border);}
-  .productPhotoPicker{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
-  .productPhotoPicker .thumb{position:relative; width:76px; height:76px;}
-  .productPhotoPicker .thumb img{width:100%; height:100%; object-fit:cover; border-radius:10px; border:1px solid var(--border);}
-  .productPhotoPicker .rmBtn{
-    position:absolute; top:-7px; left:-7px; width:22px; height:22px; border-radius:50%;
-    background:var(--red); color:#fff; border:2px solid #fff; font-size:13px; line-height:1;
-    cursor:pointer; padding:0;
-  }
-  .productPhotoAddBtn{
-    width:76px; height:76px; border-radius:10px; border:2px dashed var(--border);
-    background:var(--card2); color:var(--muted); font-size:24px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; font-family:inherit;
-  }
-  .suggRow{
-    background:var(--card2); border:1px solid var(--border); border-radius:13px;
-    padding:14px 16px; margin-bottom:9px;
-  }
-  .suggRow .sMeta{font-size:12.5px; color:var(--muted); margin-bottom:6px; font-weight:700;}
-  .suggRow .sText{font-size:14.5px; color:var(--text); font-weight:600; white-space:pre-wrap;}
-  textarea{
-    width:100%; padding:14px 15px; border-radius:11px; border:1px solid var(--border);
-    background:var(--card2); color:var(--text); font-size:16px; margin-bottom:14px;
-    font-family:inherit; resize:vertical; min-height:110px;
-  }
-  textarea:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.12);}
-  /* ============ نبض البيع اليومي + نمط الأسبوع (شاشة مبيعاتي) ============ */
-  .pulseNote{font-size:12.5px; color:var(--muted2); font-weight:700; margin:-4px 0 12px;}
-  .calHead, .calGrid, .wkGrid{display:grid; grid-template-columns:repeat(7, 1fr); gap:5px;}
-  .calHead div{font-size:10.5px; font-weight:800; color:var(--muted2); text-align:center; padding-bottom:2px;}
-  .calCell, .wkCell{background:#fff; border:1px solid var(--border); border-radius:10px; padding:6px 2px 7px; text-align:center; min-width:0;}
-  .calCell.none{border-style:dashed; background:var(--card2);}
-  .calCell.pad{visibility:hidden;}
-  .calCell .dt, .wkCell .dt{font-size:10px; color:var(--muted); font-weight:700;}
-  .calCell .amt, .wkCell .amt{font-size:11.5px; font-weight:900; color:var(--navy); margin:3px 0 5px; white-space:nowrap; overflow:hidden; text-overflow:clip; letter-spacing:-.2px;}
-  .calCell.none .amt{color:var(--muted);}
-  .calCell .amt.neg{color:var(--red);}
-  .pBar{height:4px; border-radius:4px; background:#eceae3; margin:0 4px; overflow:hidden;}
-  .pBar i{display:block; height:100%; border-radius:4px; margin-inline-start:auto;}
-  .pBar i.b{background:var(--blue);} .pBar i.g{background:var(--green);} .pBar i.o{background:#c77b1e;}
-  .wkCell .nm{font-size:11px; font-weight:800; color:var(--navy);}
-  .wkCell .weak{font-size:10px; font-weight:800; color:var(--red); margin-top:4px;}
-  .pulseFoot{font-size:11.5px; color:var(--muted); margin-top:10px; line-height:1.6;}
-  .jardCountRowInput.needFill{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.22); background:#fffaf0;}
-  .jardMissRow{display:flex; justify-content:space-between; gap:10px; padding:9px 12px; border-radius:10px;
-    background:var(--card2); border:1px solid var(--border); margin-bottom:6px; font-size:14px; font-weight:700; color:var(--navy);}
-  .jardMissRow span:last-child{color:var(--gold-d); white-space:nowrap;}
   .inAppBanner{
     background:#fff6e0; border:1px solid var(--gold); color:#6b4a10; border-radius:13px;
     padding:12px 14px; margin-bottom:14px; font-size:13.5px; font-weight:700; line-height:1.7;
@@ -581,105 +366,14 @@
     padding:9px 8px; font-weight:800; font-size:13px; font-family:inherit; cursor:pointer;
   }
   .inAppBanner button.inAppClose{flex:0 0 42px; color:var(--muted2); border-color:var(--border);}
-  /* الأجهزة اللي صاحبها مفعّل "تقليل الحركة" من إعدادات الموبايل: من غير أنيميشن الحديث/البلور */
-  .speedBox{margin-top:18px; padding-top:14px; border-top:1px dashed var(--border);}
-  .speedRow{display:flex; justify-content:space-between; gap:8px; font-size:13px; font-weight:700; color:var(--navy); padding:6px 0; border-bottom:1px solid #f0ece2;}
-  .speedRow small{color:var(--muted); font-weight:700;}
-  .speedRow.slow b{color:var(--red);}
-
-  /* ============ مندوب ماسك أكتر من فرع ============ */
-  .branchChip{
-    display:inline-flex; align-items:center; gap:6px; margin-top:9px; padding:5px 13px; border-radius:20px; cursor:pointer;
-    background:rgba(217,172,82,.16); border:1px solid rgba(217,172,82,.6); color:#fff; font-size:13px; font-weight:800; position:relative;
-  }
-  .branchPickList button{
-    display:block; width:100%; margin-top:9px; padding:14px; border-radius:12px; border:1px solid var(--gold);
-    background:#fff; color:var(--navy); font-family:inherit; font-size:16px; font-weight:800; cursor:pointer;
-  }
-  .branchPickList button.on{background:var(--gold-bg);}
-  .branchPickList button.on::after{content:'  ✔'; color:var(--gold-d);}
-  .branchSplit{margin-top:10px; border-top:1px dashed var(--border); padding-top:8px;}
-  .branchSplit div{display:flex; justify-content:space-between; font-size:14px; font-weight:700; color:var(--navy); padding:3px 0;}
-  .branchSplit div span:last-child{color:var(--gold-d); font-weight:900;}
-
-  /* ============ إعلان منتج جديد (الشكل الليلي الفخم) ============ */
-  .adOverlay{
-    position:fixed; inset:0; z-index:550; display:flex; align-items:center; justify-content:center; padding:16px;
-    background:rgba(6,10,22,.82); animation:adFade .35s ease both;
-  }
-  .adOverlay.closing{animation:adFadeOut .3s ease both;}
-  .adOverlay.closing .adCard{animation:adOut .3s ease both;}
-  .adCard{
-    position:relative; display:flex; flex-direction:column; overflow:hidden;
-    width:min(340px, 92vw); height:min(600px, 86vh); min-height:470px; border-radius:26px;
-    background:radial-gradient(120% 70% at 50% 0%, #1d2d5c 0%, #0a1226 60%, #050914 100%);
-    box-shadow:0 30px 70px rgba(0,0,0,.5), 0 0 0 1px rgba(217,172,82,.35);
-    animation:adPop .8s cubic-bezier(.2,1.2,.4,1) both;
-  }
-  .adBeam{
-    position:absolute; top:-40px; left:8px; width:46%; height:72%; pointer-events:none;
-    background:linear-gradient(180deg, rgba(217,172,82,.55), rgba(217,172,82,0) 85%);
-    clip-path:polygon(40% 0, 60% 0, 100% 100%, 0 100%); filter:blur(6px);
-    opacity:0; animation:adBeam 1.2s .3s forwards, adFlick 3s 1.5s 3;
-  }
-  .adX{
-    position:absolute; top:12px; left:12px; z-index:5; width:32px; height:32px; border-radius:50%; border:none;
-    background:rgba(255,255,255,.92); color:var(--navy); font-size:15px; font-weight:900; cursor:pointer;
-    opacity:0; animation:adFade .4s 1.1s forwards;
-  }
-  .adHead{position:relative; padding:24px 18px 0 54px; text-align:right;}
-  .adKick{display:inline-block; color:var(--gold-light); font-size:13px; font-weight:900; letter-spacing:1px; animation:adUp .5s .4s both;}
-  .adName{color:#fff; font-size:25px; font-weight:900; line-height:1.3; margin-top:2px; animation:adUp .6s .55s both;}
-  .adName span{
-    background:linear-gradient(90deg, var(--gold-light), #fff3cf, var(--gold)); background-size:200%;
-    -webkit-background-clip:text; background-clip:text; color:transparent; animation:adShim 3s 1s linear 3;
-  }
-  .adTag{color:#aab4d4; font-size:12.5px; font-weight:700; margin-top:2px; animation:adUp .5s .7s both;}
-  .adMid{position:relative; flex:1; min-height:0; margin-top:10px;}
-  .adProd{position:absolute; left:10px; top:0; bottom:8px; width:46%; animation:adRise 1s .35s cubic-bezier(.2,1,.3,1) both;}
-  .adProd img{width:100%; height:100%; object-fit:contain; object-position:bottom center; animation:adFloat 4.5s 1.4s ease-in-out 4;}
-  .adNoPhoto{height:100%; display:flex; align-items:center; justify-content:center; font-size:70px; animation:adFloat 4.5s 1.4s ease-in-out infinite;}
-  .adFloor{position:absolute; left:18px; bottom:0; width:40%; height:16px; border-radius:50%; background:radial-gradient(rgba(217,172,82,.6), transparent 70%); animation:adFade 1s 1s both;}
-  .adSpecs{position:absolute; right:14px; top:4px; width:48%; max-height:100%; overflow:hidden; list-style:none; margin:0; padding:0;}
-  .adSpecs li{color:#e9e2cf; font-size:12px; font-weight:800; line-height:1.4; padding:8px 0; border-bottom:1px solid rgba(217,172,82,.22); animation:adSlide .45s both;}
-  .adSpecs li b{display:block; color:var(--gold-light); font-size:17px; font-weight:900;}
-  .adCta{
-    margin:12px 16px 20px; border:none; border-radius:14px; padding:14px; font-family:inherit; font-weight:900; font-size:15.5px;
-    color:var(--navy); background:linear-gradient(135deg, var(--gold-light), var(--gold)); cursor:pointer;
-    animation:adUp .5s 1.5s both, adGlow 2s 2s 4;
-  }
-  .productCard.adFlash{animation:adFlash 1.6s ease 2;}
-  .adOnBadge{display:inline-flex; align-items:center; font-size:13px; font-weight:800; padding:6px 12px; border-radius:9px; background:var(--gold-bg); color:var(--gold-d); border:1px solid var(--gold);}
-  .delBtn.adSetBtn{color:var(--gold-d); font-size:14px; font-weight:800; font-family:inherit;}
-  .adAdminBox{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:var(--gold-bg); border:1px solid var(--gold);
-    border-radius:13px; padding:12px 14px; margin-bottom:12px; font-size:14px; font-weight:700; color:var(--navy);}
-  .adAdminBox .meta{font-size:12px; color:var(--muted); margin-top:2px;}
-  @keyframes adFade{from{opacity:0} to{opacity:1}}
-  @keyframes adFadeOut{to{opacity:0}}
-  @keyframes adPop{from{opacity:0; transform:scale(.88)} to{opacity:1; transform:none}}
-  @keyframes adOut{to{opacity:0; transform:scale(.9) translateY(20px)}}
-  @keyframes adBeam{to{opacity:1}}
-  @keyframes adFlick{0%,100%{opacity:1} 50%{opacity:.7}}
-  @keyframes adUp{from{opacity:0; transform:translateY(18px)} to{opacity:1; transform:none}}
-  @keyframes adShim{to{background-position:-200% 0}}
-  @keyframes adRise{from{opacity:0; transform:translateY(80px)} to{opacity:1; transform:none}}
-  @keyframes adFloat{0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)}}
-  @keyframes adSlide{from{opacity:0; transform:translateX(-30px)} to{opacity:1; transform:none}}
-  @keyframes adGlow{50%{box-shadow:0 0 24px rgba(217,172,82,.75)}}
-  @keyframes adFlash{50%{box-shadow:0 0 0 3px var(--gold), 0 0 24px rgba(182,134,47,.5)}}
-  @media (prefers-reduced-motion: reduce){
-    .adOverlay, .adOverlay *{animation:none !important; opacity:1;}
-  }
-
   @media (prefers-reduced-motion: reduce){
     .hadithBox .hadithText .word{ animation:none; opacity:1; transform:none; }
-    .spinnerOverlay{ backdrop-filter:none; }
   }
 
   /* ================== TOUCH EL ZENOUKI — إضافات ================== */
   .statRow{display:flex; gap:8px; margin-top:16px; position:relative;}
   .statBox{flex:1; background:rgba(255,255,255,.07); border:1px solid rgba(214,164,40,.28); border-radius:13px; padding:9px 6px; text-align:center;}
-  .statBox b{display:block; font-size:21px; font-weight:900; color:#fff; line-height:1.2; direction:ltr;}
+  .statBox b{display:block; font-size:18px; font-weight:900; color:#fff; line-height:1.2; direction:ltr;}
   .statBox span{font-size:11px; font-weight:700; color:#b9c3dd;}
   .gpsChip{display:inline-flex; align-items:center; gap:6px; margin-top:12px; position:relative; font-size:12px; font-weight:800;
     border-radius:20px; padding:5px 12px; background:rgba(255,255,255,.08); color:#c7cfe6; border:1px solid rgba(255,255,255,.14); cursor:pointer;}
@@ -694,6 +388,8 @@
     display:flex; align-items:center; gap:12px; width:100%; text-align:right; font-family:inherit;
     background:var(--card); border:1px solid var(--border); border-radius:16px; padding:13px 14px; margin-bottom:10px;
     box-shadow:0 3px 10px rgba(15,28,61,.05); cursor:pointer; color:var(--text);
+    /* الكروت اللي برا الشاشة مابتترسمش لحد ما المندوب ينزل لها — قايمة التجار الطويلة بتبقى أخف بكتير */
+    content-visibility:auto; contain-intrinsic-size:auto 92px;
   }
   .custCard .cIcon{width:42px; height:42px; border-radius:13px; flex:none; display:flex; align-items:center; justify-content:center;
     font-size:18px; font-weight:900; background:var(--blue-bg); color:var(--blue);}
@@ -709,6 +405,7 @@
   .chip.red{background:var(--red-bg); color:var(--red); border-color:#f0c9c9;}
   .chip.gold{background:var(--gold-bg); color:var(--gold-d); border-color:rgba(182,134,47,.3);}
   .chip.blue{background:var(--blue-bg); color:var(--blue); border-color:#cbd9ef;}
+  .chip.new{background:#e9f3ff; color:#1d5fb8; border-color:#c4dbf7;}
   .custCard .cGo{color:var(--muted); font-size:20px; flex:none;}
   .bigAction{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:14px; margin:6px 0 22px;
     border-radius:14px; border:1.5px dashed var(--gold); background:var(--gold-bg); color:var(--gold-d); font-weight:800; font-size:15px; font-family:inherit; cursor:pointer;}
@@ -724,11 +421,6 @@
   .locBox.bad{background:var(--red-bg); color:#9c2f2f; border-color:#f0c9c9;}
   .locBox label{display:flex; align-items:center; gap:8px; margin:8px 0 0; color:inherit; font-size:13.5px;}
   .locBox input[type=checkbox]{width:20px; height:20px; margin:0; flex:none;}
-  .seg{display:flex; background:#efece4; border-radius:14px; padding:4px; gap:4px; margin-bottom:16px;}
-  .seg button{flex:1; border:none; background:transparent; padding:12px 6px; border-radius:11px; font-family:inherit; font-weight:800; font-size:15px; color:var(--muted2); cursor:pointer;}
-  .seg button.on{background:var(--card); color:var(--navy); box-shadow:0 2px 8px rgba(15,28,61,.12);}
-  .seg button.on.order{color:var(--green);}
-  .seg button.on.noorder{color:var(--gold-d);}
   .reasonGrid{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
   .reasonGrid button{border:1px solid var(--border); background:var(--card2); border-radius:20px; padding:9px 14px; font-family:inherit;
     font-weight:700; font-size:14px; color:var(--text); cursor:pointer;}
@@ -736,18 +428,15 @@
   textarea{width:100%; padding:12px 14px; border-radius:11px; border:1px solid var(--border); background:var(--card2); color:var(--text);
     font-size:15.5px; font-family:inherit; min-height:70px; resize:vertical; margin-bottom:12px;}
   textarea:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.12);}
-  .qtyRow{display:flex; gap:8px; align-items:flex-end;}
-  .qtyRow > div:first-child{width:110px; flex:none;}
-  .qtyRow input{margin-bottom:0;}
-  .qtyRow .addBtn{flex:1; height:52px; padding:0 18px; border:none; border-radius:11px; background:var(--navy); color:#fff; font-weight:800; font-size:15px; font-family:inherit; cursor:pointer;}
   .orderLine{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-top:8px;}
   .orderLine .oName{flex:1; min-width:0; font-weight:800; color:var(--navy); font-size:14.5px;}
   .orderLine .oCode{font-size:11.5px; color:var(--muted); font-weight:600; direction:ltr; display:inline-block;}
-  .stepper{display:flex; align-items:center; gap:4px; flex:none;}
-  .stepper button{width:34px; height:34px; border-radius:10px; border:1px solid var(--border); background:var(--card); font-size:18px; font-weight:900; color:var(--navy); cursor:pointer; font-family:inherit;}
-  .stepper input{width:58px; text-align:center; margin:0; padding:7px 4px; font-weight:800;}
+  .orderLine .oMeta{font-size:11.5px; color:var(--muted2); font-weight:700; margin-top:2px;}
   .orderLine .rm{border:none; background:transparent; color:var(--red); font-size:18px; cursor:pointer; padding:4px;}
+  .orderLine.ret{background:#fdf3f3; border-color:#efc4c4;}
+  .orderLine.ret .oName{color:var(--red);}
   .orderSum{display:flex; justify-content:space-between; font-weight:800; color:var(--navy); margin-top:12px; font-size:14.5px;}
+  .orderSum.red{color:var(--red);}
 
   .doneCard{text-align:center;}
   .doneCard .doneIcon{width:64px; height:64px; border-radius:50%; margin:4px auto 12px; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:900; background:var(--green-bg); color:var(--green);}
@@ -758,6 +447,7 @@
   .kv:last-child{border-bottom:none;}
   .kv span:first-child{color:var(--muted2); font-weight:700;}
   .kv span:last-child{font-weight:800; color:var(--navy); text-align:left;}
+  .kv.red span{color:var(--red) !important;}
 
   .filters{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px;}
   .filters button{border:1px solid var(--border); background:var(--card); border-radius:18px; padding:7px 13px; font-family:inherit; font-weight:700; font-size:13.5px; color:var(--muted2); cursor:pointer;}
@@ -765,7 +455,6 @@
   .rangeRow{display:flex; gap:8px;}
   .rangeRow > div{flex:1; min-width:0;}
   .rangeRow input{min-width:0; max-width:100%;}
-  html{background:var(--bg);}
   .acWrap .acInput{margin-bottom:12px;}
   .rangeRow input, .rangeRow select{margin-bottom:10px;}
   .tiles{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px;}
@@ -807,7 +496,6 @@
   .orderCard .ocTop{display:flex; justify-content:space-between; gap:8px; align-items:flex-start;}
   .orderCard .ocName{font-weight:900; color:var(--navy);}
   .orderCard .ocSub{font-size:12px; color:var(--muted); font-weight:700; direction:ltr; text-align:right;}
-  .orderCard .ocItems{font-size:13px; color:var(--muted2); font-weight:600; margin-top:6px; line-height:1.7;}
   .orderCard .ocBtns{display:flex; gap:8px; margin-top:10px;}
   .orderCard .ocBtns button{flex:1; border:1px solid var(--border); background:var(--card2); border-radius:10px; padding:8px; font-family:inherit; font-weight:800; font-size:13px; color:var(--navy); cursor:pointer;}
   .dayHead{font-size:13px; font-weight:900; color:var(--gold-d); margin:16px 2px 8px;}
@@ -826,26 +514,19 @@
   .secTitle{font-weight:900; font-size:15px; color:var(--navy); margin-bottom:12px;}
   .secTitle.green{color:var(--green);} .secTitle.red{color:var(--red);} .secTitle.gold{color:var(--gold-d);}
   .retCard{border-color:#efc4c4;}
-  .orderLine.ret{background:#fdf3f3; border-color:#efc4c4;}
-  .orderLine.ret .oName{color:var(--red);}
-  .orderLine .oMeta{font-size:11.5px; color:var(--muted2); font-weight:700; margin-top:2px;}
-  .orderSum.red{color:var(--red);}
   .condRow{display:flex; gap:8px; margin-bottom:12px;}
   .condRow button{flex:1; border:1px solid var(--border); background:var(--card2); border-radius:11px; padding:10px; font-family:inherit; font-weight:800; font-size:14.5px; color:var(--muted2); cursor:pointer;}
   .condRow button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
   .addBtn.retAdd{width:100%; height:48px; border:none; border-radius:11px; background:var(--red); color:#fff; font-weight:800; font-size:15px; font-family:inherit; cursor:pointer;}
   .payAmount{font-size:24px; font-weight:900; text-align:center;}
-  .actRow{display:flex; gap:8px; margin:6px 0 22px;}
+  .actRow{display:flex; gap:8px; margin:6px 0 22px; flex-wrap:wrap;}
   .actRow .bigAction{margin:0; flex:1; font-size:14px; padding:13px 6px;}
   .bigAction.newCust{border-color:var(--green); background:var(--green-bg); color:var(--green);}
-  .statRow .statBox b{font-size:18px;}
-  .chip.new{background:#e9f3ff; color:#1d5fb8; border-color:#c4dbf7;}
+  .bigAction.phoneBtn{flex-basis:100%; border-color:#2c548f; background:var(--blue-bg); color:var(--blue);}
+  .bigAction.dayRepBtn{flex-basis:100%; border-style:solid; border-color:#1F7A47; background:#EAF5EE; color:#1F7A47;}
   .docBlock{border-top:1px dashed var(--border); margin-top:10px; padding-top:10px;}
   .docBlock .dbTitle{font-weight:900; font-size:13.5px; margin-bottom:4px;}
   .docBlock.red .dbTitle{color:var(--red);} .docBlock.green .dbTitle{color:var(--green);} .docBlock.gold .dbTitle{color:var(--gold-d);}
-  .kv.red span{color:var(--red) !important;}
-  .actRow{flex-wrap:wrap;}
-  .bigAction.phoneBtn{flex-basis:100%; border-color:#2c548f; background:var(--blue-bg); color:var(--blue);}
   .phoneNote{margin-top:12px; border-radius:13px; padding:11px 13px; font-size:13.5px; font-weight:800; background:var(--blue-bg); color:var(--blue); border:1px solid #cbd9ef;}
   .pendingBox{border-radius:12px; padding:12px; font-weight:900; text-align:center; margin-bottom:12px; background:var(--gold-bg); color:var(--gold-d); border:1px solid rgba(182,134,47,.35); font-size:15px;}
   .pendingBox.zero{background:var(--green-bg); color:var(--green); border-color:#bfe3cf;}
@@ -885,7 +566,6 @@
   .pdfPage .pEmpty{font-size:12.5px; color:#8B8676; padding:8px 10px; background:#FBF9F3; border-radius:8px;}
   .pdfPage .pEmpty.ok{color:#1F7A47; font-weight:800; background:#EAF5EE;}
   .pdfPage .pSum{font-size:12.5px; padding:8px 10px; background:#FAF3E1; border-radius:0 0 8px 8px; text-align:left;}
-  .bigAction.dayRepBtn{flex-basis:100%; border-style:solid; border-color:#1F7A47; background:#EAF5EE; color:#1F7A47;}
   textarea.needFill{border-color:var(--red) !important; box-shadow:0 0 0 3px rgba(184,58,58,.15);}
   #visitNotesLbl{font-weight:800;}
   /* ورقة الطلبية + فلاتر */
@@ -899,20 +579,21 @@
   .ofChip small{opacity:.7; font-weight:700; margin-inline-start:3px;}
   .ofCount{font-size:12px; font-weight:800; color:var(--muted2); margin:2px 2px 6px; display:flex; justify-content:space-between;}
   .ofPaper{max-height:58vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:#fffdf6; border:1px solid #ece4cf; border-radius:10px;}
-  .ofRow{display:flex; align-items:center; gap:8px; min-height:50px; padding:0 0 0 8px; border-bottom:1px solid #e3e9f3;}
+  .ofRow{display:flex; align-items:center; gap:8px; min-height:50px; padding:0 0 0 8px; border-bottom:1px solid #e3e9f3;
+    -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;
+    /* الأصناف اللي برا مكان العرض في الورقة مابتترسمش — ورقة فيها مئات الأصناف بتفتح بسرعة */
+    content-visibility:auto; contain-intrinsic-size:auto 50px;}
   .ofRow.on{background:rgba(43,122,79,.07);}
   .ofNo{width:32px; flex:none; align-self:stretch; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#b33; border-left:2px solid #f1b9b9;}
   .ofName{flex:1; min-width:0; font-size:14px; font-weight:800; color:#2a3a6c; line-height:1.3; padding:5px 0; cursor:pointer;}
   .ofName small{display:block; font-size:10.5px; color:var(--muted); font-weight:600; direction:ltr; text-align:right;}
-  input.ofIn{width:66px; height:38px; margin:0; padding:0 4px; border:1.5px solid #9fb0d0; border-radius:8px; text-align:center; font-family:inherit; font-size:18px; font-weight:900; color:#1d3fa0; background:#fff; flex:none;}
+  input.ofIn{width:66px; height:38px; margin:0; padding:0 4px; border:1.5px solid #9fb0d0; border-radius:8px; text-align:center; font-family:inherit; font-size:18px; font-weight:900; color:#1d3fa0; background:#fff; flex:none; caret-color:transparent; cursor:pointer;}
   input.ofIn:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.18);}
   .ofRow.on input.ofIn{border-color:var(--green); color:var(--green); background:var(--green-bg);}
   .ofEmpty{padding:18px; text-align:center; color:var(--muted); font-weight:800;}
-  .ofRow{-webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent;}
   .ofRow.act{background:var(--gold-bg); box-shadow:inset 0 0 0 2px var(--gold);}
   .ofRow.act input.ofIn{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.25); background:#fff; color:var(--navy);}
-  input.ofIn{caret-color:transparent; cursor:pointer;}
-  /* كيبورد الأرقام بتاع التطبيق — أصغر بكتير من كيبورد الموبايل */
+  /* كيبورد الأرقام بتاع التطبيق */
   .ofPad{position:fixed; left:0; right:0; bottom:0; z-index:45; background:#d6d9e0; padding:5px 6px calc(6px + env(safe-area-inset-bottom)); box-shadow:0 -6px 18px rgba(12,23,48,.22); max-width:640px; margin:0 auto;}
   .ofPadTop{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 4px 4px; font-size:12.5px; font-weight:800; color:var(--navy);}
   .ofPadTop span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
@@ -929,7 +610,7 @@
   .orderBar span{flex:1;}
   .orderBar button{border:none; border-radius:10px; padding:10px 18px; font-family:inherit; font-weight:900; font-size:14.5px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy); cursor:pointer;}
   body.hasBar .wrap{padding-bottom:90px;}
-  /* ===== المساعد: صوت / صورة ورقة / عد الرف ===== */
+  /* ===== عد الرف ===== */
   .aiTools{display:grid; grid-template-columns:repeat(2,1fr); gap:7px; margin-bottom:12px;}
   .aiTools button{border:1.5px solid var(--border); background:var(--card2); border-radius:13px; padding:8px 4px; font-family:inherit; font-weight:800; font-size:13px; color:var(--navy); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px;}
   .aiTools button span{font-size:21px; line-height:1.25;}
@@ -944,18 +625,6 @@
   .aiFoot:empty{display:none;}
   .aiStatus{text-align:center; font-size:13.5px; font-weight:800; color:var(--muted2); margin-bottom:10px; line-height:1.7;}
   .aiStatus.err{color:var(--red);}
-  .aiLine{background:#fff; border:1px solid var(--border); border-radius:13px; padding:10px; margin-bottom:8px;}
-  .aiLine.ret{background:#fdf5f5; border-color:#efc4c4;}
-  .aiLine.bad{border-color:var(--gold); background:var(--gold-bg);}
-  .aiLine .aTop{display:flex; align-items:center; gap:8px;}
-  .aiLine .aType{flex:none; border:1px solid #bfe3cf; background:var(--green-bg); color:var(--green); border-radius:10px; padding:5px 8px; font-weight:800; font-size:12.5px; font-family:inherit; cursor:pointer;}
-  .aiLine.ret .aType{background:var(--red-bg); color:var(--red); border-color:#f0c9c9;}
-  .aiLine .aName{flex:1; min-width:0; font-weight:800; color:var(--navy); font-size:14.5px; line-height:1.4;}
-  .aiLine select.aName, .aiLine input.aName{margin:0; padding:9px 10px; font-size:14px;}
-  .aiLine .aHeard{font-size:11.5px; color:var(--muted); font-weight:700; margin-top:5px;}
-  .aiLine .aRow2{display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;}
-  .aiLine .aRow2 select{flex:1; min-width:120px; margin:0; padding:9px 10px; font-size:14px;}
-  .aiLine .rm{flex:none; border:none; background:transparent; color:var(--red); font-size:18px; cursor:pointer; padding:4px;}
   .aiNote{background:var(--gold-bg); border:1px solid rgba(182,134,47,.35); color:var(--gold-d); border-radius:11px; padding:9px 12px; font-size:13px; font-weight:800; margin-bottom:10px; line-height:1.7;}
   .aiNote.plain{background:#fff; color:var(--muted2); border-color:var(--border);}
   .shelfHead, .shelfRow{display:grid; grid-template-columns:1fr 66px 66px; gap:8px; align-items:center;}
@@ -1112,7 +781,7 @@
 
   <!-- ============ كل تجاري (بحث) ============ -->
   <div id="viewCustomers" hidden>
-    <div class="searchBox"><input type="search" id="custSearch" placeholder="🔎 دوّر باسم التاجر أو الكود أو التليفون..." oninput="renderCustomers_()"></div>
+    <div class="searchBox"><input type="search" id="custSearch" placeholder="🔎 دوّر باسم التاجر أو الكود أو التليفون..." oninput="renderCustomersSoon_()"></div>
     <button class="bigAction newCust" style="margin:0 0 14px;" onclick="openScreen('newcust')">＋ العميل مش موجود؟ ضيفه كعميل جديد</button>
     <div id="custList"></div>
   </div>
@@ -1402,15 +1071,11 @@
 </div>
 
 <script>
-  // ============ الاتصال بالسيرفر (Google Apps Script) عبر الإنترنت — بدل google.script.run ============
-  // ده تطبيق مستقل مستضاف على GitHub Pages، فبيكلم نفس الـ Google Sheet عن طريق رابط تطبيق
-  // الويب بتاع Apps Script كـ API عادي (JSON)، بدل ما يكون Apps Script هو اللي بيعرض الصفحة.
-  // ملحوظة: لو عملت Deploy جديد (deployment جديد خالص، مش تعديل نفس القديم) هيتغيّر اللينك،
-  // وهتحتاج تحدّث القيمة دي بس.
+  // ============ الاتصال بالسيرفر (Google Apps Script) عبر الإنترنت ============
+  // لو عملت Deploy جديد (deployment جديد خالص، مش تعديل نفس القديم) هيتغيّر اللينك، وهتحتاج تحدّث القيمة دي بس.
   const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyJWUzX8sCmRxYWxpsQTjOX8CRqmVhW8aJgB6COuvTyuxu_Tfe89quIf3SvTrCaaJAN/exec';
   // ============ عدّاد سرعة التطبيق ============
   // بيسجل آخر 25 طلب: الوقت الكلي، ووقت السيرفر (جوجل) لوحده — الفرق بينهم = وقت النت.
-  // بيتعرض في "إعداداتي ← سرعة التطبيق" عشان نعرف التقل جاي من فين بالظبط.
   const SPEED_LOG_KEY_ = 'tf_speed_log';
   function logSpeed_(action, totalMs, serverMs, ok){
     try{
@@ -1421,10 +1086,9 @@
   }
   function callApi(action, args){
     const t0 = performance.now();
-    let serverMs = null;
     return callApiRaw_(action, args)
       .then(function(r){ logSpeed_(action, performance.now() - t0, r.ms, true); return r.result; })
-      .catch(function(err){ logSpeed_(action, performance.now() - t0, serverMs, false); throw err; });
+      .catch(function(err){ logSpeed_(action, performance.now() - t0, null, false); throw err; });
   }
   function callApiRaw_(action, args){
     // مهلة 40 ثانية: لو السيرفر مارجعش، بتطلع رسالة بدل ما اللودينج يفضل يلف على طول
@@ -1461,10 +1125,7 @@
       });
   }
 
-  // ============ تحميل مكتبات خارجية (ExcelJS / html2canvas) عند الحاجة الفعلية بس ============
-  // بدل ما نحملهم مع كل فتح للتطبيق (كانوا بيتحملوا في <head> قبل كده)، بنحملهم أول مرة يحتاجهم
-  // فيها المستخدم فعلاً — تنزيل أو مشاركة ملف من شاشة "سجل فواتيري" — وبعدين بيفضلوا محفوظين في
-  // المتصفح (Promise واحد لكل رابط) فمش بيتحمّلوا تاني في نفس الجلسة.
+  // ============ تحميل المكتبات الخارجية عند الحاجة الفعلية بس ============
   const _loadedScripts_ = {};
   function loadScriptOnce_(src){
     if(_loadedScripts_[src]) return _loadedScripts_[src];
@@ -1484,8 +1145,7 @@
     return loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
   }
 
-  // رقم مرجعي فريد (مش لازم يبقى UUID رسمي، بس محتاج يبقى مختلف كل مرة) — بيتبعت مع طلبات
-  // الترحيل عشان السيرفر يعرف يفرّق بين فاتورة جديدة وإعادة إرسال لنفس الفاتورة (دبل كليك)
+  // رقم مرجعي فريد — بيتبعت مع طلبات التسجيل عشان السيرفر يفرّق بين زيارة جديدة وإعادة إرسال (دبل كليك)
   function genRequestId_(){
     return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
   }
@@ -1494,7 +1154,7 @@
     const el = document.getElementById('globalMsg');
     el.innerHTML = '<div class="msg ' + type + '">' + escapeHtml(text) + '</div>';
     if(type === 'success'){ setTimeout(()=>{ el.innerHTML=''; }, 2500); }
-    // أي خطأ بيطلع رسالة واضحة في نص الشاشة (مش بس فوق الصفحة) + اهتزازة بسيطة
+    // أي خطأ بيطلع رسالة واضحة في نص الشاشة + اهتزازة بسيطة
     if(type === 'error'){
       showAlertModal_(text, 'error');
       try{ if(navigator.vibrate) navigator.vibrate(120); }catch(e){}
@@ -1513,8 +1173,6 @@
     showAlertModal_(m, 'error');
   });
   function clearMsg(){ document.getElementById('globalMsg').innerHTML = ''; }
-  // نافذة تنبيه منبثقة واضحة (z-index أعلى من أي مودال تاني في الصفحة، حتى مودال مراجعة الفاتورة)
-  // — بتتأكد إن أي رسالة خطأ هتظهر فوق أي حاجة تانية على الشاشة، ومش هتضيع تحت مودال التأكيد
   function showAlertModal_(text, kind){
     const icon = document.getElementById('alertIcon');
     icon.textContent = kind === 'success' ? '✔' : '!';
@@ -1529,21 +1187,29 @@
   function escapeHtml(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ESC_MAP_[c]);
   }
+  // en-US عشان الأرقام تفضل بالإنجليزي (0123..) — المُنسّق والترتيب العربي بيتعملوا مرة واحدة بس
+  const NUM_FMT_ = new Intl.NumberFormat('en-US', {maximumFractionDigits:2});
+  const AR_COLL_ = new Intl.Collator('ar');
   function fmt(n){
-    n = Number(n) || 0;
-    // en-US بدل ar-EG عشان الأرقام تفضل بالإنجليزي (0123..) مش بالهندي العربي (٠١٢٣..)
-    return n.toLocaleString('en-US', {maximumFractionDigits:2});
+    return NUM_FMT_.format(Number(n) || 0);
   }
+  // البحث بيتنفذ بعد ما المندوب يقف كتابة لحظة، بدل مع كل حرف
+  function debounce_(fn, ms){
+    let t = null;
+    return function(){ clearTimeout(t); t = setTimeout(fn, ms); };
+  }
+  const renderCustomersSoon_ = debounce_(function(){ renderCustomers_(); }, 150);
+  const ofApplySoon_ = debounce_(function(){ ofApply_(); }, 120);
   // تحويل تاريخ dd/mm/yyyy لصيغة صالحة كاسم ملف (بدون شرطة مائلة)
   function safeDateForFile(d){
     return String(d || '').replace(/\//g, '-');
   }
 
-  // ============ حقول السعر: تفرض أرقام إنجليزية حتى لو الكيبورد عربي ============
+  // ============ حقول الأرقام: تفرض أرقام إنجليزية حتى لو الكيبورد عربي ============
   function normalizeDigits(str){
     return String(str)
-      .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660)) // أرقام عربية هندية ٠-٩
-      .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0)); // أرقام فارسية ۰-۹
+      .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+      .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0));
   }
   document.addEventListener('input', function(e){
     const el = e.target;
@@ -1560,9 +1226,6 @@
   });
 
   // ============ ذاكرة محلية على الموبايل (عرض فوري + تحديث في الخلفية) ============
-  // الشاشات بتفتح على طول بآخر بيانات اتحفظت على الجهاز، وفي نفس اللحظة بنجيب الجديد من السيرفر
-  // ونحدّث بيه. كل حاجة بتتخزن باسم إيميل المندوب، وبتتمسح كلها عند تسجيل الخروج.
-  // ملحوظة: الترحيل والتحقق من الرصيد بيفضلوا من السيرفر 100% — الذاكرة دي للعرض بس.
   const LOCAL_CACHE_PREFIX_ = 'tf_cache_v1:';
   function localCacheKey_(name){
     return LOCAL_CACHE_PREFIX_ + String((state.auth && state.auth.email) || '').toLowerCase() + ':' + name;
@@ -1579,7 +1242,7 @@
       Object.keys(localStorage).forEach(function(k){ if(k.indexOf(LOCAL_CACHE_PREFIX_) === 0) localStorage.removeItem(k); });
     }catch(e){}
   }
-  // ============ تخزين بيانات الدخول محليًا في المتصفح عشان المندوب ميدخلش كل مرة ============
+  // ============ تخزين بيانات الدخول محليًا ============
   const AUTH_STORAGE_KEY = 'touch_field_auth';
   function saveAuth(auth){
     try{ localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth)); }catch(e){}
@@ -1594,13 +1257,10 @@
     try{ localStorage.removeItem(AUTH_STORAGE_KEY); }catch(e){}
   }
 
-  // كود التأكيد (OTP) ميتطلبش غير مرة واحدة بس لكل جهاز — نفس منطق نسخة Apps Script بالظبط
-  // علامة الجهاز بتتحفظ في 3 أماكن على الموبايل (localStorage + كوكي + IndexedDB) — لو المتصفح مسح
-  // مكان منهم (زي ما Chrome بيعمل لما مساحة الموبايل تقل، أو سفاري بعد أسبوع من غير استخدام)،
-  // بترجع من مكان تاني فالجهاز يفضل "متذكر" ومش بيطلب كود الإيميل تاني.
+  // علامة الجهاز بتتحفظ في 3 أماكن (localStorage + كوكي + IndexedDB) — لو المتصفح مسح مكان، بترجع من التاني
   const DEVICE_TOKEN_KEY = 'touch_field_device';
   const DEVICE_COOKIE_ = 'tf_dev';
-  const DEVICE_IDB_TIMEOUT_MS_ = 700; // بعض المتصفحات الداخلية بتعلّق في IndexedDB — منستناش أكتر من كده
+  const DEVICE_IDB_TIMEOUT_MS_ = 700;
 
   function cookieGet_(name){
     try{
@@ -1652,19 +1312,16 @@
     cookieSet_(DEVICE_COOKIE_, token);
     idbSetToken_(token);
   }
-  // سريع (من غير انتظار): localStorage ثم الكوكي
   function loadDeviceToken(){
     let t = '';
     try{ t = localStorage.getItem(DEVICE_TOKEN_KEY) || ''; }catch(e){}
     return t || cookieGet_(DEVICE_COOKIE_);
   }
-  // لو المكانين السريعين فاضيين بس، بنسأل IndexedDB (بحد أقصى 700ms)
   function loadDeviceTokenAsync_(){
     const quick = loadDeviceToken();
     if(quick) return Promise.resolve(quick);
     return idbGetToken_();
   }
-  // مع كل فتح للتطبيق: لو العلامة موجودة في أي مكان، نرجّعها في الأماكن التانية ونجدد مدة الكوكي
   function syncDeviceToken_(){
     loadDeviceTokenAsync_().then(function(token){
       if(!token) return;
@@ -1676,8 +1333,6 @@
     });
   }
 
-  // بنطلب من المتصفح يعتبر بيانات التطبيق "دائمة" ومايمسحهاش لوحده — Chrome بيوافق من غير أي
-  // سؤال للمستخدم. بيتطلب مرة واحدة بس بعد أول دخول ناجح.
   function requestPersistentStorage_(){
     try{
       if(localStorage.getItem('tz_persist_asked')) return;
@@ -1698,7 +1353,7 @@
   function isInAppBrowser_(){
     const ua = navigator.userAgent || '';
     return /FBAN|FBAV|FB_IAB|FBIOS|Instagram|Messenger|WhatsApp|Snapchat|Line\/|MicroMessenger|TikTok|musical_ly|Telegram/i.test(ua) ||
-      /; wv\)/.test(ua); // WebView عام جوه أي تطبيق أندرويد
+      /; wv\)/.test(ua);
   }
   function initInAppBanner_(){
     try{ if(sessionStorage.getItem('tz_inapp_dismissed')) return; }catch(e){}
@@ -1723,18 +1378,30 @@
       prompt('انسخ اللينك ده:', url);
     }
   }
+
+  // ============ شاشة الدخول: الأسماء بتظهر فورًا من آخر مرة، وبتتحدث من السيرفر في الخلفية ============
+  const LOGIN_NAMES_KEY_ = 'tf_rep_names';
+  function fillLoginNames_(names){
+    const sel = document.getElementById('loginNameSelect');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">اختر اسمك من القائمة...</option>' +
+      names.map(n => '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>').join('');
+    if(cur && names.indexOf(cur) !== -1) sel.value = cur;
+  }
   function loadLoginScreen(){
     clearMsg();
-    showLoading(true);
+    let cached = null;
+    try{ cached = JSON.parse(localStorage.getItem(LOGIN_NAMES_KEY_) || 'null'); }catch(e){}
+    const hasCached = !!(cached && cached.length);
+    if(hasCached){ fillLoginNames_(cached); setView('viewLogin'); }
+    else showLoading(true);
     callApi('listRepNames', [])
       .then(function(names){
-        const sel = document.getElementById('loginNameSelect');
-        sel.innerHTML = '<option value="">اختر اسمك من القائمة...</option>' +
-          names.map(n => '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>').join('');
-        showLoading(false);
-        setView('viewLogin');
+        try{ localStorage.setItem(LOGIN_NAMES_KEY_, JSON.stringify(names)); }catch(e){}
+        fillLoginNames_(names);
+        if(!hasCached){ showLoading(false); setView('viewLogin'); }
       })
-      .catch(onError);
+      .catch(function(err){ if(hasCached) return; onError(err); });
   }
 
   function handleLogin(){
@@ -1761,11 +1428,7 @@
         state.pendingOtpName = data.name;
         state.pendingPasskey = data.passkey || null;
         document.getElementById('otpInput').value = '';
-        if(data.passkey){
-          showOtpMode_('passkey');
-        } else {
-          showOtpMode_('email');
-        }
+        showOtpMode_(data.passkey ? 'passkey' : 'email');
         setView('viewOtp');
       })
       .catch(onError);
@@ -1794,7 +1457,6 @@
     showLoading(false);
     if(via === 'passkey') pkMarkLocal_(data.user.email, true);
     goHome();
-    // دخل بكود الإيميل؟ نعرض عليه يفعّل البصمة عشان المرة الجاية تبقى أسهل
     if(via === 'email') setTimeout(function(){ maybeOfferPasskey_(true); }, 700);
   }
 
@@ -1819,8 +1481,6 @@
   }
 
   // ================== الدخول بالبصمة (Passkey) بدل كود الإيميل ==================
-  // أول مرة على الجهاز: كود الإيميل. بعدها المندوب يفعّل البصمة، والمرة الجاية اللي التطبيق يطلب فيها
-  // تأكيد، بيحط بصمته بدل ما يستنى الإيميل. السيرفر بيتأكد من التوقيع — البصمة نفسها مابتطلعش من الموبايل.
   var _pkSupported_ = null;
   function pkSupported_(){
     if(_pkSupported_) return _pkSupported_;
@@ -1963,7 +1623,7 @@
     if(_pkOfferShownThisSession_) return;
     pkSupported_().then(function(ok){
       if(!ok) return;
-      if(document.getElementById('viewHome').hidden) return; // مانقاطعش شاشة شغال فيها
+      if(document.getElementById('viewHome').hidden) return;
       const busy = document.querySelector('.alertOverlay:not([hidden])');
       if(busy) return;
       _pkOfferShownThisSession_ = true;
@@ -1971,8 +1631,7 @@
       openPasskeyOffer_(false);
     });
   }
-  // بنجيب الـ challenge من السيرفر قبل ما المندوب يدوس "فعّل" — عشان الآيفون بيطلب إن البصمة تتفتح
-  // مباشرة من الضغطة (من غير انتظار نت في النص)
+  // بنجيب الـ challenge من السيرفر قبل ما المندوب يدوس "فعّل" — عشان الآيفون بيطلب إن البصمة تتفتح مباشرة من الضغطة
   function openPasskeyOffer_(fromProfile){
     clearMsg();
     const btn = document.getElementById('pkOfferBtn');
@@ -2043,7 +1702,7 @@
         showLoading(false);
         closePasskeyOffer_();
         const n = (typeof DOMException !== 'undefined' && err instanceof DOMException) ? err.name : '';
-        if(n === 'InvalidStateError'){ // البصمة متسجلة على الجهاز ده أصلاً
+        if(n === 'InvalidStateError'){
           pkMarkLocal_(email, true);
           refreshPasskeyProfile_();
           showMsg('البصمة متفعّلة على الجهاز ده أصلاً ✔', 'success');
@@ -2119,8 +1778,6 @@
   ];
   let hadithLastIndex_ = -1;
 
-  // بيعرض الحديث كلمة كلمة (كل كلمة بتظهر بعد اللي قبلها بلحظة بسيطة) بدل التبديل المفاجئ —
-  // "المرجع" بيبان بعد ما كل الكلمات تخلص ظهورها
   function showRandomHadith_(){
     if(document.body.classList.contains('inner')) return; // مفيش داعي نحرّك الحديث وهو مستخبي
     const box = document.getElementById('hadithBox');
@@ -2145,8 +1802,7 @@
       refEl.classList.remove('hiddenRef');
     }, words.length * 70 + 300);
   }
-  // التبديل بيقف لما التطبيق يبقى في الخلفية (الشاشة مقفولة أو فاتح تطبيق تاني) عشان ميصرفش
-  // بطارية ومعالج على حاجة محدش شايفها، ويرجع يشتغل أول ما المندوب يرجع للتطبيق
+  // التبديل بيقف لما التطبيق يبقى في الخلفية، ويرجع أول ما المندوب يرجع للتطبيق
   let hadithTimer_ = null;
   function startHadithRotation_(){
     showRandomHadith_();
@@ -2163,24 +1819,25 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.7.1';
+  const APP_VERSION_ = 'v1.7.2';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
-  const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر               // نفس الرقم اللي في السيرفر
+  const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
   const SHOP_FIX_MAX_ACC_ = 100;         // أقصى دقة (متر) لتثبيت موقع محل — نفس السيرفر
   const TRACK_EVERY_MS_ = 3 * 60 * 1000; // كل قد إيه نسجل موقع المندوب وهو فاتح التطبيق
+  const TRACK_FIRST_DELAY_MS_ = 4000;    // أول قراءة GPS بعد فتح التطبيق بـ 4 ثواني عشان الفتح يبقى ناعم
   const QUEUE_KEY_ = 'tf_visit_queue';   // زيارات اتسجلت والنت فاصل — بتتبعت لوحدها لما النت يرجع
   const TRACK_BUF_KEY_ = 'tf_track_buf';
 
   var state = {
     screen: null, auth: null, user: null, isAdmin: false, isOwner: false,
-    rep: null,          // بيانات المندوب: تجاره + الأصناف + الأسباب + زيارات النهارده
-    visit: null,        // الزيارة المفتوحة دلوقتي
-    lastDone: null,     // آخر زيارة اتسجلت (لشاشة "اتسجلت" وملف الـ Excel)
-    repOptions: [],     // المناديب اللي المشرف يقدر يشوفهم
+    rep: null,
+    visit: null,
+    lastDone: null,
+    repOptions: [],
     backTo: null,
-    lastPos: null,      // آخر موقع اتعرف {lat,lng,acc,t}
-    gps: 'unknown',     // on | off | unknown
+    lastPos: null,
+    gps: 'unknown',
   };
 
   const VIEWS_ = ['viewLogin', 'viewOtp', 'viewHome', 'viewCustomers', 'viewNewCust', 'viewVisit', 'viewDone', 'viewMyOrders', 'viewReport',
@@ -2189,7 +1846,6 @@
     VIEWS_.forEach(function(id){ document.getElementById(id).hidden = (id !== name); });
     const home = (name === 'viewHome' || name === 'viewLogin' || name === 'viewOtp');
     document.getElementById('backBtn').hidden = home;
-    // جوه الشاشات الهيدر بيصغر (من غير الحديث) عشان المساحة تبقى للشغل
     document.body.classList.toggle('inner', !home);
     if(name !== 'viewVisit'){ document.getElementById('orderBar').hidden = true; document.body.classList.remove('hasBar'); if(typeof ai_ !== 'undefined' && ai_.mode) closeAi_(); if(typeof ofPadClose_ === 'function') ofPadClose_(); }
     window.scrollTo(0, 0);
@@ -2200,9 +1856,7 @@
   }
   function onError(err){
     showLoading(false);
-    const msg = (err && err.message) || String(err);
-    showMsg(msg, 'error');
-    showAlertModal_(msg, 'error');
+    showMsg((err && err.message) || String(err), 'error'); // showMsg بتفتح نافذة الخطأ بنفسها
   }
   function confirmModal_(text, yesLabel, noLabel){
     return new Promise(function(resolve){
@@ -2348,38 +2002,45 @@
   }
 
   function init(){
-    startHadithRotation_();
     initInAppBanner_();
-    syncDeviceToken_();
     document.getElementById('appVersionNote').textContent = 'إصدار التطبيق: ' + APP_VERSION_;
     const saved = loadAuth();
-    if(!saved){ loadLoginScreen(); return; }
-    state.auth = saved;
-    const cachedHome = localCacheGet_('home');
-    const cachedRep = localCacheGet_('rep');
-    const cachedOpts = localCacheGet_('repOptions');
-    if(cachedOpts && cachedOpts.v) state.repOptions = cachedOpts.v;
-    if(cachedRep && cachedRep.v) state.rep = cachedRep.v;
-    if(cachedHome && cachedHome.v && cachedHome.v.user){
-      applyLoggedInUser(cachedHome.v.user, cachedHome.v.isAdmin);
-      goHome();
+    if(!saved){
+      loadLoginScreen();
     } else {
-      showLoading(true);
+      state.auth = saved;
+      const cachedHome = localCacheGet_('home');
+      const cachedRep = localCacheGet_('rep');
+      const cachedOpts = localCacheGet_('repOptions');
+      if(cachedOpts && cachedOpts.v) state.repOptions = cachedOpts.v;
+      // آخر بيانات اتحفظت بتظهر فورًا، ولو عمرها أقل من دقيقتين مش بنعيد تحميلها من السيرفر
+      if(cachedRep && cachedRep.v){ state.rep = cachedRep.v; state.repLoadedAt = cachedRep.t || 0; }
+      if(cachedHome && cachedHome.v && cachedHome.v.user){
+        applyLoggedInUser(cachedHome.v.user, cachedHome.v.isAdmin);
+        goHome();
+      } else {
+        showLoading(true);
+      }
+      callApi('bootstrapHome', [state.auth])
+        .then(function(data){
+          applyLoggedInUser(data.user, data.isAdmin);
+          setRepOptions_(data.repOptions);
+          if(!cachedHome){ showLoading(false); goHome(); }
+        })
+        .catch(function(err){
+          if(cachedHome && err && err.isNetwork) return;
+          localCacheClearAll_();
+          clearAuth();
+          state.auth = null; state.user = null;
+          showLoading(false);
+          loadLoginScreen();
+        });
     }
-    callApi('bootstrapHome', [state.auth])
-      .then(function(data){
-        applyLoggedInUser(data.user, data.isAdmin);
-        setRepOptions_(data.repOptions);
-        if(!cachedHome){ showLoading(false); goHome(); }
-      })
-      .catch(function(err){
-        if(cachedHome && err && err.isNetwork) return;
-        localCacheClearAll_();
-        clearAuth();
-        state.auth = null; state.user = null;
-        showLoading(false);
-        loadLoginScreen();
-      });
+    // حاجات مش مستعجلة بتتعمل بعد ما الشاشة الأولى تترسم
+    setTimeout(function(){
+      startHadithRotation_();
+      syncDeviceToken_();
+    }, 60);
   }
 
   function openScreen(name){
@@ -2463,16 +2124,19 @@
 
   // ---------- تتبع خط السير (والتطبيق مفتوح) ----------
   let trackTimer_ = null;
+  let trackFirst_ = null;
   let lastTrackTick_ = 0;
   function startTracking_(){
     if(state.isAdmin || !state.auth || trackTimer_) return;
-    trackTick_();
+    trackFirst_ = setTimeout(trackTick_, TRACK_FIRST_DELAY_MS_);
     trackTimer_ = setInterval(trackTick_, TRACK_EVERY_MS_);
   }
   function stopTracking_(){
+    if(trackFirst_){ clearTimeout(trackFirst_); trackFirst_ = null; }
     if(trackTimer_){ clearInterval(trackTimer_); trackTimer_ = null; }
   }
   function trackTick_(){
+    trackFirst_ = null;
     if(document.hidden || !state.auth || state.isAdmin) return;
     lastTrackTick_ = Date.now();
     getPos_({ timeout: 20000, maxAge: 60000 })
@@ -2489,17 +2153,17 @@
     if(!p || state.isAdmin || !(p.acc < 1500)) return;
     const buf = trackBufGet_();
     const me = state.auth ? state.auth.email : '';
-    const mineOnly = buf.filter(function(x){ return x.e === me; });
-    const last = mineOnly[mineOnly.length - 1];
+    let last = null;
+    for(let i = buf.length - 1; i >= 0; i--){ if(buf[i].e === me){ last = buf[i]; break; } }
     if(last && Math.abs(last.t - p.t) < 45000) return;
-    buf.push({ e: state.auth ? state.auth.email : '', t: p.t, lat: +p.lat.toFixed(6), lng: +p.lng.toFixed(6), acc: p.acc });
+    buf.push({ e: me, t: p.t, lat: +p.lat.toFixed(6), lng: +p.lng.toFixed(6), acc: p.acc });
     trackBufSet_(buf);
   }
   let trackFlushing_ = false;
   function flushTrack_(){
     if(trackFlushing_ || !state.auth || !navigator.onLine) return;
     const me = state.auth.email;
-    const buf = trackBufGet_().filter(function(x){ return x.e === me; }); // نقط المندوب ده بس (لو الموبايل عليه أكتر من حساب)
+    const buf = trackBufGet_().filter(function(x){ return x.e === me; });
     if(!buf.length) return;
     const batch = buf.slice(0, 300).map(function(x){ return { t: x.t, lat: x.lat, lng: x.lng, acc: x.acc }; });
     trackFlushing_ = true;
@@ -2526,7 +2190,6 @@
       })
       .catch(function(err){ if(!state.rep) onError(err); });
   }
-  // نتيجة الزيارة من البيانات اللي اتبعتت (للزيارات اللي لسه في الطابور)
   function resultOf_(p){
     const parts = [];
     if(p.items && p.items.length) parts.push('طلبية');
@@ -2534,7 +2197,6 @@
     if(p.payment && p.payment.amount) parts.push('تحصيل');
     return parts.length ? parts.join(' + ') : 'بدون طلب';
   }
-  // زيارات النهارده = اللي على السيرفر + اللي لسه في الطابور (النت فاصل)
   // الطلبات التليفونية النهارده (مش زيارات): اللي على السيرفر + اللي في الطابور
   function todayPhone_(){
     const d = state.rep;
@@ -2548,11 +2210,12 @@
     });
     return list;
   }
+  // زيارات النهارده = اللي على السيرفر + اللي لسه في الطابور (النت فاصل)
   function todayVisits_(){
     const d = state.rep;
     const list = (d && d.todayVisits ? d.todayVisits.slice() : []);
     const today = ymdToDmy_(ymd_(bizToday_()));
-    if(d && d.today !== today) list.length = 0; // البيانات المحفوظة من يوم قبل كده
+    if(d && d.today !== today) list.length = 0;
     queueGet_().forEach(function(q){
       if(!state.auth || q.email !== state.auth.email || q.day !== today || q.payload.phone) return;
       const p = q.payload;
@@ -2565,10 +2228,10 @@
     return list;
   }
   function visitHasOrder_(v){ return !!v.orderId || v.result === 'طلبية'; }
-  function visitStatusMap_(){
+  function visitStatusMap_(tv){
     const m = {};
     const rank = function(v){ return visitHasOrder_(v) ? 3 : (v.returnId || v.amount) ? 2 : 1; };
-    todayVisits_().forEach(function(v){
+    (tv || todayVisits_()).forEach(function(v){
       const cur = m[v.code];
       if(!cur || rank(v) >= rank(cur)) m[v.code] = v;
     });
@@ -2601,9 +2264,16 @@
       '<div class="cMeta">' + chips.join('') + '</div></div>' +
       '<div class="cGo">‹</div></button>';
   }
+  // ضغطة واحدة على القايمة كلها بدل listener لكل كارت — أخف بكتير مع قايمة تجار كبيرة
   function bindCustCards_(box, from){
-    box.querySelectorAll('.custCard').forEach(function(b){
-      b.onclick = function(){ openVisit_(b.dataset.code, from, from === 'phone'); };
+    box.dataset.from = from;
+    if(box.dataset.bound) return;
+    box.dataset.bound = '1';
+    box.addEventListener('click', function(e){
+      const b = e.target.closest('.custCard');
+      if(!b || !box.contains(b)) return;
+      const f = box.dataset.from;
+      openVisit_(b.dataset.code, f, f === 'phone');
     });
   }
   function renderRepHome_(){
@@ -2613,7 +2283,9 @@
     if(!d){ box.innerHTML = '<div class="empty">جاري التحميل...</div>'; return; }
     const wd = bizToday_().getDay();
     const wdName = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'][wd];
-    const status = visitStatusMap_();
+    const tv = todayVisits_();
+    const tp = todayPhone_();
+    const status = visitStatusMap_(tv);
     const planned = d.customers.filter(function(c){ return (c.days || []).indexOf(wd) !== -1; });
     const plannedCodes = {};
     planned.forEach(function(c){ plannedCodes[c.code] = true; });
@@ -2622,18 +2294,15 @@
     // اللي لسه: الأقرب الأول لو الموقع معروف
     if(state.lastPos){
       const p = state.lastPos;
-      todo.sort(function(a, b){
-        const da = a.lat != null ? distM_(p.lat, p.lng, a.lat, a.lng) : 1e12;
-        const db = b.lat != null ? distM_(p.lat, p.lng, b.lat, b.lng) : 1e12;
-        return da - db;
-      });
+      const dist = new Map();
+      todo.forEach(function(c){ dist.set(c, c.lat != null ? distM_(p.lat, p.lng, c.lat, c.lng) : 1e12); });
+      todo.sort(function(a, b){ return dist.get(a) - dist.get(b); });
     }
-    const tv = todayVisits_();
     document.getElementById('stVisits').textContent = tv.length;
-    document.getElementById('stOrders').textContent = tv.filter(visitHasOrder_).length + todayPhone_().filter(function(x){ return x.type === 'طلبية'; }).length;
+    document.getElementById('stOrders').textContent = tv.filter(visitHasOrder_).length + tp.filter(function(x){ return x.type === 'طلبية'; }).length;
     document.getElementById('stPlan').textContent = done.length + '/' + planned.length;
     document.getElementById('stCollected').textContent = fmt(tv.reduce(function(s, v){ return s + (Number(v.amount) || 0); }, 0) +
-      todayPhone_().reduce(function(s, x){ return s + (x.type === 'تحصيل' ? Number(x.amount) || 0 : 0); }, 0));
+      tp.reduce(function(s, x){ return s + (x.type === 'تحصيل' ? Number(x.amount) || 0 : 0); }, 0));
     document.getElementById('routeTitle').textContent = 'خط سير النهارده — ' + wdName;
     document.getElementById('routeProg').textContent = planned.length ? done.length + ' / ' + planned.length : '';
 
@@ -2648,7 +2317,6 @@
         html += '<div class="dayHead">✔ اتزاروا النهارده</div>' + done.map(function(c){ return custCardHtml_(c, status[c.code]); }).join('');
       }
     }
-    // زيارات من خارج خط النهارده
     const extra = d.customers.filter(function(c){ return status[c.code] && !plannedCodes[c.code]; });
     if(extra.length){
       html += '<div class="dayHead">زيارات من خارج خط النهارده</div>' + extra.map(function(c){ return custCardHtml_(c, status[c.code]); }).join('');
@@ -2666,18 +2334,30 @@
     renderCustomers_();
     if(!state.rep) loadRepData_();
   }
+  // نصوص البحث لكل تاجر بتتجهز مرة واحدة بس لكل قايمة تجار (مش مع كل حرف)
+  var _custHay_ = null, _custHaySrc_ = null;
+  function custHay_(customers){
+    if(_custHaySrc_ !== customers || _custHay_.length !== customers.length){
+      _custHaySrc_ = customers;
+      _custHay_ = customers.map(function(c){
+        return [c.name, c.code, c.address, c.area, normalizeDigits(c.phone || '')].map(normCust_);
+      });
+    }
+    return _custHay_;
+  }
+  function normCust_(s){ return String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي'); }
   function renderCustomers_(){
     const box = document.getElementById('custList');
     const d = state.rep;
     if(!d){ box.innerHTML = '<div class="empty">جاري التحميل...</div>'; return; }
     const q = normalizeDigits(document.getElementById('custSearch').value || '').trim().toLowerCase();
-    const norm = function(s){ return String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي'); };
-    const nq = norm(q);
+    const nq = normCust_(q);
     const status = visitStatusMap_();
-    const list = d.customers.filter(function(c){
+    const hay = custHay_(d.customers);
+    const list = d.customers.filter(function(c, i){
       if(!nq) return true;
-      return [c.name, c.code, c.address, c.area, normalizeDigits(c.phone || '')].some(function(x){ return norm(x).indexOf(nq) !== -1; });
-    }).sort(function(a, b){ return a.name.localeCompare(b.name, 'ar'); });
+      return hay[i].some(function(x){ return x.indexOf(nq) !== -1; });
+    }).sort(function(a, b){ return AR_COLL_.compare(a.name, b.name); });
     box.innerHTML = list.length
       ? list.map(function(c){
           return custCardHtml_(c, status[c.code]).replace('<div class="cMeta">', '<div class="cMeta"><span class="chip">' + escapeHtml(c.daysText || 'من غير أيام') + '</span>');
@@ -2794,7 +2474,7 @@
       .then(function(p){
         if(state.visit !== v) return;
         v.pos = p; pushTrack_(p);
-        if(!v.setShopTouched) v.setShop = p.acc <= 50; // بنعلّم "ثبّت موقع المحل" لوحده بس لو الموقع دقيق
+        if(!v.setShopTouched) v.setShop = p.acc <= 50;
         renderLocBox_();
       })
       .catch(function(err){ if(state.visit === v){ v.posErr = err.message; renderLocBox_(); } });
@@ -2845,7 +2525,7 @@
       m[k] = !m[k];
       if(m[k]) m.none = false;
     }
-    if(state.visit.phone){ m.none = false; } // من غير زيارة: ممكن يشيل الطلبية ويختار تحصيل بس
+    if(state.visit.phone){ m.none = false; }
     else if(!m.order && !m.ret && !m.pay && !m.none) m.none = true;
     renderModes_();
   }
@@ -2895,18 +2575,30 @@
     document.getElementById('chequeWrap').hidden = state.visit.payMethod !== 'شيك';
   }
 
-  // ---------- اختيار الصنف (بحث سريع) — نفس الطريقة للطلبية والمرتجع ----------
+  // ---------- اختيار الصنف (بحث سريع) ----------
   function normAr_(s){ return String(s || '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim(); }
+  // الأسماء بتتوحّد مرة واحدة بس لكل قايمة أصناف، والبحث بيقف أول ما يلاقي العدد المطلوب
+  var _itemIdx_ = null, _itemIdxSrc_ = null;
+  function itemIdx_(asnaf){
+    if(_itemIdxSrc_ !== asnaf || _itemIdx_.length !== asnaf.length){
+      _itemIdxSrc_ = asnaf;
+      _itemIdx_ = asnaf.map(function(a){ return { a: a, n: normAr_(a.name), c: normAr_(a.code) }; });
+    }
+    return _itemIdx_;
+  }
   function itemMatches_(q, limit){
     const asnaf = (state.rep && state.rep.asnaf) || [];
     const max = limit || 40;
     const nq = normAr_(normalizeDigits(q));
     if(!nq) return asnaf.slice(0, max);
     const words = nq.split(' ');
-    return asnaf.filter(function(a){
-      const n = normAr_(a.name), c = normAr_(a.code);
-      return c.indexOf(nq) === 0 || words.every(function(w){ return n.indexOf(w) !== -1; });
-    }).slice(0, max);
+    const idx = itemIdx_(asnaf);
+    const out = [];
+    for(let i = 0; i < idx.length && out.length < max; i++){
+      const x = idx[i];
+      if(x.c.indexOf(nq) === 0 || words.every(function(w){ return x.n.indexOf(w) !== -1; })) out.push(x.a);
+    }
+    return out;
   }
   const AC_ = {
     ret: { input: 'retItemInput', list: 'retItemList', qty: 'retQtyInput', sel: 'retSel', add: function(){ addReturnLine_(); } },
@@ -2934,7 +2626,8 @@
   Object.keys(AC_).forEach(function(k){
     const cfg = AC_[k];
     const input = document.getElementById(cfg.input);
-    input.addEventListener('input', function(){ if(state.visit) state.visit[cfg.sel] = null; renderItemList_(cfg); });
+    const renderSoon = debounce_(function(){ renderItemList_(cfg); }, 100);
+    input.addEventListener('input', function(){ if(state.visit) state.visit[cfg.sel] = null; renderSoon(); });
     input.addEventListener('focus', function(){ renderItemList_(cfg); });
     input.addEventListener('blur', function(){ setTimeout(function(){ document.getElementById(cfg.list).hidden = true; }, 150); });
     document.getElementById(cfg.qty).addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); cfg.add(); } });
@@ -2944,9 +2637,11 @@
     if(v[cfg.sel]) return v[cfg.sel];
     const typed = normAr_(normalizeDigits(document.getElementById(cfg.input).value));
     if(!typed) return null;
-    const asnaf = (state.rep && state.rep.asnaf) || [];
-    return asnaf.find(function(a){ return normAr_(a.name) === typed || normAr_(a.code) === typed; }) ||
-      (itemMatches_(typed).length === 1 ? itemMatches_(typed)[0] : null);
+    const idx = itemIdx_((state.rep && state.rep.asnaf) || []);
+    const exact = idx.find(function(x){ return x.n === typed || x.c === typed; });
+    if(exact) return exact.a;
+    const m = itemMatches_(typed, 2);
+    return m.length === 1 ? m[0] : null;
   }
   function readQty_(id){ return Number(normalizeDigits(document.getElementById(id).value || '').replace(/[^\d.]/g, '')); }
   // ---------- ورقة الطلبية + فلاتر سريعة ----------
@@ -2955,12 +2650,13 @@
   function lineKey_(x){ return x.code || x.name; }
   function findLine_(key){ return state.visit.lines.find(function(l){ return lineKey_(l) === key; }); }
   const OF_UNITS_ = ['لتر', 'ليتر', 'بوصه', 'انش', 'وات', 'واط', 'ريشه', 'ريش', 'سم', 'مم', 'حصان', 'كيلو', 'سرعه', 'سرعات', 'شمعه', 'عين', 'قطعه', 'متر'];
-  var _ofMeta_ = null, _ofSrc_ = null;
+  var _ofMeta_ = null, _ofSrc_ = null, _ofByKey_ = null, _ofTypes_ = null, _ofRowsHtml_ = null;
   function ofStrip_(w){ return w.length > 3 && w.indexOf('ال') === 0 ? w.slice(2) : w; }
   function ofMeta_(){
     const as = (state.rep && state.rep.asnaf) || [];
-    if(_ofSrc_ === as && _ofMeta_) return _ofMeta_;
+    if(_ofSrc_ === as && _ofMeta_ && _ofMeta_.length === as.length) return _ofMeta_;
     _ofSrc_ = as;
+    _ofByKey_ = null; _ofTypes_ = null; _ofRowsHtml_ = null;
     _ofMeta_ = as.map(function(a, i){
       const raw = normalizeDigits(String(a.name)).replace(/(\d)([^\d.\s])/g, '$1 $2').replace(/([^\d.\s])(\d)/g, '$1 $2').split(/\s+/).filter(Boolean);
       const nrm = raw.map(function(w){ return normAr_(w); });
@@ -2980,6 +2676,14 @@
       };
     });
     return _ofMeta_;
+  }
+  function ofByKey_(){
+    const metas = ofMeta_();
+    if(!_ofByKey_){
+      _ofByKey_ = {};
+      metas.forEach(function(m){ _ofByKey_[m.key] = m; });
+    }
+    return _ofByKey_;
   }
   function ofMatch_(m, f, q){
     if(f.sel && !findLine_(m.key)) return false;
@@ -3005,7 +2709,9 @@
     const chip = function(k, val, label, on, extra){
       return '<button type="button" class="ofChip' + (extra || '') + (on ? ' on' : '') + '" data-of="' + k + '" data-v="' + escapeHtml(val) + '">' + label + '</button>';
     };
-    const types = ofDistinct_(metas, 'type', 'typeLbl').sort(function(a, b){ return b.n - a.n; });
+    // قايمة الأنواع ثابتة لنفس الأصناف — بتتحسب مرة واحدة بس
+    if(!_ofTypes_) _ofTypes_ = ofDistinct_(metas, 'type', 'typeLbl').sort(function(a, b){ return b.n - a.n; });
+    const types = _ofTypes_;
     let html = '<div class="ofChips">' + chip('all', '', 'الكل', !f.t && !f.sel) +
       chip('sel', '', '✔ اللي اتكتب <small>' + v.lines.length + '</small>', f.sel, ' sel') +
       types.map(function(t){ return chip('t', t.k, escapeHtml(t.l) + ' <small>' + t.n + '</small>', f.t === t.k); }).join('') + '</div>';
@@ -3019,19 +2725,27 @@
     }
     document.getElementById('ofFilters').innerHTML = html;
   }
+  // تحديث رقم "✔ اللي اتكتب" بس — بدل ما كل الفلاتر تتبني من الأول مع كل رقم بيتكتب
+  function ofSelCount_(){
+    const s = document.querySelector('#ofFilters [data-of="sel"] small');
+    if(s && state.visit) s.textContent = state.visit.lines.length;
+    else renderOfFilters_();
+  }
   function ofApply_(){
     const v = state.visit;
     if(!v) return;
     const q = normAr_(normalizeDigits(document.getElementById('pickSearch').value || '')).replace(/\s+/g, ' ').trim();
     const metas = ofMeta_();
-    const byKey = {};
-    metas.forEach(function(m){ byKey[m.key] = m; });
+    const byKey = ofByKey_();
     let shown = 0;
-    document.querySelectorAll('#pickList .ofRow').forEach(function(row){
+    const rows = document.getElementById('pickList').children;
+    for(let i = 0; i < rows.length; i++){
+      const row = rows[i];
+      if(!row.classList.contains('ofRow')) continue;
       const ok = ofMatch_(byKey[row.dataset.k], v.of, q);
-      row.hidden = !ok;
+      if(row.hidden === ok) row.hidden = !ok;
       if(ok) shown++;
-    });
+    }
     const empty = document.getElementById('ofEmpty');
     if(empty) empty.hidden = shown > 0;
     const filtered = v.of.t || v.of.sel || q;
@@ -3043,14 +2757,22 @@
     if(!v) return;
     if(!v.of) v.of = { t: '', m: '', s: '', sel: false };
     const metas = ofMeta_();
-    document.getElementById('pickList').innerHTML = metas.map(function(m, n){
-      const l = findLine_(m.key);
+    const row = function(m, n, l){
       return '<div class="ofRow' + (l ? ' on' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
         '<span class="ofNo">' + (n + 1) + '</span>' +
         '<span class="ofName">' + escapeHtml(m.a.name) + (m.a.code ? '<small>' + escapeHtml(m.a.code) + '</small>' : '') + '</span>' +
         '<input type="text" class="ofIn" inputmode="none" readonly tabindex="-1" dir="ltr" autocomplete="off" aria-label="كمية ' + escapeHtml(m.a.name) + '" value="' + (l ? l.qty : '') + '">' +
         '</div>';
-    }).join('') + '<div class="ofEmpty" id="ofEmpty" hidden>مفيش صنف بالفلتر ده — دوس "الكل"</div>';
+    };
+    let html;
+    if(!v.lines.length){
+      // ورقة فاضية (أغلب الزيارات): الشكل نفسه بيتبني مرة واحدة ويتعاد استخدامه
+      if(!_ofRowsHtml_) _ofRowsHtml_ = metas.map(function(m, n){ return row(m, n, null); }).join('');
+      html = _ofRowsHtml_;
+    } else {
+      html = metas.map(function(m, n){ return row(m, n, findLine_(m.key)); }).join('');
+    }
+    document.getElementById('pickList').innerHTML = html + '<div class="ofEmpty" id="ofEmpty" hidden>مفيش صنف بالفلتر ده — دوس "الكل"</div>';
     ofPadClose_();
     renderOfFilters_();
     ofApply_();
@@ -3062,7 +2784,7 @@
     if(l && !qty) v.lines.splice(v.lines.indexOf(l), 1);
     else if(l) l.qty = qty;
     else if(qty){
-      const m = ofMeta_().find(function(x){ return x.key === key; });
+      const m = ofByKey_()[key];
       if(m) v.lines.push({ code: m.a.code, name: m.a.name, qty: qty });
     }
   }
@@ -3074,7 +2796,7 @@
     const row = inp.closest('.ofRow');
     setLineQty_(row.dataset.k, Number(d) || 0);
     row.classList.toggle('on', Number(d) > 0);
-    renderOfFilters_();
+    ofSelCount_();
     ofApply_();
     updateOrderSum_();
   });
@@ -3102,7 +2824,7 @@
     pad.hidden = false;
     document.body.classList.add('padOpen');
     const ae = document.activeElement;
-    if(ae && (ae.id === 'pickSearch' || ae.classList.contains('ofIn'))) ae.blur(); // مايفتحش كيبورد الموبايل
+    if(ae && (ae.id === 'pickSearch' || ae.classList.contains('ofIn'))) ae.blur();
     ofPadInfo_();
     updateOrderSum_();
     // الصنف يبان فوق الكيبورد
@@ -3132,13 +2854,13 @@
     document.getElementById('ofPadSum').textContent = n ? '🧾 ' + n + ' صنف • ' + fmt(tot) + ' قطعة' : '';
   }
   function ofPadMove_(dir){
-    const rows = Array.from(document.querySelectorAll('#pickList .ofRow:not([hidden])'));
-    const i = rows.indexOf(ofPad_.row);
-    const next = rows[i + dir];
-    if(next) ofPadOpen_(next);
+    let el = ofPad_.row;
+    do { el = dir > 0 ? el.nextElementSibling : el.previousElementSibling; }
+    while(el && (!el.classList.contains('ofRow') || el.hidden));
+    if(el) ofPadOpen_(el);
     else if(dir > 0) ofPadClose_();
   }
-  document.getElementById('ofPad').addEventListener('pointerdown', function(e){ e.preventDefault(); }); // مايسرقش التركيز
+  document.getElementById('ofPad').addEventListener('pointerdown', function(e){ e.preventDefault(); });
   document.getElementById('ofPad').addEventListener('click', function(e){
     const b = e.target.closest('[data-pk]');
     const row = ofPad_.row;
@@ -3156,12 +2878,12 @@
     inp.value = val;
     setLineQty_(row.dataset.k, Number(val) || 0);
     row.classList.toggle('on', Number(val) > 0);
-    renderOfFilters_();
+    ofSelCount_();
     ofPadInfo_();
     updateOrderSum_();
   });
   document.getElementById('pickSearch').addEventListener('focus', ofPadClose_);
-  document.getElementById('pickSearch').addEventListener('input', ofApply_);
+  document.getElementById('pickSearch').addEventListener('input', ofApplySoon_);
   document.getElementById('ofFilters').addEventListener('click', function(e){
     const b = e.target.closest('[data-of]');
     const v = state.visit;
@@ -3213,11 +2935,11 @@
     dl.dataset.n = String(as.length);
   }
   function findAsnafLoose_(v){
-    const as = (state.rep && state.rep.asnaf) || [];
     const n = normAr_(normalizeDigits(v));
     if(!n) return null;
-    const exact = as.find(function(a){ return normAr_(a.name) === n || (a.code && normAr_(a.code) === n); });
-    if(exact) return exact;
+    const idx = itemIdx_((state.rep && state.rep.asnaf) || []);
+    const exact = idx.find(function(x){ return x.n === n || (x.a.code && x.c === n); });
+    if(exact) return exact.a;
     const m = itemMatches_(v, 2);
     return m.length === 1 ? m[0] : null;
   }
@@ -3604,11 +3326,10 @@
         sent++;
       }catch(err){
         if(!err || err.code !== 'REJECTED'){
-          // نت أو زحمة أو مشكلة مؤقتة — الزيارة بتفضل محفوظة ونجرب تاني بعدين
           if(manual && err && !err.isNetwork) showMsg('لسه ماتبعتتش: ' + err.message, 'error');
           break;
         }
-        // السيرفر رفض الزيارة نفسها (مثلاً التاجر اتشال من الشيت) — نشيلها عشان ماتوقفش الباقي ونقول للمندوب
+        // السيرفر رفض الزيارة نفسها — نشيلها عشان ماتوقفش الباقي ونقول للمندوب
         queueSet_(queueGet_().filter(function(x){ return x.reqId !== item.reqId; }));
         failed.push(item.custName + ': ' + err.message);
       }
@@ -3641,7 +3362,7 @@
     }
     downloadBlob_(blob, fileName);
   }
-  const XL_NAVY_ = 'FF0C1730', XL_GOLD_ = 'FFFAF3E1', XL_RED_ = 'FFB83A3A', XL_RED_BG_ = 'FFFBECEC', XL_GREEN_BG_ = 'FFEAF5EE';
+  const XL_NAVY_ = 'FF0C1730', XL_GOLD_ = 'FFFAF3E1', XL_RED_ = 'FFB83A3A', XL_RED_BG_ = 'FFFBECEC';
   const XL_BORDER_ = { style: 'thin', color: { argb: 'FFD9D2BF' } };
   function xlBorders_(cell){ cell.border = { top: XL_BORDER_, left: XL_BORDER_, bottom: XL_BORDER_, right: XL_BORDER_ }; }
   function xlFill_(argb){ return { type: 'pattern', pattern: 'solid', fgColor: { argb: argb } }; }
@@ -3941,13 +3662,14 @@
   }
 
   // ================== الخرايط ==================
+  // Leaflet من نفس الـ CDN بتاع باقي المكتبات (cdnjs) — اتصال أقل
   function ensureLeaflet_(){
     if(!document.getElementById('leafletCss')){
       const l = document.createElement('link');
-      l.id = 'leafletCss'; l.rel = 'stylesheet'; l.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      l.id = 'leafletCss'; l.rel = 'stylesheet'; l.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
       document.head.appendChild(l);
     }
-    return loadScriptOnce_('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');
+    return loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js');
   }
   const maps_ = {};
   function freshMap_(id){
@@ -4122,7 +3844,7 @@
       const isRet = l.type === 'مرتجع';
       if(l.orderId !== lastId){
         if(lastId !== null){
-          // مسافة واسعة بين كل مستند والتاني: سطر فاضي عالي بخط غامق تقيل فوقه وتحته (من غير بيانات — مايأثرش على النسخ واللصق)
+          // مسافة واسعة بين كل مستند والتاني (من غير بيانات — مايأثرش على النسخ واللصق)
           const sep = ws.addRow([]);
           sep.height = 30;
           for(let k = 1; k <= cols.length; k++){
@@ -4254,6 +3976,7 @@
       .then(function(){
         showLoading(false);
         ['repNameInput', 'repEmailInput', 'repPinInput'].forEach(function(id){ document.getElementById(id).value = ''; });
+        try{ localStorage.removeItem(LOGIN_NAMES_KEY_); }catch(e){}
         showMsg('اتضاف ' + name + ' ✔ — ماتنساش تكتب تجاره في تاب "التجار"', 'success');
         refreshReps_();
       })
@@ -4280,7 +4003,7 @@
     if(!confirm('حذف ' + r.name + ' نهائيًا؟ زياراته وطلبياته القديمة هتفضل في الشيت.')) return;
     showLoading(true);
     callApi('deleteRep', [state.auth, r.email])
-      .then(function(){ showLoading(false); refreshReps_(); })
+      .then(function(){ showLoading(false); try{ localStorage.removeItem(LOGIN_NAMES_KEY_); }catch(e){} refreshReps_(); })
       .catch(onError);
   }
   function handleAddAsnaf_(){
@@ -4308,7 +4031,6 @@
       '<br><br>التطبيق بيسجل مكانك كل 3 دقايق <b>وهو مفتوح بس</b>، ومع كل زيارة.';
   }
   // ================== تقرير آخر اليوم PDF (للواتساب) ==================
-  // بيتعمل على الموبايل نفسه: صفحات A4 HTML → صورة (html2canvas) → PDF (jsPDF)، وبعدين مشاركة واتساب.
   function ensureJsPdfLoaded_(){
     return loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   }
@@ -4322,8 +4044,10 @@
       }
     }
     showLoading(true);
+    // المكتبات بتبدأ تتحمل في نفس الوقت اللي السيرفر بيجهز فيه البيانات
+    const libs = Promise.all([ensureHtml2CanvasLoaded_(), ensureJsPdfLoaded_()]);
     callApi('getDayReport', [state.auth, rep || '', dmy || ''])
-      .then(function(r){ return Promise.all([ensureHtml2CanvasLoaded_(), ensureJsPdfLoaded_()]).then(function(){ return buildDayPdf_(r); }).then(function(blob){ return { r: r, blob: blob }; }); })
+      .then(function(r){ return libs.then(function(){ return buildDayPdf_(r); }).then(function(blob){ return { r: r, blob: blob }; }); })
       .then(function(x){
         showLoading(false);
         const name = 'تقرير ' + x.r.rep + ' - ' + x.r.date.replace(/\//g, '-') + '.pdf';
@@ -4461,9 +4185,6 @@
   }
 
   // ============ تسجيل الـ Service Worker + اكتشاف التحديثات تلقائيًا ============
-  // ده اللي كان بيحل مشكلة "المندوب شايل نسخة قديمة كاش ومش شايف الميزة الجديدة" —
-  // دلوقتي أول ما ننشر نسخة جديدة من الملفات، أي حد فاتح التطبيق هيشوف شريط أسفل الشاشة
-  // "فيه تحديث جديد" وبيدوس عليه يحدّث فورًا بدل ما يقفل ويفتح التطبيق يدوي أو يمسح الكاش
   let newWorkerWaiting_ = null;
 
   function registerServiceWorkerWithUpdateCheck_(){
@@ -4488,7 +4209,6 @@
     }).catch(function(e){ console.warn('SW register failed', e); });
 
     let reloadingAfterUpdate_ = false;
-    // أول تثبيت للتطبيق (مكنش فيه نسخة قبل كده) مش تحديث — مانعملش reload عشان مانقطعش المندوب وهو بيسجل دخول
     const hadController_ = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', function(){
       if(reloadingAfterUpdate_ || !hadController_) return;
@@ -4508,7 +4228,7 @@
 
   window.addEventListener('load', registerServiceWorkerWithUpdateCheck_);
 
-  // ============ شريط "مفيش اتصال بالإنترنت" — بيظهر/يختفي تلقائي مع حالة الشبكة ============
+  // ============ شريط "مفيش اتصال بالإنترنت" ============
   function updateOfflineBanner_(){
     document.getElementById('offlineBanner').hidden = navigator.onLine;
   }
