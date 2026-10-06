@@ -12,9 +12,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="TOUCH EL ZENOUKI">
 <meta name="mobile-web-app-capable" content="yes">
-<!-- فتح الاتصال بسيرفر جوجل من أول لحظة — أول طلب للسيرفر بيوفر جزء من الثانية -->
-<link rel="preconnect" href="https://script.google.com" crossorigin>
-<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<!-- فتح الاتصال بالسيرفر من أول لحظة — أول طلب بيوفر جزء من الثانية -->
+<link rel="preconnect" href="https://zdwiiymjgacxylgdrtsm.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -1071,11 +1070,15 @@
 </div>
 
 <script>
-  // ============ الاتصال بالسيرفر (Google Apps Script) عبر الإنترنت ============
-  // لو عملت Deploy جديد (deployment جديد خالص، مش تعديل نفس القديم) هيتغيّر اللينك، وهتحتاج تحدّث القيمة دي بس.
+  // ============ الاتصال بالسيرفر ============
+  // كل البيانات على Supabase (سريع). تسجيل الدخول وكود الإيميل والبصمة بس على Google Apps Script.
   const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbyJWUzX8sCmRxYWxpsQTjOX8CRqmVhW8aJgB6COuvTyuxu_Tfe89quIf3SvTrCaaJAN/exec';
+  const SB_RPC_URL = 'https://zdwiiymjgacxylgdrtsm.supabase.co/rest/v1/rpc/api';
+  const SB_PUBLIC_KEY = 'sb_publishable_WsFj6BKtcV5JP3YTWH9r5g_1TdS791b'; // مفتاح عام — عادي يكون في التطبيق
+  const GAS_ACTIONS_ = { login: 1, verifyLoginOtp: 1, resendLoginOtp: 1, verifyLoginPasskey: 1,
+    passkeyRegisterStart: 1, passkeyRegisterFinish: 1, passkeyClearMine: 1 };
   // ============ عدّاد سرعة التطبيق ============
-  // بيسجل آخر 25 طلب: الوقت الكلي، ووقت السيرفر (جوجل) لوحده — الفرق بينهم = وقت النت.
+  // بيسجل آخر 25 طلب: الوقت الكلي، ووقت السيرفر لوحده — الفرق بينهم = وقت النت.
   const SPEED_LOG_KEY_ = 'tf_speed_log';
   function logSpeed_(action, totalMs, serverMs, ok){
     try{
@@ -1094,10 +1097,12 @@
     // مهلة 40 ثانية: لو السيرفر مارجعش، بتطلع رسالة بدل ما اللودينج يفضل يلف على طول
     const ctrl = window.AbortController ? new AbortController() : null;
     const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 40000) : null;
-    return fetch(WEBAPP_URL, {
+    const gas = !!GAS_ACTIONS_[action];
+    return fetch(gas ? WEBAPP_URL : SB_RPC_URL, {
       method: 'POST',
-      // text/plain مهم عشان المتصفح ميبعتش طلب OPTIONS (preflight) — Apps Script مش بيرد عليه
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      // Apps Script: text/plain عشان المتصفح ميبعتش طلب OPTIONS (preflight) — Apps Script مش بيرد عليه
+      headers: gas ? { 'Content-Type': 'text/plain;charset=utf-8' }
+                   : { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
       body: JSON.stringify({ action: action, args: args || [] }),
       signal: ctrl ? ctrl.signal : undefined,
     })
@@ -1105,7 +1110,7 @@
       .then(function(data){
         if(timer) clearTimeout(timer);
         if(!data || data.ok !== true){
-          const e = new Error((data && data.error) || 'حصل خطأ غير متوقع، حاول تاني');
+          const e = new Error((data && (data.error || data.message)) || 'حصل خطأ غير متوقع، حاول تاني');
           e.code = (data && data.code) || '';
           throw e;
         }
@@ -1819,7 +1824,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.7.4';
+  const APP_VERSION_ = 'v1.8.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3182,7 +3187,7 @@
         res = await callApi('submitVisit', [state.auth, payload, v.reqId]);
       }catch(err){
         showLoading(false);
-        // بيانات غلط (تاجر/صنف مش موجود...) → نوريه الغلط. أي مشكلة تانية (نت، زحمة، جوجل) → نحفظها ونبعتها بعدين
+        // بيانات غلط (تاجر/صنف مش موجود...) → نوريه الغلط. أي مشكلة تانية (نت، زحمة، سيرفر) → نحفظها ونبعتها بعدين
         if(err && err.code === 'REJECTED') throw err;
         queueVisit_(v, payload, err && !err.isNetwork ? err.message : '');
         return;
