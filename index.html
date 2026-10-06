@@ -1819,7 +1819,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.7.2';
+  const APP_VERSION_ = 'v1.7.4';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3502,17 +3502,40 @@
     if(state.isAdmin) fillRepSelect_('rRep', 'كل المناديب');
     loadReport_();
   }
+  // آخر تقرير اتعرض بيتحفظ على الموبايل: لو نفس الاختيارات، بيظهر فورًا ويتحدث في الخلفية
+  const STALE_NOTE_ = '<div class="note" id="staleNote" style="margin-bottom:8px; color:var(--blue);">⟳ بيتحدث...</div>';
+  function staleNoteFail_(){
+    const n = document.getElementById('staleNote');
+    if(n){ n.style.color = 'var(--gold-d)'; n.textContent = '⚠️ دي آخر نسخة اتحملت — تعذر التحديث دلوقتي'; }
+  }
+  function swrLoad_(slot, params, outId, render, fetcher, loadingHtml){
+    const out = document.getElementById(outId);
+    const seq = (swrSeq_[slot] = (swrSeq_[slot] || 0) + 1);
+    const key = JSON.stringify(params);
+    const cached = localCacheGet_(slot);
+    const hit = cached && cached.v && cached.v.k === key ? cached.v.r : null;
+    if(hit){ render(hit); out.insertAdjacentHTML('afterbegin', STALE_NOTE_); }
+    else out.innerHTML = loadingHtml || '<div class="empty">جاري التحميل...</div>';
+    fetcher()
+      .then(function(r){
+        if(seq !== swrSeq_[slot]) return;
+        localCacheSet_(slot, { k: key, r: r });
+        render(r);
+      })
+      .catch(function(err){
+        if(seq !== swrSeq_[slot]) return;
+        if(hit){ staleNoteFail_(); return; }
+        out.innerHTML = ''; onError(err);
+      });
+  }
+  var swrSeq_ = {};
   function loadReport_(){
     const from = document.getElementById('rFrom').value, to = document.getElementById('rTo').value;
     const rep = state.isAdmin ? document.getElementById('rRep').value : (state.user && state.user.name);
-    const out = document.getElementById('reportOut');
-    out.innerHTML = '<div class="empty">جاري التحميل...</div>';
-    callApi('getReport', [state.auth, from, to, rep || ''])
-      .then(function(r){
-        if(state.isAdmin){ setRepOptions_(r.repOptions); fillRepSelect_('rRep', 'كل المناديب'); }
-        renderReport_(r);
-      })
-      .catch(function(err){ out.innerHTML = ''; onError(err); });
+    swrLoad_('rpt', [from, to, rep || ''], 'reportOut', function(r){
+      if(state.isAdmin){ setRepOptions_(r.repOptions); fillRepSelect_('rRep', 'كل المناديب'); }
+      renderReport_(r);
+    }, function(){ return callApi('getReport', [state.auth, from, to, rep || '']); });
   }
   function pctTxt_(p){ return p == null ? '—' : p + '%'; }
   function renderReport_(r){
@@ -3599,10 +3622,12 @@
     loadUnvisited_();
   }
   function loadUnvisited_(){
+    const days = Number(document.getElementById('uDays').value), rep = document.getElementById('uRep').value;
+    swrLoad_('unv', [days, rep], 'unvisitedOut', renderUnvisited_,
+      function(){ return callApi('getUnvisited', [state.auth, days, rep]); });
+  }
+  function renderUnvisited_(r){
     const out = document.getElementById('unvisitedOut');
-    out.innerHTML = '<div class="empty">جاري التحميل...</div>';
-    callApi('getUnvisited', [state.auth, Number(document.getElementById('uDays').value), document.getElementById('uRep').value])
-      .then(function(r){
         setRepOptions_(r.repOptions); fillRepSelect_('uRep', 'كل المناديب');
         let html = '<div class="tiles"><div class="tile red"><b>' + r.list.length + '</b><span>تاجر</span></div>' +
           '<div class="tile"><b>' + r.neverVisited + '</b><span>عمرهم ما اتزاروا</span></div>' +
@@ -3616,8 +3641,6 @@
             '<div class="lNum">' + (x.daysSince == null ? '—' : x.daysSince) + '<small>يوم</small></div></div>';
         }).join('') : '<div class="empty">كل التجار اتزاروا ✔</div>') + '</div>';
         out.innerHTML = html;
-      })
-      .catch(function(err){ out.innerHTML = ''; onError(err); });
   }
 
   // ================== الأصناف المطلوبة ==================
@@ -3630,12 +3653,15 @@
     loadItems_();
   }
   function loadItems_(){
-    const out = document.getElementById('itemsOut');
-    out.innerHTML = '<div class="empty">جاري التحميل...</div>';
     const custSel = document.getElementById('iCust');
     const cust = custSel.value;
-    callApi('getItemsReport', [state.auth, document.getElementById('iFrom').value, document.getElementById('iTo').value, document.getElementById('iRep').value, cust])
-      .then(function(r){
+    const from = document.getElementById('iFrom').value, to = document.getElementById('iTo').value, rep = document.getElementById('iRep').value;
+    swrLoad_('its', [from, to, rep, cust], 'itemsOut', function(r){ renderItems_(r, cust); },
+      function(){ return callApi('getItemsReport', [state.auth, from, to, rep, cust]); });
+  }
+  function renderItems_(r, cust){
+    const out = document.getElementById('itemsOut');
+    const custSel = document.getElementById('iCust');
         setRepOptions_(r.repOptions); fillRepSelect_('iRep', 'كل المناديب');
         custSel.innerHTML = '<option value="">كل التجار</option>' + r.customerOptions.map(function(c){
           return '<option value="' + escapeHtml(c.code) + '">' + escapeHtml(c.name) + '</option>';
@@ -3657,19 +3683,45 @@
           }).join('') + '</div>';
         }
         out.innerHTML = html;
-      })
-      .catch(function(err){ out.innerHTML = ''; onError(err); });
   }
 
   // ================== الخرايط ==================
-  // Leaflet من نفس الـ CDN بتاع باقي المكتبات (cdnjs) — اتصال أقل
+  // مكتبة الخريطة (Leaflet): بنجرب أكتر من مصدر بالترتيب — لو واحد واقع أو محجوب على الشبكة، التاني بيشتغل لوحده
+  const LEAFLET_SRCS_ = [
+    { js: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', css: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' },
+    { js: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js', css: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css' },
+    { js: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js', css: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css' },
+  ];
+  let _leafletP_ = null;
   function ensureLeaflet_(){
-    if(!document.getElementById('leafletCss')){
+    if(window.L && window.L.map) return Promise.resolve();
+    if(_leafletP_) return _leafletP_;
+    const tryAt = function(i){
+      if(i >= LEAFLET_SRCS_.length) return Promise.reject(new Error('تعذر تحميل الخريطة — تأكد إنك متصل بالإنترنت وحاول تاني'));
+      const src = LEAFLET_SRCS_[i];
+      const old = document.getElementById('leafletCss');
+      if(old) old.remove();
       const l = document.createElement('link');
-      l.id = 'leafletCss'; l.rel = 'stylesheet'; l.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+      l.id = 'leafletCss'; l.rel = 'stylesheet'; l.href = src.css;
       document.head.appendChild(l);
-    }
-    return loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js');
+      return loadWithTimeout_(src.js, 12000)
+        .then(function(){ if(!(window.L && window.L.map)) throw new Error('bad'); })
+        .catch(function(){ return tryAt(i + 1); });
+    };
+    _leafletP_ = tryAt(0).catch(function(err){ _leafletP_ = null; throw err; });
+    return _leafletP_;
+  }
+  // تحميل سكربت مع مهلة — لو المصدر بطيء جدًا أو معلّق ننتقل للي بعده بدل ما نستنى على طول
+  function loadWithTimeout_(src, ms){
+    return new Promise(function(resolve, reject){
+      const s = document.createElement('script');
+      let done = false;
+      const t = setTimeout(function(){ if(!done){ done = true; s.remove(); reject(new Error('timeout')); } }, ms);
+      s.src = src;
+      s.onload = function(){ if(!done){ done = true; clearTimeout(t); resolve(); } };
+      s.onerror = function(){ if(!done){ done = true; clearTimeout(t); s.remove(); reject(new Error('load')); } };
+      document.head.appendChild(s);
+    });
   }
   const maps_ = {};
   function freshMap_(id){
