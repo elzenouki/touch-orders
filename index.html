@@ -692,6 +692,48 @@
   .dlInfo span{color:var(--muted2); font-weight:700; flex:none;}
   .dlInfo b{text-align:left; font-weight:800;}
   .dlInfo a{color:var(--blue);}
+  .walletBtn{background:linear-gradient(135deg,#fff7e6,#fbecc8) !important; border-color:rgba(182,134,47,.45) !important; color:var(--gold-d) !important;}
+  .walletBtns{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;}
+  .walletBtns button{margin-top:0;}
+  .expKinds{grid-template-columns:repeat(3,1fr) !important;}
+  select.expCustList{height:auto; padding:4px; margin-top:6px;}
+  select.expCustList option{padding:7px 6px; border-bottom:1px solid #eee;}
+  #printArea{display:none;}
+  @media print{
+    @page{size:A4 portrait; margin:12mm 10mm;}
+    html, body{background:#fff !important;}
+    body > *:not(#printArea){display:none !important;}
+    #printArea{display:block !important;}
+  }
+  .pw{padding:0 3px; font-family:'Cairo', Tahoma, Arial, sans-serif; color:#111; direction:rtl; font-size:12px; position:relative; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .pwDraft{border:2px dashed #b83a3a; color:#b83a3a; text-align:center; font-weight:900; padding:4px; margin-bottom:8px; font-size:13px;}
+  .pwHead{display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #111; padding-bottom:6px;}
+  .pwCo{font-size:16px; font-weight:900;}
+  .pwLogo{font-size:28px; font-weight:900; letter-spacing:1px; direction:ltr; line-height:1; text-align:center;}
+  .pwLogo small{display:block; font-size:9px; letter-spacing:3px; font-weight:800;}
+  .pwTitleRow{display:flex; justify-content:space-between; align-items:center; margin:10px 0 6px;}
+  .pwTitle{font-size:20px; font-weight:900; border-bottom:2px solid #111; padding:0 12px 2px;}
+  .pwSerial{font-size:22px; font-weight:900; color:#c62828; letter-spacing:2px; direction:ltr;}
+  .pwInfo{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:12.5px; margin-bottom:8px;}
+  .pwSec{background:#ddd; font-weight:900; text-align:center; padding:4px; border:1px solid #111; border-bottom:none; margin-top:10px; font-size:13px;}
+  .pwT{width:100%; border-collapse:collapse; page-break-inside:auto;}
+  .pwT th{background:#eee; font-weight:900; font-size:11.5px;}
+  .pwT th, .pwT td{border:1px solid #111; padding:4px 5px; text-align:center;}
+  .pwT tr{page-break-inside:avoid;}
+  .pwT td.tl{text-align:right;}
+  .pwT td.sm{font-size:10.5px;}
+  .pwT td small{color:#555; font-size:10px;}
+  .pwT td.n{font-weight:800; direction:ltr; text-align:center; white-space:nowrap;}
+  .pwT tfoot td{font-weight:900; background:#f3f3f3;}
+  .pwT .emptyRow{color:#777; padding:8px;}
+  .pwSum{width:100%; border-collapse:collapse; margin-top:12px; page-break-inside:avoid;}
+  .pwSum td{border:1px solid #111; padding:6px 8px; font-weight:800;}
+  .pwSum td.n{direction:ltr; text-align:center; font-weight:900; width:16%;}
+  .pwSum td.big{font-size:14px; background:#eee;}
+  .pwSign{display:flex; justify-content:space-between; gap:16px; margin-top:28px; page-break-inside:avoid; font-weight:900;}
+  .pwSign div{flex:1; text-align:center;}
+  .pwSign span{display:block; border-bottom:1px dotted #111; height:34px;}
+  .pwFoot{margin-top:14px; font-size:10px; color:#555; direction:ltr; text-align:left;}
   .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:700; background:var(--navy); color:#fff; font-weight:800; font-size:14px; padding:11px 18px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:90vw; text-align:center;}
   .aiStatus{text-align:center; font-size:13.5px; font-weight:800; color:var(--muted2); margin-bottom:10px; line-height:1.7;}
   .aiStatus.err{color:var(--red);}
@@ -803,6 +845,7 @@
         <button class="bigAction newCust" onclick="openScreen('newcust')">＋ عميل جديد</button>
         <button class="bigAction phoneBtn" onclick="openScreen('phone')">📞 من غير زيارة: طلبية / مرتجع / تحصيل (تليفون أو تحويل)</button>
         <button class="bigAction dayRepBtn" onclick="openDayReport_('', '')">📄 تقرير آخر اليوم — PDF للواتساب</button>
+        <button class="bigAction walletBtn" onclick="openScreen('wallet')">💼 حافظتي — التحصيل والإكراميات والمصروفات</button>
       </div>
       <div class="subHeader"><span class="lbl">خدمات إضافية</span><span class="line"></span></div>
       <div class="subPanel">
@@ -841,6 +884,7 @@
         <div class="gridSub">
           <button class="adminLink ic-itemsales" onclick="openScreen('items')"><div class="icon">📦</div><div class="title">الأصناف المطلوبة</div></button>
           <button class="adminLink ic-history" onclick="openScreen('export')"><div class="icon">⬇</div><div class="title">تصدير اليوم Excel</div></button>
+          <button class="adminLink ic-history" onclick="openScreen('wallet')"><div class="icon">💼</div><div class="title">حوافظ المناديب</div></button>
           <button class="adminLink ic-settings" onclick="openScreen('profile')"><div class="icon">⚙</div><div class="title">إعداداتي</div></button>
           <button class="adminLink wide ic-admin" id="adminLink" onclick="openScreen('admin')" hidden><div class="icon">👥</div><div class="title">إدارة المناديب والأصناف</div></button>
           <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon">⎋</div><div class="title">تسجيل خروج</div></button>
@@ -1042,6 +1086,12 @@
     <div id="exportOut"></div>
   </div>
 
+  <!-- ============ حافظة تحصيل المندوب ============ -->
+  <div id="viewWallet" hidden>
+    <div id="wRepWrap" hidden><label>المندوب</label><select id="wRep" onchange="loadWallet_()"></select></div>
+    <div id="walletOut"></div>
+  </div>
+
   <!-- ============ إدارة المناديب والأصناف ============ -->
   <div id="viewAdmin" hidden>
     <div class="card">
@@ -1097,6 +1147,7 @@
     </div>
   </div>
   <div id="toast" class="toast" hidden></div>
+  <div id="printArea"></div>
   <datalist id="aiAsnafList"></datalist>
   <div id="ofPad" class="ofPad" hidden>
     <div class="ofPadTop"><span id="ofPadName"></span><b id="ofPadSum"></b></div>
@@ -1900,7 +1951,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.9.0';
+  const APP_VERSION_ = 'v1.10.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -1921,7 +1972,7 @@
     gps: 'unknown',
   };
 
-  const VIEWS_ = ['viewLogin', 'viewOtp', 'viewHome', 'viewCustomers', 'viewNewCust', 'viewVisit', 'viewDone', 'viewMyOrders', 'viewReport',
+  const VIEWS_ = ['viewWallet', 'viewLogin', 'viewOtp', 'viewHome', 'viewCustomers', 'viewNewCust', 'viewVisit', 'viewDone', 'viewMyOrders', 'viewReport',
     'viewUnvisited', 'viewItems', 'viewMap', 'viewLive', 'viewExport', 'viewAdmin', 'viewProfile'];
   function setView(name){
     VIEWS_.forEach(function(id){ document.getElementById(id).hidden = (id !== name); });
@@ -2057,6 +2108,7 @@
       if(!state.rep || Date.now() - (state.repLoadedAt || 0) > 120000) loadRepData_();
       startTracking_();
       flushQueue_(false);
+      flushExpQueue_();
     }
     if(!_pkOfferShownThisSession_) setTimeout(function(){ maybeOfferPasskey_(false); }, 2500);
   }
@@ -2140,6 +2192,7 @@
     if(name === 'export'){ openExport_(); return; }
     if(name === 'admin'){ openAdmin_(); return; }
     if(name === 'profile'){ openProfile_(); return; }
+    if(name === 'wallet'){ openWallet_(); return; }
   }
 
   // ================== الموقع (GPS) ==================
@@ -2530,6 +2583,7 @@
     const btns = [];
     if(c.phone) btns.push('<a href="tel:' + escapeHtml(c.phone.replace(/[^\d+]/g, '')) + '">📞 اتصال</a>');
     if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '">🧭 الاتجاهات</a>');
+    btns.push('<a href="#" onclick="openExpenseSheet_({ kind: \'إكرامية\', customerCode: state.visit.cust.code }); return false;">🎁 إكرامية</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
     ['visitNotes', 'pickSearch', 'retSearch', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
@@ -3985,6 +4039,265 @@
     document.getElementById('dlBody').innerHTML = dlSum_([nOrd + ' طلبية', (order.length - nOrd) ? (order.length - nOrd) + ' مرتجع' : '']) +
       '<div class="note" style="margin-bottom:10px;">دوس 📋 على كل مستند ينسخ الكود والكمية لكل أصنافه، والزق في السيستم. اللي اتنسخ بيتعلّم ✔ عشان ماتكررهوش.</div>' +
       (order.length ? order.map(function(d){ return dlDocCard_(d, true, false); }).join('') : dlEmpty_());
+  }
+
+  // ================== 💼 حافظة تحصيل المندوب ==================
+  // كل اللي المندوب حصّله + الإكراميات والمصروفات من آخر تقفيل (رحلة يومين أو أسبوعين — مش فارقة).
+  // لما يرجع الشركة: "تقفيل وطباعة" → الحافظة تاخد رقم مسلسل وتتطبع A4 زي الدفتر الورق.
+  const EXP_KINDS_ = ['إكرامية', 'فندق', 'سيارة وبنزين', 'مواصلات', 'أكل', 'أخرى'];
+  const EXP_ICONS_ = { 'إكرامية': '🎁', 'فندق': '🏨', 'سيارة وبنزين': '🚗', 'مواصلات': '🚌', 'أكل': '🍽', 'أخرى': '📝' };
+  const EXP_QUEUE_KEY_ = 'tf_exp_queue';
+  var wal_ = { rep: '', w: null };
+  function expQueueGet_(){ try{ return JSON.parse(localStorage.getItem(EXP_QUEUE_KEY_) || '[]'); }catch(e){ return []; } }
+  function expQueueSet_(q){ try{ localStorage.setItem(EXP_QUEUE_KEY_, JSON.stringify(q)); }catch(e){} }
+  var expFlushing_ = false;
+  async function flushExpQueue_(){
+    if(expFlushing_ || !state.auth || !navigator.onLine) return;
+    const mine = expQueueGet_().filter(function(x){ return x.email === state.auth.email; });
+    if(!mine.length) return;
+    expFlushing_ = true;
+    let sent = 0;
+    for(const it of mine){
+      try{
+        await callApi('addExpense', [state.auth, it.p, it.req]);
+        expQueueSet_(expQueueGet_().filter(function(x){ return x.req !== it.req; }));
+        sent++;
+      }catch(err){
+        if(err && err.code === 'REJECTED') expQueueSet_(expQueueGet_().filter(function(x){ return x.req !== it.req; }));
+        else break;
+      }
+    }
+    expFlushing_ = false;
+    if(sent && state.screen === 'wallet') loadWallet_();
+  }
+  window.addEventListener('online', function(){ flushExpQueue_(); });
+
+  function openWallet_(){
+    setTitle_(state.isAdmin ? 'حوافظ المناديب' : 'حافظتي', 'التحصيل والإكراميات والمصروفات');
+    setView('viewWallet');
+    document.getElementById('wRepWrap').hidden = !state.isAdmin;
+    if(state.isAdmin) fillRepSelect_('wRep', 'كل المناديب');
+    flushExpQueue_();
+    loadWallet_();
+  }
+  function walletRep_(){ return state.isAdmin ? document.getElementById('wRep').value : ''; }
+  function loadWallet_(){
+    const rep = walletRep_();
+    const out = document.getElementById('walletOut');
+    out.innerHTML = '<div class="empty">جاري التحميل...</div>';
+    if(state.isAdmin && !rep){
+      callApi('listWallets', [state.auth, '']).then(renderWalletOverview_).catch(function(err){ out.innerHTML = '<div class="msg error">' + escapeHtml(err.message) + '</div>'; });
+      return;
+    }
+    Promise.all([callApi('getWallet', [state.auth, rep, '']), callApi('listWallets', [state.auth, rep])])
+      .then(function(x){ wal_.rep = rep; wal_.w = x[0]; renderWallet_(x[0], x[1]); })
+      .catch(function(err){ out.innerHTML = '<div class="msg error">' + escapeHtml(err.message) + '</div>'; });
+  }
+  function wTile_(val, lbl, cls){ return '<div class="tile' + (cls ? ' ' + cls : '') + '"><b>' + val + '</b><span>' + lbl + '</span></div>'; }
+  function renderWalletOverview_(r){
+    let h = '<div class="dayHead">💼 الحوافظ المفتوحة (لسه ماتقفلتش)</div>';
+    h += r.open.length ? r.open.map(function(o){
+      return '<div class="listRow tapRow" data-rep="' + escapeHtml(o.rep) + '"><div class="lMain"><div class="lName">' + escapeHtml(o.rep) + '</div>' +
+        '<div class="lSub">تحصيل ' + fmt(o.collected) + ' ج (نقدي ' + fmt(o.cash) + ') • مصروفات ' + fmt(o.expenses) + ' • ' + o.payCount + ' تحصيل • ' + o.expCount + ' مصروف</div></div>' +
+        '<span class="lNum" style="color:var(--green); font-weight:900; direction:ltr;">' + fmt(o.netCash) + '</span></div>';
+    }).join('') : '<div class="empty">مفيش حوافظ مفتوحة</div>';
+    h += walletHistHtml_(r.closed, true);
+    const out = document.getElementById('walletOut');
+    out.innerHTML = h;
+    out.querySelectorAll('.listRow[data-rep]').forEach(function(row){
+      row.onclick = function(){ document.getElementById('wRep').value = row.dataset.rep; loadWallet_(); };
+    });
+  }
+  function walletHistHtml_(list, showRep){
+    if(!list.length) return '';
+    return '<div class="dayHead">📚 الحوافظ اللي اتقفلت</div>' + list.map(function(w, i){
+      return '<div class="batchRow"><b>#' + w.serial + '</b><span class="bMeta">' + (showRep ? escapeHtml(w.rep) + ' • ' : '') + escapeHtml(w.from + (w.to !== w.from ? ' ← ' + w.to : '')) +
+        '<br>تحصيل ' + fmt(w.collected) + ' • مصروفات ' + fmt(w.expenses) + ' • صافي نقدي ' + fmt(w.netCash) + '</span>' +
+        '<span class="bBtns"><button onclick="printWalletById_(' + w.id + ')">🖨 طباعة</button>' +
+        (state.isAdmin && (!showRep || list.findIndex(function(x){ return x.rep === w.rep; }) === i) ? '<button onclick="reopenWallet_(' + w.id + ', ' + w.serial + ')">↺ فك</button>' : '') + '</span></div>';
+    }).join('');
+  }
+  function renderWallet_(w, lst){
+    const t = w.totals;
+    const pend = expQueueGet_().filter(function(x){ return state.auth && x.email === state.auth.email && (!x.p.rep || x.p.rep === wal_.rep); });
+    let h = '<div class="note" style="margin-bottom:10px;">' + (w.payments.length || w.expenses.length ? 'من ' + escapeHtml(w.from) + (w.to !== w.from ? ' لـ ' + escapeHtml(w.to) : '') : 'الحافظة لسه فاضية') +
+      ' — كل اللي اتحصّل واتصرف من آخر تقفيل' + (state.isAdmin ? ' (' + escapeHtml(w.rep) + ')' : '') + '</div>';
+    h += '<div class="tiles">' + wTile_(fmt(t.cash), 'نقدي', 'gold') + wTile_(fmt(t.cheques), 'شيكات') + wTile_(fmt(t.transfers), 'تحويلات') +
+      wTile_(fmt(t.collected), 'إجمالي التحصيل', 'green') + wTile_(fmt(t.expenses), 'مصروفات وإكراميات', 'red') + wTile_(fmt(t.netCash), 'صافي النقدي', t.netCash < 0 ? 'red' : 'green') + '</div>';
+    h += '<button class="primary" onclick="openExpenseSheet_({})">＋ إكرامية / مصروف</button>';
+    if(pend.length) h += '<div class="queueBar" style="margin-top:10px;"><span>⏳ ' + pend.length + ' مصروف مستني النت — هيتبعت لوحده</span></div>';
+    h += '<div class="card" style="margin-top:12px;"><div class="cardTitle">💸 الإكراميات والمصروفات (' + w.expenses.length + ')</div>' + (w.expenses.length ? w.expenses.map(function(e){
+      return '<div class="listRow"><div class="lMain"><div class="lName">' + (EXP_ICONS_[e.kind] || '') + ' ' + escapeHtml(e.kind) + (e.customerName ? ' — ' + escapeHtml(e.customerName) : '') + '</div>' +
+        '<div class="lSub">' + escapeHtml([e.date, e.notes].filter(Boolean).join(' • ')) + '</div></div>' +
+        '<span class="lNum" style="color:var(--red); font-weight:900; direction:ltr;">' + fmt(e.amount) + '</span>' +
+        (w.open ? '<button type="button" class="rm" onclick="deleteExpense_(\'' + escapeHtml(e.id) + '\')">✕</button>' : '') + '</div>';
+    }).join('') : '<div class="empty">مفيش مصروفات</div>') + '</div>';
+    h += '<div class="card"><div class="cardTitle">💵 التحصيلات (' + w.payments.length + ')</div>' + (w.payments.length ? w.payments.map(function(p){
+      return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(p.customerName) + ' <span class="oCode">' + escapeHtml(p.customerCode) + '</span></div>' +
+        '<div class="lSub">' + escapeHtml([p.date, p.method + (p.chequeDate ? ' (استحقاق ' + p.chequeDate + ')' : ''), p.remote ? '📞 من غير زيارة' : '', p.notes].filter(Boolean).join(' • ')) + '</div></div>' +
+        '<span class="lNum" style="color:var(--gold-d); font-weight:900; direction:ltr;">' + fmt(p.amount) + '</span></div>';
+    }).join('') : '<div class="empty">مفيش تحصيل</div>') + '</div>';
+    h += '<div class="walletBtns"><button class="whatsapp" onclick="printWallet_(wal_.w)">🖨 طباعة (مسودة)</button>' +
+      '<button class="finalize" onclick="closeWallet_()">🔒 تقفيل وطباعة</button></div>' +
+      '<div class="note" style="margin-top:8px;">"تقفيل وطباعة" لما المندوب يسلّم في الشركة: الحافظة بتاخد رقم مسلسل، واللي بعد كده بيبدأ في حافظة جديدة.</div>';
+    h += walletHistHtml_(lst.closed, false);
+    document.getElementById('walletOut').innerHTML = h;
+  }
+  async function closeWallet_(){
+    const w = wal_.w;
+    if(!w) return;
+    if(!w.payments.length && !w.expenses.length){ showAlertModal_('الحافظة فاضية — مفيش تحصيل ولا مصروفات', 'error'); return; }
+    const t = w.totals;
+    const ok = await confirmModal_('تقفيل حافظة <b>' + escapeHtml(w.rep) + '</b>:<br>تحصيل <b>' + fmt(t.collected) + '</b> ج — مصروفات <b>' + fmt(t.expenses) + '</b> ج<br>' +
+      'صافي النقدي المطلوب تسليمه: <b>' + fmt(t.netCash) + '</b> ج<br><br>بعد التقفيل الحافظة بتاخد رقم ومش هينفع تتعدل. متأكد؟', '🔒 قفّل واطبع', 'رجوع');
+    if(!ok) return;
+    try{
+      showLoading(true);
+      const r = await callApi('closeWallet', [state.auth, wal_.rep]);
+      showLoading(false);
+      showMsg('اتقفلت حافظة رقم ' + r.serial + ' ✔', 'success');
+      loadWallet_();
+      printWallet_(r);
+    }catch(err){ onError(err); }
+  }
+  async function reopenWallet_(id, serial){
+    const ok = await confirmModal_('فك تقفيل حافظة رقم <b>' + serial + '</b>؟<br>التحصيلات والمصروفات بتاعتها هترجع للحافظة المفتوحة.', '↺ فك التقفيل', 'رجوع');
+    if(!ok) return;
+    try{ showLoading(true); await callApi('reopenWallet', [state.auth, String(id)]); showLoading(false); showMsg('اتفك التقفيل ✔', 'success'); loadWallet_(); }
+    catch(err){ onError(err); }
+  }
+  async function deleteExpense_(id){
+    const ok = await confirmModal_('تمسح المصروف ده؟', 'مسح', 'رجوع');
+    if(!ok) return;
+    try{ showLoading(true); await callApi('deleteExpense', [state.auth, id]); showLoading(false); loadWallet_(); }
+    catch(err){ onError(err); }
+  }
+  async function printWalletById_(id){
+    try{ showLoading(true); const w = await callApi('getWallet', [state.auth, '', String(id)]); showLoading(false); printWallet_(w); }
+    catch(err){ onError(err); }
+  }
+
+  // ---------- شاشة تسجيل إكرامية / مصروف ----------
+  var exp_ = { kind: '' };
+  function openExpenseSheet_(pre){
+    pre = pre || {};
+    exp_ = { kind: pre.kind || '', customerCode: pre.customerCode || '', rep: state.isAdmin ? (wal_.rep || '') : '' };
+    if(state.isAdmin && !exp_.rep){ showAlertModal_('اختار المندوب الأول', 'error'); return; }
+    dl_.stack = [];
+    dlBackBtn_();
+    dlOpen_('💸 إكرامية / مصروف', state.isAdmin ? exp_.rep : 'هيتحسب في حافظتك');
+    const custs = (state.rep && state.rep.customers) || [];
+    const today = new Date(); const ymd = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    document.getElementById('dlBody').innerHTML =
+      '<label>النوع</label><div class="reasonGrid expKinds">' + EXP_KINDS_.map(function(k){
+        return '<button type="button" data-k="' + escapeHtml(k) + '" class="' + (exp_.kind === k ? 'on' : '') + '">' + EXP_ICONS_[k] + ' ' + escapeHtml(k) + '</button>';
+      }).join('') + '</div>' +
+      '<div id="expCustWrap" hidden><label>العميل اللي أخد الإكرامية</label>' +
+        (custs.length ? '<input type="search" id="expCustSearch" class="acInput" placeholder="دوّر باسم العميل أو الكود..." autocomplete="off"><select id="expCust" size="5" class="expCustList"></select>'
+                      : '<input type="text" id="expCust" placeholder="كود العميل" dir="ltr">') + '</div>' +
+      '<label>المبلغ (جنيه)</label><input type="text" id="expAmount" class="ltrNum payAmount" inputmode="decimal" dir="ltr" placeholder="0">' +
+      '<label>التاريخ</label><input type="date" id="expDate" value="' + ymd + '" max="' + ymd + '">' +
+      '<label id="expNotesLbl">ملاحظات (اختياري)</label><textarea id="expNotes" placeholder="مثلاً: فندق ليلتين / بنزين من أسيوط / إكرامية عشان التصريف..."></textarea>' +
+      '<button class="finalize" id="expSave">✔ سجّل</button>';
+    const body = document.getElementById('dlBody');
+    const fillCust = function(){
+      const sel = document.getElementById('expCust');
+      if(!sel || sel.tagName !== 'SELECT') return;
+      const q = normAr_(normalizeDigits(document.getElementById('expCustSearch').value || ''));
+      const list = custs.filter(function(c){ return !q || normAr_(c.name).indexOf(q) !== -1 || normAr_(c.code).indexOf(q) === 0; }).slice(0, 80);
+      sel.innerHTML = list.map(function(c){ return '<option value="' + escapeHtml(c.code) + '"' + (c.code === exp_.customerCode ? ' selected' : '') + '>' + escapeHtml(c.name + ' — ' + c.code) + '</option>'; }).join('');
+      if(exp_.customerCode && !list.some(function(c){ return c.code === exp_.customerCode; })){
+        const c = custs.find(function(x){ return x.code === exp_.customerCode; });
+        if(c) sel.insertAdjacentHTML('afterbegin', '<option value="' + escapeHtml(c.code) + '" selected>' + escapeHtml(c.name + ' — ' + c.code) + '</option>');
+      }
+    };
+    const sync = function(){
+      body.querySelectorAll('.expKinds button').forEach(function(b){ b.classList.toggle('on', b.dataset.k === exp_.kind); });
+      document.getElementById('expCustWrap').hidden = exp_.kind !== 'إكرامية';
+      document.getElementById('expNotesLbl').textContent = exp_.kind === 'أخرى' ? 'المصروف ده كان إيه؟ (إجباري)' : 'ملاحظات (اختياري)';
+    };
+    body.querySelector('.expKinds').onclick = function(e){ const b = e.target.closest('button'); if(b){ exp_.kind = b.dataset.k; sync(); } };
+    if(document.getElementById('expCustSearch')) document.getElementById('expCustSearch').addEventListener('input', debounce_(fillCust, 120));
+    if(document.getElementById('expCust') && document.getElementById('expCust').tagName !== 'SELECT') document.getElementById('expCust').value = exp_.customerCode;
+    fillCust();
+    sync();
+    document.getElementById('expSave').onclick = saveExpense_;
+    setTimeout(function(){ const a = document.getElementById('expAmount'); if(a && exp_.kind) a.focus(); }, 300);
+  }
+  async function saveExpense_(){
+    const amount = Number(normalizeDigits(document.getElementById('expAmount').value || '').replace(/[^\d.]/g, ''));
+    const cust = document.getElementById('expCust') ? norm_(document.getElementById('expCust').value) : '';
+    const notes = document.getElementById('expNotes').value.trim();
+    if(!exp_.kind){ showMsg('اختار نوع المصروف', 'error'); return; }
+    if(exp_.kind === 'إكرامية' && !cust){ showMsg('اختار العميل اللي أخد الإكرامية', 'error'); return; }
+    if(!(amount > 0)){ showMsg('اكتب المبلغ', 'error'); document.getElementById('expAmount').focus(); return; }
+    if(exp_.kind === 'أخرى' && !notes){ showMsg('اكتب المصروف ده كان إيه', 'error'); return; }
+    const p = { kind: exp_.kind, amount: amount, customerCode: exp_.kind === 'إكرامية' ? cust : '', notes: notes, date: document.getElementById('expDate').value !== document.getElementById('expDate').defaultValue ? document.getElementById('expDate').value : '', rep: exp_.rep };
+    const req = genRequestId_();
+    const btn = document.getElementById('expSave');
+    btn.disabled = true;
+    try{
+      await callApi('addExpense', [state.auth, p, req]);
+      dlClose_();
+      toast_('✔ اتسجل ' + exp_.kind + ' ' + fmt(amount) + ' ج');
+      if(state.screen === 'wallet') loadWallet_();
+    }catch(err){
+      btn.disabled = false;
+      if(err && err.isNetwork){
+        const q = expQueueGet_(); q.push({ email: state.auth.email, req: req, p: p, at: Date.now() }); expQueueSet_(q);
+        dlClose_();
+        showAlertModal_('📶 مفيش نت — المصروف اتحفظ على الموبايل وهيتبعت لوحده أول ما النت يرجع', 'success');
+        if(state.screen === 'wallet') loadWallet_();
+        return;
+      }
+      showMsg(err.message, 'error');
+    }
+  }
+  function norm_(s){ return String(s == null ? '' : s).trim(); }
+
+  // ---------- الطباعة (A4 زي الدفتر الورق) ----------
+  function printWallet_(w){
+    if(!w) return;
+    const t = w.totals;
+    const money = function(n){ return n ? fmt(n) : ''; };
+    const rowsIn = w.payments.map(function(p, i){
+      const k = p.kind;
+      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(p.date) + '</td><td class="tl">' + escapeHtml(p.customerName) + ' <small>' + escapeHtml(p.customerCode) + '</small></td>' +
+        '<td class="n">' + (k === 'cash' ? fmt(p.amount) : '') + '</td><td class="n">' + (k === 'cheque' ? fmt(p.amount) : '') + '</td><td class="n">' + (k === 'transfer' ? fmt(p.amount) : '') + '</td>' +
+        '<td class="tl sm">' + escapeHtml([k === 'transfer' ? p.method : '', p.chequeDate ? 'استحقاق ' + p.chequeDate : '', p.notes].filter(Boolean).join(' • ')) + '</td></tr>';
+    }).join('');
+    const rowsOut = w.expenses.map(function(e, i){
+      return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(e.date) + '</td><td>' + escapeHtml(e.kind) + '</td>' +
+        '<td class="tl">' + escapeHtml([e.customerName ? e.customerName + ' (' + e.customerCode + ')' : '', e.notes].filter(Boolean).join(' — ')) + '</td><td class="n">' + fmt(e.amount) + '</td></tr>';
+    }).join('');
+    const serial = w.open ? '' : String(w.serial).padStart(7, '0');
+    const now = new Date();
+    const printed = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear() + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const html =
+      '<div class="pw">' +
+      (w.open ? '<div class="pwDraft">مسودة — الحافظة لسه ماتقفلتش</div>' : '') +
+      '<div class="pwHead"><div class="pwCo">الزنوكى لصناعة الأجهزة الكهربائية</div><div class="pwLogo">TOUCH<small>ZENOUKI GROUP</small></div></div>' +
+      '<div class="pwTitleRow"><div class="pwTitle">حافظة تحصيل المندوب</div><div class="pwSerial">' + (serial || '———') + '</div></div>' +
+      '<div class="pwInfo"><div>إسم المندوب: <b>' + escapeHtml(w.rep) + '</b></div><div>الفترة: <b>' + escapeHtml(w.from ? w.from + (w.to !== w.from ? ' إلى ' + w.to : '') : '—') + '</b></div>' +
+        '<div>' + (w.open ? 'تاريخ الطباعة' : 'تاريخ التقفيل') + ': <b>' + escapeHtml(w.open ? printed : w.closedAt) + '</b></div></div>' +
+      '<div class="pwSec">الـــوارد (التحصيلات)</div>' +
+      '<table class="pwT"><thead><tr><th style="width:5%">م</th><th style="width:11%">التاريخ</th><th>اسم العميل</th><th style="width:12%">القيمة نقداً</th><th style="width:12%">القيمة شيكات</th><th style="width:12%">تحويلات</th><th style="width:18%">ملاحظات</th></tr></thead>' +
+      '<tbody>' + (rowsIn || '<tr><td colspan="7" class="emptyRow">لا يوجد</td></tr>') + '</tbody>' +
+      '<tfoot><tr><td colspan="3">الإجمالي</td><td class="n">' + money(t.cash) + '</td><td class="n">' + money(t.cheques) + '</td><td class="n">' + money(t.transfers) + '</td><td class="n">' + fmt(t.collected) + '</td></tr></tfoot></table>' +
+      '<div class="pwSec">المنصـــرف (الإكراميات والمصروفات)</div>' +
+      '<table class="pwT"><thead><tr><th style="width:5%">م</th><th style="width:11%">التاريخ</th><th style="width:16%">النوع</th><th>بيان الصرف</th><th style="width:14%">القيمة</th></tr></thead>' +
+      '<tbody>' + (rowsOut || '<tr><td colspan="5" class="emptyRow">لا يوجد</td></tr>') + '</tbody>' +
+      '<tfoot><tr><td colspan="4">الإجمالي</td><td class="n">' + fmt(t.expenses) + '</td></tr></tfoot></table>' +
+      '<table class="pwSum"><tr><td>إجمالي التحصيل</td><td class="n">' + fmt(t.collected) + '</td><td>إجمالي النقدي</td><td class="n">' + fmt(t.cash) + '</td></tr>' +
+        '<tr><td>شيكات</td><td class="n">' + fmt(t.cheques) + '</td><td>(−) المصروفات والإكراميات</td><td class="n">' + fmt(t.expenses) + '</td></tr>' +
+        '<tr><td>تحويلات</td><td class="n">' + fmt(t.transfers) + '</td><td class="big">صافي النقدي (المطلوب تسليمه)</td><td class="n big">' + fmt(t.netCash) + '</td></tr></table>' +
+      '<div class="pwSign"><div>توقيع المندوب<span></span></div><div>اعتماد المدير المباشر<span></span></div><div>أمين الخزينة<span></span></div></div>' +
+      '<div class="pwFoot">F-SA-8.6-07-01 • TOUCH EL ZENOUKI</div></div>';
+    const area = document.getElementById('printArea');
+    if(area.parentNode !== document.body) document.body.appendChild(area); // لازم يكون برا أي حاجة بتستخبى في الطباعة
+    area.innerHTML = html;
+    document.title = 'حافظة ' + w.rep + (serial ? ' ' + serial : '');
+    setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
   }
 
   // ================== تجار ماتزاروش ==================
