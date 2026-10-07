@@ -513,6 +513,19 @@
   .secTitle{font-weight:900; font-size:15px; color:var(--navy); margin-bottom:12px;}
   .secTitle.green{color:var(--green);} .secTitle.red{color:var(--red);} .secTitle.gold{color:var(--gold-d);}
   .retCard{border-color:#efc4c4;}
+  .retHint{font-size:12px; margin:-2px 0 8px;}
+  #retBox .condRow{margin:0;}
+  #retBox .condRow button{white-space:nowrap; padding-inline:12px;}
+  .ofPaper.ret .ofRow.on{background:rgba(184,58,58,.07);}
+  .ofPaper.ret .ofRow.on input.ofIn{border-color:var(--red); color:var(--red); background:var(--red-bg);}
+  .ofPad.ret .ofPadTop{color:var(--red);}
+  select.needFill{border-color:var(--red) !important; box-shadow:0 0 0 3px rgba(184,58,58,.15);}
+  .retEdit{display:flex; gap:6px; margin-top:5px; align-items:center;}
+  .retEdit select{height:32px; padding:0 6px; font-size:12.5px; margin:0; flex:1; min-width:0;}
+  .retEdit button{height:32px; border-radius:8px; border:1px solid var(--border); background:#fff; font-family:inherit; font-weight:800; font-size:12px; padding:0 9px; flex:none; cursor:pointer;}
+  .retEdit button.ok{color:var(--green); border-color:#bfe3cf; background:var(--green-bg);}
+  .retEdit button.bad{color:var(--red); border-color:#efc4c4; background:var(--red-bg);}
+  .orderLine.needFill .retEdit select{border-color:var(--red); box-shadow:0 0 0 3px rgba(184,58,58,.15);}
   .condRow{display:flex; gap:8px; margin-bottom:12px;}
   .condRow button{flex:1; border:1px solid var(--border); background:var(--card2); border-radius:11px; padding:10px; font-family:inherit; font-weight:800; font-size:14.5px; color:var(--muted2); cursor:pointer;}
   .condRow button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
@@ -622,6 +635,64 @@
   .aiFoot{padding:12px 16px calc(12px + env(safe-area-inset-bottom)); border-top:1px solid var(--border); background:#fff; display:flex; gap:8px;}
   .aiFoot button{margin-top:0;}
   .aiFoot:empty{display:none;}
+  /* ===== تفاصيل أرقام التقرير ===== */
+  .tap{cursor:pointer; transition:transform .08s;}
+  .tap:active{transform:scale(.97);}
+  .tile.tap, .repCard .rGrid div.tap{position:relative;}
+  .tile.tap::after, .repCard .rGrid div.tap::after{content:'‹'; position:absolute; top:4px; left:8px; font-size:13px; color:var(--muted); font-weight:900;}
+  .bBtns{display:flex; gap:6px; flex:none;}
+  .tapHint{font-size:12px; margin:-4px 0 8px;}
+  .planTap{border-radius:10px; padding:2px 0;}
+  .dlHead{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .dlHead small{font-size:12px; opacity:.75; font-weight:700; margin-top:2px;}
+  .dlSum{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .dlSum span{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:6px 12px; font-weight:900; color:var(--navy); font-size:14px;}
+  .dlChips{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .dlChips.in{margin:5px 0 0;}
+  .chip.green{background:var(--green-bg); color:var(--green); border-color:#bfe3cf;}
+  .chip.gold{background:var(--gold-bg); color:var(--gold-d); border-color:rgba(182,134,47,.35);}
+  .tapRow{cursor:pointer;}
+  .tapRow .lNum{color:var(--muted); font-size:20px; font-weight:900;}
+  .dlLinks{display:flex; gap:12px; margin-top:4px; font-size:13px; font-weight:800;}
+  .dlLinks a{color:var(--blue); text-decoration:none;}
+  .docCard{background:var(--card); border:1px solid var(--border); border-radius:14px; margin-bottom:9px; overflow:hidden; content-visibility:auto; contain-intrinsic-size:auto 110px;}
+  .docCard.ret{border-color:#efc4c4;}
+  .docCard summary{list-style:none; cursor:pointer; padding:11px 12px; position:relative; padding-left:88px;}
+  .docCard summary::-webkit-details-marker{display:none;}
+  .docCard .dTop{display:flex; gap:6px; align-items:baseline; flex-wrap:wrap;}
+  .docCard .dTop b{color:var(--navy); font-size:14.5px;}
+  .docCard .dMeta{font-size:12px; color:var(--muted2); font-weight:600; margin-top:2px;}
+  .docCard .copyBtn{position:absolute; left:10px; top:50%; transform:translateY(-50%);}
+  .copyBtn{border:none; border-radius:11px; background:var(--navy); color:#fff; font-family:inherit; font-weight:900; font-size:13.5px; padding:10px 12px; cursor:pointer;}
+  .copyBtn.wide{width:100%; margin-bottom:10px; padding:12px;}
+  .copiedChip{display:none; background:var(--green-bg); color:var(--green); border-color:#bfe3cf;}
+  .docCard.copied .copiedChip{display:inline-block;}
+  .docCard.copied .copyBtn{background:var(--green);}
+  .dLines{border-top:1px dashed var(--border); padding:6px 12px 10px; background:var(--card2);}
+  .dLine{display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #eee9dc; font-size:13.5px;}
+  .dLine:last-of-type{border-bottom:none;}
+  .dCode{flex:none; min-width:62px; font-weight:800; color:var(--blue); direction:ltr; text-align:right;}
+  .dName{flex:1; min-width:0; font-weight:700; color:var(--text);}
+  .dName small{display:block; color:var(--red); font-size:11.5px;}
+  .dQty{flex:none; font-weight:900; font-size:15px; color:var(--navy); direction:ltr;}
+  .docCard.ret .dQty{color:var(--red);}
+  .dNotes{font-size:12.5px; color:var(--muted2); margin-top:6px;}
+  .dLines .rLink{margin-top:8px; border:none; background:var(--blue-bg); color:var(--blue); font-weight:800; font-size:12.5px; border-radius:10px; padding:6px 10px; font-family:inherit; cursor:pointer;}
+  .dlItems{background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden;}
+  .dlItem{display:flex; align-items:center; gap:10px; padding:9px 12px; border-bottom:1px solid #eee9dc;}
+  .dlItem .iNo{flex:none; width:24px; font-size:11.5px; color:var(--muted); font-weight:800; text-align:center;}
+  .dlItem .iMain{flex:1; min-width:0;}
+  .dlItem .iMain b{display:block; font-size:13.5px; color:var(--navy);}
+  .dlItem .iMain small{font-size:11.5px; color:var(--muted2); font-weight:600;}
+  .dlItem .iQty{flex:none; font-weight:900; font-size:16px; color:var(--navy); direction:ltr;}
+  .dlItems.ret .iQty{color:var(--red);}
+  .dlInfo{padding:6px 14px;}
+  .dlInfo div{display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .dlInfo div:last-child{border-bottom:none;}
+  .dlInfo span{color:var(--muted2); font-weight:700; flex:none;}
+  .dlInfo b{text-align:left; font-weight:800;}
+  .dlInfo a{color:var(--blue);}
+  .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:700; background:var(--navy); color:#fff; font-weight:800; font-size:14px; padding:11px 18px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:90vw; text-align:center;}
   .aiStatus{text-align:center; font-size:13.5px; font-weight:800; color:var(--muted2); margin-bottom:10px; line-height:1.7;}
   .aiStatus.err{color:var(--red);}
   .aiNote{background:var(--gold-bg); border:1px solid rgba(182,134,47,.35); color:var(--gold-d); border-radius:11px; padding:9px 12px; font-size:13px; font-weight:800; margin-bottom:10px; line-height:1.7;}
@@ -823,26 +894,25 @@
       <input type="search" id="pickSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off">
       <div id="ofFilters"></div>
       <div class="ofCount" id="ofCount"></div>
-      <div id="pickList" class="ofPaper"></div>
+      <div id="pickList" class="ofPaper" data-p="order"></div>
       <div class="orderSum" id="orderSum" hidden><span id="orderSumItems"></span><span id="orderSumQty"></span></div>
     </div>
     <div class="card secCard retCard" id="retBox" hidden>
-      <div class="secTitle red">↩ المرتجع (بيتسجل بالسالب)</div>
-      <label>الصنف</label>
-      <div class="acWrap">
-        <input type="text" id="retItemInput" class="acInput" placeholder="اكتب اسم الصنف أو الكود..." autocomplete="off">
-        <div class="acList" id="retItemList" hidden></div>
-      </div>
+      <div class="secTitle red">↩ ورقة المرتجع — اكتب الكمية قدام الصنف</div>
       <div class="rangeRow">
-        <div style="flex:0 0 96px;"><label>الكمية</label><input type="text" id="retQtyInput" class="ltrNum" inputmode="numeric" dir="ltr" placeholder="0"></div>
-        <div><label>السبب</label><select id="retReason"></select></div>
+        <div><label>سبب المرتجع</label><select id="retReason"></select></div>
+        <div style="flex:0 0 auto;"><label>الحالة</label>
+          <div class="condRow" id="retCond">
+            <button type="button" class="on" data-c="سليم">✔ سليم</button>
+            <button type="button" data-c="تالف">✖ تالف</button>
+          </div>
+        </div>
       </div>
-      <label>حالة المرتجع</label>
-      <div class="condRow" id="retCond">
-        <button type="button" class="on" data-c="سليم">✔ سليم</button>
-        <button type="button" data-c="تالف">✖ تالف</button>
-      </div>
-      <button class="addBtn retAdd" onclick="addReturnLine_()">＋ إضافة للمرتجع</button>
+      <div class="note retHint">السبب والحالة دول بيتطبقوا على كل الأصناف — ولو صنف مختلف غيّره من تحت.</div>
+      <input type="search" id="retSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off">
+      <div id="retFilters"></div>
+      <div class="ofCount" id="retCount"></div>
+      <div id="retPickList" class="ofPaper ret" data-p="ret"></div>
       <div id="retLines"></div>
       <div class="orderSum red" id="retSum" hidden><span id="retSumItems"></span><span id="retSumQty"></span></div>
     </div>
@@ -1020,6 +1090,13 @@
       <div class="aiFoot" id="aiFoot"></div>
     </div>
   </div>
+  <div id="dlOverlay" class="aiOverlay" hidden onclick="if(event.target === this) dlClose_()">
+    <div class="aiSheet">
+      <div class="aiHead"><button type="button" class="aiX" id="dlBack" onclick="dlBack_()" hidden>→</button><div class="dlHead"><b id="dlTitle"></b><small id="dlSub"></small></div><button type="button" class="aiX" onclick="dlClose_()">✕</button></div>
+      <div class="aiBody" id="dlBody"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" hidden></div>
   <datalist id="aiAsnafList"></datalist>
   <div id="ofPad" class="ofPad" hidden>
     <div class="ofPadTop"><span id="ofPadName"></span><b id="ofPadSum"></b></div>
@@ -1204,7 +1281,6 @@
     return function(){ clearTimeout(t); t = setTimeout(fn, ms); };
   }
   const renderCustomersSoon_ = debounce_(function(){ renderCustomers_(); }, 150);
-  const ofApplySoon_ = debounce_(function(){ ofApply_(); }, 120);
   // تحويل تاريخ dd/mm/yyyy لصيغة صالحة كاسم ملف (بدون شرطة مائلة)
   function safeDateForFile(d){
     return String(d || '').replace(/\//g, '-');
@@ -1824,7 +1900,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.8.0';
+  const APP_VERSION_ = 'v1.9.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -2456,7 +2532,7 @@
     if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '">🧭 الاتجاهات</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
-    ['visitNotes', 'pickSearch', 'retItemInput', 'retQtyInput', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['visitNotes', 'pickSearch', 'retSearch', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
     const rr = (state.rep && state.rep.returnReasons) || [];
     document.getElementById('retReason').innerHTML = '<option value="">اختار السبب...</option>' +
       rr.map(function(r){ return '<option>' + escapeHtml(r) + '</option>'; }).join('');
@@ -2465,7 +2541,9 @@
     renderModes_();
     renderReasons_();
     renderOrderLines_();
-    renderRetLines_();
+    document.getElementById('retPickList').innerHTML = '';
+    document.getElementById('retReason').classList.remove('needFill');
+    renderRetPaper_();
     if(!phone) renderLocBox_();
     setView('viewVisit');
     if(!phone) refreshVisitPos_();
@@ -2542,6 +2620,7 @@
     document.getElementById('modeNone').classList.toggle('on', m.none);
     document.getElementById('orderBox').hidden = !m.order;
     document.getElementById('retBox').hidden = !m.ret;
+    if(m.ret && !state.visit.retPaperBuilt) renderPaper_('ret');
     document.getElementById('payBox').hidden = !m.pay;
     document.getElementById('noOrderBox').hidden = state.visit.phone || !(m.none || (!m.order && (m.ret || m.pay)));
     document.querySelector('#noOrderBox .secTitle').textContent = m.none ? '✋ ليه مافيش طلبية؟' : '✋ ليه مافيش طلبية؟ (اختياري)';
@@ -2565,7 +2644,7 @@
   function renderCond_(){
     document.querySelectorAll('#retCond button').forEach(function(b){
       b.classList.toggle('on', b.dataset.c === state.visit.retCond);
-      b.onclick = function(){ state.visit.retCond = b.dataset.c; renderCond_(); };
+      b.onclick = function(){ state.visit.retCond = b.dataset.c; renderCond_(); retDefaultsChanged_(); };
     });
   }
   function renderPayMethods_(){
@@ -2605,55 +2684,18 @@
     }
     return out;
   }
-  const AC_ = {
-    ret: { input: 'retItemInput', list: 'retItemList', qty: 'retQtyInput', sel: 'retSel', add: function(){ addReturnLine_(); } },
-  };
-  function renderItemList_(cfg){
-    const input = document.getElementById(cfg.input);
-    const list = document.getElementById(cfg.list);
-    const m = itemMatches_(input.value);
-    if(!m.length){ list.innerHTML = '<div class="acEmpty">مفيش صنف بالاسم ده</div>'; list.hidden = false; return; }
-    list.innerHTML = m.map(function(a, i){
-      return '<div class="acItem" data-i="' + i + '"><span>' + escapeHtml(a.name) + '</span><span class="acCode">' + escapeHtml(a.code) + '</span></div>';
-    }).join('');
-    list.hidden = false;
-    list.querySelectorAll('.acItem').forEach(function(el){
-      el.onmousedown = function(e){ e.preventDefault(); };
-      el.onclick = function(){
-        const a = m[Number(el.dataset.i)];
-        state.visit[cfg.sel] = a;
-        input.value = a.name;
-        list.hidden = true;
-        document.getElementById(cfg.qty).focus();
-      };
-    });
-  }
-  Object.keys(AC_).forEach(function(k){
-    const cfg = AC_[k];
-    const input = document.getElementById(cfg.input);
-    const renderSoon = debounce_(function(){ renderItemList_(cfg); }, 100);
-    input.addEventListener('input', function(){ if(state.visit) state.visit[cfg.sel] = null; renderSoon(); });
-    input.addEventListener('focus', function(){ renderItemList_(cfg); });
-    input.addEventListener('blur', function(){ setTimeout(function(){ document.getElementById(cfg.list).hidden = true; }, 150); });
-    document.getElementById(cfg.qty).addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); cfg.add(); } });
-  });
-  function resolveTypedItem_(cfg){
-    const v = state.visit;
-    if(v[cfg.sel]) return v[cfg.sel];
-    const typed = normAr_(normalizeDigits(document.getElementById(cfg.input).value));
-    if(!typed) return null;
-    const idx = itemIdx_((state.rep && state.rep.asnaf) || []);
-    const exact = idx.find(function(x){ return x.n === typed || x.c === typed; });
-    if(exact) return exact.a;
-    const m = itemMatches_(typed, 2);
-    return m.length === 1 ? m[0] : null;
-  }
-  function readQty_(id){ return Number(normalizeDigits(document.getElementById(id).value || '').replace(/[^\d.]/g, '')); }
-  // ---------- ورقة الطلبية + فلاتر سريعة ----------
+  // ---------- ورقة الأصناف (الطلبية والمرتجع بنفس الشكل) + فلاتر سريعة ----------
   // كل الأصناف بترتيب تاب الأصناف، وقدام كل صنف خانة يكتب فيها الكمية (زي الورقة المطبوعة).
   // الفلاتر (النوع / الشكل / المقاس) بتطلع لوحدها من أسامي الأصناف، وبتخفي السطور بس — الأرقام اللي اتكتبت مابتضيعش.
+  // ورقتين: "order" (الطلبية → v.lines) و"ret" (المرتجع → v.rets، وكل سطر معاه السبب والحالة).
+  const PAPERS_ = {
+    order: { list: 'pickList', filters: 'ofFilters', search: 'pickSearch', count: 'ofCount', lk: 'lines', fk: 'of' },
+    ret:   { list: 'retPickList', filters: 'retFilters', search: 'retSearch', count: 'retCount', lk: 'rets', fk: 'rof' },
+  };
   function lineKey_(x){ return x.code || x.name; }
-  function findLine_(key){ return state.visit.lines.find(function(l){ return lineKey_(l) === key; }); }
+  function paperLines_(pk){ return state.visit[PAPERS_[pk || 'order'].lk]; }
+  function findLine_(key, pk){ return paperLines_(pk).find(function(l){ return lineKey_(l) === key; }); }
+  function paperOf_(el){ const p = el && el.closest('.ofPaper'); return (p && p.dataset.p) || 'order'; }
   const OF_UNITS_ = ['لتر', 'ليتر', 'بوصه', 'انش', 'وات', 'واط', 'ريشه', 'ريش', 'سم', 'مم', 'حصان', 'كيلو', 'سرعه', 'سرعات', 'شمعه', 'عين', 'قطعه', 'متر'];
   var _ofMeta_ = null, _ofSrc_ = null, _ofByKey_ = null, _ofTypes_ = null, _ofRowsHtml_ = null;
   function ofStrip_(w){ return w.length > 3 && w.indexOf('ال') === 0 ? w.slice(2) : w; }
@@ -2690,8 +2732,8 @@
     }
     return _ofByKey_;
   }
-  function ofMatch_(m, f, q){
-    if(f.sel && !findLine_(m.key)) return false;
+  function ofMatch_(m, f, q, pk){
+    if(f.sel && !findLine_(m.key, pk)) return false;
     if(f.t && m.type !== f.t) return false;
     if(f.m && m.shape !== f.m) return false;
     if(f.s && !m.sizes.some(function(z){ return z.k === f.s; })) return false;
@@ -2706,10 +2748,12 @@
     });
     return out;
   }
-  function renderOfFilters_(){
+  function renderOfFilters_(pk){
+    pk = pk || 'order';
     const v = state.visit;
     if(!v) return;
-    const f = v.of;
+    const P = PAPERS_[pk];
+    const f = v[P.fk];
     const metas = ofMeta_();
     const chip = function(k, val, label, on, extra){
       return '<button type="button" class="ofChip' + (extra || '') + (on ? ' on' : '') + '" data-of="' + k + '" data-v="' + escapeHtml(val) + '">' + label + '</button>';
@@ -2718,7 +2762,7 @@
     if(!_ofTypes_) _ofTypes_ = ofDistinct_(metas, 'type', 'typeLbl').sort(function(a, b){ return b.n - a.n; });
     const types = _ofTypes_;
     let html = '<div class="ofChips">' + chip('all', '', 'الكل', !f.t && !f.sel) +
-      chip('sel', '', '✔ اللي اتكتب <small>' + v.lines.length + '</small>', f.sel, ' sel') +
+      chip('sel', '', '✔ اللي اتكتب <small>' + v[P.lk].length + '</small>', f.sel, ' sel') +
       types.map(function(t){ return chip('t', t.k, escapeHtml(t.l) + ' <small>' + t.n + '</small>', f.t === t.k); }).join('') + '</div>';
     if(f.t){
       const ofType = metas.filter(function(m){ return m.type === f.t; });
@@ -2728,40 +2772,48 @@
       const sizes = ofDistinct_(pool, 'sizes').sort(function(a, b){ return parseFloat(a.k) - parseFloat(b.k); });
       if(sizes.length > 1) html += '<div class="ofLbl">المقاس</div><div class="ofChips">' + sizes.map(function(x){ return chip('s', x.k, escapeHtml(x.l), f.s === x.k); }).join('') + '</div>';
     }
-    document.getElementById('ofFilters').innerHTML = html;
+    document.getElementById(P.filters).innerHTML = html;
   }
   // تحديث رقم "✔ اللي اتكتب" بس — بدل ما كل الفلاتر تتبني من الأول مع كل رقم بيتكتب
-  function ofSelCount_(){
-    const s = document.querySelector('#ofFilters [data-of="sel"] small');
-    if(s && state.visit) s.textContent = state.visit.lines.length;
-    else renderOfFilters_();
+  function ofSelCount_(pk){
+    pk = pk || 'order';
+    const s = document.querySelector('#' + PAPERS_[pk].filters + ' [data-of="sel"] small');
+    if(s && state.visit) s.textContent = paperLines_(pk).length;
+    else renderOfFilters_(pk);
   }
-  function ofApply_(){
+  function ofApply_(pk){
+    pk = pk || 'order';
     const v = state.visit;
     if(!v) return;
-    const q = normAr_(normalizeDigits(document.getElementById('pickSearch').value || '')).replace(/\s+/g, ' ').trim();
+    const P = PAPERS_[pk];
+    const listEl = document.getElementById(P.list);
+    if(!listEl.firstElementChild) return; // الورقة لسه ماتبنتش
+    const q = normAr_(normalizeDigits(document.getElementById(P.search).value || '')).replace(/\s+/g, ' ').trim();
     const metas = ofMeta_();
     const byKey = ofByKey_();
     let shown = 0;
-    const rows = document.getElementById('pickList').children;
+    const rows = listEl.children;
     for(let i = 0; i < rows.length; i++){
       const row = rows[i];
       if(!row.classList.contains('ofRow')) continue;
-      const ok = ofMatch_(byKey[row.dataset.k], v.of, q);
+      const ok = ofMatch_(byKey[row.dataset.k], v[P.fk], q, pk);
       if(row.hidden === ok) row.hidden = !ok;
       if(ok) shown++;
     }
-    const empty = document.getElementById('ofEmpty');
+    const empty = listEl.querySelector('.ofEmpty');
     if(empty) empty.hidden = shown > 0;
-    const filtered = v.of.t || v.of.sel || q;
-    document.getElementById('ofCount').innerHTML = '<span>' + (filtered ? 'ظاهر ' + shown + ' من ' + metas.length + ' صنف' : metas.length + ' صنف') + '</span>' +
-      (v.lines.length ? '<span style="color:var(--green)">✔ مكتوب ' + v.lines.length + ' صنف</span>' : '');
+    const n = v[P.lk].length;
+    const filtered = v[P.fk].t || v[P.fk].sel || q;
+    document.getElementById(P.count).innerHTML = '<span>' + (filtered ? 'ظاهر ' + shown + ' من ' + metas.length + ' صنف' : metas.length + ' صنف') + '</span>' +
+      (n ? '<span style="color:' + (pk === 'ret' ? 'var(--red)' : 'var(--green)') + '">✔ مكتوب ' + n + ' صنف</span>' : '');
   }
-  function renderOrderLines_(){
+  function renderPaper_(pk){
     const v = state.visit;
     if(!v) return;
-    if(!v.of) v.of = { t: '', m: '', s: '', sel: false };
+    const P = PAPERS_[pk];
+    if(!v[P.fk]) v[P.fk] = { t: '', m: '', s: '', sel: false };
     const metas = ofMeta_();
+    const lines = v[P.lk];
     const row = function(m, n, l){
       return '<div class="ofRow' + (l ? ' on' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
         '<span class="ofNo">' + (n + 1) + '</span>' +
@@ -2770,66 +2822,105 @@
         '</div>';
     };
     let html;
-    if(!v.lines.length){
+    if(!lines.length){
       // ورقة فاضية (أغلب الزيارات): الشكل نفسه بيتبني مرة واحدة ويتعاد استخدامه
       if(!_ofRowsHtml_) _ofRowsHtml_ = metas.map(function(m, n){ return row(m, n, null); }).join('');
       html = _ofRowsHtml_;
     } else {
-      html = metas.map(function(m, n){ return row(m, n, findLine_(m.key)); }).join('');
+      html = metas.map(function(m, n){ return row(m, n, findLine_(m.key, pk)); }).join('');
     }
-    document.getElementById('pickList').innerHTML = html + '<div class="ofEmpty" id="ofEmpty" hidden>مفيش صنف بالفلتر ده — دوس "الكل"</div>';
+    document.getElementById(P.list).innerHTML = html + '<div class="ofEmpty" hidden>مفيش صنف بالفلتر ده — دوس "الكل"</div>';
+    if(pk === 'ret') v.retPaperBuilt = true;
     ofPadClose_();
-    renderOfFilters_();
-    ofApply_();
-    updateOrderSum_();
+    renderOfFilters_(pk);
+    ofApply_(pk);
+    if(pk === 'ret') renderRetLines_(); else updateOrderSum_();
   }
-  function setLineQty_(key, qty){
+  function renderOrderLines_(){ renderPaper_('order'); }
+  // ورقة المرتجع بتتبني أول ما المندوب يفتح "مرتجع" بس — أغلب الزيارات مافيهاش مرتجع
+  function renderRetPaper_(){
     const v = state.visit;
-    const l = findLine_(key);
-    if(l && !qty) v.lines.splice(v.lines.indexOf(l), 1);
+    if(!v) return;
+    if(v.modes.ret && !v.retPaperBuilt) renderPaper_('ret');
+    else renderRetLines_();
+  }
+  function setLineQty_(key, qty, pk){
+    pk = pk || 'order';
+    const lines = paperLines_(pk);
+    const l = findLine_(key, pk);
+    if(l && !qty) lines.splice(lines.indexOf(l), 1);
     else if(l) l.qty = qty;
     else if(qty){
       const m = ofByKey_()[key];
-      if(m) v.lines.push({ code: m.a.code, name: m.a.name, qty: qty });
+      if(!m) return;
+      if(pk === 'ret') lines.push({ code: m.a.code, name: m.a.name, qty: qty, reason: retDefReason_(), condition: state.visit.retCond, own: false });
+      else lines.push({ code: m.a.code, name: m.a.name, qty: qty });
     }
   }
-  document.getElementById('pickList').addEventListener('input', function(e){
-    const inp = e.target;
-    if(!inp.classList.contains('ofIn') || !state.visit) return;
-    const d = normalizeDigits(inp.value).replace(/[^\d]/g, '').slice(0, 5);
-    if(d !== inp.value) inp.value = d;
-    const row = inp.closest('.ofRow');
-    setLineQty_(row.dataset.k, Number(d) || 0);
-    row.classList.toggle('on', Number(d) > 0);
-    ofSelCount_();
-    ofApply_();
-    updateOrderSum_();
-  });
-  // Enter = الصنف اللي بعده (من اللي ظاهرين بس)
-  document.getElementById('pickList').addEventListener('keydown', function(e){
-    if(e.key !== 'Enter' || !e.target.classList.contains('ofIn')) return;
-    e.preventDefault();
-    const all = Array.from(document.querySelectorAll('#pickList .ofRow:not([hidden]) .ofIn'));
-    const next = all[all.indexOf(e.target) + 1];
-    if(next){ next.focus(); next.select(); } else e.target.blur();
-  });
-  document.getElementById('pickList').addEventListener('click', function(e){
-    const row = e.target.closest('.ofRow');
-    if(row) ofPadOpen_(row);
+  function paperChanged_(pk){
+    ofSelCount_(pk);
+    if(pk === 'ret') renderRetLines_(); else updateOrderSum_();
+  }
+  ['order', 'ret'].forEach(function(pk){
+    const P = PAPERS_[pk];
+    const list = document.getElementById(P.list);
+    list.addEventListener('input', function(e){
+      const inp = e.target;
+      if(!inp.classList.contains('ofIn') || !state.visit) return;
+      const d = normalizeDigits(inp.value).replace(/[^\d]/g, '').slice(0, 5);
+      if(d !== inp.value) inp.value = d;
+      const row = inp.closest('.ofRow');
+      setLineQty_(row.dataset.k, Number(d) || 0, pk);
+      row.classList.toggle('on', Number(d) > 0);
+      ofApply_(pk);
+      paperChanged_(pk);
+    });
+    // Enter = الصنف اللي بعده (من اللي ظاهرين بس)
+    list.addEventListener('keydown', function(e){
+      if(e.key !== 'Enter' || !e.target.classList.contains('ofIn')) return;
+      e.preventDefault();
+      const all = Array.from(list.querySelectorAll('.ofRow:not([hidden]) .ofIn'));
+      const next = all[all.indexOf(e.target) + 1];
+      if(next){ next.focus(); next.select(); } else e.target.blur();
+    });
+    list.addEventListener('click', function(e){
+      const row = e.target.closest('.ofRow');
+      if(row) ofPadOpen_(row);
+    });
+    const applySoon = debounce_(function(){ ofApply_(pk); }, 120);
+    document.getElementById(P.search).addEventListener('focus', ofPadClose_);
+    document.getElementById(P.search).addEventListener('input', applySoon);
+    document.getElementById(P.filters).addEventListener('click', function(e){
+      const b = e.target.closest('[data-of]');
+      const v = state.visit;
+      if(!b || !v) return;
+      const f = v[P.fk];
+      const k = b.dataset.of, val = b.dataset.v;
+      if(k === 'all'){ v[P.fk] = { t: '', m: '', s: '', sel: false }; document.getElementById(P.search).value = ''; }
+      else if(k === 'sel') f.sel = !f.sel;
+      else if(k === 't'){ f.t = f.t === val ? '' : val; f.m = ''; f.s = ''; }
+      else if(k === 'm'){ f.m = f.m === val ? '' : val; f.s = ''; }
+      else if(k === 's') f.s = f.s === val ? '' : val;
+      renderOfFilters_(pk);
+      ofApply_(pk);
+      list.scrollTop = 0;
+    });
   });
   // ---------- كيبورد الأرقام بتاع التطبيق ----------
-  var ofPad_ = { row: null, buf: '' };
+  var ofPad_ = { row: null, buf: '', pk: 'order' };
   function ofPadIsOpen_(){ return !document.getElementById('ofPad').hidden; }
   function ofPadOpen_(row){
     if(ofPad_.row && ofPad_.row !== row) ofPad_.row.classList.remove('act');
     ofPad_.row = row;
     ofPad_.buf = '';
+    ofPad_.pk = paperOf_(row);
     row.classList.add('act');
     const pad = document.getElementById('ofPad');
     pad.hidden = false;
+    pad.classList.toggle('ret', ofPad_.pk === 'ret');
     document.body.classList.add('padOpen');
     const ae = document.activeElement;
-    if(ae && (ae.id === 'pickSearch' || ae.classList.contains('ofIn'))) ae.blur();
+    if(ae && (ae.id === PAPERS_[ofPad_.pk].search || ae.classList.contains('ofIn'))) ae.blur();
     ofPadInfo_();
     updateOrderSum_();
     // الصنف يبان فوق الكيبورد
@@ -2853,10 +2944,12 @@
     const row = ofPad_.row;
     if(!row) return;
     const nm = row.querySelector('.ofName');
-    document.getElementById('ofPadName').textContent = (nm.firstChild ? nm.firstChild.textContent : '') + ' ← ' + (row.querySelector('.ofIn').value || '0');
-    const n = state.visit.lines.length;
-    const tot = state.visit.lines.reduce(function(a, l){ return a + l.qty; }, 0);
-    document.getElementById('ofPadSum').textContent = n ? '🧾 ' + n + ' صنف • ' + fmt(tot) + ' قطعة' : '';
+    const ret = ofPad_.pk === 'ret';
+    document.getElementById('ofPadName').textContent = (ret ? '↩ ' : '') + (nm.firstChild ? nm.firstChild.textContent : '') + ' ← ' + (ret && row.querySelector('.ofIn').value ? '-' : '') + (row.querySelector('.ofIn').value || '0');
+    const lines = paperLines_(ofPad_.pk);
+    const n = lines.length;
+    const tot = lines.reduce(function(a, l){ return a + l.qty; }, 0);
+    document.getElementById('ofPadSum').textContent = n ? (ret ? '↩ مرتجع ' + n + ' صنف • -' : '🧾 ' + n + ' صنف • ') + fmt(tot) + ' قطعة' : '';
   }
   function ofPadMove_(dir){
     let el = ofPad_.row;
@@ -2881,27 +2974,10 @@
     else { ofPad_.buf = (ofPad_.buf + k).replace(/^0+(?=\d)/, '').slice(0, 5); val = ofPad_.buf; }
     if(val === '0') val = '';
     inp.value = val;
-    setLineQty_(row.dataset.k, Number(val) || 0);
+    setLineQty_(row.dataset.k, Number(val) || 0, ofPad_.pk);
     row.classList.toggle('on', Number(val) > 0);
-    ofSelCount_();
+    paperChanged_(ofPad_.pk);
     ofPadInfo_();
-    updateOrderSum_();
-  });
-  document.getElementById('pickSearch').addEventListener('focus', ofPadClose_);
-  document.getElementById('pickSearch').addEventListener('input', ofApplySoon_);
-  document.getElementById('ofFilters').addEventListener('click', function(e){
-    const b = e.target.closest('[data-of]');
-    const v = state.visit;
-    if(!b || !v) return;
-    const k = b.dataset.of, val = b.dataset.v;
-    if(k === 'all'){ v.of = { t: '', m: '', s: '', sel: false }; document.getElementById('pickSearch').value = ''; }
-    else if(k === 'sel') v.of.sel = !v.of.sel;
-    else if(k === 't'){ v.of.t = v.of.t === val ? '' : val; v.of.m = ''; v.of.s = ''; }
-    else if(k === 'm'){ v.of.m = v.of.m === val ? '' : val; v.of.s = ''; }
-    else if(k === 's') v.of.s = v.of.s === val ? '' : val;
-    renderOfFilters_();
-    ofApply_();
-    document.getElementById('pickList').scrollTop = 0;
   });
   function updateOrderSum_(){
     const v = state.visit;
@@ -3078,36 +3154,54 @@
   }
 
   // ---------- المرتجع ----------
-  function addReturnLine_(silent){
+  // السبب والحالة اللي فوق بيتطبقوا على كل سطر، إلا السطور اللي اتغيرت لوحدها (own)
+  function retDefReason_(){ return document.getElementById('retReason').value || ''; }
+  function retDefaultsChanged_(){
     const v = state.visit;
-    const a = resolveTypedItem_(AC_.ret);
-    const qty = readQty_('retQtyInput');
-    const reason = document.getElementById('retReason').value;
-    if(!a){ if(!silent) showMsg('اختار صنف المرتجع من القايمة', 'error'); return false; }
-    if(!(qty > 0)){ if(!silent) showMsg('اكتب كمية المرتجع', 'error'); document.getElementById('retQtyInput').focus(); return false; }
-    if(!reason){ if(!silent) showMsg('اختار سبب المرتجع', 'error'); return false; }
-    const ex = v.rets.find(function(l){ return (l.code || l.name) === (a.code || a.name) && l.reason === reason && l.condition === v.retCond; });
-    if(ex) ex.qty += qty; else v.rets.push({ code: a.code, name: a.name, qty: qty, reason: reason, condition: v.retCond });
-    v.retSel = null;
-    document.getElementById('retItemInput').value = '';
-    document.getElementById('retQtyInput').value = '';
-    clearMsg();
+    if(!v) return;
+    const r = retDefReason_();
+    v.rets.forEach(function(l){ if(!l.own){ l.reason = r; l.condition = v.retCond; } });
     renderRetLines_();
-    return true;
   }
+  document.getElementById('retReason').addEventListener('change', function(){ this.classList.remove('needFill'); retDefaultsChanged_(); });
   function renderRetLines_(){
     const v = state.visit;
-    document.getElementById('retLines').innerHTML = v.rets.map(function(l, i){
-      return '<div class="orderLine ret"><div class="oName">' + escapeHtml(l.name) + ' <span class="oCode">' + escapeHtml(l.code) + '</span>' +
-        '<div class="oMeta">' + escapeHtml(l.reason) + ' • ' + escapeHtml(l.condition) + '</div></div>' +
+    if(!v) return;
+    const rr = (state.rep && state.rep.returnReasons) || [];
+    document.getElementById('retLines').innerHTML = v.rets.length ? '<div class="ofLbl" style="margin-top:10px;">أصناف المرتجع</div>' + v.rets.map(function(l, i){
+      const opts = '<option value="">السبب...</option>' + rr.map(function(r){ return '<option' + (r === l.reason ? ' selected' : '') + '>' + escapeHtml(r) + '</option>'; }).join('');
+      return '<div class="orderLine ret' + (l.reason ? '' : ' needFill') + '" data-i="' + i + '"><div class="oName">' + escapeHtml(l.name) + ' <span class="oCode">' + escapeHtml(l.code) + '</span>' +
+        '<div class="retEdit"><select data-f="reason">' + opts + '</select>' +
+        '<button type="button" data-f="cond" class="' + (l.condition === 'تالف' ? 'bad' : 'ok') + '">' + (l.condition === 'تالف' ? '✖ تالف' : '✔ سليم') + '</button></div></div>' +
         '<div class="lNum" style="color:var(--red); font-weight:900; direction:ltr;">-' + fmt(l.qty) + '</div>' +
-        '<button type="button" class="rm" onclick="state.visit.rets.splice(' + i + ',1); renderRetLines_();">✕</button></div>';
-    }).join('');
+        '<button type="button" class="rm" data-f="rm">✕</button></div>';
+    }).join('') : '';
     const total = v.rets.reduce(function(s, l){ return s + l.qty; }, 0);
     document.getElementById('retSum').hidden = !v.rets.length;
     document.getElementById('retSumItems').textContent = v.rets.length + ' صنف مرتجع';
     document.getElementById('retSumQty').textContent = 'إجمالي -' + fmt(total) + ' قطعة';
   }
+  document.getElementById('retLines').addEventListener('change', function(e){
+    const box = e.target.closest('.orderLine');
+    if(!box || e.target.dataset.f !== 'reason' || !state.visit) return;
+    const l = state.visit.rets[Number(box.dataset.i)];
+    l.reason = e.target.value; l.own = true;
+    renderRetLines_();
+  });
+  document.getElementById('retLines').addEventListener('click', function(e){
+    const b = e.target.closest('[data-f]');
+    const box = e.target.closest('.orderLine');
+    if(!b || !box || !state.visit || b.tagName === 'SELECT') return;
+    const v = state.visit, i = Number(box.dataset.i), l = v.rets[i];
+    if(b.dataset.f === 'cond'){ l.condition = l.condition === 'تالف' ? 'سليم' : 'تالف'; l.own = true; renderRetLines_(); return; }
+    if(b.dataset.f === 'rm'){
+      v.rets.splice(i, 1);
+      const row = document.querySelector('#retPickList .ofRow[data-k="' + CSS.escape(lineKey_(l)) + '"]');
+      if(row){ row.classList.remove('on'); row.querySelector('.ofIn').value = ''; }
+      ofSelCount_('ret'); ofApply_('ret');
+      renderRetLines_();
+    }
+  });
 
   // ---------- تسجيل الزيارة ----------
   let submitting_ = false;
@@ -3116,13 +3210,15 @@
     if(!v || submitting_) return;
     clearMsg();
     const m = v.modes;
-    // صنف مكتوب ومتضافش — نضيفه لوحده
-    if(m.ret && document.getElementById('retItemInput').value.trim() && document.getElementById('retQtyInput').value.trim()){
-      if(!addReturnLine_(false)) return;
-    }
     if(v.phone && !m.order && !m.ret && !m.pay){ showMsg('اختار طلبية أو مرتجع أو تحصيل', 'error'); return; }
     if(m.order && !v.lines.length){ showMsg('ضيف أصناف الطلبية والكميات (أو شيل علامة "طلبية")', 'error'); return; }
     if(m.ret && !v.rets.length){ showMsg('ضيف أصناف المرتجع (أو شيل علامة "مرتجع")', 'error'); return; }
+    if(m.ret && v.rets.some(function(l){ return !l.reason; })){
+      showMsg('اختار سبب المرتجع (فوق للكل، أو قدام الصنف)', 'error');
+      document.getElementById('retReason').classList.add('needFill');
+      document.getElementById('retBox').scrollIntoView({ block: 'start', behavior: 'smooth' });
+      return;
+    }
     let payment = null;
     if(m.pay){
       const amount = Number(normalizeDigits(document.getElementById('payAmount').value || '').replace(/[^\d.]/g, ''));
@@ -3546,41 +3642,43 @@
   function renderReport_(r){
     const t = r.totals;
     let html = '<div class="note" style="margin-bottom:10px;">من ' + escapeHtml(r.from) + ' إلى ' + escapeHtml(r.to) + (r.repFilter ? ' — ' + escapeHtml(r.repFilter) : '') + '</div>';
-    html += '<div class="tiles">' +
-      '<div class="tile"><b>' + t.visits + '</b><span>زيارة</span></div>' +
-      '<div class="tile green"><b>' + t.orders + '</b><span>طلبية</span></div>' +
-      '<div class="tile gold"><b>' + t.conversion + '%</b><span>نسبة الطلب</span></div>' +
-      '<div class="tile"><b>' + pctTxt_(t.planPct) + '</b><span>التزام بخط السير</span></div>' +
-      '<div class="tile"><b>' + fmt(t.qty) + '</b><span>قطعة مطلوبة</span></div>' +
-      '<div class="tile red"><b>' + fmt(t.returnQty) + '</b><span>قطعة مرتجعة</span></div>' +
-      '<div class="tile gold"><b>' + fmt(t.collected) + '</b><span>تحصيل (ج)</span></div>' +
-      '<div class="tile"><b>' + t.newCustomers + '</b><span>عملاء جدد</span></div>' +
-      '<div class="tile"><b>' + (t.phoneOrders + t.phoneReturns + (t.remotePay || 0)) + '</b><span>📞 من غير زيارة</span></div>' +
-      '<div class="tile red"><b>' + (t.far + t.noLocation) + '</b><span>بعيد/من غير موقع</span></div></div>';
+    const T = function(k, cls, val, lbl){ return '<div class="tile tap' + (cls ? ' ' + cls : '') + '" data-k="' + k + '"><b>' + val + '</b><span>' + lbl + '</span></div>'; };
+    html += '<div class="note tapHint">👆 دوس على أي رقم تشوف تفاصيله</div><div class="tiles">' +
+      T('visits', '', t.visits, 'زيارة') +
+      T('orders', 'green', t.orders, 'طلبية') +
+      T('noorder', 'gold', t.conversion + '%', 'نسبة الطلب') +
+      T('plan', '', pctTxt_(t.planPct), 'التزام بخط السير') +
+      T('qty', '', fmt(t.qty), 'قطعة مطلوبة') +
+      T('returnQty', 'red', fmt(t.returnQty), 'قطعة مرتجعة') +
+      T('payments', 'gold', fmt(t.collected), 'تحصيل (ج)') +
+      T('newcust', '', t.newCustomers, 'عملاء جدد') +
+      T('remote', '', (t.phoneOrders + t.phoneReturns + (t.remotePay || 0)), '📞 من غير زيارة') +
+      T('flags', 'red', (t.far + t.noLocation), 'بعيد/من غير موقع') + '</div>';
     if(!r.repFilter){
       html += r.reps.map(function(p){
-        return '<div class="repCard"><div class="rTop"><span class="rName">' + escapeHtml(p.rep) + '</span>' +
+        const g = function(k, val, lbl, color){ return '<div class="tap" data-k="' + k + '"><b' + (color ? ' style="color:' + color + '"' : '') + '>' + val + '</b><span>' + lbl + '</span></div>'; };
+        return '<div class="repCard" data-rep="' + escapeHtml(p.rep) + '"><div class="rTop"><span class="rName">' + escapeHtml(p.rep) + '</span>' +
           '<span><button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="detail">التفاصيل</button> ' +
           '<button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="map">🗺 الخريطة</button> ' +
           '<button class="rLink" data-rep="' + escapeHtml(p.rep) + '" data-act="pdf">📄 PDF</button></span></div>' +
-          '<div class="rGrid"><div><b>' + p.visits + '</b><span>زيارة</span></div><div><b>' + p.orders + '</b><span>طلبية</span></div>' +
-          '<div><b>' + p.conversion + '%</b><span>نسبة الطلب</span></div><div><b>' + fmt(p.qty) + '</b><span>قطعة</span></div></div>' +
-          '<div class="rGrid"><div><b style="color:var(--red)">' + p.returns + '</b><span>مرتجع</span></div><div><b style="color:var(--red)">' + fmt(p.returnQty) + '</b><span>قطعة مرتجعة</span></div>' +
-          '<div><b style="color:var(--gold-d)">' + fmt(p.collected) + '</b><span>تحصيل</span></div><div><b>' + p.newCustomers + '</b><span>عملاء جدد</span></div></div>' +
-          '<div class="planLine"><span>خط السير: ' + p.plannedDone + ' من ' + p.planned + '</span><span>' + pctTxt_(p.planPct) + '</span></div>' +
-          '<div class="bar green"><i style="width:' + (p.planPct || 0) + '%"></i></div>' +
+          '<div class="rGrid">' + g('visits', p.visits, 'زيارة') + g('orders', p.orders, 'طلبية') +
+          g('noorder', p.conversion + '%', 'نسبة الطلب') + g('qty', fmt(p.qty), 'قطعة') + '</div>' +
+          '<div class="rGrid">' + g('returns', p.returns, 'مرتجع', 'var(--red)') + g('returnQty', fmt(p.returnQty), 'قطعة مرتجعة', 'var(--red)') +
+          g('payments', fmt(p.collected), 'تحصيل', 'var(--gold-d)') + g('newcust', p.newCustomers, 'عملاء جدد') + '</div>' +
+          '<div class="tap planTap" data-k="plan"><div class="planLine"><span>خط السير: ' + p.plannedDone + ' من ' + p.planned + '</span><span>' + pctTxt_(p.planPct) + '</span></div>' +
+          '<div class="bar green"><i style="width:' + (p.planPct || 0) + '%"></i></div></div>' +
           '<div class="flagRow">' +
-            (p.offPlan ? '<span class="chip">خارج الخط: ' + p.offPlan + '</span>' : '') +
-            (p.far ? '<span class="chip red">بعيد عن المحل: ' + p.far + '</span>' : '') +
-            (p.noLocation ? '<span class="chip red">من غير موقع: ' + p.noLocation + '</span>' : '') +
+            (p.offPlan ? '<span class="chip tap" data-k="offplan">خارج الخط: ' + p.offPlan + '</span>' : '') +
+            (p.far ? '<span class="chip red tap" data-k="flags">بعيد عن المحل: ' + p.far + '</span>' : '') +
+            (p.noLocation ? '<span class="chip red tap" data-k="flags">من غير موقع: ' + p.noLocation + '</span>' : '') +
             '<span class="chip blue">أيام شغل: ' + p.workDays + '</span>' +
-            (p.phoneOrders || p.phoneReturns || p.remotePay ? '<span class="chip blue">📞 من غير زيارة: ' + [p.phoneOrders ? p.phoneOrders + ' طلبية' : '', p.phoneReturns ? p.phoneReturns + ' مرتجع' : '', p.remotePay ? p.remotePay + ' تحصيل' : ''].filter(Boolean).join(' + ') + '</span>' : '') +
+            (p.phoneOrders || p.phoneReturns || p.remotePay ? '<span class="chip blue tap" data-k="remote">📞 من غير زيارة: ' + [p.phoneOrders ? p.phoneOrders + ' طلبية' : '', p.phoneReturns ? p.phoneReturns + ' مرتجع' : '', p.remotePay ? p.remotePay + ' تحصيل' : ''].filter(Boolean).join(' + ') + '</span>' : '') +
           '</div></div>';
       }).join('') || '<div class="empty">مفيش بيانات في الفترة دي</div>';
     }
     if(r.reasons.length){
       const max = r.reasons[0].count;
-      html += '<div class="card"><div class="cardTitle">أسباب عدم الطلب</div>' + r.reasons.map(function(x){
+      html += '<div class="card tap" data-k="noorder"><div class="cardTitle">أسباب عدم الطلب ‹</div>' + r.reasons.map(function(x){
         return '<div style="margin-bottom:9px;"><div style="display:flex; justify-content:space-between; font-size:13.5px; font-weight:700;"><span>' + escapeHtml(x.reason) + '</span><span class="ltrNum">' + x.count + '</span></div>' +
           '<div class="bar"><i style="width:' + Math.round(x.count * 100 / max) + '%"></i></div></div>';
       }).join('') + '</div>';
@@ -3604,6 +3702,14 @@
     }
     const out = document.getElementById('reportOut');
     out.innerHTML = html;
+    // أي رقم → شاشة بتفاصيله (نفس الفترة، ولو جوه كارت مندوب: المندوب ده بس)
+    out.querySelectorAll('.tap[data-k]').forEach(function(el){
+      el.onclick = function(e){
+        e.stopPropagation();
+        const card = el.closest('.repCard');
+        openReportList_(el.dataset.k, card ? card.dataset.rep : (r.repFilter || ''), r.from, r.to);
+      };
+    });
     out.querySelectorAll('.rLink').forEach(function(b){
       b.onclick = function(){
         if(b.dataset.act === 'map'){ openMap_(b.dataset.rep, dmyToYmd_(r.to)); return; }
@@ -3617,6 +3723,268 @@
         row.onclick = function(){ openMap_(r.repFilter, dmyToYmd_(row.dataset.day)); };
       });
     }
+  }
+
+  // ================== تفاصيل أي رقم في التقرير ==================
+  // شاشة من تحت بتفتح فوق التقرير. جواها ممكن تدوس على زيارة تشوف كل اللي حصل فيها، وترجع بـ "رجوع".
+  var dl_ = { stack: [] };
+  const DL_TITLES_ = {
+    visits: '👣 الزيارات', orders: '🧾 الطلبيات', noorder: '✋ زيارات من غير طلبية', returns: '↩ المرتجعات',
+    qty: '📦 الأصناف المطلوبة', returnQty: '↩ الأصناف المرتجعة', payments: '💵 التحصيلات', newcust: '🆕 العملاء الجدد',
+    remote: '📞 من غير زيارة', flags: '📍 بعيد عن المحل / من غير موقع', offplan: '🧭 خارج خط السير', plan: '🗓 خط السير',
+  };
+  function dlOpen_(title, sub){
+    document.getElementById('dlTitle').textContent = title;
+    document.getElementById('dlSub').textContent = sub || '';
+    document.getElementById('dlBody').innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    document.getElementById('dlOverlay').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function dlClose_(){
+    document.getElementById('dlOverlay').hidden = true;
+    document.body.style.overflow = '';
+    dl_.stack = [];
+  }
+  function dlBack_(){
+    const prev = dl_.stack.pop();
+    if(!prev){ dlClose_(); return; }
+    document.getElementById('dlTitle').textContent = prev.title;
+    document.getElementById('dlSub').textContent = prev.sub;
+    document.getElementById('dlBody').innerHTML = prev.html;
+    document.getElementById('dlBody').scrollTop = prev.top;
+    dlBackBtn_();
+  }
+  function dlBackBtn_(){ document.getElementById('dlBack').hidden = !dl_.stack.length; }
+  function dlPush_(){
+    const b = document.getElementById('dlBody');
+    dl_.stack.push({ title: document.getElementById('dlTitle').textContent, sub: document.getElementById('dlSub').textContent, html: b.innerHTML, top: b.scrollTop });
+  }
+  function openReportList_(kind, rep, from, to){
+    dl_.stack = [];
+    dlBackBtn_();
+    const sub = (rep ? rep + ' • ' : (state.isAdmin ? 'كل المناديب • ' : '')) + (from === to ? from : 'من ' + from + ' لـ ' + to);
+    dlOpen_(DL_TITLES_[kind] || 'التفاصيل', sub);
+    dl_.cur = { kind: kind, rep: rep };
+    callApi('getReportList', [state.auth, dmyToYmd_(from), dmyToYmd_(to), rep || '', kind])
+      .then(function(r){
+        if(document.getElementById('dlOverlay').hidden || dl_.cur.kind !== kind) return;
+        document.getElementById('dlBody').innerHTML = renderDl_(r, !rep);
+      })
+      .catch(function(err){ document.getElementById('dlBody').innerHTML = '<div class="aiStatus err">' + escapeHtml(err.message) + '</div>'; });
+  }
+  function dlMore_(shown, total, what){
+    return total > shown ? '<div class="note" style="text-align:center; margin:6px 0 12px;">ظاهر أحدث ' + shown + ' ' + what + ' من ' + total + ' — اختار فترة أقصر أو مندوب واحد عشان تشوف الباقي</div>' : '';
+  }
+  function dlEmpty_(t){ return '<div class="empty">' + (t || 'مفيش حاجة في الفترة دي') + '</div>'; }
+  function dlSum_(items){ return '<div class="dlSum">' + items.filter(Boolean).map(function(x){ return '<span>' + x + '</span>'; }).join('') + '</div>'; }
+  function renderDl_(r, showRep){
+    const k = r.kind;
+    if(r.visits){
+      let h = dlSum_([r.total + ' زيارة']);
+      if(r.reasons && r.reasons.length) h += '<div class="dlChips">' + r.reasons.map(function(x){ return '<span class="chip">' + escapeHtml(x.reason) + ' <b>' + x.count + '</b></span>'; }).join('') + '</div>';
+      return h + (r.visits.length ? r.visits.map(function(v){ return dlVisitRow_(v, showRep); }).join('') : dlEmpty_()) + dlMore_(r.visits.length, r.total, 'زيارة');
+    }
+    if(r.docs){
+      const q = r.docs.reduce(function(s, d){ return s + d.qty; }, 0);
+      let h = dlSum_([r.total + (k === 'returns' ? ' مرتجع' : k === 'remote' ? ' مستند' : ' طلبية'), fmt(q) + ' قطعة',
+        r.payments && r.payments.length ? r.payments.length + ' تحصيل' : '']);
+      h += r.docs.length ? r.docs.map(function(d){ return dlDocCard_(d, showRep, false); }).join('') : (r.payments && r.payments.length ? '' : dlEmpty_());
+      h += dlMore_(r.docs.length, r.total, 'مستند');
+      if(r.payments && r.payments.length) h += '<div class="dayHead">💵 تحصيل من غير زيارة</div>' + r.payments.map(function(p){ return dlPayRow_(p, showRep); }).join('');
+      return h;
+    }
+    if(r.items){
+      const ret = k === 'returnQty';
+      const q = r.items.reduce(function(s, i){ return s + i.qty; }, 0);
+      let h = dlSum_([r.items.length + ' صنف', (ret ? '-' : '') + fmt(q) + ' قطعة']);
+      if(!r.items.length) return h + dlEmpty_();
+      h += '<button type="button" class="copyBtn wide" data-copy="items">📋 نسخ كل الأصناف (الكود والكمية)</button>';
+      h += '<div class="dlItems' + (ret ? ' ret' : '') + '">' + r.items.map(function(i, n){
+        return '<div class="dlItem"><span class="iNo">' + (n + 1) + '</span><div class="iMain"><b>' + escapeHtml(i.itemName) + '</b><small>' + escapeHtml(i.itemCode) +
+          ' • ' + i.docs + (ret ? ' مرتجع' : ' طلبية') + ' • ' + i.customers + ' تاجر' + (i.reasons ? ' • ' + escapeHtml(i.reasons) : '') + '</small></div>' +
+          '<span class="iQty">' + (ret ? '-' : '') + fmt(i.qty) + '</span></div>';
+      }).join('') + '</div>';
+      dl_.items = r.items;
+      return h;
+    }
+    if(r.payments){
+      const tot = r.payments.reduce(function(s, p){ return s + p.amount; }, 0);
+      let h = dlSum_([r.payments.length + ' تحصيل', fmt(tot) + ' ج']);
+      if(r.byMethod && r.byMethod.length) h += '<div class="dlChips">' + r.byMethod.map(function(m){ return '<span class="chip gold">' + escapeHtml(m.method) + ' <b>' + fmt(m.amount) + '</b></span>'; }).join('') + '</div>';
+      return h + (r.payments.length ? r.payments.map(function(p){ return dlPayRow_(p, showRep); }).join('') : dlEmpty_());
+    }
+    if(r.customers){
+      return dlSum_([r.customers.length + ' عميل جديد']) + (r.customers.length ? r.customers.map(function(c){
+        return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(c.name) + ' <span class="oCode">' + escapeHtml(c.code) + '</span></div>' +
+          '<div class="lSub">' + escapeHtml([c.date, showRep ? c.rep : '', c.area, c.address].filter(Boolean).join(' • ')) + '</div>' +
+          '<div class="dlLinks">' + (c.phone ? '<a href="tel:' + escapeHtml(String(c.phone).replace(/[^\d+]/g, '')) + '">📞 ' + escapeHtml(c.phone) + '</a>' : '') +
+          (c.lat != null ? '<a target="_blank" rel="noopener" href="https://maps.google.com/?q=' + c.lat + ',' + c.lng + '">📍 المكان</a>' : '') + '</div></div></div>';
+      }).join('') : dlEmpty_());
+    }
+    if(r.plan){
+      const done = r.plan.filter(function(p){ return p.done; }).length;
+      const miss = r.plan.length - done;
+      let h = dlSum_([done + ' اتزار', miss ? '<b style="color:var(--red)">' + miss + ' ماتزارش</b>' : '', r.plan.length ? Math.round(done * 100 / r.plan.length) + '%' : '']);
+      if(!r.plan.length) return h + dlEmpty_('مفيش خط سير متحدد في الفترة دي (أيام الزيارة في جدول التجار)');
+      let last = null;
+      r.plan.forEach(function(p){
+        if(p.done !== last){ h += '<div class="dayHead">' + (p.done ? '✔ اتزاروا' : '✖ ماتزاروش') + '</div>'; last = p.done; }
+        h += '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(p.name) + ' <span class="oCode">' + escapeHtml(p.code) + '</span></div>' +
+          '<div class="lSub">' + escapeHtml(p.weekday + ' ' + p.date + (showRep ? ' • ' + p.rep : '')) + '</div></div>' +
+          '<span class="chip ' + (p.done ? 'green' : 'red') + '">' + (p.done ? 'اتزار' : 'ماتزارش') + '</span></div>';
+      });
+      return h;
+    }
+    return dlEmpty_();
+  }
+  function dlVisitRow_(v, showRep){
+    const flags = [];
+    if(!v.hasLocation) flags.push('<span class="chip red">من غير موقع</span>');
+    else if(v.far) flags.push('<span class="chip red">بعيد ' + fmtDist_(v.distance) + '</span>');
+    if(!v.inPlan) flags.push('<span class="chip">خارج الخط</span>');
+    const res = [];
+    if(v.orderId) res.push('<span class="chip green">🧾 طلبية</span>');
+    if(v.returnId) res.push('<span class="chip red">↩ مرتجع</span>');
+    if(v.amount) res.push('<span class="chip gold">💵 ' + fmt(v.amount) + '</span>');
+    if(!v.orderId && v.reason) res.push('<span class="chip">✋ ' + escapeHtml(v.reason) + '</span>');
+    return '<div class="listRow tapRow" data-vid="' + escapeHtml(v.id) + '"><div class="lMain"><div class="lName">' + escapeHtml(v.name) + ' <span class="oCode">' + escapeHtml(v.code) + '</span></div>' +
+      '<div class="lSub">' + escapeHtml(v.date + ' ' + v.time + (showRep ? ' • ' + v.rep : '')) + (v.notes ? ' • ' + escapeHtml(v.notes) : '') + '</div>' +
+      '<div class="dlChips in">' + res.join('') + flags.join('') + '</div></div><span class="lNum">‹</span></div>';
+  }
+  function dlPayRow_(p, showRep){
+    return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(p.customerName) + ' <span class="oCode">' + escapeHtml(p.customerCode) + '</span></div>' +
+      '<div class="lSub">' + escapeHtml([p.date + ' ' + p.time, showRep ? p.rep : '', p.method + (p.chequeDate ? ' (شيك ' + p.chequeDate + ')' : ''), p.remote ? '📞 من غير زيارة' : '', p.notes].filter(Boolean).join(' • ')) + '</div></div>' +
+      '<span class="lNum" style="color:var(--gold-d); font-weight:900; direction:ltr;">' + fmt(p.amount) + '</span></div>';
+  }
+  // كارت طلبية / مرتجع بأصنافه + زرار نسخ الكود والكمية
+  function dlDocCard_(d, showRep, open){
+    const ret = d.type === 'مرتجع';
+    dl_.docs = dl_.docs || {};
+    dl_.docs[d.orderId] = d;
+    const copied = wasCopied_(d.orderId);
+    return '<details class="docCard' + (ret ? ' ret' : '') + (copied ? ' copied' : '') + '"' + (open ? ' open' : '') + '>' +
+      '<summary><div class="dTop"><b>' + escapeHtml(d.customerName) + '</b><span class="oCode">' + escapeHtml(d.customerCode) + '</span></div>' +
+      '<div class="dMeta">' + escapeHtml([d.date + ' ' + d.time, showRep ? d.rep : '', d.orderId].filter(Boolean).join(' • ')) + '</div>' +
+      '<div class="dlChips in">' + '<span class="chip ' + (ret ? 'red' : 'green') + '">' + (ret ? '↩ مرتجع' : '🧾 طلبية') + ' • ' + d.count + ' صنف • ' + (ret ? '-' : '') + fmt(d.qty) + ' قطعة</span>' +
+        (d.source === 'تليفون' ? '<span class="chip blue">📞 من غير زيارة</span>' : '') +
+        (d.batch ? '<span class="chip">📥 ' + escapeHtml(d.batch) + '</span>' : '') +
+        '<span class="chip copiedChip">✔ اتنسخ</span></div>' +
+      '<button type="button" class="copyBtn" data-copy="doc" data-id="' + escapeHtml(d.orderId) + '">📋 نسخ</button></summary>' +
+      '<div class="dLines">' + d.lines.map(function(l){
+        return '<div class="dLine"><span class="dCode">' + escapeHtml(l.itemCode) + '</span><span class="dName">' + escapeHtml(l.itemName) +
+          (ret && (l.reason || l.condition) ? '<small>' + escapeHtml([l.reason, l.condition].filter(Boolean).join(' • ')) + '</small>' : '') + '</span>' +
+          '<span class="dQty">' + (ret ? '-' : '') + fmt(l.qty) + '</span></div>';
+      }).join('') + (d.notes ? '<div class="dNotes">📝 ' + escapeHtml(d.notes) + '</div>' : '') +
+      (d.visitId ? '<button type="button" class="rLink" data-vid="' + escapeHtml(d.visitId) + '">👣 الزيارة</button>' : '') + '</div></details>';
+  }
+  // ---------- النسخ: كل صنف في سطر: الكود ثم الكمية (عمودين — تتلزق في الإكسل أو السيستم على طول) ----------
+  function linesToClip_(lines){
+    return lines.map(function(l){ return (l.itemCode || l.itemName) + '\t' + Math.abs(l.qty); }).join('\n');
+  }
+  function copyText_(text){
+    const fallback = function(){
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.top = '-1000px';
+      document.body.appendChild(ta); ta.select();
+      let ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta);
+      return ok ? Promise.resolve() : Promise.reject(new Error('copy'));
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).catch(fallback);
+    return fallback();
+  }
+  const COPIED_KEY_ = 'tf_copied_docs';
+  function copiedMap_(){ try{ return JSON.parse(localStorage.getItem(COPIED_KEY_) || '{}'); }catch(e){ return {}; } }
+  function wasCopied_(id){ return !!copiedMap_()[id]; }
+  function markCopied_(id){
+    try{
+      const m = copiedMap_();
+      m[id] = Date.now();
+      const keys = Object.keys(m);
+      if(keys.length > 3000) keys.sort(function(a, b){ return m[a] - m[b]; }).slice(0, keys.length - 3000).forEach(function(k){ delete m[k]; });
+      localStorage.setItem(COPIED_KEY_, JSON.stringify(m));
+    }catch(e){}
+  }
+  function toast_(t){
+    const el = document.getElementById('toast');
+    el.textContent = t;
+    el.hidden = false;
+    clearTimeout(toast_.t);
+    toast_.t = setTimeout(function(){ el.hidden = true; }, 1800);
+  }
+  function onCopyClick_(e){
+    const b = e.target.closest('[data-copy]');
+    if(!b) return false;
+    e.preventDefault(); e.stopPropagation();
+    let text = '', n = 0, id = '';
+    if(b.dataset.copy === 'doc'){
+      const d = dl_.docs && dl_.docs[b.dataset.id];
+      if(!d) return true;
+      text = linesToClip_(d.lines); n = d.lines.length; id = d.orderId;
+    } else if(b.dataset.copy === 'items'){
+      text = linesToClip_(dl_.items || []); n = (dl_.items || []).length;
+    }
+    copyText_(text).then(function(){
+      toast_('📋 اتنسخ ' + n + ' صنف — الكود والكمية');
+      if(id){ markCopied_(id); const card = b.closest('.docCard'); if(card) card.classList.add('copied'); }
+      try{ if(navigator.vibrate) navigator.vibrate(30); }catch(x){}
+    }).catch(function(){ showAlertModal_('الموبايل رفض النسخ — جرّب تاني', 'error'); });
+    return true;
+  }
+  document.getElementById('dlBody').addEventListener('click', function(e){
+    if(onCopyClick_(e)) return;
+    const row = e.target.closest('[data-vid]');
+    if(row) openVisitDetail_(row.dataset.vid);
+  });
+  function openVisitDetail_(id){
+    dlPush_();
+    dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '👣 تفاصيل الزيارة';
+    document.getElementById('dlSub').textContent = '';
+    const body = document.getElementById('dlBody');
+    body.innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    body.scrollTop = 0;
+    callApi('getVisitDetail', [state.auth, id]).then(function(r){
+      if(document.getElementById('dlOverlay').hidden) return;
+      const v = r.visit;
+      document.getElementById('dlSub').textContent = v.rep + ' • ' + v.date + ' ' + v.time;
+      const info = [];
+      info.push(['التاجر', escapeHtml(v.name) + ' <span class="oCode">' + escapeHtml(v.code) + '</span>']);
+      info.push(['النتيجة', escapeHtml(v.result || '—')]);
+      if(v.reason) info.push(['السبب', escapeHtml(v.reason)]);
+      if(v.notes) info.push(['ملاحظات', escapeHtml(v.notes)]);
+      info.push(['خط السير', v.inPlan ? '✔ في خط السير' : '<span style="color:var(--red)">خارج خط السير</span>']);
+      info.push(['الموقع', !v.hasLocation ? '<span style="color:var(--red)">⚠️ من غير موقع</span>' :
+        (v.distance != null ? (v.far ? '<span style="color:var(--red)">⚠️ بعيد عن المحل ' + fmtDist_(v.distance) + '</span>' : 'عند المحل (' + fmtDist_(v.distance) + ')') : 'اتسجل') +
+        ' — <a target="_blank" rel="noopener" href="https://maps.google.com/?q=' + v.lat + ',' + v.lng + '">📍 افتح الخريطة</a>']);
+      let h = '<div class="card dlInfo">' + info.map(function(x){ return '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('') + '</div>';
+      h += r.docs.map(function(d){ return dlDocCard_(d, false, true).replace(/<button type="button" class="rLink" data-vid="[^"]*">👣 الزيارة<\/button>/, ''); }).join('');
+      if(r.payments.length) h += '<div class="dayHead">💵 التحصيل</div>' + r.payments.map(function(p){ return dlPayRow_(p, false); }).join('');
+      if(!r.docs.length && !r.payments.length) h += '<div class="empty">مفيش طلبية ولا مرتجع ولا تحصيل في الزيارة دي</div>';
+      body.innerHTML = h;
+    }).catch(function(err){ body.innerHTML = '<div class="aiStatus err">' + escapeHtml(err.message) + '</div>'; });
+  }
+  // ---------- الطلبيات للنسخ (بعد التنزيل للسيستم، أو لأي دفعة قديمة) ----------
+  function openDocsForCopy_(title, sub, lines){
+    dl_.stack = [];
+    dlBackBtn_();
+    dlOpen_(title, sub);
+    const map = {}, order = [];
+    lines.forEach(function(l){
+      let d = map[l.orderId];
+      if(!d){
+        d = map[l.orderId] = { orderId: l.orderId, type: l.type, date: l.date, time: l.time, rep: l.rep, customerCode: l.customerCode, customerName: l.customerName,
+          source: l.source, batch: l.batch, notes: l.notes, visitId: '', qty: 0, count: 0, lines: [] };
+        order.push(d);
+      }
+      d.lines.push({ itemCode: l.itemCode, itemName: l.itemName, qty: Math.abs(l.qty), reason: l.reason, condition: l.condition });
+      d.qty += Math.abs(l.qty); d.count++;
+    });
+    const nOrd = order.filter(function(d){ return d.type !== 'مرتجع'; }).length;
+    document.getElementById('dlBody').innerHTML = dlSum_([nOrd + ' طلبية', (order.length - nOrd) ? (order.length - nOrd) + ' مرتجع' : '']) +
+      '<div class="note" style="margin-bottom:10px;">دوس 📋 على كل مستند ينسخ الكود والكمية لكل أصنافه، والزق في السيستم. اللي اتنسخ بيتعلّم ✔ عشان ماتكررهوش.</div>' +
+      (order.length ? order.map(function(d){ return dlDocCard_(d, true, false); }).join('') : dlEmpty_());
   }
 
   // ================== تجار ماتزاروش ==================
@@ -3876,7 +4244,7 @@
         document.getElementById('batchesOut').innerHTML = r.batches.length
           ? '<div class="dayHead">آخر الدفعات</div>' + r.batches.map(function(b, i){
               return '<div class="batchRow"><b>' + escapeHtml(b.batch) + '</b><span class="bMeta">' + escapeHtml(b.at) + ' • ' + b.docs + ' مستند</span>' +
-                '<button onclick="downloadBatch_(' + i + ')">⬇ نزّلها تاني</button></div>';
+                '<span class="bBtns"><button onclick="copyBatch_(' + i + ')">📋 نسخ</button><button onclick="downloadBatch_(' + i + ')">⬇ نزّلها تاني</button></span></div>';
             }).join('')
           : '';
       })
@@ -3985,9 +4353,25 @@
       if(!r.batch){ showLoading(false); showAlertModal_('مفيش طلبيات ولا مرتجعات جديدة — كله اتدخل السيستم قبل كده ✔', 'success'); loadBatches_(); return; }
       const x = await buildExportXlsx_(r.lines, null);
       showLoading(false);
-      document.getElementById('exportOut').innerHTML = '<div class="msg success">' + escapeHtml(r.batch) + ': ' + x.orders + ' طلبية — ' + x.returns + ' مرتجع ✔ (اتعلّموا إنهم اتدخلوا السيستم)</div>';
+      document.getElementById('exportOut').innerHTML = '<div class="msg success">' + escapeHtml(r.batch) + ': ' + x.orders + ' طلبية — ' + x.returns + ' مرتجع ✔ (اتعلّموا إنهم اتدخلوا السيستم)</div>' +
+        '<button class="primary" onclick="copyBatch_(0)">📋 افتح الطلبيات للنسخ في السيستم</button>';
+      state.lastBatchLines_ = { batch: r.batch, at: r.at, lines: r.lines };
       loadBatches_();
       downloadBlob_(x.blob, r.batch + ' - للسيستم - ' + safeDateForFile(r.at.split(' ')[0]) + '.xlsx');
+      openDocsForCopy_('📋 ' + r.batch + ' — للنسخ', r.at, r.lines);
+    }catch(err){ onError(err); }
+  }
+  // الطلبيات والمرتجعات بتاعة دفعة → كل مستند بزرار نسخ (الكود والكمية)
+  async function copyBatch_(i){
+    const b = state.batches_ && state.batches_[i];
+    const last = state.lastBatchLines_;
+    if(last && (!b || b.batch === last.batch)){ openDocsForCopy_('📋 ' + last.batch + ' — للنسخ', last.at, last.lines); return; }
+    if(!b) return;
+    try{
+      showLoading(true);
+      const r = await callApi('exportBatch', [state.auth, b.batch]);
+      showLoading(false);
+      openDocsForCopy_('📋 ' + b.batch + ' — للنسخ', b.at, r.lines);
     }catch(err){ onError(err); }
   }
   async function downloadBatch_(i){
