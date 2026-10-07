@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>TOUCH EL ZENOUKI - المناديب الخارجيين</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0c1730">
@@ -29,6 +29,11 @@
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
+  /* ===== التطبيق ثابت زي أي تطبيق موبايل: من غير زووم بصباعين أو دبل تاب، ومن غير ما الصفحة تتهز أو تسيح يمين وشمال ===== */
+  html{touch-action:manipulation; -webkit-text-size-adjust:100%; text-size-adjust:100%; overflow-x:clip; overscroll-behavior:none;}
+  body{overflow-x:clip; overscroll-behavior-y:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;}
+  button, a, label, .tile, .listRow, .adminLink, .homeBtn, .bigAction, .ofRow, .tabBar{-webkit-user-select:none; user-select:none;}
+  img{-webkit-user-drag:none;}
   html{background:var(--bg);}
   body{
     margin:0; color:var(--text);
@@ -741,6 +746,41 @@
   .pwSign div{width:28%; text-align:center;}
   .pwSign span{display:block; border-bottom:1px dotted #111; height:18px; margin-top:2px;}
   .pwFoot{margin-top:4px; font-size:8px; font-weight:800; direction:ltr; text-align:left;}
+  /* ===== الرئيسية (تصور 1) ===== */
+  .homeTop{display:flex; align-items:center; gap:12px; margin:0 0 14px;}
+  .hAvatar{width:48px; height:48px; flex:none; border-radius:50%; background:var(--navy); color:var(--gold-light); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900;}
+  .homeTop .wText{flex:1; min-width:0;}
+  .homeTop .hi{font-size:13px; color:var(--muted2); font-weight:700;}
+  .homeTop .name{font-size:19px; font-weight:900; color:var(--text); line-height:1.3; overflow-wrap:anywhere;}
+  .homeTop .gpsChip{margin:0; flex:none; background:#eef0f4; color:#5d6475; border:1px solid #dde1e8; padding:7px 12px; font-family:inherit; min-height:36px;}
+  .homeTop .gpsChip.on{background:var(--green-bg); color:var(--green); border-color:#bfe3cf;}
+  .homeTop .gpsChip.off{background:var(--red-bg); color:var(--red); border-color:#efc4c4;}
+  .todayCard{background:var(--navy); border-radius:22px; padding:16px; color:#fff; margin-bottom:14px; box-shadow:0 10px 26px rgba(12,23,48,.2);}
+  .tcHead{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:14.5px; font-weight:800; margin-bottom:12px;}
+  .tcHead #tcPlan{font-size:12px; color:#c9cfdd; font-weight:700; white-space:nowrap;}
+  .tcHead #tcPlan b{color:#fff; direction:ltr; display:inline-block;}
+  .tcGrid{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px;}
+  .tcBox{background:rgba(255,255,255,.07); border-radius:14px; padding:10px 4px; text-align:center;}
+  .tcBox b{display:block; font-size:21px; font-weight:900; line-height:1.25; direction:ltr; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .tcBox.gold b{color:var(--gold-light);}
+  .tcBox span{font-size:11.5px; color:#c9cfdd; font-weight:700;}
+  .tcBar{height:6px; background:rgba(255,255,255,.12); border-radius:99px; overflow:hidden; margin-top:14px;}
+  .tcBar i{display:block; height:6px; width:0; background:var(--gold-light); border-radius:99px; transition:width .5s;}
+  .startVisit{width:100%; min-height:62px; border:none; border-radius:18px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy); font-family:inherit; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; box-shadow:0 8px 20px rgba(182,134,47,.3); margin-bottom:6px;}
+  .qaLabel{font-size:13.5px; font-weight:800; color:var(--muted2); margin:16px 2px 10px;}
+  .qaGrid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-bottom:22px;}
+  .qa{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:14px 4px 12px; display:flex; flex-direction:column; align-items:center; gap:8px; font-family:inherit; font-size:13px; font-weight:800; color:var(--text); cursor:pointer; min-height:96px;}
+  .qi{width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center;}
+  .qi.g{background:var(--green-bg); color:var(--green);} .qi.b{background:var(--blue-bg); color:var(--blue);}
+  .qi.y{background:var(--gold-bg); color:var(--gold-d);} .qi.r{background:var(--red-bg); color:var(--red);}
+  .qi.p{background:#efecf8; color:#5b4a9c;} .qi.n{background:#eef0f3; color:#3d4556;}
+  .logoutLink{display:block; margin:18px auto 0; background:none; border:none; color:var(--muted2); font-family:inherit; font-size:13px; font-weight:800; padding:10px 16px; cursor:pointer;}
+  .tabBar{position:fixed; left:0; right:0; bottom:0; z-index:420; background:#fff; border-top:1px solid var(--border); display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); padding:6px 6px calc(6px + env(safe-area-inset-bottom)); box-shadow:0 -6px 20px rgba(12,23,48,.06);}
+  .tabBar button{background:none; border:none; font-family:inherit; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; color:var(--muted2); font-size:11.5px; font-weight:700; cursor:pointer; min-height:52px;}
+  .tabBar button.on{color:var(--navy); font-weight:900;}
+  .tabBar button.on svg{stroke-width:2.4;}
+  body.tabs .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  @media (min-width:700px){ .tabBar{max-width:640px; margin:0 auto; border-radius:18px 18px 0 0; border:1px solid var(--border);} }
   .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:700; background:var(--navy); color:#fff; font-weight:800; font-size:14px; padding:11px 18px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:90vw; text-align:center;}
   .aiStatus{text-align:center; font-size:13.5px; font-weight:800; color:var(--muted2); margin-bottom:10px; line-height:1.7;}
   .aiStatus.err{color:var(--red);}
@@ -825,44 +865,41 @@
 
   <!-- ============ الرئيسية ============ -->
   <div id="viewHome" hidden>
-    <div class="welcomeCard">
-      <div class="wText" style="position:relative;">
-        <div class="hi" id="homeHi">أهلاً بيك</div>
-        <div class="name" id="homeUserName"></div>
+    <div class="homeTop">
+      <div class="hAvatar" id="homeAvatar">؟</div>
+      <div class="wText"><div class="hi" id="homeHi">أهلاً بيك</div><div class="name" id="homeUserName"></div></div>
+      <button type="button" class="gpsChip" id="gpsChip" hidden onclick="onGpsChip_()"><span class="dot"></span><span id="gpsChipText">الموقع</span></button>
+    </div>
+    <div class="todayCard" id="repStats" hidden>
+      <div class="tcHead"><span id="tcDate">النهارده</span><span id="tcPlan">خط السير <b id="stPlan">0/0</b></span></div>
+      <div class="tcGrid">
+        <div class="tcBox"><b id="stVisits">0</b><span>زيارة</span></div>
+        <div class="tcBox"><b id="stOrders">0</b><span>طلبية</span></div>
+        <div class="tcBox"><b id="stReturns">0</b><span>مرتجع</span></div>
+        <div class="tcBox gold"><b id="stCollected">0</b><span>تحصيل</span></div>
       </div>
-      <div id="repStats" class="statRow" hidden>
-        <div class="statBox"><b id="stVisits">0</b><span>زيارة النهارده</span></div>
-        <div class="statBox"><b id="stOrders">0</b><span>طلبية</span></div>
-        <div class="statBox"><b id="stPlan">0/0</b><span>خط السير</span></div>
-        <div class="statBox"><b id="stCollected">0</b><span>تحصيل</span></div>
-      </div>
-      <div class="gpsChip" id="gpsChip" hidden onclick="onGpsChip_()"><span class="dot"></span><span id="gpsChipText">الموقع</span></div>
+      <div class="tcBar"><i id="tcBarFill"></i></div>
     </div>
 
     <!-- المندوب -->
     <div id="repHome" hidden>
       <div id="queueBar" class="queueBar" hidden><span id="queueText"></span><button onclick="flushQueue_(true)">ابعت دلوقتي</button></div>
-      <div class="routeHead">
+      <button type="button" class="startVisit" onclick="openScreen('customers')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16" y2="16"/></svg> ابدأ زيارة تاجر</button>
+      <div class="qaLabel">إجراءات سريعة</div>
+      <div class="qaGrid">
+        <button type="button" class="qa" onclick="openScreen('newcust')"><span class="qi g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="8" r="4"/><path d="M3 20c1.5-3.5 4-5 7-5"/><line x1="18" y1="13" x2="18" y2="21"/><line x1="14" y1="17" x2="22" y2="17"/></svg></span>عميل جديد</button>
+        <button type="button" class="qa" onclick="openScreen('phone')"><span class="qi b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></span>من غير زيارة</button>
+        <button type="button" class="qa" onclick="openScreen('wallet')"><span class="qi y"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 6V4H8v2"/><line x1="3" y1="12" x2="21" y2="12"/></svg></span>حافظتي</button>
+        <button type="button" class="qa" onclick="openDayReport_('', '')"><span class="qi r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>تقرير اليوم</button>
+        <button type="button" class="qa" onclick="openScreen('myorders')"><span class="qi p"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>سجل زياراتي</button>
+        <button type="button" class="qa" onclick="openScreen('report')"><span class="qi n"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/></svg></span>أرقامي</button>
+      </div>
+      <div class="routeHead" id="routeAnchor">
         <div class="sectionLabel" id="routeTitle">خط سير النهارده</div>
         <span class="routeProg" id="routeProg"></span>
       </div>
       <div id="routeList"><div class="empty">جاري التحميل...</div></div>
-      <div class="actRow">
-        <button class="bigAction" onclick="openScreen('customers')">🔎 زيارة تاجر تاني</button>
-        <button class="bigAction newCust" onclick="openScreen('newcust')">＋ عميل جديد</button>
-        <button class="bigAction phoneBtn" onclick="openScreen('phone')">📞 من غير زيارة: طلبية / مرتجع / تحصيل (تليفون أو تحويل)</button>
-        <button class="bigAction dayRepBtn" onclick="openDayReport_('', '')">📄 تقرير آخر اليوم — PDF للواتساب</button>
-        <button class="bigAction walletBtn" onclick="openScreen('wallet')">💼 حافظتي — التحصيل والإكراميات والمصروفات</button>
-      </div>
-      <div class="subHeader"><span class="lbl">خدمات إضافية</span><span class="line"></span></div>
-      <div class="subPanel">
-        <div class="gridSub">
-          <button class="adminLink ic-history" onclick="openScreen('myorders')"><div class="icon">📋</div><div class="title">سجل زياراتي</div></button>
-          <button class="adminLink ic-mystats" onclick="openScreen('report')"><div class="icon">📊</div><div class="title">زياراتي</div></button>
-          <button class="adminLink ic-settings" onclick="openScreen('profile')"><div class="icon">⚙</div><div class="title">إعداداتي</div></button>
-          <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon">⎋</div><div class="title">تسجيل خروج</div></button>
-        </div>
-      </div>
+      <button type="button" class="logoutLink" onclick="handleLogout()">⎋ تسجيل خروج</button>
     </div>
 
     <!-- المشرف وصاحب الحساب -->
@@ -1153,6 +1190,12 @@
       <div class="aiBody" id="dlBody"></div>
     </div>
   </div>
+  <nav class="tabBar" id="tabBar" hidden>
+    <button type="button" class="on" data-tab="home" onclick="tabGo_('home')"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>الرئيسية</span></button>
+    <button type="button" data-tab="route" onclick="tabGo_('route')"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>خط السير</span></button>
+    <button type="button" data-tab="wallet" onclick="tabGo_('wallet')"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 6V4H8v2"/></svg><span>حافظتي</span></button>
+    <button type="button" data-tab="profile" onclick="tabGo_('profile')"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>حسابي</span></button>
+  </nav>
   <div id="toast" class="toast" hidden></div>
   <div id="printArea"></div>
   <datalist id="aiAsnafList"></datalist>
@@ -1958,7 +2001,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.10.2';
+  const APP_VERSION_ = 'v1.11.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -1986,6 +2029,11 @@
     const home = (name === 'viewHome' || name === 'viewLogin' || name === 'viewOtp');
     document.getElementById('backBtn').hidden = home;
     document.body.classList.toggle('inner', !home);
+    const tab = { viewHome: 'home', viewWallet: 'wallet', viewProfile: 'profile' }[name];
+    const showTabs = !!(tab && state.user && !state.isAdmin);
+    document.getElementById('tabBar').hidden = !showTabs;
+    document.body.classList.toggle('tabs', showTabs);
+    if(showTabs) document.querySelectorAll('#tabBar button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab === tab); });
     if(name !== 'viewVisit'){ document.getElementById('orderBar').hidden = true; document.body.classList.remove('hasBar'); if(typeof ai_ !== 'undefined' && ai_.mode) closeAi_(); if(typeof ofPadClose_ === 'function') ofPadClose_(); }
     window.scrollTo(0, 0);
   }
@@ -2090,6 +2138,7 @@
     state.isAdmin = !!isAdmin;
     state.isOwner = !!(user && String(user.email || '').trim().toLowerCase() === OWNER_EMAIL_);
     document.getElementById('homeUserName').textContent = user.name;
+    document.getElementById('homeAvatar').textContent = String(user.name || '؟').trim().charAt(0) || '؟';
     document.getElementById('adminLink').hidden = !state.isOwner;
     document.getElementById('repHome').hidden = state.isAdmin;
     document.getElementById('adminHome').hidden = !state.isAdmin;
@@ -2118,6 +2167,18 @@
       flushExpQueue_();
     }
     if(!_pkOfferShownThisSession_) setTimeout(function(){ maybeOfferPasskey_(false); }, 2500);
+  }
+  // الشريط اللي تحت (للمندوب)
+  function tabGo_(t){
+    if(t === 'wallet'){ openScreen('wallet'); return; }
+    if(t === 'profile'){ openScreen('profile'); return; }
+    if(state.screen) goHome();
+    if(t === 'route'){
+      const el = document.getElementById('routeAnchor');
+      const top = el.getBoundingClientRect().top + window.scrollY - document.querySelector('.header').offsetHeight - 10;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      document.querySelectorAll('#tabBar button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab === 'route'); });
+    } else window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   function goBack_(){
     if((state.screen === 'visit' || state.screen === 'newcust') && state.backTo === 'customers'){ openScreen('customers'); return; }
@@ -2442,6 +2503,10 @@
     document.getElementById('stVisits').textContent = tv.length;
     document.getElementById('stOrders').textContent = tv.filter(visitHasOrder_).length + tp.filter(function(x){ return x.type === 'طلبية'; }).length;
     document.getElementById('stPlan').textContent = done.length + '/' + planned.length;
+    document.getElementById('stReturns').textContent = tv.filter(function(v){ return !!v.returnId; }).length + tp.filter(function(x){ return x.type === 'مرتجع'; }).length;
+    document.getElementById('tcBarFill').style.width = (planned.length ? Math.round(done.length * 100 / planned.length) : 0) + '%';
+    const bt = bizToday_();
+    document.getElementById('tcDate').textContent = 'النهارده — ' + wdName + ' ' + bt.getDate() + ' ' + ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'][bt.getMonth()];
     document.getElementById('stCollected').textContent = fmt(tv.reduce(function(s, v){ return s + (Number(v.amount) || 0); }, 0) +
       tp.reduce(function(s, x){ return s + (x.type === 'تحصيل' ? Number(x.amount) || 0 : 0); }, 0));
     document.getElementById('routeTitle').textContent = 'خط سير النهارده — ' + wdName;
@@ -4956,6 +5021,17 @@
 
   // ============ تسجيل الـ Service Worker + اكتشاف التحديثات تلقائيًا ============
   let newWorkerWaiting_ = null;
+
+  // ============ منع الزووم بصباعين (آيفون بيتجاهل user-scalable) — ما عدا الخريطة. الدبل تاب بيمنعه touch-action في الـ CSS ============
+  (function lockZoom_(){
+    const onMap = function(e){ return e.target && e.target.closest && e.target.closest('.leaflet-container'); };
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function(t){
+      document.addEventListener(t, function(e){ if(!onMap(e)) e.preventDefault(); }, { passive: false });
+    });
+    document.addEventListener('touchmove', function(e){
+      if(e.touches && e.touches.length > 1 && !onMap(e)) e.preventDefault();
+    }, { passive: false });
+  })();
 
   function registerServiceWorkerWithUpdateCheck_(){
     if(!('serviceWorker' in navigator)) return;
