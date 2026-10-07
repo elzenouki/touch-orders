@@ -781,6 +781,42 @@
   .tabBar button.on svg{stroke-width:2.4;}
   body.tabs .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
   @media (min-width:700px){ .tabBar{max-width:640px; margin:0 auto; border-radius:18px 18px 0 0; border:1px solid var(--border);} }
+  /* ===== الشرح أول مرة ===== */
+  .tourBar{position:fixed; top:0; left:0; right:0; z-index:960; background:var(--gold); color:var(--navy); font-weight:900; font-size:12.5px; display:flex; justify-content:space-between; align-items:center; gap:8px; padding:calc(6px + env(safe-area-inset-top)) 14px 6px;}
+  .tourBar button{background:var(--navy); color:#fff; border:none; border-radius:9px; padding:6px 14px; font-family:inherit; font-weight:900; font-size:12.5px; cursor:pointer;}
+  body.touring .header{top:calc(34px + env(safe-area-inset-top));}
+  body.touring{padding-top:calc(34px + env(safe-area-inset-top));}
+  body.touring .ofPad{z-index:945;}
+  body.touring .alertOverlay, body.touring #loading{z-index:975 !important;}
+  .tourSpot{position:fixed; z-index:940; border-radius:16px; pointer-events:none; box-shadow:0 0 0 3px var(--gold-light), 0 0 0 9999px rgba(8,14,30,.66); transition:top .25s, left .25s, width .25s, height .25s;}
+  .tourTip{position:fixed; z-index:950; left:14px; right:14px; max-width:520px; margin:0 auto; background:#fff; border-radius:20px; padding:16px 18px 12px; box-shadow:0 14px 40px rgba(0,0,0,.35); display:flex; flex-direction:column; gap:9px; transition:top .25s;}
+  .ttArrow{position:absolute; top:-8px; width:18px; height:18px; background:#fff; transform:rotate(45deg); border-radius:3px;}
+  .tourTip.above .ttArrow{top:auto; bottom:-8px;}
+  .ttTitle{font-size:16.5px; font-weight:900; color:var(--navy);}
+  .ttText{font-size:14px; color:#4b483f; line-height:1.8;}
+  .ttText b{color:var(--navy);}
+  .ttHint{background:var(--gold-bg); color:var(--gold-d); border-radius:12px; padding:7px 12px; font-size:12.5px; font-weight:800;}
+  .tourEnd{margin-top:10px; padding-top:10px; border-top:1px solid #ece8dc; font-size:13.5px;}
+  .tourEnd > b:first-child{color:var(--green); font-size:15.5px;}
+  .ttFoot{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .ttDots{display:flex; gap:5px; align-items:center;}
+  .ttDots i{width:6px; height:6px; border-radius:3px; background:#d6d2c6; display:block;}
+  .ttDots i.on{width:18px; background:var(--navy);}
+  .ttBtns{display:flex; gap:6px;}
+  .ttSkip{min-height:42px; padding:0 12px; border:none; background:none; color:var(--muted2); font-family:inherit; font-weight:800; font-size:14px; cursor:pointer;}
+  .ttNext{min-height:42px; padding:0 20px; border:none; border-radius:12px; background:var(--navy); color:#fff; font-family:inherit; font-weight:900; font-size:14.5px; cursor:pointer;}
+  .ttNext.gold{background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy);}
+  .tourWelcome{position:fixed; inset:0; z-index:970; background:rgba(8,14,30,.68); display:flex; align-items:flex-end; justify-content:center;}
+  .twSheet{background:#fff; width:100%; max-width:640px; border-radius:26px 26px 0 0; padding:24px 22px calc(18px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; box-shadow:0 -12px 40px rgba(0,0,0,.3);}
+  .twIcon{width:64px; height:64px; border-radius:20px; background:var(--gold-bg); color:var(--gold-d); display:flex; align-items:center; justify-content:center; align-self:center;}
+  .twTitle{font-size:22px; font-weight:900; color:var(--navy); text-align:center;}
+  .twText{font-size:14.5px; color:#5e5a50; line-height:1.8; text-align:center;}
+  .twText b{color:var(--navy);}
+  .twList{background:var(--bg); border-radius:16px; padding:12px 14px; display:flex; flex-direction:column; gap:9px; font-size:13.5px; font-weight:800;}
+  .twList div{display:flex; align-items:center; gap:10px;}
+  .twList i{font-style:normal; width:24px; height:24px; border-radius:50%; background:var(--navy); color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; flex:none;}
+  .twStart{min-height:56px; border:none; border-radius:16px; background:linear-gradient(135deg,var(--gold-light),var(--gold)); color:var(--navy); font-family:inherit; font-size:17px; font-weight:900; cursor:pointer;}
+  .twSkip{min-height:44px; border:none; background:none; color:var(--muted2); font-family:inherit; font-size:14px; font-weight:800; cursor:pointer;}
   .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:700; background:var(--navy); color:#fff; font-weight:800; font-size:14px; padding:11px 18px; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.3); max-width:90vw; text-align:center;}
   .aiStatus{text-align:center; font-size:13.5px; font-weight:800; color:var(--muted2); margin-bottom:10px; line-height:1.7;}
   .aiStatus.err{color:var(--red);}
@@ -1163,6 +1199,11 @@
 
   <!-- ============ إعداداتي ============ -->
   <div id="viewProfile" hidden>
+    <div class="card" id="tourAgainBox">
+      <div class="pkProfileTitle">🎓 شرح التطبيق</div>
+      <div class="note" style="margin-bottom:10px;">جولة سريعة على تاجر تجريبي — مفيش حاجة بتتسجل.</div>
+      <button class="primary" onclick="goHome(); setTimeout(tourStart_, 300);">إعادة الشرح</button>
+    </div>
     <div class="card pkProfileBox" id="pkProfileBox" hidden>
       <div class="pkProfileTitle">🔐 الدخول بالبصمة</div>
       <div class="pkProfileStatus" id="pkProfileStatus"></div>
@@ -1196,6 +1237,19 @@
     <button type="button" data-tab="wallet" onclick="tabGo_('wallet')"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 6V4H8v2"/></svg><span>حافظتي</span></button>
     <button type="button" data-tab="profile" onclick="tabGo_('profile')"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span>حسابي</span></button>
   </nav>
+  <div id="tourBar" class="tourBar" hidden><span>🎓 وضع التدريب — بيانات تجريبية مش بتتسجل</span><button type="button" onclick="tourEnd_(false)">خروج</button></div>
+  <div id="tourSpot" class="tourSpot" hidden></div>
+  <div id="tourTip" class="tourTip" hidden></div>
+  <div id="tourWelcome" class="tourWelcome" hidden>
+    <div class="twSheet">
+      <div class="twIcon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div>
+      <b class="twTitle" id="tourWelcomeName">أهلاً بيك</b>
+      <div class="twText">تعالى نعرّفك على التطبيق في دقيقة واحدة. هتجرّب بنفسك على <b>تاجر تجريبي</b> — ولا حاجة من اللي هتعملها هتتسجل.</div>
+      <div class="twList"><div><i>1</i>تشوف أرقام يومك فين</div><div><i>2</i>تزور تاجر وتكتب طلبية</div><div><i>3</i>تسجّل الزيارة</div><div><i>4</i>الحافظة والإكراميات</div></div>
+      <button type="button" class="twStart" onclick="tourStart_()">ابدأ الشرح</button>
+      <button type="button" class="twSkip" onclick="tourSkip_()">تخطي — هشوفه بعدين من "حسابي"</button>
+    </div>
+  </div>
   <div id="toast" class="toast" hidden></div>
   <div id="printArea"></div>
   <datalist id="aiAsnafList"></datalist>
@@ -2001,7 +2055,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.11.0';
+  const APP_VERSION_ = 'v1.12.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -2138,6 +2192,7 @@
     state.isAdmin = !!isAdmin;
     state.isOwner = !!(user && String(user.email || '').trim().toLowerCase() === OWNER_EMAIL_);
     document.getElementById('homeUserName').textContent = user.name;
+    document.getElementById('tourAgainBox').hidden = !!isAdmin;
     document.getElementById('homeAvatar').textContent = String(user.name || '؟').trim().charAt(0) || '؟';
     document.getElementById('adminLink').hidden = !state.isOwner;
     document.getElementById('repHome').hidden = state.isAdmin;
@@ -2386,6 +2441,7 @@
         state.rep = d;
         state.repLoadedAt = Date.now();
         localCacheSet_('rep', d);
+        if(state.demo) tourInjectDemo_();
         if(state.screen === null && !state.isAdmin) renderRepHome_();
         if(state.screen === 'customers') renderCustomers_();
         return d;
@@ -2529,6 +2585,7 @@
     }
     box.innerHTML = html;
     bindCustCards_(box, 'home');
+    tourMaybeOffer_();
   }
 
   // ---------- كل تجاري ----------
@@ -2563,7 +2620,7 @@
     const list = d.customers.filter(function(c, i){
       if(!nq) return true;
       return hay[i].some(function(x){ return x.indexOf(nq) !== -1; });
-    }).sort(function(a, b){ return AR_COLL_.compare(a.name, b.name); });
+    }).sort(function(a, b){ return ((b.demo ? 1 : 0) - (a.demo ? 1 : 0)) || AR_COLL_.compare(a.name, b.name); });
     box.innerHTML = list.length
       ? list.map(function(c){
           return custCardHtml_(c, status[c.code]).replace('<div class="cMeta">', '<div class="cMeta"><span class="chip">' + escapeHtml(c.daysText || 'من غير أيام') + '</span>');
@@ -3163,6 +3220,7 @@
   function openShelf_(){
     const v = state.visit;
     if(!v || v.phone) return;
+    if(state.demo){ toast_('عد الرف مش متاح في التدريب'); return; }
     if(!v.shelfData && !navigator.onLine){ showMsg('عد الرف محتاج نت أول مرة في الزيارة — كمّل يدوي', 'error'); return; }
     openAiSheet_('shelf', '📊 عد رف التاجر');
     document.getElementById('aiBody').innerHTML = '<div class="aiStatus" id="aiStatus">بجيب مبيعات التاجر...</div>';
@@ -3373,6 +3431,7 @@
       const ok = await confirmModal_((v.phone ? '📞 تأكيد (من غير زيارة) لـ <b>' : 'تأكيد زيارة <b>') + escapeHtml(v.cust.name) + '</b>:<br>' + lines.join('<br>'), '✔ تأكيد', 'رجوع');
       if(!ok) return;
     }
+    if(state.demo){ demoSubmit_(v, m, payment); return; }
     submitting_ = true;
     try{
       let pos = v.pos && Date.now() - v.pos.t < 3 * 60000 ? v.pos : null;
@@ -4253,6 +4312,7 @@
   var exp_ = { kind: '' };
   function openExpenseSheet_(pre){
     pre = pre || {};
+    if(state.demo){ toast_('الإكراميات بتتسجل من حافظتي — مش متاحة في التدريب'); return; }
     exp_ = { kind: pre.kind || '', customerCode: pre.customerCode || '', rep: state.isAdmin ? (wal_.rep || '') : '' };
     if(state.isAdmin && !exp_.rep){ showAlertModal_('اختار المندوب الأول', 'error'); return; }
     dl_.stack = [];
@@ -4379,6 +4439,168 @@
     area.innerHTML = html;
     document.title = 'حافظة ' + w.rep + (serial ? ' ' + serial : '');
     setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
+  }
+
+  // ================== 🎓 الشرح أول مرة (على تاجر تجريبي — مفيش حاجة بتتسجل) ==================
+  const TOUR_DEMO_CODE_ = 'DEMO-TOUR';
+  var tour_ = { on: false, i: -1, timer: null, offered: false };
+  function tourKey_(){ return 'tf_tour_done:' + ((state.auth && state.auth.email) || ''); }
+  function tourDone_(){ try{ return !!localStorage.getItem(tourKey_()); }catch(e){ return true; } }
+  function tourMarkDone_(){ try{ localStorage.setItem(tourKey_(), String(Date.now())); }catch(e){} }
+  function tourInjectDemo_(){
+    const d = state.rep;
+    if(!d || d.customers.some(function(c){ return c.code === TOUR_DEMO_CODE_; })) return;
+    const wd = bizToday_().getDay();
+    d.customers.unshift({ code: TOUR_DEMO_CODE_, name: 'محل النور — تجريبي', phone: '', address: 'تاجر للتدريب بس', area: '',
+      days: [wd], daysText: 'النهارده', lat: null, lng: null, notes: '', isNew: false, lastVisit: '', lastVisitDays: null, lastOrder: '', demo: true });
+  }
+  function tourRemoveDemo_(){
+    const d = state.rep;
+    if(d) d.customers = d.customers.filter(function(c){ return c.code !== TOUR_DEMO_CODE_; });
+  }
+  // أول ما المندوب يفتح التطبيق على الموبايل ده لأول مرة
+  function tourMaybeOffer_(){
+    if(tour_.offered || tour_.on || state.isAdmin || !state.rep || !state.auth || state.screen !== null || tourDone_()) return;
+    tour_.offered = true;
+    setTimeout(function(){ if(state.screen === null && !tour_.on) tourWelcome_(); }, 900);
+  }
+  function tourWelcome_(){
+    const name = String((state.user && state.user.name) || '').split(' ')[0];
+    document.getElementById('tourWelcomeName').textContent = 'أهلاً يا ' + (name || 'بطل');
+    document.getElementById('tourWelcome').hidden = false;
+  }
+  function tourSkip_(){
+    document.getElementById('tourWelcome').hidden = true;
+    tourMarkDone_();
+    toast_('تقدر تشوف الشرح في أي وقت من حسابي');
+  }
+  function tourStart_(){
+    document.getElementById('tourWelcome').hidden = true;
+    if(!state.rep){ showMsg('استنى لحظة لحد ما بيانات تجارك تحمّل', 'error'); return; }
+    state.demo = true;
+    tour_.on = true;
+    tourInjectDemo_();
+    goHome();
+    document.body.classList.add('touring');
+    document.getElementById('tourBar').hidden = false;
+    tourGo_(0);
+    clearInterval(tour_.timer);
+    tour_.timer = setInterval(tourTick_, 250);
+  }
+  function tourEnd_(finished){
+    clearInterval(tour_.timer);
+    tour_.on = false;
+    tour_.i = -1;
+    state.demo = false;
+    tourMarkDone_();
+    document.body.classList.remove('touring');
+    ['tourBar', 'tourSpot', 'tourTip'].forEach(function(id){ document.getElementById(id).hidden = true; });
+    tourRemoveDemo_();
+    if(state.screen !== null) goHome(); else renderRepHome_();
+    if(!finished) toast_('خرجت من الشرح — تقدر تعيده من حسابي');
+  }
+  const TOUR_STEPS_ = [
+    { target: function(){ return document.getElementById('repStats'); },
+      title: 'دي أرقام يومك',
+      text: 'زياراتك وطلبياتك والتحصيل بتاع النهارده بتتحدث لوحدها مع كل زيارة. والشريط الدهبي بيتملى كل ما تزور تاجر من خط سيرك.',
+      next: true },
+    { target: function(){ return document.querySelector('#repHome .startVisit'); },
+      title: 'جرّب بنفسك: دوس "ابدأ زيارة تاجر"',
+      text: 'هتلاقي في القايمة تاجر تجريبي اسمه <b>"محل النور — تجريبي"</b>.',
+      hint: 'الخطوة دي مستنياك تدوس على الزرار اللي منوّر',
+      wait: function(){ return state.screen === 'customers'; } },
+    { target: function(){ return document.querySelector('#custList [data-code="' + TOUR_DEMO_CODE_ + '"]'); },
+      title: 'اختار التاجر التجريبي',
+      text: 'دي قايمة كل تجارك، وتقدر تدوّر بالاسم أو الكود. دوس على <b>محل النور</b>.',
+      hint: 'دوس على التاجر اللي منوّر',
+      wait: function(){ return state.screen === 'visit' && state.visit && state.visit.cust.code === TOUR_DEMO_CODE_; } },
+    { target: function(){
+        if(ofPad_.row) return ofPad_.row;
+        return document.querySelector('#pickList .ofRow:not([hidden])');
+      },
+      title: 'اكتب الكمية قدام الصنف',
+      text: 'دوس على أي صنف، وكيبورد الأرقام هيطلعلك تحت. اكتب الكمية ودوس <b>التالي</b> للصنف اللي بعده، ولما تخلص دوس <b>تم</b>.',
+      hint: 'اكتب كمية لصنف واحد على الأقل ودوس "تم"',
+      top: true,
+      wait: function(){ return state.visit && state.visit.lines.length > 0 && !ofPadIsOpen_(); } },
+    { target: function(){ const b = document.getElementById('submitVisitBtn'); return b && b.closest('.card'); },
+      title: 'اكتب اللي حصل ودوس "سجّل"',
+      text: 'الملاحظة دي بتوصل للمشرف. ولو النت فاصل، الزيارة بتتحفظ على الموبايل وبتتبعت لوحدها أول ما النت يرجع.',
+      hint: 'في التدريب مفيش حاجة بتتبعت — جرّب براحتك',
+      wait: function(){ return state.screen === 'done'; } },
+    { enter: function(){ setTimeout(function(){ if(tour_.on) goHome(); }, 1600); },
+      target: function(){ return state.screen === null ? document.querySelector('#tabBar [data-tab="wallet"]') : null; },
+      title: 'حافظتك هنا',
+      text: 'كل اللي بتحصّله بيتجمع فيها لوحده. ومنها بتسجّل <b>الإكراميات</b> ومصروفات الفندق والعربية، ولما ترجع الشركة بتطبعها.<div class="tourEnd"><b>كده خلصنا الشرح!</b><br>الزيارة التجريبية اتمسحت. تقدر تعيد الشرح في أي وقت من <b>حسابي ← إعادة الشرح</b>.</div>',
+      finish: true },
+  ];
+  function tourGo_(i){
+    tour_.i = i;
+    const s = TOUR_STEPS_[i];
+    if(!s){ tourEnd_(true); return; }
+    if(s.enter) s.enter();
+    const dots = TOUR_STEPS_.map(function(x, k){ return '<i class="' + (k === i ? 'on' : '') + '"></i>'; }).join('');
+    const tip = document.getElementById('tourTip');
+    tip.innerHTML = '<div class="ttArrow"></div><b class="ttTitle">' + escapeHtml(s.title) + '</b><div class="ttText">' + s.text + '</div>' +
+      (s.hint ? '<div class="ttHint">' + escapeHtml(s.hint) + '</div>' : '') +
+      '<div class="ttFoot"><span class="ttDots">' + dots + '</span><span class="ttBtns">' +
+      (s.finish ? '' : '<button type="button" class="ttSkip" onclick="tourEnd_(false)">تخطي</button>') +
+      (s.next ? '<button type="button" class="ttNext" onclick="tourGo_(' + (i + 1) + ')">التالي</button>' : '') +
+      (s.finish ? '<button type="button" class="ttNext gold" onclick="tourEnd_(true)">يلا نبدأ الشغل</button>' : '') +
+      '</span></div>';
+    tour_.lastEl = null;
+    tourTick_();
+  }
+  function tourTick_(){
+    if(!tour_.on) return;
+    const s = TOUR_STEPS_[tour_.i];
+    if(!s) return;
+    if(s.wait && s.wait()){ tourGo_(tour_.i + 1); return; }
+    const el = s.target();
+    const spot = document.getElementById('tourSpot'), tip = document.getElementById('tourTip');
+    if(!el || !el.getClientRects().length){ spot.hidden = true; tip.hidden = true; return; }
+    if(tour_.lastEl !== el){
+      tour_.lastEl = el;
+      const r0 = el.getBoundingClientRect();
+      const headH = (document.querySelector('.header') || { offsetHeight: 0 }).offsetHeight;
+      if(r0.top < headH + 40 || r0.bottom > window.innerHeight - 220) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+    const r = el.getBoundingClientRect();
+    const pad = 6;
+    spot.hidden = false;
+    spot.style.top = (r.top - pad) + 'px'; spot.style.left = (r.left - pad) + 'px';
+    spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
+    tip.hidden = false;
+    const th = tip.offsetHeight, vh = window.innerHeight;
+    const padOpen = ofPadIsOpen_();
+    const limit = padOpen ? vh - document.getElementById('ofPad').offsetHeight : vh;
+    let below = !s.top && r.bottom + 14 + th < limit - 8;
+    if(s.top && r.top - 14 - th < 50) below = true;
+    if(!below && r.top - 14 - th < 50) below = true;
+    let top = below ? r.bottom + 14 : r.top - 14 - th;
+    top = Math.max(44, Math.min(top, limit - th - 8));
+    tip.style.top = top + 'px';
+    tip.classList.toggle('above', !below);
+    const ax = Math.min(Math.max(r.left + r.width / 2 - tip.getBoundingClientRect().left - 9, 18), tip.offsetWidth - 36);
+    tip.querySelector('.ttArrow').style.left = ax + 'px';
+  }
+  window.addEventListener('resize', function(){ if(tour_.on) tourTick_(); });
+  window.addEventListener('scroll', function(){ if(tour_.on) tourTick_(); }, { passive: true });
+  // تسجيل الزيارة في التدريب: مفيش أي حاجة بتروح للسيرفر
+  function demoSubmit_(v, m, payment){
+    const now = new Date();
+    const res = {
+      demo: true, phone: false, result: resultOf_({ items: m.order ? v.lines : [], returns: m.ret ? v.rets : [], payment: payment }),
+      reason: m.order ? '' : v.reason, notes: document.getElementById('visitNotes').value.trim(), orderId: '', hasLocation: true, inPlan: true,
+      time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
+      customer: { code: v.cust.code, name: v.cust.name },
+      items: m.order ? v.lines.map(function(l){ return { code: l.code, name: l.name, qty: l.qty }; }) : [],
+      returns: m.ret ? v.rets.map(function(l){ return { code: l.code, name: l.name, qty: l.qty, reason: l.reason, condition: l.condition }; }) : [],
+      payment: payment,
+    };
+    showDone_(res, false);
+    document.getElementById('doneTitle').textContent = '🎓 زيارة تجريبية — ماتبعتتش (تدريب)';
+    document.getElementById('doneOrderBtns').hidden = true;
   }
 
   // ================== تجار ماتزاروش ==================
