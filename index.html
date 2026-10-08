@@ -883,8 +883,6 @@
     min-height:68px !important; box-shadow:0 10px 22px rgba(217,162,27,.3) !important;}
   .qaLabel{font-family:var(--fTitle); font-size:15px; color:var(--o3);}
   .qa{background:var(--ocard) !important; border-color:var(--oline) !important; color:var(--o3) !important; font-weight:600 !important;}
-  .qi.b, .qi.n{background:#eef0dc !important; color:var(--o1) !important;}
-  .qi.y{background:#fbf1d6 !important; color:#8a640a !important;}
   .routeHead .sectionLabel{font-family:var(--fTitle); font-size:16px; color:var(--o3); text-transform:none; letter-spacing:0;}
   .sectionLabel{text-transform:none; letter-spacing:0;}
   .sectionLabel::before{background:var(--mus);}
@@ -966,6 +964,32 @@
   .ttNext.gold, .twStart{background:var(--mus) !important; color:var(--o3) !important;}
   .toast{background:var(--o3) !important;}
 
+
+  /* ===== الأيقونات: لون لكل زرار — مربع مدوّر بلون فاتح والأيقونة بلونها ===== */
+  svg.ico{flex:none;}
+  .secTitle{display:flex; align-items:center; gap:8px;}
+  .qa .qi, .homeBtn .icon, .adminLink .icon{border-radius:18px !important; box-shadow:none !important; --tb:#eef0dc; --tf:#3f4c22; background:var(--tb) !important; color:var(--tf) !important;}
+  .qa .qi svg, .homeBtn .icon svg, .adminLink .icon svg{stroke:var(--tf) !important; stroke-width:1.9 !important;}
+  .qa .qi{width:54px !important; height:54px !important;}
+  .homeBtn .icon{width:56px !important; height:56px !important;}
+  .adminLink .icon{width:44px !important; height:44px !important; border-radius:14px !important;}
+  .adminLink.wide .icon{width:36px !important; height:36px !important; border-radius:11px !important;}
+  /* الألوان: أخضر عميل جديد • أزرق من غير زيارة • دهبي حافظتي • أحمر تقرير اليوم • بنفسجي سجل زياراتي • زيتوني أرقامي */
+  .qa .qi.g, .homeBtn.sales .icon, .adminLink[onclick*="export"] .icon{--tb:#e3f1e6; --tf:#2b7a4f;}
+  .qa .qi.b, .homeBtn.tawrid .icon, .adminLink.ic-itemsales .icon{--tb:#e7edf6; --tf:#2c548f;}
+  .qa .qi.y, .homeBtn.jard .icon, .adminLink[onclick*="wallet"] .icon{--tb:#fbf1d6; --tf:#8a640a;}
+  .qa .qi.r, .homeBtn.returns .icon, .adminLink.ic-logout .icon{--tb:#fbe8e4; --tf:#a8432f;}
+  .qa .qi.p, .adminLink.ic-admin .icon{--tb:#eee9f6; --tf:#5b4a9c;}
+  .qa .qi.n, .adminLink.ic-settings .icon{--tb:#eef0dc; --tf:#3f4c22;}
+  .custCard .cIcon{border-radius:14px !important; width:44px !important; height:44px !important;}
+  .homeBtn::before{display:none;}
+  .modeBtn{display:flex; align-items:center; justify-content:center; gap:5px; flex-direction:column; padding:8px 4px !important; font-size:13.5px !important;}
+  .modeBtn svg{width:22px; height:22px;}
+  .visitBtns a{display:flex; align-items:center; justify-content:center; gap:6px;}
+  .visitBtns a svg{width:18px; height:18px; stroke:var(--o1);}
+  .logoutLink{display:flex !important; align-items:center; gap:6px;}
+  .logoutLink svg{width:18px; height:18px;}
+  .tabBar svg{width:24px; height:24px;}
   /* ===== ✍️ التوقيع ===== */
   .sigPad{display:block; width:100%; height:170px; border:1.5px dashed var(--mus); border-radius:12px; touch-action:none; cursor:crosshair;
     background:#fff linear-gradient(transparent calc(100% - 42px), #e0d8bd calc(100% - 42px), #e0d8bd calc(100% - 41px), transparent calc(100% - 41px));}
@@ -982,9 +1006,16 @@
   .pwCut span{position:absolute; top:-7px; left:50%; transform:translateX(-50%); background:#fff; padding:0 8px; font-size:8px; color:#666; font-weight:800;}
   .pwSheet:not(.full) .pwT{table-layout:fixed;}
   .pwSheet:not(.full) .pwT td.nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .pwSign div{position:relative;}
-  .pwSign img{position:absolute; left:50%; transform:translateX(-50%); bottom:12px; height:12mm; max-width:95%; object-fit:contain; mix-blend-mode:multiply;}
-  .pwSign small{display:block; font-size:9px; font-weight:800; color:#1a237e; min-height:12px; line-height:12px;}
+  /* التوقيع لازق في الاسم: العنوان ← التوقيع ← خط ← الاسم تحته على طول */
+  .pwSign{margin-top:8px !important;}
+  .pwSign > div{display:flex; flex-direction:column; align-items:center; width:28% !important;}
+  .pwSign > div > div{width:100% !important; text-align:center;}
+  @media print{ html, body{background:#fff !important;} }
+  .pwSign .sl{font-size:11px; font-weight:900;}
+  .pwSign .sg{height:11mm; width:100%; display:flex; align-items:flex-end; justify-content:center; border-bottom:1px dotted #111;}
+  .pwSign .sg img{display:block; height:11mm; max-width:95%; object-fit:contain; mix-blend-mode:multiply; margin-bottom:-2mm;}
+  .pwSign .sn{font-size:10.5px; font-weight:900; color:#1a237e; line-height:1.3; margin-top:1px; min-height:14px;}
+  .pwPer{color:#111 !important; font-size:9px !important; margin-top:3px !important;}
   .pwFoot{display:flex; justify-content:space-between; direction:rtl; text-align:right;}
   .pwFoot b{font-size:9px; border:1px solid #111; border-radius:3px; padding:0 6px;}
   .pw.cmp{padding-top:4mm;}
@@ -1097,7 +1128,7 @@
         <span class="routeProg" id="routeProg"></span>
       </div>
       <div id="routeList"><div class="empty">جاري التحميل...</div></div>
-      <button type="button" class="logoutLink" onclick="handleLogout()">⎋ تسجيل خروج</button>
+      <button type="button" class="logoutLink" onclick="handleLogout()"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><polyline points="15 8 19 12 15 16"/><line x1="19" y1="12" x2="9" y2="12"/></svg> تسجيل خروج</button>
     </div>
 
     <!-- المشرف وصاحب الحساب -->
@@ -1124,12 +1155,12 @@
       <div class="subHeader"><span class="lbl">الطلبيات</span><span class="line"></span></div>
       <div class="subPanel">
         <div class="gridSub">
-          <button class="adminLink ic-itemsales" onclick="openScreen('items')"><div class="icon">📦</div><div class="title">الأصناف المطلوبة</div></button>
-          <button class="adminLink ic-history" onclick="openScreen('export')"><div class="icon">⬇</div><div class="title">تصدير اليوم Excel</div></button>
-          <button class="adminLink ic-history" onclick="openScreen('wallet')"><div class="icon">💼</div><div class="title">حوافظ المناديب</div></button>
-          <button class="adminLink ic-settings" onclick="openScreen('profile')"><div class="icon">⚙</div><div class="title">إعداداتي</div></button>
-          <button class="adminLink wide ic-admin" id="adminLink" onclick="openScreen('admin')" hidden><div class="icon">👥</div><div class="title">إدارة المناديب والأصناف</div></button>
-          <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon">⎋</div><div class="title">تسجيل خروج</div></button>
+          <button class="adminLink ic-itemsales" onclick="openScreen('items')"><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div><div class="title">الأصناف المطلوبة</div></button>
+          <button class="adminLink ic-history" onclick="openScreen('export')"><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><polyline points="7 10 12 15 17 10"/><path d="M5 20h14"/></svg></div><div class="title">تصدير اليوم Excel</div></button>
+          <button class="adminLink ic-history" onclick="openScreen('wallet')"><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 6V4H8v2"/><circle cx="16.5" cy="13" r="1.3"/></svg></div><div class="title">حوافظ المناديب</div></button>
+          <button class="adminLink ic-settings" onclick="openScreen('profile')"><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div><div class="title">إعداداتي</div></button>
+          <button class="adminLink wide ic-admin" id="adminLink" onclick="openScreen('admin')" hidden><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.6-5 6.5-5s5.5 1.5 6.5 5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 15c2 .6 3.2 2.2 3.5 5"/></svg></div><div class="title">إدارة المناديب والأصناف</div></button>
+          <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><polyline points="15 8 19 12 15 16"/><line x1="19" y1="12" x2="9" y2="12"/></svg></div><div class="title">تسجيل خروج</div></button>
         </div>
       </div>
     </div>
@@ -1167,15 +1198,15 @@
       <div class="phoneNote" id="phoneNote" hidden>📞 من غير زيارة (التاجر كلّمك أو حوّل فلوس) — من غير موقع، ومش هتتحسب زيارة</div>
     </div>
     <div class="modeRow">
-      <button type="button" class="modeBtn order on" id="modeOrder" onclick="toggleMode_('order')">🧾 طلبية</button>
-      <button type="button" class="modeBtn ret" id="modeRet" onclick="toggleMode_('ret')">↩ مرتجع</button>
-      <button type="button" class="modeBtn pay" id="modePay" onclick="toggleMode_('pay')">💵 تحصيل</button>
-      <button type="button" class="modeBtn none" id="modeNone" onclick="toggleMode_('none')">✋ مافيش طلب</button>
+      <button type="button" class="modeBtn order on" id="modeOrder" onclick="toggleMode_('order')"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg><span>طلبية</span></button>
+      <button type="button" class="modeBtn ret" id="modeRet" onclick="toggleMode_('ret')"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span>مرتجع</span></button>
+      <button type="button" class="modeBtn pay" id="modePay" onclick="toggleMode_('pay')"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg><span>تحصيل</span></button>
+      <button type="button" class="modeBtn none" id="modeNone" onclick="toggleMode_('none')"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/></svg><span>مافيش طلب</span></button>
     </div>
     <div class="card secCard" id="orderBox">
-      <div class="secTitle green">🧾 ورقة الطلبية — اكتب الكمية قدام الصنف</div>
+      <div class="secTitle green"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>ورقة الطلبية — اكتب الكمية قدام الصنف</div>
       <div class="aiTools" style="grid-template-columns:1fr;">
-        <button type="button" id="shelfToolBtn" onclick="openShelf_()" style="flex-direction:row; gap:8px; padding:10px;"><span>📊</span>عد رف التاجر واطلب على قده</button>
+        <button type="button" id="shelfToolBtn" onclick="openShelf_()" style="flex-direction:row; gap:8px; padding:10px;"><span style="display:flex"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/></svg></span>عد رف التاجر واطلب على قده</button>
       </div>
       <input type="search" id="pickSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off">
       <div id="ofFilters"></div>
@@ -1184,7 +1215,7 @@
       <div class="orderSum" id="orderSum" hidden><span id="orderSumItems"></span><span id="orderSumQty"></span></div>
     </div>
     <div class="card secCard retCard" id="retBox" hidden>
-      <div class="secTitle red">↩ ورقة المرتجع — اكتب الكمية قدام الصنف</div>
+      <div class="secTitle red"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ورقة المرتجع — اكتب الكمية قدام الصنف</div>
       <div class="rangeRow">
         <div><label>سبب المرتجع</label><select id="retReason"></select></div>
         <div style="flex:0 0 auto;"><label>الحالة</label>
@@ -1203,7 +1234,7 @@
       <div class="orderSum red" id="retSum" hidden><span id="retSumItems"></span><span id="retSumQty"></span></div>
     </div>
     <div class="card secCard" id="payBox" hidden>
-      <div class="secTitle gold">💵 التحصيل</div>
+      <div class="secTitle gold"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>التحصيل</div>
       <label>المبلغ اللي استلمته (جنيه)</label>
       <input type="text" id="payAmount" class="ltrNum payAmount" inputmode="decimal" dir="ltr" placeholder="0">
       <label>طريقة الدفع</label>
@@ -1211,7 +1242,7 @@
       <div id="chequeWrap" hidden><label>تاريخ الشيك (الاستحقاق)</label><input type="date" id="chequeDate"></div>
     </div>
     <div class="card secCard" id="noOrderBox" hidden>
-      <div class="secTitle">✋ ليه مافيش طلبية؟</div>
+      <div class="secTitle">ليه مافيش طلبية؟</div>
       <div class="reasonGrid" id="reasonGrid"></div>
     </div>
     <div class="card">
@@ -2228,7 +2259,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.13.0';
+  const APP_VERSION_ = 'v1.13.2';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -2883,9 +2914,9 @@
       (c.notes ? '<br>📝 ' + escapeHtml(c.notes) : '') +
       '<br>آخر زيارة: ' + daysAgoText_(c.lastVisitDays) + (c.lastOrder ? ' — آخر طلبية: ' + escapeHtml(c.lastOrder) : '');
     const btns = [];
-    if(c.phone) btns.push('<a href="tel:' + escapeHtml(c.phone.replace(/[^\d+]/g, '')) + '">📞 اتصال</a>');
-    if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '">🧭 الاتجاهات</a>');
-    btns.push('<a href="#" onclick="openExpenseSheet_({ kind: \'إكرامية\', customerCode: state.visit.cust.code }); return false;">🎁 إكرامية</a>');
+    if(c.phone) btns.push('<a href="tel:' + escapeHtml(c.phone.replace(/[^\d+]/g, '')) + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>اتصال</a>');
+    if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>الاتجاهات</a>');
+    btns.push('<a href="#" onclick="openExpenseSheet_({ kind: \'إكرامية\', customerCode: state.visit.cust.code }); return false;"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M12 9v12M3 13h18"/><path d="M12 9c-1.5-4-6-4-6-1.5S10 9 12 9zM12 9c1.5-4 6-4 6-1.5S14 9 12 9z"/></svg>إكرامية</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
     ['visitNotes', 'pickSearch', 'retSearch', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
@@ -2979,7 +3010,7 @@
     if(m.ret && !state.visit.retPaperBuilt) renderPaper_('ret');
     document.getElementById('payBox').hidden = !m.pay;
     document.getElementById('noOrderBox').hidden = state.visit.phone || !(m.none || (!m.order && (m.ret || m.pay)));
-    document.querySelector('#noOrderBox .secTitle').textContent = m.none ? '✋ ليه مافيش طلبية؟' : '✋ ليه مافيش طلبية؟ (اختياري)';
+    document.querySelector('#noOrderBox .secTitle').textContent = m.none ? 'ليه مافيش طلبية؟' : 'ليه مافيش طلبية؟ (اختياري)';
     const parts = [];
     if(m.order) parts.push('الطلبية');
     if(m.ret) parts.push('المرتجع');
@@ -4425,7 +4456,7 @@
     const t = w.totals;
     const pend = expQueueGet_().filter(function(x){ return state.auth && x.email === state.auth.email && (!x.p.rep || x.p.rep === wal_.rep); });
     let h = '<div class="note" style="margin-bottom:10px;">' + (w.payments.length || w.expenses.length ? 'من ' + escapeHtml(w.from) + (w.to !== w.from ? ' لـ ' + escapeHtml(w.to) : '') : 'الحافظة لسه فاضية') +
-      ' — كل اللي اتحصّل واتصرف من آخر تقفيل' + (state.isAdmin ? ' (' + escapeHtml(w.rep) + ')' : '') + '</div>';
+      ' — كل اللي اتحصّل واتصرف من آخر تقفيل' + ' — <b>' + escapeHtml(w.rep || (state.user && state.user.name) || '') + '</b>' + '</div>';
     h += '<div class="tiles">' + wTile_(fmt(t.cash), 'نقدي', 'gold') + wTile_(fmt(t.cheques), 'شيكات') + wTile_(fmt(t.transfers), 'تحويلات') +
       wTile_(fmt(t.collected), 'إجمالي التحصيل', 'green') + wTile_(fmt(t.expenses), 'مصروفات وإكراميات', 'red') + wTile_(fmt(t.netCash), 'صافي النقدي', t.netCash < 0 ? 'red' : 'green') + '</div>';
     h += '<button class="primary" onclick="openExpenseSheet_({})">＋ إكرامية / مصروف</button>';
@@ -4657,8 +4688,8 @@
   }
 
   // ================== 🖨 طباعة الحافظة: نسختين على ورقة A4 ==================
-  // لحد 9 سطور: نسختين عاديين | لحد 13: نسختين بخط أصغر | أكتر من كده: كل نسخة في صفحة لوحدها
-  const WALLET_ROWS_HALF_ = 9, WALLET_ROWS_CMP_ = 13;
+  // لحد 8 سطور: نسختين عاديين | لحد 12: نسختين بخط أصغر | أكتر من كده: كل نسخة في صفحة لوحدها
+  const WALLET_ROWS_HALF_ = 8, WALLET_ROWS_CMP_ = 12;
   async function walletSignatures_(rep){
     const mgr = state.isAdmin && state.user ? state.user.name : '';
     const r = await Promise.all([fetchSignature_(rep), mgr && mgr !== rep ? fetchSignature_(mgr) : Promise.resolve('')]);
@@ -4666,7 +4697,10 @@
   }
   function walletCopyHtml_(w, label, sigs, minRows, compact){
     const t = w.totals;
-    const nonCash = t.cheques + t.transfers;
+    // التحويلات (إنستاباي / بنك / محفظة) بتتكتب في خانة النقدي — الشيكات بس في خانة الشيكات
+    const cashCol = (Number(t.cash) || 0) + (Number(t.transfers) || 0);
+    const chqCol = Number(t.cheques) || 0;
+    const netCol = cashCol - (Number(t.expenses) || 0);
     const n = Math.max(minRows, w.payments.length, w.expenses.length);
     let rows = '';
     for(let i = 0; i < n; i++){
@@ -4674,7 +4708,7 @@
       let pin = '<td></td><td></td><td class="sep"></td>';
       if(p){
         const tag = p.kind === 'cheque' ? 'شيك' + (p.chequeDate ? ' ' + p.chequeDate : '') : p.kind === 'transfer' ? p.method : '';
-        pin = '<td class="n">' + (p.kind === 'cash' ? fmt(p.amount) : '') + '</td><td class="n">' + (p.kind !== 'cash' ? fmt(p.amount) : '') + '</td>' +
+        pin = '<td class="n">' + (p.kind !== 'cheque' ? fmt(p.amount) : '') + '</td><td class="n">' + (p.kind === 'cheque' ? fmt(p.amount) : '') + '</td>' +
           '<td class="nm sep">' + escapeHtml(p.customerName) + (tag ? ' <small>(' + escapeHtml(tag) + ')</small>' : '') + '</td>';
       }
       let eout = '<td></td><td class="sep"></td>';
@@ -4702,16 +4736,20 @@
       '<thead><tr class="g"><th colspan="3" class="sep">الـــوارد</th><th colspan="2" class="sep">المنصـــرف</th><th>الصافي</th></tr>' +
       '<tr><th>القيمة نقدا</th><th>القيمة شيكات</th><th class="sep">اسم العميـــل</th><th>القيمة</th><th class="sep">بيان الصرف</th><th>صافى النقدى</th></tr></thead>' +
       '<tbody>' + rows +
-      '<tr class="tot"><td class="n">' + fmt(t.cash) + '</td><td class="n">' + (nonCash ? fmt(nonCash) : '') + '</td><td class="lbl sep">الإجمالي : <span style="direction:ltr; display:inline-block; color:#1a237e;">' + fmt(t.collected) + '</span></td>' +
-        '<td class="n">' + (t.expenses ? fmt(t.expenses) : '') + '</td><td class="lbl sep">الإجمالي :</td><td class="n">' + fmt(t.netCash) + '</td></tr></tbody></table>' +
+      '<tr class="tot"><td class="n">' + fmt(cashCol) + '</td><td class="n">' + (chqCol ? fmt(chqCol) : '') + '</td><td class="lbl sep">الإجمالي : <span style="direction:ltr; display:inline-block; color:#1a237e;">' + fmt(t.collected) + '</span></td>' +
+        '<td class="n">' + (t.expenses ? fmt(t.expenses) : '') + '</td><td class="lbl sep">الإجمالي :</td><td class="n">' + fmt(netCol) + '</td></tr></tbody></table>' +
+      (Number(t.transfers) ? '<div class="pwPer">منها تحويلات (إنستاباي / بنك / محفظة): ' + fmt(t.transfers) + ' ج — النقدي المطلوب تسليمه في الإيد: ' + fmt(netCol - Number(t.transfers)) + ' ج</div>' : '') +
       '<div class="pwSign">' +
-        '<div>توقيع المندوب' + img(sigs.rep) + '<span></span><small>' + escapeHtml(w.rep) + '</small></div>' +
-        '<div>إعتماد المدير المباشر' + img(sigs.mgr) + '<span></span><small>' + escapeHtml(sigs.mgrName || '') + '</small></div>' +
-        '<div>أمين الخزينة<span></span><small>&nbsp;</small></div></div>' +
+        '<div><div class="sl">توقيع المندوب</div><div class="sg">' + img(sigs.rep) + '</div><div class="sn">' + escapeHtml(w.rep) + '</div></div>' +
+        '<div><div class="sl">إعتماد المدير المباشر</div><div class="sg">' + img(sigs.mgr) + '</div><div class="sn">' + (escapeHtml(sigs.mgrName || '') || '&nbsp;') + '</div></div>' +
+        '<div><div class="sl">أمين الخزينة</div><div class="sg"></div><div class="sn">&nbsp;</div></div></div>' +
       '<div class="pwFoot"><b>' + label + '</b><span>F-SA-8.6-07-01</span></div></div>';
   }
   async function printWallet_(w){
     if(!w) return;
+    // اسم المندوب: من الحافظة، ولو مش راجع من السيرفر ناخده من المندوب المختار / اللي داخل
+    const repName = String(w.rep || (state.isAdmin ? (wal_.rep || '') : (state.user && state.user.name) || '')).trim();
+    w = Object.assign({}, w, { rep: repName });
     showLoading(true);
     let sigs = { rep: '', mgr: '', mgrName: '' };
     try{ sigs = await walletSignatures_(w.rep); }catch(e){}
