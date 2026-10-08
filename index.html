@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>TOUCH EL ZENOUKI - المناديب الخارجيين</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0c1730">
+<meta name="theme-color" content="#3f4c22">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://zdwiiymjgacxylgdrtsm.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=El+Messiri:wght@600;700&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
   :root{
     --bg:#f7f6f2; --card:#ffffff; --card2:#faf8f3; --border:#e4dfd1;
@@ -705,7 +705,7 @@
   select.expCustList option{padding:7px 6px; border-bottom:1px solid #eee;}
   #printArea{display:none;}
   @media print{
-    @page{size:A5 landscape; margin:0;}
+    @page{size:A4 portrait; margin:0;}
     html, body{background:#fff !important;}
     body > *:not(#printArea){display:none !important;}
     #printArea{display:block !important;}
@@ -831,6 +831,168 @@
   .shelfRow input{margin:0; padding:9px 2px; text-align:center; font-weight:900; font-size:16px;}
   .shelfRow input.st{border-color:var(--gold); background:var(--gold-bg);}
   .shelfRow input.sg{border-color:#8fd0aa; background:var(--green-bg); color:var(--green);}
+
+  /* ================= الشكل: زيتوني وخردلي (تراثي) — نفس روح تطبيق تاتش الزنوكي ================= */
+  :root{
+    --o1:#3f4c22; --o2:#56672f; --o3:#2f3519; --cream:#f3efe2; --ocard:#fbf8ee; --mus:#d9a21b; --musl:#f2cf6b; --oline:#e0d8bd; --omut:#6c7051;
+    --navy:#3f4c22; --navy2:#56672f; --navy3:#2f3519;
+    --bg:#f3efe2; --card:#fbf8ee; --card2:#f7f3e6; --border:#e0d8bd;
+    --gold:#b8860f; --gold-light:#e0b23c; --gold-d:#8a640a; --gold-bg:#fbf1d6;
+    --text:#2f3519; --muted:#7d7f62; --muted2:#6c7051;
+    --blue:#56672f; --blue-bg:#eef0dc;
+    --fTitle:'El Messiri','Alexandria',sans-serif; --fHadith:'Scheherazade New','Amiri',serif;
+  }
+  html{background:var(--cream);}
+  body{background:var(--cream) !important; font-family:'Alexandria','Cairo','Segoe UI',Tahoma,Arial,sans-serif !important; font-weight:500;}
+  h1, h2, .cardTitle, #pageTitle, .doneTitle, .ttTitle, .twTitle, .secTitle, .homeTop .name{font-family:var(--fTitle) !important;}
+  .cardTitle{text-transform:none; letter-spacing:0; font-size:15px; color:var(--o3);}
+  input, select, textarea{background:#fff !important; border-color:var(--oline) !important;}
+  select:focus, input:focus, textarea:focus{border-color:var(--mus) !important; box-shadow:0 0 0 3px rgba(217,162,27,.18) !important;}
+
+  /* الهيدر: زيتوني بخط خردلي تحت */
+  .header{background:linear-gradient(160deg, var(--o2), var(--o1) 60%, var(--o3)) !important; background-image:linear-gradient(160deg, var(--o2), var(--o1) 60%, var(--o3)) !important;
+    box-shadow:inset 0 -3px 0 var(--mus), 0 8px 20px rgba(47,53,25,.2) !important;}
+  .header::after{display:none;}
+  .header .kicker{color:var(--musl); text-transform:none; letter-spacing:.3px;}
+  .header .brandLine{background:var(--mus);}
+  .header .sub{color:#e4e2c6 !important;}
+  .backBtn{color:var(--musl); border-color:rgba(242,207,107,.55); background:rgba(255,255,255,.08);}
+  .hadithBox{background:var(--o1) !important; border:1.5px solid var(--mus) !important; border-radius:18px !important;
+    box-shadow:inset 0 0 0 4px var(--o1), inset 0 0 0 5px rgba(217,162,27,.85);}
+  .hadithBox::before{content:'✦'; color:var(--mus); font-size:16px; line-height:1; display:block; margin-bottom:2px;}
+  .hadithBox .hadithText{font-family:var(--fHadith) !important; font-size:19px !important; color:#fbf8ee !important; line-height:1.7 !important; font-weight:700;}
+  .hadithBox .hadithRef{color:var(--musl) !important; font-weight:600;}
+
+  /* الرئيسية */
+  .hAvatar{background:var(--o1) !important; color:#fbf8ee !important; width:50px; height:50px; font-size:21px;}
+  .homeTop .hi{color:var(--omut); font-weight:500;}
+  .homeTop .name{color:var(--o3); font-size:20px; font-weight:700;}
+  .homeTop .gpsChip{background:var(--ocard) !important; border-color:var(--oline) !important;}
+  .homeTop .gpsChip.on{background:#eef0dc !important; color:var(--o1) !important; border-color:#cfd6a8 !important;}
+  .todayCard{background:var(--o1) !important; border:1.5px solid var(--mus);
+    box-shadow:inset 0 0 0 4px var(--o1), inset 0 0 0 5px rgba(217,162,27,.85), 0 12px 26px rgba(47,53,25,.2) !important;}
+  .tcHead{font-family:var(--fTitle); font-size:16px;}
+  .tcHead #tcPlan{color:#e4e2c6;}
+  .tcBox{background:rgba(255,255,255,.08) !important;}
+  .tcBox span{color:#e4e2c6 !important; font-weight:500;}
+  .tcBox b{font-weight:700;}
+  .tcBox.gold b{color:var(--musl) !important;}
+  .tcBar{background:rgba(255,255,255,.14) !important;}
+  .tcBar i{background:var(--mus) !important;}
+  .startVisit{background:var(--mus) !important; color:var(--o3) !important; font-family:var(--fTitle) !important; font-size:22px !important; font-weight:700 !important;
+    min-height:68px !important; box-shadow:0 10px 22px rgba(217,162,27,.3) !important;}
+  .qaLabel{font-family:var(--fTitle); font-size:15px; color:var(--o3);}
+  .qa{background:var(--ocard) !important; border-color:var(--oline) !important; color:var(--o3) !important; font-weight:600 !important;}
+  .qi.b, .qi.n{background:#eef0dc !important; color:var(--o1) !important;}
+  .qi.y{background:#fbf1d6 !important; color:#8a640a !important;}
+  .routeHead .sectionLabel{font-family:var(--fTitle); font-size:16px; color:var(--o3); text-transform:none; letter-spacing:0;}
+  .sectionLabel{text-transform:none; letter-spacing:0;}
+  .sectionLabel::before{background:var(--mus);}
+  .routeProg{background:#fbf1d6 !important; color:#8a640a !important; border-color:rgba(217,162,27,.4) !important;}
+  .custCard{background:var(--ocard) !important; border-color:#ebe5cf !important; box-shadow:0 4px 12px rgba(47,53,25,.05) !important;}
+  .custCard .cName{color:var(--o3) !important;}
+  .custCard .cIcon{background:#eef0dc !important; color:var(--o1) !important;}
+  .custCard.done .cIcon{background:var(--green-bg) !important; color:var(--green) !important;}
+  .custCard.noorder .cIcon{background:#fbf1d6 !important; color:#8a640a !important;}
+  .custCard .cGo{color:var(--mus);}
+  .chip{background:#f1ecdc; border-color:#e6dfc6;}
+  .chip.blue{background:#eef0dc; color:var(--o1); border-color:#d6dcb4;}
+  .dayHead{color:#8a640a; font-family:var(--fTitle); font-size:14px;}
+  .queueBar{background:#eef0dc !important; border-color:#d6dcb4 !important; color:var(--o3) !important;}
+  .queueBar button{background:var(--o1) !important;}
+  .homeBtn, .adminLink{background:var(--ocard) !important; border-color:var(--oline) !important;}
+  .homeBtn .title, .adminLink .title{color:var(--o3) !important;}
+  .subPanel{background:var(--card2) !important;}
+
+  /* الشريط اللي تحت: عايم زيتوني غامق والزرار المختار خردلي */
+  .tabBar{left:12px !important; right:12px !important; bottom:calc(12px + env(safe-area-inset-bottom)) !important; max-width:616px; margin:0 auto;
+    background:var(--o3) !important; border:none !important; border-radius:24px !important; padding:6px !important; gap:4px;
+    box-shadow:0 12px 28px rgba(47,53,25,.3) !important;}
+  .tabBar button{color:#c9c7a8 !important; border-radius:18px; min-height:58px; font-size:12px !important; font-weight:500 !important;}
+  .tabBar button.on{background:var(--mus) !important; color:var(--o3) !important; font-weight:700 !important;}
+  body.tabs .wrap{padding-bottom:calc(110px + env(safe-area-inset-bottom)) !important;}
+
+  /* الزراير والكروت */
+  .card{background:var(--ocard) !important; border-color:var(--oline) !important; box-shadow:0 4px 14px rgba(47,53,25,.05) !important;}
+  button.primary{background:var(--o1) !important; border-color:var(--o1) !important;}
+  button.finalize{background:var(--o1) !important; color:#fbf8ee !important; box-shadow:inset 0 0 0 2px var(--mus), 0 8px 18px rgba(47,53,25,.2) !important;}
+  button.ghost{border-color:var(--mus) !important; color:var(--gold-d) !important;}
+  .alertOkBtn{background:var(--mus) !important; color:var(--o3) !important;}
+  .bigAction{border-color:var(--mus) !important; background:#fbf1d6 !important; color:#8a640a !important;}
+  .filters button.on, .reasonGrid button.on, .condRow button.on, .ofChip.on{background:var(--o1) !important; border-color:var(--o1) !important; color:#fbf8ee !important; box-shadow:inset 0 0 0 1.5px var(--mus);}
+  .ofChip{background:var(--ocard) !important; border-color:var(--oline) !important; color:var(--o3) !important;}
+  .ofChip.sel{background:var(--green-bg) !important; color:var(--green) !important; border-color:#bfe3cf !important;}
+  .ofChip.sel.on{background:var(--green) !important; color:#fff !important;}
+
+  /* شاشة الزيارة */
+  .visitHead .vName{font-family:var(--fTitle); color:var(--o3);}
+  .visitBtns a{background:#fff !important; border-color:var(--oline) !important; color:var(--o3) !important;}
+  .modeBtn{background:var(--ocard) !important; border-color:var(--oline) !important; color:var(--omut) !important;}
+  .modeBtn.on.order{background:var(--green-bg) !important; border-color:#8fd0aa !important; color:var(--green) !important;}
+  .modeBtn.on.ret{background:var(--red-bg) !important; border-color:#e8a9a9 !important; color:var(--red) !important;}
+  .modeBtn.on.pay{background:#fbf1d6 !important; border-color:var(--mus) !important; color:#8a640a !important;}
+  .modeBtn.on.none{background:#eef0dc !important; border-color:#b9c48a !important; color:var(--o1) !important;}
+  .aiTools button{background:#fbf1d6 !important; border:1.5px dashed var(--mus) !important; color:#8a640a !important;}
+
+  /* ورقة الطلبية والكيبورد */
+  .ofPaper{background:#fffdf5 !important; border-color:var(--oline) !important;}
+  .ofRow{border-bottom-color:#ebe5cf !important;}
+  .ofNo{color:#8a640a !important; border-left-color:rgba(217,162,27,.55) !important;}
+  .ofName{color:var(--o3) !important;}
+  input.ofIn{border-color:#c9c3a6 !important; color:var(--o1) !important;}
+  .ofRow.act{background:#fbf1d6 !important; box-shadow:inset 0 0 0 2px var(--mus) !important;}
+  .ofRow.act input.ofIn{border-color:var(--mus) !important; color:var(--o3) !important;}
+  .ofPad{background:#e8e2cb !important; border-radius:22px 22px 0 0;}
+  .ofPadTop{color:var(--o3) !important;}
+  .ofPad button{box-shadow:0 1px 0 #b7b094 !important; color:var(--o3) !important;}
+  .ofPadAct button{background:#d6cfb1 !important;}
+  .ofPadAct button.g{background:var(--green) !important; color:#fff !important;}
+  .ofPadAct button.d{background:var(--o1) !important; color:#fbf8ee !important;}
+  .orderBar{background:var(--o3) !important; box-shadow:inset 0 3px 0 var(--mus), 0 -10px 30px rgba(47,53,25,.25) !important;}
+  .orderBar button{background:var(--mus) !important; color:var(--o3) !important; font-family:var(--fTitle) !important;}
+  .shelfRow{background:#fff !important; border-color:var(--oline) !important;}
+  .shelfRow b{color:var(--o3) !important;}
+  .aiHead{background:var(--o1) !important; box-shadow:inset 0 -3px 0 var(--mus);}
+  .aiSheet{background:var(--cream) !important;}
+
+  /* تقارير وحافظة */
+  .tile, .repCard, .orderCard, .docCard, .dlItems{background:var(--ocard) !important; border-color:var(--oline) !important;}
+  .tile b, .repCard .rName, .listRow .lName, .listRow .lNum{color:var(--o3);}
+  .copyBtn{background:var(--o1) !important;}
+  .updateBanner{background:var(--o3) !important;}
+  .updateBanner button{background:var(--mus) !important; color:var(--o3) !important;}
+  .tourBar{background:var(--mus) !important; color:var(--o3) !important;}
+  .tourBar button, .ttNext{background:var(--o1) !important;}
+  .ttNext.gold, .twStart{background:var(--mus) !important; color:var(--o3) !important;}
+  .toast{background:var(--o3) !important;}
+
+  /* ===== ✍️ التوقيع ===== */
+  .sigPad{display:block; width:100%; height:170px; border:1.5px dashed var(--mus); border-radius:12px; touch-action:none; cursor:crosshair;
+    background:#fff linear-gradient(transparent calc(100% - 42px), #e0d8bd calc(100% - 42px), #e0d8bd calc(100% - 41px), transparent calc(100% - 41px));}
+  .sigCur{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--oline); border-radius:12px; padding:8px 12px; margin-bottom:10px; font-size:13px; font-weight:700; color:var(--omut);}
+  .sigCur img{height:46px; max-width:60%; object-fit:contain;}
+
+  /* ===== 🖨 الحافظة: نسختين على A4 ===== */
+  .pwSheet{width:210mm; height:296mm; display:flex; flex-direction:column; overflow:hidden; page-break-after:always; break-after:page;}
+  .pwSheet:last-child{page-break-after:auto; break-after:auto;}
+  .pwHalf{height:148mm; overflow:hidden; position:relative;}
+  .pwSheet.full{height:auto; overflow:visible;}
+  .pwSheet.full .pwHalf{height:auto; overflow:visible;}
+  .pwCut{height:0; border-top:1.5px dashed #888; position:relative; margin:0 6mm;}
+  .pwCut span{position:absolute; top:-7px; left:50%; transform:translateX(-50%); background:#fff; padding:0 8px; font-size:8px; color:#666; font-weight:800;}
+  .pwSheet:not(.full) .pwT{table-layout:fixed;}
+  .pwSheet:not(.full) .pwT td.nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pwSign div{position:relative;}
+  .pwSign img{position:absolute; left:50%; transform:translateX(-50%); bottom:12px; height:12mm; max-width:95%; object-fit:contain; mix-blend-mode:multiply;}
+  .pwSign small{display:block; font-size:9px; font-weight:800; color:#1a237e; min-height:12px; line-height:12px;}
+  .pwFoot{display:flex; justify-content:space-between; direction:rtl; text-align:right;}
+  .pwFoot b{font-size:9px; border:1px solid #111; border-radius:3px; padding:0 6px;}
+  .pw.cmp{padding-top:4mm;}
+  .pw.cmp .pwT th, .pw.cmp .pwT td{height:15px; padding:0 3px; font-size:9px; line-height:1.1;}
+  .pw.cmp .pwT td.n{font-size:9.5px;}
+  .pw.cmp .pwT thead tr.g th{font-size:10px; letter-spacing:1px;}
+  .pw.cmp .pwSign{margin-top:6px;}
+  .pw, .pdfPage{font-family:'Alexandria',Tahoma,Arial,sans-serif !important;}
 </style>
 </head>
 <body>
@@ -1204,6 +1366,16 @@
       <div class="note" style="margin-bottom:10px;">جولة سريعة على تاجر تجريبي — مفيش حاجة بتتسجل.</div>
       <button class="primary" onclick="goHome(); setTimeout(tourStart_, 300);">إعادة الشرح</button>
     </div>
+    <div class="card" id="sigCard">
+      <div class="pkProfileTitle">✍️ توقيعي</div>
+      <div class="note" style="margin-bottom:8px;">وقّع بصباعك جوه المربع — التوقيع ده بيتطبع على حافظة التحصيل.</div>
+      <div class="sigCur" id="sigCur" hidden><span>توقيعك الحالي:</span><img id="sigCurImg" alt=""></div>
+      <canvas id="sigPad" class="sigPad"></canvas>
+      <div class="walletBtns" style="margin-top:8px;">
+        <button class="ghost" onclick="sigClear_()">مسح</button>
+        <button class="finalize" onclick="sigSave_()">✔ حفظ التوقيع</button>
+      </div>
+    </div>
     <div class="card pkProfileBox" id="pkProfileBox" hidden>
       <div class="pkProfileTitle">🔐 الدخول بالبصمة</div>
       <div class="pkProfileStatus" id="pkProfileStatus"></div>
@@ -1308,7 +1480,8 @@
   const SB_RPC_URL = 'https://zdwiiymjgacxylgdrtsm.supabase.co/rest/v1/rpc/api';
   const SB_PUBLIC_KEY = 'sb_publishable_WsFj6BKtcV5JP3YTWH9r5g_1TdS791b'; // مفتاح عام — عادي يكون في التطبيق
   const GAS_ACTIONS_ = { login: 1, verifyLoginOtp: 1, resendLoginOtp: 1, verifyLoginPasskey: 1,
-    passkeyRegisterStart: 1, passkeyRegisterFinish: 1, passkeyClearMine: 1 };
+    passkeyRegisterStart: 1, passkeyRegisterFinish: 1, passkeyClearMine: 1,
+    saveMySignature: 1, getRepSignature: 1 };
   // ============ عدّاد سرعة التطبيق ============
   // بيسجل آخر 25 طلب: الوقت الكلي، ووقت السيرفر لوحده — الفرق بينهم = وقت النت.
   const SPEED_LOG_KEY_ = 'tf_speed_log';
@@ -2055,7 +2228,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.12.0';
+  const APP_VERSION_ = 'v1.13.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4388,14 +4561,113 @@
   function norm_(s){ return String(s == null ? '' : s).trim(); }
 
   // ---------- الطباعة (A4 زي الدفتر الورق) ----------
-  function printWallet_(w){
-    if(!w) return;
+  // ================== ✍️ التوقيع ==================
+  var sig_ = { ctx: null, drawing: false, dirty: false, last: null };
+  var sigMem_ = {};
+  function sigCacheGet_(name){
+    if(sigMem_[name] !== undefined) return sigMem_[name];
+    try{ const v = localStorage.getItem('tf_sig:' + name); if(v !== null) return v; }catch(e){}
+    return undefined;
+  }
+  function sigCacheSet_(name, v){ sigMem_[name] = v || ''; try{ localStorage.setItem('tf_sig:' + name, v || ''); }catch(e){} }
+  function fetchSignature_(name){
+    if(!name || !state.auth) return Promise.resolve('');
+    return callApi('getRepSignature', [state.auth, name])
+      .then(function(r){ const s = (r && r.signature) || ''; sigCacheSet_(name, s); return s; })
+      .catch(function(){ return sigCacheGet_(name) || ''; });
+  }
+  function initSigPad_(){
+    const c = document.getElementById('sigPad');
+    if(!c) return;
+    const r = c.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+    const ctx = c.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#0d1b6b'; ctx.fillStyle = '#0d1b6b';
+    sig_.ctx = ctx; sig_.dirty = false;
+    if(c.dataset.bound) return;
+    c.dataset.bound = '1';
+    const pt = function(e){ const b = c.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top }; };
+    c.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      try{ c.setPointerCapture(e.pointerId); }catch(x){}
+      sig_.drawing = true; sig_.dirty = true; sig_.last = pt(e);
+      sig_.ctx.beginPath(); sig_.ctx.arc(sig_.last.x, sig_.last.y, 1.3, 0, Math.PI * 2); sig_.ctx.fill();
+    });
+    c.addEventListener('pointermove', function(e){
+      if(!sig_.drawing) return;
+      e.preventDefault();
+      const p = pt(e);
+      sig_.ctx.beginPath(); sig_.ctx.moveTo(sig_.last.x, sig_.last.y); sig_.ctx.lineTo(p.x, p.y); sig_.ctx.stroke();
+      sig_.last = p;
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(t){ c.addEventListener(t, function(){ sig_.drawing = false; }); });
+  }
+  function sigClear_(){
+    const c = document.getElementById('sigPad');
+    if(sig_.ctx){ sig_.ctx.save(); sig_.ctx.setTransform(1, 0, 0, 1, 0, 0); sig_.ctx.clearRect(0, 0, c.width, c.height); sig_.ctx.restore(); }
+    sig_.dirty = false;
+  }
+  // بيقص التوقيع على قده ويصغّره — صورة صغيرة (حوالي 10 كيلو)
+  function sigExport_(){
+    const c = document.getElementById('sigPad');
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+    for(let y = 0; y < c.height; y++){
+      for(let x = 0; x < c.width; x++){
+        if(d[(y * c.width + x) * 4 + 3] > 10){ if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+      }
+    }
+    if(x1 < 0) return '';
+    const dpr = window.devicePixelRatio || 1;
+    if(x1 - x0 < 40 * dpr) return 'small';
+    const pad = 6;
+    x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(c.width - 1, x1 + pad); y1 = Math.min(c.height - 1, y1 + pad);
+    const w = x1 - x0 + 1, h = y1 - y0 + 1, s = Math.min(1, 420 / w, 160 / h);
+    const o = document.createElement('canvas');
+    o.width = Math.round(w * s); o.height = Math.round(h * s);
+    o.getContext('2d').drawImage(c, x0, y0, w, h, 0, 0, o.width, o.height);
+    return o.toDataURL('image/png');
+  }
+  function sigShowCurrent_(){
+    const name = state.user && state.user.name;
+    const box = document.getElementById('sigCur');
+    const show = function(s){ box.hidden = !s; if(s) document.getElementById('sigCurImg').src = s; };
+    const c = sigCacheGet_(name);
+    if(c !== undefined) show(c);
+    fetchSignature_(name).then(function(s){ if(state.screen === 'profile') show(s); });
+  }
+  function sigSave_(){
+    const url = sig_.dirty ? sigExport_() : '';
+    if(!url){ showMsg('وقّع جوه المربع الأول', 'error'); return; }
+    if(url === 'small'){ showMsg('التوقيع صغير أوي — وقّع أكبر شوية', 'error'); return; }
+    showLoading(true);
+    callApi('saveMySignature', [state.auth, url])
+      .then(function(){
+        showLoading(false);
+        sigCacheSet_(state.user.name, url);
+        sigClear_();
+        document.getElementById('sigCur').hidden = false;
+        document.getElementById('sigCurImg').src = url;
+        showMsg('اتحفظ توقيعك ✔', 'success');
+      })
+      .catch(onError);
+  }
+
+  // ================== 🖨 طباعة الحافظة: نسختين على ورقة A4 ==================
+  // لحد 9 سطور: نسختين عاديين | لحد 13: نسختين بخط أصغر | أكتر من كده: كل نسخة في صفحة لوحدها
+  const WALLET_ROWS_HALF_ = 9, WALLET_ROWS_CMP_ = 13;
+  async function walletSignatures_(rep){
+    const mgr = state.isAdmin && state.user ? state.user.name : '';
+    const r = await Promise.all([fetchSignature_(rep), mgr && mgr !== rep ? fetchSignature_(mgr) : Promise.resolve('')]);
+    return { rep: r[0], mgr: r[1], mgrName: r[1] ? mgr : '' };
+  }
+  function walletCopyHtml_(w, label, sigs, minRows, compact){
     const t = w.totals;
-    const money = function(n){ return n ? fmt(n) : ''; };
-    // نفس شكل الدفتر: الوارد (نقداً / شيكات / اسم العميل) — المنصرف (القيمة / بيان الصرف) — الصافي (صافي النقدي)
-    // التحويلات بتتكتب في خانة الشيكات (مش نقدي في إيد المندوب) ومكتوب جنب اسم العميل نوعها.
     const nonCash = t.cheques + t.transfers;
-    const n = Math.max(w.payments.length, w.expenses.length, 8);
+    const n = Math.max(minRows, w.payments.length, w.expenses.length);
     let rows = '';
     for(let i = 0; i < n; i++){
       const p = w.payments[i], e = w.expenses[i];
@@ -4417,8 +4689,8 @@
     const today = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
     const dateTxt = w.open ? today : String(w.closedAt || '').split(' ')[0];
     const period = w.from ? (w.to && w.to !== w.from ? 'من ' + w.from + ' إلى ' + w.to : w.from) : '';
-    const html =
-      '<div class="pw">' +
+    const img = function(s){ return s && s.indexOf('data:image/png;base64,') === 0 ? '<img src="' + escapeHtml(s) + '" alt="">' : ''; };
+    return '<div class="pw' + (compact ? ' cmp' : '') + '">' +
       '<div class="pwMark"><b>TOUCH</b><i>ZENOUKI</i></div>' +
       (w.open ? '<div class="pwDraft">مسودة — لسه ماتقفلتش</div>' : '') +
       '<div class="pwTop"><div class="pwCo">الزنوكى لصناعة الاجهزة الكهربائية</div><div class="pwLogo"><b>TOUCH</b><small>ZENOUKI GROUP</small></div></div>' +
@@ -4432,11 +4704,32 @@
       '<tbody>' + rows +
       '<tr class="tot"><td class="n">' + fmt(t.cash) + '</td><td class="n">' + (nonCash ? fmt(nonCash) : '') + '</td><td class="lbl sep">الإجمالي : <span style="direction:ltr; display:inline-block; color:#1a237e;">' + fmt(t.collected) + '</span></td>' +
         '<td class="n">' + (t.expenses ? fmt(t.expenses) : '') + '</td><td class="lbl sep">الإجمالي :</td><td class="n">' + fmt(t.netCash) + '</td></tr></tbody></table>' +
-      '<div class="pwSign"><div>توقيع المندوب<span></span></div><div>إعتماد المدير المباشر<span></span></div><div>أمين الخزينة<span></span></div></div>' +
-      '<div class="pwFoot">F-SA-8.6-07-01</div></div>';
+      '<div class="pwSign">' +
+        '<div>توقيع المندوب' + img(sigs.rep) + '<span></span><small>' + escapeHtml(w.rep) + '</small></div>' +
+        '<div>إعتماد المدير المباشر' + img(sigs.mgr) + '<span></span><small>' + escapeHtml(sigs.mgrName || '') + '</small></div>' +
+        '<div>أمين الخزينة<span></span><small>&nbsp;</small></div></div>' +
+      '<div class="pwFoot"><b>' + label + '</b><span>F-SA-8.6-07-01</span></div></div>';
+  }
+  async function printWallet_(w){
+    if(!w) return;
+    showLoading(true);
+    let sigs = { rep: '', mgr: '', mgrName: '' };
+    try{ sigs = await walletSignatures_(w.rep); }catch(e){}
+    showLoading(false);
+    const count = Math.max(w.payments.length, w.expenses.length);
+    const mode = count <= WALLET_ROWS_HALF_ ? 'half' : count <= WALLET_ROWS_CMP_ ? 'cmp' : 'full';
+    const minRows = mode === 'half' ? WALLET_ROWS_HALF_ : mode === 'cmp' ? WALLET_ROWS_CMP_ : 8;
+    const a = walletCopyHtml_(w, 'نسخة الشركة', sigs, minRows, mode === 'cmp');
+    const b = walletCopyHtml_(w, 'نسخة المندوب', sigs, minRows, mode === 'cmp');
+    const html = mode === 'full'
+      ? '<div class="pwSheet full"><div class="pwHalf">' + a + '</div></div><div class="pwSheet full"><div class="pwHalf">' + b + '</div></div>'
+      : '<div class="pwSheet"><div class="pwHalf">' + a + '</div><div class="pwCut"><span>✂ قص هنا</span></div><div class="pwHalf">' + b + '</div></div>';
     const area = document.getElementById('printArea');
     if(area.parentNode !== document.body) document.body.appendChild(area); // لازم يكون برا أي حاجة بتستخبى في الطباعة
     area.innerHTML = html;
+    await Promise.all(Array.from(area.querySelectorAll('img')).map(function(i){ return i.decode ? i.decode().catch(function(){}) : null; }));
+    if(!sigs.rep && !state.isAdmin) toast_('✍️ سجّل توقيعك من "حسابي" عشان يتطبع على الحافظة');
+    const serial = w.open ? '' : String(w.serial).padStart(7, '0');
     document.title = 'حافظة ' + w.rep + (serial ? ' ' + serial : '');
     setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
   }
@@ -5081,6 +5374,7 @@
   function openProfile_(){
     setTitle_('إعداداتي');
     setView('viewProfile');
+    initSigPad_(); sigShowCurrent_();
     refreshPasskeyProfile_();
     document.getElementById('gpsHelpCard').hidden = state.isAdmin;
     let st = state.gps === 'on' ? '✔ الموقع شغال على الجهاز ده.<br><br>' : state.gps === 'off' ? '⚠️ الموقع مقفول دلوقتي.<br><br>' : '';
