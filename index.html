@@ -710,8 +710,8 @@
     body > *:not(#printArea){display:none !important;}
     #printArea{display:block !important;}
   }
-  .pw{padding:6mm 7mm 4mm; font-family:'Cairo', Tahoma, Arial, sans-serif; color:#111; direction:rtl; font-size:10px; position:relative; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
-  .pwMark{position:absolute; left:0; right:0; top:105px; text-align:center; pointer-events:none; z-index:0; color:rgba(0,0,0,.07); font-weight:900; direction:ltr; line-height:.9;}
+  .pw{padding:6mm 7mm 4mm; font-family:'Cairo', Tahoma, Arial, sans-serif; color:#2f3519; direction:rtl; font-size:10px; position:relative; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .pwMark{position:absolute; left:0; right:0; top:105px; text-align:center; pointer-events:none; z-index:0; color:rgba(63,76,34,.09); font-weight:900; direction:ltr; line-height:.9;}
   .pwMark b{display:block; font-size:110px; letter-spacing:4px;}
   .pwMark i{display:block; font-style:normal; font-size:42px; letter-spacing:3px;}
   .pw > *:not(.pwMark){position:relative; z-index:1;}
@@ -722,29 +722,29 @@
   .pwLogo b{display:block; font-size:30px; font-weight:900; letter-spacing:1px; font-family:'Arial Black', Arial, sans-serif;}
   .pwLogo small{display:block; font-size:8.5px; font-weight:900; letter-spacing:2px;}
   .pwMid{display:flex; justify-content:space-between; align-items:center; margin-top:2px;}
-  .pwTitle{font-size:16px; font-weight:900; border-bottom:2px solid #111; padding:0 18px 2px; margin-inline-start:110px;}
+  .pwTitle{font-size:16px; font-weight:900; border-bottom:2px solid #2f3519; padding:0 18px 2px; margin-inline-start:110px;}
   .pwSerial{font-size:20px; font-weight:900; color:#d32f2f; letter-spacing:3px; direction:ltr; font-family:'Courier New', monospace;}
   .pwLine{display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-top:4px; font-size:11px; font-weight:900;}
   .pwLine .f{display:flex; align-items:flex-end; gap:6px;}
-  .pwLine .v{min-width:150px; border-bottom:1px dotted #111; text-align:center; font-weight:800; color:#1a237e; padding:0 6px 1px;}
+  .pwLine .v{min-width:150px; border-bottom:1px dotted #2f3519; text-align:center; font-weight:800; color:#3f4c22; padding:0 6px 1px;}
   .pwLine .v.s{min-width:95px;}
   .pwPer{font-size:8.5px; color:#444; font-weight:700; text-align:left; margin-top:2px;}
-  .pwT{width:100%; border-collapse:collapse; margin-top:5px; border:1.5px solid #111;}
-  .pwT th, .pwT td{border:1px solid #111; padding:1px 4px; text-align:center; height:20px;}
-  .pwT thead th{background:#d9d9d9; font-weight:900; font-size:10px;}
+  .pwT{width:100%; border-collapse:collapse; margin-top:5px; border:1.5px solid #2f3519;}
+  .pwT th, .pwT td{border:1px solid #2f3519; padding:1px 4px; text-align:center; height:20px;}
+  .pwT thead th{background:#e6e0c6; font-weight:900; font-size:10px;}
   .pwT thead tr.g th{letter-spacing:2px; font-size:11px;}
-  .pwT .sep{border-left:1.5px solid #111;}
-  .pwT td.n{font-weight:800; direction:ltr; white-space:nowrap; color:#1a237e; font-size:10.5px;}
-  .pwT td.nm{text-align:center; color:#1a237e; font-weight:800;}
-  .pwT td.nm small{color:#555; font-size:8px; font-weight:700;}
+  .pwT .sep{border-left:1.5px solid #2f3519;}
+  .pwT td.n{font-weight:800; direction:ltr; white-space:nowrap; color:#3f4c22; font-size:10.5px;}
+  .pwT td.nm{text-align:center; color:#3f4c22; font-weight:800;}
+  .pwT td.nm small{color:#6c7051; font-size:8px; font-weight:700;}
   .pwT tr{page-break-inside:avoid;}
-  .pwT tr.tot td{border-top:1.5px solid #111; font-weight:900; height:22px;}
+  .pwT tr.tot td{border-top:1.5px solid #2f3519; font-weight:900; height:22px;}
   .pwT tr.tot td.lbl{text-align:right;}
   .pwT tr.tot td.n{font-size:11.5px;}
   .pwT td{height:20px; line-height:1.15; vertical-align:middle;}
   .pwSign{display:flex; justify-content:space-between; margin-top:12px; page-break-inside:avoid; font-weight:900; font-size:11px; padding:0 20px;}
   .pwSign div{width:28%; text-align:center;}
-  .pwSign span{display:block; border-bottom:1px dotted #111; height:18px; margin-top:2px;}
+  .pwSign span{display:block; border-bottom:1px dotted #2f3519; height:18px; margin-top:2px;}
   .pwFoot{margin-top:4px; font-size:8px; font-weight:800; direction:ltr; text-align:left;}
   /* ===== الرئيسية (تصور 1) ===== */
   .homeTop{display:flex; align-items:center; gap:12px; margin:0 0 14px;}
@@ -997,7 +997,7 @@
   .sigCur img{height:46px; max-width:60%; object-fit:contain;}
 
   /* ===== 🖨 الحافظة: نسختين على A4 ===== */
-  .pwSheet{width:210mm; height:296mm; display:flex; flex-direction:column; overflow:hidden; page-break-after:always; break-after:page;}
+  .pwSheet{background:#fff; width:210mm; height:296mm; display:flex; flex-direction:column; overflow:hidden; page-break-after:always; break-after:page;}
   .pwSheet:last-child{page-break-after:auto; break-after:auto;}
   .pwHalf{height:148mm; overflow:hidden; position:relative;}
   .pwSheet.full{height:auto; overflow:visible;}
@@ -1012,12 +1012,17 @@
   .pwSign > div > div{width:100% !important; text-align:center;}
   @media print{ html, body{background:#fff !important;} }
   .pwSign .sl{font-size:11px; font-weight:900;}
-  .pwSign .sg{height:11mm; width:100%; display:flex; align-items:flex-end; justify-content:center; border-bottom:1px dotted #111;}
-  .pwSign .sg img{display:block; height:11mm; max-width:95%; object-fit:contain; mix-blend-mode:multiply; margin-bottom:-2mm;}
-  .pwSign .sn{font-size:10.5px; font-weight:900; color:#1a237e; line-height:1.3; margin-top:1px; min-height:14px;}
+  .pwSign .sg{height:11mm; width:100%; display:flex; align-items:flex-end; justify-content:center; border-bottom:1px dotted #2f3519;}
+  .pwSign .sg img{display:block; height:11mm; max-width:95%; object-fit:contain; margin-bottom:-2mm;}
+  .pwSign .sn{font-size:10.5px; font-weight:900; color:#3f4c22; line-height:1.3; margin-top:1px; min-height:14px;}
   .pwPer{color:#111 !important; font-size:9px !important; margin-top:3px !important;}
   .pwFoot{display:flex; justify-content:space-between; direction:rtl; text-align:right;}
-  .pwFoot b{font-size:9px; border:1px solid #111; border-radius:3px; padding:0 6px;}
+  .pwFoot b{font-size:9px; border:1px solid #2f3519; color:#3f4c22; border-radius:3px; padding:0 6px;}
+  .wPrevBtns{display:grid; grid-template-columns:1.5fr 1fr; gap:8px;}
+  .wPrevBtns button{margin-top:0 !important;}
+  .wPrevBox{margin-top:12px; background:#d9d2b6; border-radius:12px; overflow:hidden; direction:ltr; box-shadow:inset 0 0 0 1px var(--oline);}
+  .wPrevInner{width:794px; transform-origin:0 0;}
+  .wPrevInner .pwSheet{margin-bottom:6px;}
   .pw.cmp{padding-top:4mm;}
   .pw.cmp .pwT th, .pw.cmp .pwT td{height:15px; padding:0 3px; font-size:9px; line-height:1.1;}
   .pw.cmp .pwT td.n{font-size:9.5px;}
@@ -2259,7 +2264,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.13.2';
+  const APP_VERSION_ = 'v1.13.3';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4448,7 +4453,7 @@
     return '<div class="dayHead">📚 الحوافظ اللي اتقفلت</div>' + list.map(function(w, i){
       return '<div class="batchRow"><b>#' + w.serial + '</b><span class="bMeta">' + (showRep ? escapeHtml(w.rep) + ' • ' : '') + escapeHtml(w.from + (w.to !== w.from ? ' ← ' + w.to : '')) +
         '<br>تحصيل ' + fmt(w.collected) + ' • مصروفات ' + fmt(w.expenses) + ' • صافي نقدي ' + fmt(w.netCash) + '</span>' +
-        '<span class="bBtns"><button onclick="printWalletById_(' + w.id + ')">🖨 طباعة</button>' +
+        '<span class="bBtns"><button onclick="printWalletById_(' + w.id + ')">👁 معاينة</button>' +
         (state.isAdmin && (!showRep || list.findIndex(function(x){ return x.rep === w.rep; }) === i) ? '<button onclick="reopenWallet_(' + w.id + ', ' + w.serial + ')">↺ فك</button>' : '') + '</span></div>';
     }).join('');
   }
@@ -4472,9 +4477,9 @@
         '<div class="lSub">' + escapeHtml([p.date, p.method + (p.chequeDate ? ' (استحقاق ' + p.chequeDate + ')' : ''), p.remote ? '📞 من غير زيارة' : '', p.notes].filter(Boolean).join(' • ')) + '</div></div>' +
         '<span class="lNum" style="color:var(--gold-d); font-weight:900; direction:ltr;">' + fmt(p.amount) + '</span></div>';
     }).join('') : '<div class="empty">مفيش تحصيل</div>') + '</div>';
-    h += '<div class="walletBtns"><button class="whatsapp" onclick="printWallet_(wal_.w)">🖨 طباعة (مسودة)</button>' +
-      '<button class="finalize" onclick="closeWallet_()">🔒 تقفيل وطباعة</button></div>' +
-      '<div class="note" style="margin-top:8px;">"تقفيل وطباعة" لما المندوب يسلّم في الشركة: الحافظة بتاخد رقم مسلسل، واللي بعد كده بيبدأ في حافظة جديدة.</div>';
+    h += '<div class="walletBtns"><button class="ghost" onclick="previewWallet_(wal_.w)">👁 معاينة</button>' +
+      '<button class="finalize" onclick="closeWallet_()">🔒 تقفيل ومشاركة PDF</button></div>' +
+      '<div class="note" style="margin-top:8px;">"تقفيل ومشاركة" لما المندوب يسلّم في الشركة: الحافظة بتاخد رقم مسلسل وبيطلعلك PDF تبعته واتساب أو تطبعه، واللي بعد كده بيبدأ في حافظة جديدة.</div>';
     h += walletHistHtml_(lst.closed, false);
     document.getElementById('walletOut').innerHTML = h;
   }
@@ -4484,7 +4489,7 @@
     if(!w.payments.length && !w.expenses.length){ showAlertModal_('الحافظة فاضية — مفيش تحصيل ولا مصروفات', 'error'); return; }
     const t = w.totals;
     const ok = await confirmModal_('تقفيل حافظة <b>' + escapeHtml(w.rep) + '</b>:<br>تحصيل <b>' + fmt(t.collected) + '</b> ج — مصروفات <b>' + fmt(t.expenses) + '</b> ج<br>' +
-      'صافي النقدي المطلوب تسليمه: <b>' + fmt(t.netCash) + '</b> ج<br><br>بعد التقفيل الحافظة بتاخد رقم ومش هينفع تتعدل. متأكد؟', '🔒 قفّل واطبع', 'رجوع');
+      'صافي النقدي المطلوب تسليمه: <b>' + fmt(t.netCash) + '</b> ج<br><br>بعد التقفيل الحافظة بتاخد رقم ومش هينفع تتعدل. متأكد؟', '🔒 قفّل وابعت', 'رجوع');
     if(!ok) return;
     try{
       showLoading(true);
@@ -4492,7 +4497,7 @@
       showLoading(false);
       showMsg('اتقفلت حافظة رقم ' + r.serial + ' ✔', 'success');
       loadWallet_();
-      printWallet_(r);
+      previewWallet_(r, true);
     }catch(err){ onError(err); }
   }
   async function reopenWallet_(id, serial){
@@ -4508,7 +4513,7 @@
     catch(err){ onError(err); }
   }
   async function printWalletById_(id){
-    try{ showLoading(true); const w = await callApi('getWallet', [state.auth, '', String(id)]); showLoading(false); printWallet_(w); }
+    try{ showLoading(true); const w = await callApi('getWallet', [state.auth, '', String(id)]); showLoading(false); previewWallet_(w); }
     catch(err){ onError(err); }
   }
 
@@ -4603,9 +4608,17 @@
   function sigCacheSet_(name, v){ sigMem_[name] = v || ''; try{ localStorage.setItem('tf_sig:' + name, v || ''); }catch(e){} }
   function fetchSignature_(name){
     if(!name || !state.auth) return Promise.resolve('');
+    const local = sigCacheGet_(name) || '';
+    const mine = !!(state.user && name === state.user.name);
     return callApi('getRepSignature', [state.auth, name])
-      .then(function(r){ const s = (r && r.signature) || ''; sigCacheSet_(name, s); return s; })
-      .catch(function(){ return sigCacheGet_(name) || ''; });
+      .then(function(r){
+        const s = (r && r.signature) || '';
+        if(s){ sigCacheSet_(name, s); return s; }
+        // السيرفر مش لاقي توقيع بس الموبايل عنده واحد اتعمل عليه — نستخدمه ونرفعه تاني
+        if(local && mine) callApi('saveMySignature', [state.auth, local]).catch(function(){});
+        return local;
+      })
+      .catch(function(){ return local; });
   }
   function initSigPad_(){
     const c = document.getElementById('sigPad');
@@ -4616,7 +4629,7 @@
     const ctx = c.getContext('2d');
     ctx.scale(dpr, dpr);
     ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#0d1b6b'; ctx.fillStyle = '#0d1b6b';
+    ctx.strokeStyle = '#2f3519'; ctx.fillStyle = '#2f3519';
     sig_.ctx = ctx; sig_.dirty = false;
     if(c.dataset.bound) return;
     c.dataset.bound = '1';
@@ -4692,6 +4705,7 @@
   const WALLET_ROWS_HALF_ = 8, WALLET_ROWS_CMP_ = 12;
   async function walletSignatures_(rep){
     const mgr = state.isAdmin && state.user ? state.user.name : '';
+    if(!state.isAdmin && state.user) rep = state.user.name; // المندوب: توقيعه هو المتسجل على الموبايل ده
     const r = await Promise.all([fetchSignature_(rep), mgr && mgr !== rep ? fetchSignature_(mgr) : Promise.resolve('')]);
     return { rep: r[0], mgr: r[1], mgrName: r[1] ? mgr : '' };
   }
@@ -4736,7 +4750,7 @@
       '<thead><tr class="g"><th colspan="3" class="sep">الـــوارد</th><th colspan="2" class="sep">المنصـــرف</th><th>الصافي</th></tr>' +
       '<tr><th>القيمة نقدا</th><th>القيمة شيكات</th><th class="sep">اسم العميـــل</th><th>القيمة</th><th class="sep">بيان الصرف</th><th>صافى النقدى</th></tr></thead>' +
       '<tbody>' + rows +
-      '<tr class="tot"><td class="n">' + fmt(cashCol) + '</td><td class="n">' + (chqCol ? fmt(chqCol) : '') + '</td><td class="lbl sep">الإجمالي : <span style="direction:ltr; display:inline-block; color:#1a237e;">' + fmt(t.collected) + '</span></td>' +
+      '<tr class="tot"><td class="n">' + fmt(cashCol) + '</td><td class="n">' + (chqCol ? fmt(chqCol) : '') + '</td><td class="lbl sep">الإجمالي : <span style="direction:ltr; display:inline-block; color:#3f4c22;">' + fmt(t.collected) + '</span></td>' +
         '<td class="n">' + (t.expenses ? fmt(t.expenses) : '') + '</td><td class="lbl sep">الإجمالي :</td><td class="n">' + fmt(netCol) + '</td></tr></tbody></table>' +
       (Number(t.transfers) ? '<div class="pwPer">منها تحويلات (إنستاباي / بنك / محفظة): ' + fmt(t.transfers) + ' ج — النقدي المطلوب تسليمه في الإيد: ' + fmt(netCol - Number(t.transfers)) + ' ج</div>' : '') +
       '<div class="pwSign">' +
@@ -4745,15 +4759,12 @@
         '<div><div class="sl">أمين الخزينة</div><div class="sg"></div><div class="sn">&nbsp;</div></div></div>' +
       '<div class="pwFoot"><b>' + label + '</b><span>F-SA-8.6-07-01</span></div></div>';
   }
-  async function printWallet_(w){
-    if(!w) return;
+  async function walletDoc_(w){
     // اسم المندوب: من الحافظة، ولو مش راجع من السيرفر ناخده من المندوب المختار / اللي داخل
     const repName = String(w.rep || (state.isAdmin ? (wal_.rep || '') : (state.user && state.user.name) || '')).trim();
     w = Object.assign({}, w, { rep: repName });
-    showLoading(true);
     let sigs = { rep: '', mgr: '', mgrName: '' };
-    try{ sigs = await walletSignatures_(w.rep); }catch(e){}
-    showLoading(false);
+    try{ sigs = await walletSignatures_(repName); }catch(e){}
     const count = Math.max(w.payments.length, w.expenses.length);
     const mode = count <= WALLET_ROWS_HALF_ ? 'half' : count <= WALLET_ROWS_CMP_ ? 'cmp' : 'full';
     const minRows = mode === 'half' ? WALLET_ROWS_HALF_ : mode === 'cmp' ? WALLET_ROWS_CMP_ : 8;
@@ -4762,14 +4773,83 @@
     const html = mode === 'full'
       ? '<div class="pwSheet full"><div class="pwHalf">' + a + '</div></div><div class="pwSheet full"><div class="pwHalf">' + b + '</div></div>'
       : '<div class="pwSheet"><div class="pwHalf">' + a + '</div><div class="pwCut"><span>✂ قص هنا</span></div><div class="pwHalf">' + b + '</div></div>';
+    const serial = w.open ? '' : String(w.serial).padStart(7, '0');
+    const title = 'حافظة ' + repName + (serial ? ' ' + serial : ' (مسودة)');
+    return { w: w, sigs: sigs, html: html, title: title, fileName: title.replace(/[\\\/:*?"<>|]/g, ' ') + '.pdf' };
+  }
+  function waitImgs_(root){
+    return Promise.all(Array.from(root.querySelectorAll('img')).map(function(i){ return i.decode ? i.decode().catch(function(){}) : null; }));
+  }
+  async function printWalletDoc_(d){
     const area = document.getElementById('printArea');
     if(area.parentNode !== document.body) document.body.appendChild(area); // لازم يكون برا أي حاجة بتستخبى في الطباعة
-    area.innerHTML = html;
-    await Promise.all(Array.from(area.querySelectorAll('img')).map(function(i){ return i.decode ? i.decode().catch(function(){}) : null; }));
-    if(!sigs.rep && !state.isAdmin) toast_('✍️ سجّل توقيعك من "حسابي" عشان يتطبع على الحافظة');
-    const serial = w.open ? '' : String(w.serial).padStart(7, '0');
-    document.title = 'حافظة ' + w.rep + (serial ? ' ' + serial : '');
+    area.innerHTML = d.html;
+    await waitImgs_(area);
+    document.title = d.title;
     setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
+  }
+  async function printWallet_(w){
+    if(!w) return;
+    showLoading(true);
+    const d = await walletDoc_(w);
+    showLoading(false);
+    printWalletDoc_(d);
+  }
+  // PDF بنفس شكل الطباعة بالظبط (نسختين على A4)
+  async function walletPdfBlob_(d){
+    await Promise.all([ensureHtml2CanvasLoaded_(), ensureJsPdfLoaded_()]);
+    const stage = document.createElement('div');
+    stage.id = 'pdfStage';
+    stage.innerHTML = d.html;
+    document.body.appendChild(stage);
+    try{
+      await waitImgs_(stage);
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+      const sheets = stage.querySelectorAll('.pwSheet');
+      for(let i = 0; i < sheets.length; i++){
+        const canvas = await html2canvas(sheets[i], { scale: 2, backgroundColor: '#ffffff', logging: false });
+        if(i) pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, 210, Math.min(297, canvas.height / canvas.width * 210));
+      }
+      return pdf.output('blob');
+    } finally {
+      stage.remove();
+    }
+  }
+  // شاشة المعاينة: الحافظة زي ما هتطلع بالظبط + مشاركة PDF واتساب + طباعة
+  async function previewWallet_(w, justClosed){
+    if(!w) return;
+    showLoading(true);
+    let d;
+    try{ d = await walletDoc_(w); }catch(err){ onError(err); return; }
+    showLoading(false);
+    dl_.stack = [];
+    dlBackBtn_();
+    dlOpen_(justClosed ? '✔ اتقفلت الحافظة — ابعتها' : 'معاينة الحافظة', d.title);
+    const body = document.getElementById('dlBody');
+    body.innerHTML = '<div class="wPrevBtns"><button class="whatsapp" id="wShareBtn" disabled>جاري تجهيز PDF...</button><button class="ghost" id="wPrintBtn">🖨 طباعة</button></div>' +
+      (d.sigs.rep ? '' : '<div class="note" style="margin-top:8px; color:var(--red);">✍️ مفيش توقيع للمندوب — يسجّله من "حسابي" وبعدين يفتح المعاينة تاني</div>') +
+      '<div class="wPrevBox" id="wPrevBox"><div class="wPrevInner" id="wPrevInner">' + d.html + '</div></div>';
+    const fit = function(){
+      const box = document.getElementById('wPrevBox'), inner = document.getElementById('wPrevInner');
+      if(!box || !inner) return;
+      const sc = box.clientWidth / 794;
+      inner.style.transform = 'scale(' + sc + ')';
+      box.style.height = Math.ceil(inner.offsetHeight * sc) + 'px';
+    };
+    requestAnimationFrame(fit);
+    waitImgs_(body).then(fit);
+    document.getElementById('wPrintBtn').onclick = function(){ printWalletDoc_(d); };
+    const btn = document.getElementById('wShareBtn');
+    walletPdfBlob_(d).then(function(blob){
+      if(!document.body.contains(btn)) return;
+      btn.disabled = false;
+      btn.textContent = '📤 مشاركة PDF واتساب';
+      btn.onclick = function(){ shareOrDownload_(blob, d.fileName, 'share'); };
+    }).catch(function(){
+      btn.textContent = 'تعذر تجهيز PDF — اطبع بدل كده';
+    });
   }
 
   // ================== 🎓 الشرح أول مرة (على تاجر تجريبي — مفيش حاجة بتتسجل) ==================
