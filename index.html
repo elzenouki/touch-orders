@@ -979,7 +979,22 @@
   .qa .qi.b, .homeBtn.tawrid .icon, .adminLink.ic-itemsales .icon{--tb:#e7edf6; --tf:#2c548f;}
   .qa .qi.y, .homeBtn.jard .icon, .adminLink[onclick*="wallet"] .icon{--tb:#fbf1d6; --tf:#8a640a;}
   .qa .qi.r, .homeBtn.returns .icon, .adminLink.ic-logout .icon{--tb:#fbe8e4; --tf:#a8432f;}
-  .qa .qi.p, .adminLink.ic-admin .icon{--tb:#eee9f6; --tf:#5b4a9c;}
+  .qa .qi.p, .adminLink.ic-admin .icon, .homeBtn.usage .icon{--tb:#eee9f6; --tf:#5b4a9c;}
+  .uRow{display:block; background:#fff; border:1px solid #ebe5cf; border-radius:14px; padding:10px 12px; margin-bottom:8px;}
+  .uRow summary{list-style:none; cursor:pointer;}
+  .uRow summary::-webkit-details-marker{display:none;}
+  .uTop{display:flex; align-items:baseline; gap:8px;}
+  .uTop b{flex:1; font-family:var(--fTitle); font-size:16.5px; color:var(--o3); overflow-wrap:anywhere;}
+  .uTop span{font-size:18px; font-weight:800; color:var(--o1); direction:ltr;}
+  .uBar{height:6px; background:#efe9d4; border-radius:3px; margin:6px 0 4px; overflow:hidden;}
+  .uBar i{display:block; height:100%; background:var(--o1); border-radius:3px;}
+  .uBar i.hot{background:#a8432f;}
+  .uSub{font-size:12px; color:var(--omut); line-height:1.6;}
+  .uAct{display:flex; justify-content:space-between; font-size:13px; padding:5px 2px; border-top:1px dashed #ebe5cf; color:var(--o3);}
+  .uAct span:last-child{font-weight:800; direction:ltr;}
+  .uTabs{display:flex; gap:6px; margin-bottom:10px;}
+  .uTabs button{flex:1; height:40px; border-radius:12px; border:1px solid var(--oline); background:var(--ocard); color:var(--o3); font-family:inherit; font-weight:700; cursor:pointer;}
+  .uTabs button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
   .qa .qi.n, .adminLink.ic-settings .icon{--tb:#eef0dc; --tf:#3f4c22;}
   .custCard .cIcon{border-radius:14px !important; width:44px !important; height:44px !important;}
   .homeBtn::before{display:none;}
@@ -1074,6 +1089,9 @@
   .pwPer{color:#111 !important; font-size:9px !important; margin-top:3px !important;}
   .pwFoot{display:flex; justify-content:space-between; direction:rtl; text-align:right;}
   .pwFoot b{font-size:9px; border:1px solid #2f3519; color:#3f4c22; border-radius:3px; padding:0 6px;}
+  .invPdfBox{margin:8px 0 10px;}
+  .docCard .invPdfBox{margin:0 12px 8px;}
+  .invPdfBox button{width:100%; margin:0 !important;}
   .wPrevBtns{display:grid; grid-template-columns:1.5fr 1fr; gap:8px;}
   .wPrevBtns button{margin-top:0 !important;}
   .wPrevBox{margin-top:12px; background:#d9d2b6; border-radius:12px; overflow:hidden; direction:ltr; box-shadow:inset 0 0 0 1px var(--oline);}
@@ -1212,6 +1230,10 @@
         <button class="homeBtn returns" onclick="openScreen('unvisited')">
           <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c73e3e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
           <div><div class="title">تجار ماتزاروش</div><div class="desc">اللي محدش راحلهم من فترة</div></div>
+        </button>
+        <button class="homeBtn usage" onclick="openUsage_(1)">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+          <div><div class="title">استهلاك السيرفر</div><div class="desc">مين بيكلّم السيرفر كام مرة وفي إيه</div></div>
         </button>
       </div>
       <div class="subHeader"><span class="lbl">الطلبيات</span><span class="line"></span></div>
@@ -2321,7 +2343,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.15.0';
+  const APP_VERSION_ = 'v1.17.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4664,10 +4686,80 @@
   function norm_(s){ return String(s == null ? '' : s).trim(); }
 
   // ---------- الطباعة (A4 زي الدفتر الورق) ----------
+  // ================== 📶 استهلاك السيرفر: مين بيبعت طلبات كتير ==================
+  // الأرقام بتيجي من جدول api_usage في Supabase (اتعمل بملف api_usage.sql)
+  const USAGE_NAMES_ = { logLocations: 'تسجيل الموقع', bootstrapRep: 'فتح التطبيق', bootstrapHome: 'فتح الرئيسية', submitVisit: 'تسجيل زيارة',
+    getShelfData: 'عد الرف', listMyOrders: 'سجل زياراتي', getDayReport: 'تقرير اليوم', getReport: 'التقارير', getReportList: 'قايمة التقارير',
+    getLiveLocations: 'المناديب دلوقتي', getMapDay: 'خريطة اليوم', getUnvisited: 'تجار ماتزاروش', getItemsReport: 'الأصناف المطلوبة',
+    listWallets: 'الحوافظ', getWallet: 'الحافظة', addExpense: 'إكرامية/مصروف', deleteExpense: 'مسح مصروف', closeWallet: 'تقفيل حافظة',
+    reopenWallet: 'فك تقفيل', addCustomer: 'عميل جديد', getVisitDetail: 'تفاصيل زيارة', exportOrders: 'تصدير', exportBatch: 'تصدير',
+    transferOrders: 'تحويل للسيستم', listTransferBatches: 'دفعات التحويل', listReps: 'المناديب', listRepNames: 'أسماء المناديب',
+    getRepSignature: 'جلب التوقيع', saveMySignature: 'حفظ التوقيع' };
+  var usage_ = { rows: [], days: 1, today: '' };
+  function openUsage_(days){
+    usage_.days = days || 1;
+    dl_.stack = [];
+    dlBackBtn_();
+    dlOpen_('📶 استهلاك السيرفر', 'عدد الطلبات اللي كل واحد بعتها للسيرفر');
+    const body = document.getElementById('dlBody');
+    body.innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    fetch(SB_RPC_URL.replace(/\/api$/, '/api_usage_report'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
+      body: JSON.stringify({ auth: state.auth, days: 7 }),
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(!d || d.ok !== true){
+        const msg = (d && (d.error || d.message)) || '';
+        body.innerHTML = '<div class="aiStatus err">' + (/api_usage_report/.test(msg) || (d && d.code === 'PGRST202')
+          ? 'لسه ملف api_usage.sql ماتشغّلش في Supabase' : escapeHtml(msg || 'حصل خطأ')) + '</div>';
+        return;
+      }
+      usage_.rows = d.result.rows || [];
+      usage_.today = d.result.today;
+      renderUsage_();
+    }).catch(function(){ body.innerHTML = '<div class="aiStatus err">تعذر الاتصال بالسيرفر</div>'; });
+  }
+  function renderUsage_(){
+    const body = document.getElementById('dlBody');
+    const today = usage_.today;
+    const rows = usage_.rows.filter(function(r){ return usage_.days === 1 ? r.day === today : true; });
+    const people = {}, acts = {};
+    let total = 0;
+    rows.forEach(function(r){
+      const k = r.name || r.who;
+      const p = people[k] || (people[k] = { name: k, n: 0, acts: {} });
+      p.n += r.n; p.acts[r.action] = (p.acts[r.action] || 0) + r.n;
+      acts[r.action] = (acts[r.action] || 0) + r.n;
+      total += r.n;
+    });
+    const list = Object.keys(people).map(function(k){ return people[k]; }).sort(function(a, b){ return b.n - a.n; });
+    const max = list.length ? list[0].n : 1;
+    const avg = list.length ? total / list.length : 0;
+    const an = function(a){ return USAGE_NAMES_[a] || a; };
+    const sortActs = function(o){ return Object.keys(o).sort(function(a, b){ return o[b] - o[a]; }); };
+    let h = '<div class="uTabs"><button class="' + (usage_.days === 1 ? 'on' : '') + '" onclick="usage_.days=1; renderUsage_()">النهارده</button>' +
+      '<button class="' + (usage_.days === 7 ? 'on' : '') + '" onclick="usage_.days=7; renderUsage_()">آخر 7 أيام</button></div>';
+    h += dlSum_([fmt(total) + ' طلب', list.length + ' مستخدم', list.length ? 'المتوسط ' + fmt(Math.round(avg)) : '']);
+    if(!list.length) return body.innerHTML = h + '<div class="empty">لسه مفيش طلبات متسجلة في الفترة دي</div>';
+    h += list.map(function(p){
+      const hot = p.n > avg * 2 && list.length > 2;
+      const top = sortActs(p.acts);
+      return '<details class="uRow"><summary><div class="uTop"><b>' + (hot ? '🔥 ' : '') + escapeHtml(p.name) + '</b><span>' + fmt(p.n) + '</span></div>' +
+        '<div class="uBar"><i class="' + (hot ? 'hot' : '') + '" style="width:' + Math.max(3, Math.round(p.n / max * 100)) + '%"></i></div>' +
+        '<div class="uSub">' + top.slice(0, 3).map(function(a){ return escapeHtml(an(a)) + ' ' + fmt(p.acts[a]); }).join(' • ') + '</div></summary>' +
+        top.map(function(a){ return '<div class="uAct"><span>' + escapeHtml(an(a)) + '</span><span>' + fmt(p.acts[a]) + '</span></div>'; }).join('') + '</details>';
+    }).join('');
+    h += '<div class="sectionLabel" style="margin:16px 0 8px;">حسب نوع الطلب</div><div class="uRow">' +
+      sortActs(acts).map(function(a){ return '<div class="uAct"><span>' + escapeHtml(an(a)) + '</span><span>' + fmt(acts[a]) + '</span></div>'; }).join('') + '</div>';
+    h += '<div class="note" style="margin-top:10px;">🔥 = أكتر من ضعف المتوسط. "تسجيل الموقع" بيتبعت لوحده كل 3 دقايق طول ما التطبيق مفتوح — لو رقمه عالي يبقى المندوب سايب التطبيق مفتوح طول اليوم.<br>' +
+      'ملحوظة: "Log Query" في Supabase بيتحسب من قراية اللوجات في لوحة Supabase نفسها، مش من الطلبات دي — بس كل ما الطلبات تكتر اللوجات بتكبر.</div>';
+    body.innerHTML = h;
+  }
+
   // ================== 📄 فواتير التاجر — بتتقري من جهاز الشركة (Postgres) عن طريق n8n، قراية بس ==================
   // التطبيق كله على Supabase، والفواتير بس من جهازك. لو جهازك مش متاح بيعرض آخر نسخة اتحفظت على الموبايل.
-  const INVOICES_URL = 'https://CHANGE-ME.ts.net/webhook/field-invoices'; // ← لينك Tailscale Funnel + مسار الـ webhook
-  const INVOICES_KEY = 'CHANGE_ME_SECRET';                                // ← نفس المفتاح اللي في n8n
+  const INVOICES_URL = 'https://desktop-i2p68qq.taile535be.ts.net/webhook/field-invoices'; // ← لينك Tailscale Funnel + مسار الـ webhook
+  const INVOICES_KEY = 'tz5307877912f3af6d0296';                                // ← نفس المفتاح اللي في n8n
   const INV_CACHE_ = 'tf_inv:';
   function invoicesOn_(){ return INVOICES_URL.indexOf('CHANGE-ME') === -1; }
   function invCacheGet_(c){ try{ return JSON.parse(localStorage.getItem(INV_CACHE_ + c) || 'null'); }catch(e){ return null; } }
@@ -4708,16 +4800,52 @@
       .then(function(r){ if(!document.getElementById('dlOverlay').hidden) body.innerHTML = invHtml_(r.data, r.at, !r.fresh); })
       .catch(function(){ if(!cached) body.innerHTML = '<div class="aiStatus err">جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية</div>'; });
   }
+  // PDF الفاتورة بنفس شكل ورك فلو "اصدار الفواتير" — بيتعمل على جهاز الشركة (n8n + Gotenberg)
+  var invPdfCache_ = {};
+  function invPdf_(box){
+    const v = state.visit;
+    if(!v) return;
+    const inv = box.getAttribute('data-inv') || '';
+    const key = v.cust.code + '|' + inv;
+    const done = function(blob){
+      const name = 'فاتورة ' + v.cust.name + (inv ? ' ' + inv : '') + '.pdf';
+      box.innerHTML = '<div class="wPrevBtns"><button type="button" class="whatsapp">📤 مشاركة</button><button type="button" class="ghost">👁 عرض</button></div>';
+      const b = box.querySelectorAll('button');
+      b[0].onclick = function(){ shareOrDownload_(blob, name.replace(/[\\\/:*?"<>|]/g, ' '), 'share'); };
+      b[1].onclick = function(){ const u = URL.createObjectURL(blob); window.open(u, '_blank'); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000); };
+    };
+    if(invPdfCache_[key]) return done(invPdfCache_[key]);
+    const btn = box.querySelector('button');
+    btn.disabled = true; btn.textContent = 'جاري تجهيز الفاتورة...';
+    const url = INVOICES_URL + '?acct=' + encodeURIComponent(v.cust.code) + '&k=' + encodeURIComponent(INVOICES_KEY) + '&pdf=1' + (inv ? '&inv=' + encodeURIComponent(inv) : '');
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 30000) : null;
+    fetch(url, { signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' })
+      .then(function(r){
+        const ct = r.headers.get('content-type') || '';
+        if(r.ok && ct.indexOf('pdf') !== -1) return r.blob();
+        return r.json().then(function(d){ throw new Error((d && d.error) || 'تعذر عمل الفاتورة'); });
+      })
+      .then(function(blob){ invPdfCache_[key] = new Blob([blob], { type: 'application/pdf' }); done(invPdfCache_[key]); })
+      .catch(function(err){
+        btn.disabled = false;
+        btn.textContent = '📄 حاول تاني';
+        toast_(err && err.name === 'AbortError' ? 'جهاز الشركة اتأخر في الرد — حاول تاني' : (err && err.message && !/fetch|network/i.test(err.message) ? err.message : 'جهاز الشركة مش متاح دلوقتي — حاول كمان شوية'));
+      })
+      .finally(function(){ if(timer) clearTimeout(timer); });
+  }
   function invHtml_(d, at, stale){
     let h = '';
     if(stale) h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">⚠️ دي آخر نسخة اتحفظت على الموبايل' +
       (at ? ' (' + new Date(at).toLocaleString('ar-EG', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) + ')' : '') + ' — جهاز الشركة مش متاح دلوقتي</div>';
     if(!d.invoices || !d.invoices.length) return h + '<div class="empty">مفيش فواتير للتاجر ده في آخر 12 شهر</div>';
     h += dlSum_([d.invoices.length + ' فاتورة', 'آخر شراء ' + ymdToDmy_(d.lastDate), fmt(d.total12m) + ' ج']);
+    h += '<div class="invPdfBox" data-inv=""><button type="button" class="finalize" onclick="invPdf_(this.parentNode)">📄 آخر فاتورة PDF</button></div>';
     h += d.invoices.map(function(inv){
       return '<details class="docCard"><summary><div class="dTop"><b>' + escapeHtml(inv.inv) + '</b></div>' +
         '<div class="dMeta">' + ymdToDmy_(inv.date) + ' — ' + inv.lines.length + ' صنف</div>' +
         '<span class="copyBtn" style="pointer-events:none; direction:ltr;">' + fmt(inv.total) + '</span></summary>' +
+        '<div class="invPdfBox" data-inv="' + escapeHtml(inv.inv) + '"><button type="button" class="ghost" onclick="invPdf_(this.parentNode)">📄 الفاتورة PDF</button></div>' +
         '<div class="dLines">' + inv.lines.map(function(l){
           return '<div class="dLine"><span class="dCode">' + escapeHtml(l.code) + '</span><span class="dName">' + escapeHtml(l.name) + '</span><span class="dQty">' + fmt(l.qty) + '</span></div>';
         }).join('') + '</div></details>';
