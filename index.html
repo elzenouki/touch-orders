@@ -2343,7 +2343,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.17.0';
+  const APP_VERSION_ = 'v1.17.1';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4759,9 +4759,17 @@
   // ================== 📄 فواتير التاجر — بتتقري من جهاز الشركة (Postgres) عن طريق n8n، قراية بس ==================
   // التطبيق كله على Supabase، والفواتير بس من جهازك. لو جهازك مش متاح بيعرض آخر نسخة اتحفظت على الموبايل.
   const INVOICES_URL = 'https://desktop-i2p68qq.taile535be.ts.net/webhook/field-invoices'; // ← لينك Tailscale Funnel + مسار الـ webhook
-  const INVOICES_KEY = 'tz5307877912f3af6d0296';                                // ← نفس المفتاح اللي في n8n
+  // مفيش كلمة سر ثابتة: n8n بيتأكد من المندوب نفسه (إيميل + PIN) في Supabase، وكل مندوب بيشوف عملاءه بس
   const INV_CACHE_ = 'tf_inv:';
   function invoicesOn_(){ return INVOICES_URL.indexOf('CHANGE-ME') === -1; }
+  function invPost_(params, signal){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || '');
+    b.set('p', (state.auth && state.auth.pin) || '');
+    Object.keys(params).forEach(function(k){ b.set(k, params[k]); });
+    // form-urlencoded = طلب بسيط، المتصفح مش بيبعت OPTIONS قبله
+    return fetch(INVOICES_URL, { method: 'POST', body: b, signal: signal, cache: 'no-store' });
+  }
   function invCacheGet_(c){ try{ return JSON.parse(localStorage.getItem(INV_CACHE_ + c) || 'null'); }catch(e){ return null; } }
   function invCacheSet_(c, v){ try{ localStorage.setItem(INV_CACHE_ + c, JSON.stringify({ t: Date.now(), v: v })); }catch(e){} }
   var invInflight_ = {};
@@ -4769,17 +4777,16 @@
     if(invInflight_[code]) return invInflight_[code];
     const ctrl = window.AbortController ? new AbortController() : null;
     const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
-    const url = INVOICES_URL + '?acct=' + encodeURIComponent(code) + '&k=' + encodeURIComponent(INVOICES_KEY);
-    const p = fetch(url, { signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' })
+    const p = invPost_({ acct: code }, ctrl ? ctrl.signal : undefined)
       .then(function(r){ return r.json(); })
       .then(function(d){
-        if(!d || d.ok !== true) throw new Error((d && d.error) || 'bad');
+        if(!d || d.ok !== true){ const e = new Error((d && d.error) || 'bad'); e.denied = true; throw e; }
         invCacheSet_(code, d);
         return { data: d, fresh: true };
       })
       .catch(function(err){
         const c = invCacheGet_(code);
-        if(c) return { data: c.v, fresh: false, at: c.t };
+        if(c && !err.denied) return { data: c.v, fresh: false, at: c.t };
         throw err;
       })
       .finally(function(){ if(timer) clearTimeout(timer); delete invInflight_[code]; });
@@ -4798,7 +4805,10 @@
     body.innerHTML = cached ? invHtml_(cached.v, cached.t, true) : '<div class="aiStatus">جاري جلب الفواتير من الشركة...</div>';
     fetchInvoices_(c.code)
       .then(function(r){ if(!document.getElementById('dlOverlay').hidden) body.innerHTML = invHtml_(r.data, r.at, !r.fresh); })
-      .catch(function(){ if(!cached) body.innerHTML = '<div class="aiStatus err">جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية</div>'; });
+      .catch(function(err){
+        if(err && err.denied) body.innerHTML = '<div class="aiStatus err">' + escapeHtml(err.message) + '</div>';
+        else if(!cached) body.innerHTML = '<div class="aiStatus err">جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية</div>';
+      });
   }
   // PDF الفاتورة بنفس شكل ورك فلو "اصدار الفواتير" — بيتعمل على جهاز الشركة (n8n + Gotenberg)
   var invPdfCache_ = {};
@@ -4817,10 +4827,11 @@
     if(invPdfCache_[key]) return done(invPdfCache_[key]);
     const btn = box.querySelector('button');
     btn.disabled = true; btn.textContent = 'جاري تجهيز الفاتورة...';
-    const url = INVOICES_URL + '?acct=' + encodeURIComponent(v.cust.code) + '&k=' + encodeURIComponent(INVOICES_KEY) + '&pdf=1' + (inv ? '&inv=' + encodeURIComponent(inv) : '');
     const ctrl = window.AbortController ? new AbortController() : null;
     const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 30000) : null;
-    fetch(url, { signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' })
+    const prm = { acct: v.cust.code, pdf: '1' };
+    if(inv) prm.inv = inv;
+    invPost_(prm, ctrl ? ctrl.signal : undefined)
       .then(function(r){
         const ct = r.headers.get('content-type') || '';
         if(r.ok && ct.indexOf('pdf') !== -1) return r.blob();
