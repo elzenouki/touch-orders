@@ -992,6 +992,31 @@
   .uSub{font-size:12px; color:var(--omut); line-height:1.6;}
   .uAct{display:flex; justify-content:space-between; font-size:13px; padding:5px 2px; border-top:1px dashed #ebe5cf; color:var(--o3);}
   .uAct span:last-child{font-weight:800; direction:ltr;}
+  .homeBtn.admdata .icon{--tb:#e6eef0; --tf:#2f5f6b;}
+  .aTabs{display:flex; gap:6px; overflow-x:auto; margin:0 -2px 10px; padding:0 2px 2px; scrollbar-width:none;}
+  .aTabs::-webkit-scrollbar{display:none;}
+  .aTabs button{flex:0 0 auto; height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--oline); background:var(--ocard); color:var(--o3); font-family:inherit; font-weight:700; font-size:13.5px; cursor:pointer;}
+  .aTabs button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
+  .aFil{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;}
+  .aFil label{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--omut); font-weight:700;}
+  .aFil input, .aFil select, .aForm input, .aForm select, .aForm textarea{width:100%; min-width:0; height:40px; border:1px solid var(--oline); border-radius:11px; background:#fff; padding:0 10px; font-family:inherit; font-size:14px; color:var(--o3); box-sizing:border-box;}
+  .aFil select, .aFil input[type=search]{grid-column:span 2;}
+  .aGo{grid-column:span 2; height:42px; border:0; border-radius:12px; background:var(--o1); color:#fbf8ee; font-family:inherit; font-weight:800; font-size:15px; cursor:pointer;}
+  .aGo.wide{width:100%; margin-top:6px;}
+  .aForm{display:flex; flex-direction:column; gap:10px;}
+  .aForm label{display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--omut); font-weight:700;}
+  .aForm textarea{height:auto; padding:8px 10px;}
+  .aRow{background:#fff; border:1px solid #ebe5cf; border-radius:14px; padding:10px 12px; margin-bottom:8px; cursor:pointer;}
+  .aTop{display:flex; align-items:baseline; gap:8px;}
+  .aTop b{flex:1; font-family:var(--fTitle); font-size:16px; color:var(--o3); overflow-wrap:anywhere;}
+  .aAmt{font-weight:800; color:var(--o1); direction:ltr; white-space:nowrap;}
+  .aSub{font-size:12.5px; color:var(--omut); line-height:1.7; margin-top:2px;}
+  .aWarn{display:inline-block; font-size:11px; font-weight:800; color:#8a640a; background:#fbf1d6; border-radius:8px; padding:0 7px;}
+  .aLock{display:inline-block; font-size:11px; font-weight:800; color:#5b4a9c; background:#eee9f6; border-radius:8px; padding:0 7px;}
+  .aBtns{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .aBtns button{height:32px; padding:0 11px; border-radius:10px; border:1px solid var(--oline); background:var(--ocard); color:var(--o3); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer;}
+  .aBtns button.del{color:#a8432f; border-color:#efcfc6; background:#fdf3f0;}
+  .aBtns button.ok{color:#fbf8ee; background:var(--o1); border-color:var(--o1);}
   .uTabs{display:flex; gap:6px; margin-bottom:10px;}
   .uTabs button{flex:1; height:40px; border-radius:12px; border:1px solid var(--oline); background:var(--ocard); color:var(--o3); font-family:inherit; font-weight:700; cursor:pointer;}
   .uTabs button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
@@ -1230,6 +1255,10 @@
         <button class="homeBtn returns" onclick="openScreen('unvisited')">
           <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c73e3e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
           <div><div class="title">تجار ماتزاروش</div><div class="desc">اللي محدش راحلهم من فترة</div></div>
+        </button>
+        <button class="homeBtn admdata" onclick="openAdminData_()">
+          <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v6c0 1.4 3.1 2.5 7 2.5"/><path d="M5 11.5v6c0 1.4 3.1 2.5 7 2.5"/><path d="M19 5.5V11"/><path d="M15.5 15.5l5 5M20.5 15.5l-5 5"/></svg></div>
+          <div><div class="title">إدارة البيانات</div><div class="desc">امسح أو صحّح أي حاجة اتسجلت غلط</div></div>
         </button>
         <button class="homeBtn usage" onclick="openUsage_(1)">
           <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
@@ -2343,7 +2372,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.17.1';
+  const APP_VERSION_ = 'v1.18.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4754,6 +4783,217 @@
     h += '<div class="note" style="margin-top:10px;">🔥 = أكتر من ضعف المتوسط. "تسجيل الموقع" بيتبعت لوحده كل 3 دقايق طول ما التطبيق مفتوح — لو رقمه عالي يبقى المندوب سايب التطبيق مفتوح طول اليوم.<br>' +
       'ملحوظة: "Log Query" في Supabase بيتحسب من قراية اللوجات في لوحة Supabase نفسها، مش من الطلبات دي — بس كل ما الطلبات تكتر اللوجات بتكبر.</div>';
     body.innerHTML = h;
+  }
+
+  // ================== 🛠 إدارة البيانات (للمشرفين) — بتكلّم دالة admin_data في Supabase (ملف admin_data.sql) ==================
+  // أي مسح بيروح "سلة المحذوفات" 30 يوم وتقدر ترجّعه. الحاجات اللي في حافظة اتقفلت مابتتمسحش لحد ما الحافظة تتفك.
+  const ADM_TABS_ = [['cust', 'العملاء'], ['visit', 'الزيارات'], ['doc', 'الطلبيات والمرتجع'], ['pay', 'التحصيل'], ['exp', 'المصروفات'], ['trash', 'المحذوفات']];
+  const ADM_METHODS_ = { cash: 'كاش', cheque: 'شيك', check: 'شيك', instapay: 'انستاباي', transfer: 'تحويل', wallet: 'محفظة' };
+  var adm_ = { tab: 'cust', from: '', to: '', rep: '', q: '', rows: [], lines: [], seq: 0 };
+  function admCall_(act, args){
+    return fetch(SB_RPC_URL.replace(/\/api$/, '/admin_data'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
+      body: JSON.stringify({ auth: state.auth, act: act, args: args || {} }),
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok === true) return d.result;
+      const msg = (d && (d.error || d.message)) || 'حصل خطأ';
+      throw new Error(/admin_data/.test(msg) || (d && d.code === 'PGRST202') ? 'لسه ملف admin_data.sql ماتشغّلش في Supabase' : msg);
+    }, function(){ throw new Error('تعذر الاتصال بالسيرفر'); });
+  }
+  function openAdminData_(){
+    if(!adm_.from){ const t = bizToday_(); adm_.to = ymd_(t); adm_.from = ymd_(addDays_(t, -7)); }
+    if(!state.repOptions.length) callApi('bootstrapHome', [state.auth]).then(function(d){ setRepOptions_(d.repOptions); admRender_(); }).catch(function(){});
+    dl_.stack = [];
+    dlBackBtn_();
+    dlOpen_('🛠 إدارة البيانات', 'امسح أو صحّح أي حاجة اتسجلت غلط');
+    admLoad_();
+  }
+  function admTab_(t){ adm_.tab = t; adm_.rows = []; adm_.q = ''; admLoad_(); }
+  function admReadFilters_(){
+    const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
+    if(g('admFrom') != null) adm_.from = g('admFrom');
+    if(g('admTo') != null) adm_.to = g('admTo');
+    if(g('admRep') != null) adm_.rep = g('admRep');
+    if(g('admQ') != null) adm_.q = g('admQ').trim();
+  }
+  function admLoad_(){
+    admReadFilters_();
+    const act = { cust: 'cust_list', visit: 'visit_list', doc: 'doc_list', pay: 'pay_list', exp: 'exp_list', trash: 'trash_list' }[adm_.tab];
+    const my = ++adm_.seq;
+    adm_.loading = true; adm_.err = '';
+    admRender_();
+    return admCall_(act, { from: adm_.from, to: adm_.to, rep: adm_.rep, q: adm_.q })
+      .then(function(r){ if(my === adm_.seq){ adm_.rows = r || []; adm_.loading = false; admRender_(); } })
+      .catch(function(e){ if(my === adm_.seq){ adm_.rows = []; adm_.loading = false; adm_.err = e.message; admRender_(); } });
+  }
+  function admDay_(s){ return ymdToDmy_(String(s || '').slice(0, 10)); }
+  function admTime_(s){ const d = s ? new Date(s) : null; return d && !isNaN(d) ? d.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' }) : ''; }
+  function admBtns_(i, list){
+    return '<div class="aBtns">' + list.map(function(b){
+      return '<button type="button" class="' + (b[2] || '') + '" onclick="event.stopPropagation(); ' + b[1] + '(' + i + ')">' + b[0] + '</button>';
+    }).join('') + '</div>';
+  }
+  function admRender_(){
+    const body = document.getElementById('dlBody');
+    if(!body || document.getElementById('dlOverlay').hidden || dl_.stack.length) return;
+    const t = adm_.tab;
+    let h = '<div class="aTabs">' + ADM_TABS_.map(function(x){
+      return '<button type="button" class="' + (x[0] === t ? 'on' : '') + '" onclick="admTab_(\'' + x[0] + '\')">' + x[1] + '</button>';
+    }).join('') + '</div>';
+    if(t !== 'trash'){
+      h += '<div class="aFil">';
+      if(t !== 'cust') h += '<label>من<input type="date" id="admFrom" value="' + escapeHtml(adm_.from) + '"></label><label>لـ<input type="date" id="admTo" value="' + escapeHtml(adm_.to) + '"></label>';
+      h += '<select id="admRep"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){
+        return '<option value="' + escapeHtml(n) + '"' + (n === adm_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select>';
+      h += '<input type="search" id="admQ" placeholder="' + (t === 'exp' ? 'نوع المصروف أو اسم التاجر' : 'اسم التاجر أو الكود' + (t === 'cust' ? ' أو الموبايل' : '')) +
+        '" value="' + escapeHtml(adm_.q) + '" onkeydown="if(event.key===\'Enter\') admLoad_()">' +
+        '<button type="button" class="aGo" onclick="admLoad_()">عرض</button></div>';
+    } else {
+      h += '<div class="note" style="margin-bottom:10px;">أي حاجة اتمسحت من هنا بتفضل 30 يوم وبعدين بتتمسح نهائي. "رجّع" بترجّعها زي ما كانت بالظبط.</div>';
+    }
+    if(adm_.loading) return body.innerHTML = h + '<div class="aiStatus">جاري التحميل...</div>';
+    if(adm_.err) return body.innerHTML = h + '<div class="aiStatus err">' + escapeHtml(adm_.err) + '</div>';
+    const rows = adm_.rows;
+    if(!rows.length) return body.innerHTML = h + '<div class="empty">' + (t === 'trash' ? 'السلة فاضية' : 'مفيش حاجة بالبحث ده') + '</div>';
+    if(rows.length >= 300) h += '<div class="note" style="margin-bottom:8px;">ظاهر أول ' + rows.length + ' بس — ضيّق البحث عشان تلاقي اللي عاوزه</div>';
+    h += rows.map(function(r, i){
+      if(t === 'cust') return '<div class="aRow" onclick="admCustEdit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.name || '') + '</b><span class="chip">' + escapeHtml(r.code) + '</span></div>' +
+        '<div class="aSub">' + [r.rep, r.area, r.phone, r.system_code ? 'كود السيستم ' + r.system_code : '', r.visits + ' زيارة', r.last_visit ? 'آخر زيارة ' + admDay_(r.last_visit) : ''].filter(Boolean).map(escapeHtml).join(' • ') + '</div>' +
+        admBtns_(i, [['✏️ تعديل', 'admCustEdit_'], ['🔀 دمج في عميل تاني', 'admCustMerge_'], ['🗑 مسح', 'admCustDel_', 'del']]) + '</div>';
+      if(t === 'visit') return '<div class="aRow" onclick="admVisit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.customer_name || r.customer_code || '') + '</b><span class="chip">' + admDay_(r.day) + ' ' + admTime_(r.at) + '</span></div>' +
+        '<div class="aSub">' + [r.rep, r.result, r.order_lines ? r.order_lines + ' صنف طلبية' : '', r.return_lines ? r.return_lines + ' صنف مرتجع' : '', +r.paid ? 'تحصيل ' + fmt(r.paid) : '', r.reason, r.notes].filter(Boolean).map(escapeHtml).join(' • ') +
+        (r.exported ? ' <span class="aWarn">اتصدّر للسيستم</span>' : '') + '</div>' + admBtns_(i, [['🔍 التفاصيل', 'admVisit_'], ['🗑 مسح الزيارة كلها', 'admVisitDel_', 'del']]) + '</div>';
+      if(t === 'doc') return '<div class="aRow" onclick="admDoc_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.customer_name || r.customer_code || '') + '</b><span class="chip">' + (+r.qty < 0 || /return|مرتجع/i.test(r.type || '') ? '↩ مرتجع' : '🧾 طلبية') + '</span></div>' +
+        '<div class="aSub">' + [r.rep, admDay_(r.day) + ' ' + admTime_(r.at), r.lines + ' صنف', 'كمية ' + fmt(Math.abs(+r.qty || 0)), r.visit_id ? '' : 'من غير زيارة'].filter(Boolean).map(escapeHtml).join(' • ') +
+        (r.exported ? ' <span class="aWarn">اتصدّر للسيستم</span>' : '') + '</div>' + admBtns_(i, [['🔍 الأصناف', 'admDoc_'], ['🗑 مسح كلها', 'admDocDel_', 'del']]) + '</div>';
+      if(t === 'pay') return '<div class="aRow"><div class="aTop"><b>' + escapeHtml(r.customer_name || r.customer_code || '') + '</b><span class="aAmt">' + fmt(r.amount) + ' ج</span></div>' +
+        '<div class="aSub">' + [r.rep, admDay_(r.day) + ' ' + admTime_(r.at), ADM_METHODS_[String(r.method || '').toLowerCase()] || r.method, r.cheque_date ? 'شيك ' + admDay_(r.cheque_date) : '', r.notes].filter(Boolean).map(escapeHtml).join(' • ') +
+        (r.wallet_id ? ' <span class="aLock">🔒 في حافظة مقفولة</span>' : '') + '</div>' + (r.wallet_id ? '' : admBtns_(i, [['🗑 مسح', 'admPayDel_', 'del']])) + '</div>';
+      if(t === 'exp') return '<div class="aRow"><div class="aTop"><b>' + escapeHtml(r.kind || 'مصروف') + '</b><span class="aAmt">' + fmt(r.amount) + ' ج</span></div>' +
+        '<div class="aSub">' + [r.rep, admDay_(r.day) + ' ' + admTime_(r.at), r.customer_name, r.notes].filter(Boolean).map(escapeHtml).join(' • ') +
+        (r.wallet_id ? ' <span class="aLock">🔒 في حافظة مقفولة</span>' : '') + '</div>' + (r.wallet_id ? '' : admBtns_(i, [['🗑 مسح', 'admExpDel_', 'del']])) + '</div>';
+      return '<div class="aRow"><div class="aTop"><b>' + escapeHtml(r.label || '') + '</b></div><div class="aSub">اتمسح ' + admDay_(r.at) + ' ' + admTime_(r.at) + ' • ' + escapeHtml(r.by || '') +
+        ' • بيتمسح نهائي بعد ' + Math.max(0, 30 - Math.floor((Date.now() - new Date(r.at)) / 864e5)) + ' يوم</div>' + admBtns_(i, [['↩ رجّع', 'admRestore_', 'ok']]) + '</div>';
+    }).join('');
+    body.innerHTML = h;
+  }
+  // تنفيذ أي مسح: تأكيد ← السيرفر ← رسالة ← تحديث القايمة
+  function admDo_(text, act, args, done){
+    return confirmModal_(text, act === 'trash_restore' ? 'رجّع' : 'امسح', 'رجوع').then(function(yes){
+      if(!yes) return;
+      showLoading(true);
+      return admCall_(act, args).then(function(){
+        showLoading(false);
+        toast_(act === 'trash_restore' ? '✅ اترجع' : act === 'cust_save' ? '✅ اتحفظ' : act === 'cust_merge' ? '✅ اتدمجوا' : '🗑 اتمسح — تقدر ترجّعه من المحذوفات خلال 30 يوم');
+        if(done) done(); else { dl_.stack = []; dlBackBtn_(); admLoad_(); }
+      }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
+  }
+  function admExpWarn_(r){ return r.exported ? '<br><br><b style="color:#a8432f">⚠ ده اتصدّر للسيستم بالفعل — المسح هنا مش هيشيله من السيستم، لازم تعدّله هناك كمان.</b>' : ''; }
+  function admCustDel_(i){
+    const r = adm_.rows[i];
+    admDo_('تمسح العميل <b>' + escapeHtml(r.name) + '</b> (' + escapeHtml(r.code) + ')؟' + (r.visits ? '<br><br>ليه ' + r.visits + ' زيارة — الزيارات مش هتتمسح، لو هو مكرر الأحسن تستخدم "دمج".' : ''), 'cust_delete', { code: r.code });
+  }
+  function admCustMerge_(i){
+    const r = adm_.rows[i];
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '🔀 دمج عميل مكرر';
+    document.getElementById('dlSub').textContent = r.name + ' (' + r.code + ')';
+    document.getElementById('dlBody').innerHTML = '<div class="note" style="margin-bottom:10px;">كل زيارات وطلبيات وتحصيلات <b>' + escapeHtml(r.name) + '</b> هتتنقل للعميل الصح، وبعدين ده يتمسح. تقدر ترجّع الدمج من المحذوفات.</div>' +
+      '<div class="aForm"><label>كود العميل الصح<input id="admDst" inputmode="numeric" placeholder="مثلاً 1234" oninput="admMergeFind_(this.value)"></label><div id="admDstName" class="aSub"></div>' +
+      '<button type="button" class="aGo wide" onclick="admMergeGo_(' + i + ')">دمج</button></div>';
+  }
+  var admFindT_;
+  function admMergeFind_(code){
+    clearTimeout(admFindT_);
+    const out = document.getElementById('admDstName');
+    code = String(code || '').trim();
+    if(!code){ out.textContent = ''; return; }
+    admFindT_ = setTimeout(function(){
+      admCall_('cust_list', { q: code }).then(function(l){
+        const m = (l || []).filter(function(x){ return x.code === code; })[0];
+        out.innerHTML = m ? '✅ ' + escapeHtml(m.name) + ' • ' + escapeHtml(m.rep || '') : '<span style="color:#a8432f">مفيش عميل بالكود ده</span>';
+      }).catch(function(){});
+    }, 350);
+  }
+  function admMergeGo_(i){
+    const r = adm_.rows[i], dst = document.getElementById('admDst').value.trim();
+    if(!dst || dst === r.code) return showMsg('اكتب كود العميل الصح', 'error');
+    admDo_('تدمج <b>' + escapeHtml(r.name) + '</b> (' + escapeHtml(r.code) + ') في العميل <b>' + escapeHtml(dst) + '</b>؟', 'cust_merge', { src: r.code, dst: dst }).catch(function(){});
+  }
+  function admCustEdit_(i){
+    const r = adm_.rows[i];
+    const f = function(k, lbl, mode){ return '<label>' + lbl + '<input id="admF_' + k + '"' + (mode ? ' inputmode="' + mode + '"' : '') + ' value="' + escapeHtml(r[k] == null ? '' : r[k]) + '"></label>'; };
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '✏️ تعديل عميل';
+    document.getElementById('dlSub').textContent = r.name + ' (' + r.code + ')';
+    document.getElementById('dlBody').innerHTML = '<div class="aForm">' + f('name', 'الاسم') + f('phone', 'الموبايل', 'tel') + f('address', 'العنوان') + f('area', 'المنطقة') +
+      '<label>المندوب<select id="admF_rep">' + state.repOptions.concat(state.repOptions.indexOf(r.rep) === -1 && r.rep ? [r.rep] : []).map(function(n){
+        return '<option' + (n === r.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select></label>' +
+      f('system_code', 'كود السيستم (رقم الحساب)', 'numeric') + '<label>ملاحظات<textarea id="admF_notes" rows="2">' + escapeHtml(r.notes || '') + '</textarea></label>' +
+      '<button type="button" class="aGo wide" onclick="admCustSave_(' + i + ')">حفظ</button></div>';
+  }
+  function admCustSave_(i){
+    const r = adm_.rows[i], a = { code: r.code };
+    ['name', 'phone', 'address', 'area', 'rep', 'system_code', 'notes'].forEach(function(k){ const e = document.getElementById('admF_' + k); if(e) a[k] = e.value.trim(); });
+    if(!a.name) return showMsg('الاسم مايبقاش فاضي', 'error');
+    showLoading(true);
+    admCall_('cust_save', a).then(function(){ showLoading(false); toast_('✅ اتحفظ'); dl_.stack = []; dlBackBtn_(); admLoad_(); })
+      .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+  }
+  function admVisitDel_(i){
+    const r = adm_.rows[i];
+    admDo_('تمسح زيارة <b>' + escapeHtml(r.customer_name || '') + '</b> يوم ' + admDay_(r.day) + '؟<br>هيتمسح معاها الطلبية والمرتجع والتحصيل والجرد اللي اتسجلوا فيها.' + admExpWarn_(r), 'visit_delete', { id: r.id });
+  }
+  function admDocDel_(i){
+    const r = adm_.rows[i];
+    admDo_('تمسح ' + (+r.qty < 0 ? 'المرتجع' : 'الطلبية') + ' بتاعة <b>' + escapeHtml(r.customer_name || '') + '</b> (' + r.lines + ' صنف)؟' + admExpWarn_(r), 'doc_delete', { doc_id: r.doc_id });
+  }
+  function admPayDel_(i){ const r = adm_.rows[i]; admDo_('تمسح تحصيل <b>' + fmt(r.amount) + ' ج</b> من ' + escapeHtml(r.customer_name || '') + '؟', 'pay_delete', { id: r.id }); }
+  function admExpDel_(i){ const r = adm_.rows[i]; admDo_('تمسح مصروف <b>' + escapeHtml(r.kind || '') + ' ' + fmt(r.amount) + ' ج</b> بتاع ' + escapeHtml(r.rep || '') + '؟', 'exp_delete', { id: r.id }); }
+  function admRestore_(i){ const r = adm_.rows[i]; admDo_('ترجّع: <b>' + escapeHtml(r.label || '') + '</b>؟', 'trash_restore', { id: r.id }); }
+  // تفاصيل زيارة/طلبية: الأصناف واحد واحد وتقدر تمسح صنف لوحده
+  function admLinesHtml_(lines, pays){
+    let h = '';
+    if(lines.length) h += '<div class="sectionLabel" style="margin:4px 0 8px;">الأصناف</div>' + lines.map(function(o, j){
+      return '<div class="aRow"><div class="aTop"><b>' + escapeHtml(o.item_name || o.item_code || '') + '</b><span class="aAmt">' + (+o.qty < 0 ? '↩ ' : '') + fmt(Math.abs(+o.qty || 0)) + '</span></div>' +
+        '<div class="aSub">' + [o.item_code, o.return_reason, o.return_condition, o.notes].filter(Boolean).map(escapeHtml).join(' • ') + (o.batch ? ' <span class="aWarn">اتصدّر</span>' : '') + '</div>' +
+        '<div class="aBtns"><button type="button" class="del" onclick="admLineDel_(' + j + ')">🗑 مسح الصنف ده</button></div></div>';
+    }).join('');
+    if(pays && pays.length) h += '<div class="sectionLabel" style="margin:14px 0 8px;">التحصيل</div>' + pays.map(function(p){
+      return '<div class="aRow"><div class="aTop"><b>' + escapeHtml(ADM_METHODS_[String(p.method || '').toLowerCase()] || p.method || '') + '</b><span class="aAmt">' + fmt(p.amount) + ' ج</span></div>' +
+        (p.wallet_id ? '<div class="aSub"><span class="aLock">🔒 في حافظة مقفولة</span></div>' : '') + '</div>';
+    }).join('');
+    return h || '<div class="empty">مفيش أصناف ولا تحصيل في دي</div>';
+  }
+  function admDetailOpen_(title, sub, p, back){
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = title;
+    document.getElementById('dlSub').textContent = sub;
+    const body = document.getElementById('dlBody');
+    body.innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    adm_.back = back;
+    p.then(function(d){ adm_.lines = d.lines; body.innerHTML = admLinesHtml_(d.lines, d.payments); })
+      .catch(function(e){ body.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function admVisit_(i){
+    const r = adm_.rows[i];
+    admDetailOpen_('🔍 زيارة ' + (r.customer_name || ''), (r.rep || '') + ' • ' + admDay_(r.day), admCall_('visit_detail', { id: r.id }), function(){ admVisit_(i); });
+  }
+  function admDoc_(i){
+    const r = adm_.rows[i];
+    admDetailOpen_('🔍 ' + (+r.qty < 0 ? 'مرتجع ' : 'طلبية ') + (r.customer_name || ''), (r.rep || '') + ' • ' + admDay_(r.day),
+      admCall_('doc_lines', { doc_id: r.doc_id }).then(function(l){ return { lines: l, payments: [] }; }), function(){ admDoc_(i); });
+  }
+  function admLineDel_(j){
+    const o = adm_.lines[j];
+    admDo_('تمسح الصنف <b>' + escapeHtml(o.item_name || '') + '</b> (' + fmt(Math.abs(+o.qty || 0)) + ')؟' + (o.batch ? '<br><br><b style="color:#a8432f">⚠ اتصدّر للسيستم بالفعل</b>' : ''), 'line_delete', { id: o.id }, function(){
+      // نرجع للقايمة ونفتح التفاصيل تاني بعد التحديث
+      const back = adm_.back;
+      dl_.stack = []; dlBackBtn_();
+      admLoad_().then(function(){ if(back && !adm_.err) back(); });
+    });
   }
 
   // ================== 📄 فواتير التاجر — بتتقري من جهاز الشركة (Postgres) عن طريق n8n، قراية بس ==================
