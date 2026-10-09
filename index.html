@@ -990,6 +990,62 @@
   .logoutLink{display:flex !important; align-items:center; gap:6px;}
   .logoutLink svg{width:18px; height:18px;}
   .tabBar svg{width:24px; height:24px;}
+
+  /* ================= نفس تصميم تطبيق البروموتر (تاتش الزنوكي) ================= */
+  /* الرئيسية من غير هيدر: الاسم فوق + التاريخ، وبعدين الحديث في مربع زيتوني */
+  body.c2home .header{display:none !important;}
+  body.c2home .wrap{padding-top:calc(18px + env(safe-area-inset-top)) !important;}
+  .homeTop{align-items:center !important; margin-bottom:14px !important;}
+  .hAvatar{width:56px !important; height:56px !important; font-size:24px !important; font-family:var(--fTitle) !important; border-radius:50% !important;}
+  .homeTop .hi{font-size:13px !important; color:var(--omut) !important;}
+  .homeTop .name{font-family:var(--fTitle) !important; font-size:22px !important; font-weight:700 !important; color:var(--o3) !important;}
+  .hChips{display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:none;}
+  .dateChip{background:var(--ocard); color:var(--o3); border:1px solid var(--oline); border-radius:999px; padding:6px 16px; font-family:var(--fTitle); font-size:15px; font-weight:700; white-space:nowrap;}
+  .hChips .gpsChip{min-height:30px !important; padding:4px 12px !important; font-size:12px !important;}
+  #viewHome .hadithBox{display:block !important; text-align:center; margin:0 0 16px !important; padding:12px 16px 10px !important;
+    box-shadow:inset 0 0 0 4px var(--o1), inset 0 0 0 5px rgba(217,162,27,.85), 0 8px 20px rgba(47,53,25,.12) !important;}
+  #viewHome .hadithBox .hadithText{font-size:21px !important; -webkit-line-clamp:3;}
+  #viewHome .hadithBox .hadithRef{font-size:13px !important; margin-top:2px;}
+  /* أرقام اليوم: كارت كريمي زي كارت الإحصائيات في البروموتر */
+  .todayCard{background:var(--ocard) !important; color:var(--o3) !important; border:1px solid var(--oline) !important; box-shadow:0 6px 18px rgba(47,53,25,.06) !important; border-radius:20px !important;}
+  .tcHead{color:var(--o3) !important;}
+  .tcHead #tcPlan{color:var(--omut) !important;}
+  .tcHead #tcPlan b{color:var(--o1);}
+  .tcBox{background:#fff !important; border:1px solid #ece5cc;}
+  .tcBox b{color:var(--o3) !important; font-family:var(--fTitle); font-size:24px !important;}
+  .tcBox span{color:var(--omut) !important;}
+  .tcBox.gold b{color:var(--gold-d) !important;}
+  .tcBar{background:#e8e2cb !important;}
+  .tcBar i{background:var(--o1) !important;}
+  /* القوايم: كارت واحد كريمي فيه صفوف — أيقونة ملونة + اسم + سهم */
+  .qaLabel{display:none;}
+  .qaGrid, .homeGrid, .gridSub{display:flex !important; flex-direction:column !important; gap:0 !important; background:var(--ocard); border:1px solid var(--oline); border-radius:20px; padding:4px 14px; margin-bottom:18px !important;}
+  .subPanel{background:none !important; border:none !important; box-shadow:none !important; padding:0 !important;}
+  .qa, .homeBtn, .adminLink{flex-direction:row !important; align-items:center !important; justify-content:flex-start !important; gap:14px !important; text-align:right !important;
+    background:transparent !important; border:none !important; border-bottom:1px solid #ebe5cf !important; border-radius:0 !important; box-shadow:none !important;
+    min-height:64px !important; padding:10px 2px !important; width:100% !important; font-family:var(--fTitle) !important; font-size:18px !important; font-weight:700 !important; color:var(--o3) !important; position:relative;}
+  .qaGrid .qa:last-child, .homeGrid .homeBtn:last-child, .gridSub .adminLink:last-child{border-bottom:none !important;}
+  .qa::after, .homeBtn::after, .adminLink::after{content:''; margin-inline-start:auto; width:9px; height:9px; border-top:2.4px solid var(--mus); border-left:2.4px solid var(--mus); transform:rotate(-45deg); flex:none;}
+  .qa .qi, .homeBtn .icon, .adminLink .icon, .adminLink.wide .icon{width:42px !important; height:42px !important; border-radius:12px !important; margin:0 !important; flex:none;}
+  .qa .qi svg, .homeBtn .icon svg, .adminLink .icon svg{width:21px !important; height:21px !important;}
+  .homeBtn > div:last-child{display:flex; flex-direction:column; min-width:0;}
+  .homeBtn .title, .adminLink .title{font-family:var(--fTitle) !important; font-size:18px !important; font-weight:700 !important; color:var(--o3) !important; min-height:0 !important; display:block !important; text-align:right !important;}
+  .homeBtn .desc{font-family:'Alexandria',sans-serif; font-size:12px !important; color:var(--omut) !important; margin-top:1px !important; font-weight:500;}
+  .adminLink.ic-logout .title{color:#a8432f !important;}
+  .adminLink.ic-logout::after{display:none;}
+  .sectionLabel, .subHeader .lbl{font-family:var(--fTitle) !important; font-size:17px !important; color:var(--o3) !important; text-transform:none !important; letter-spacing:0 !important; font-weight:700 !important;}
+  .subHeader .line{display:none;}
+  /* هيدر الشاشات الداخلية: زرار رجوع دايري زي البروموتر */
+  .header h1{font-family:var(--fTitle) !important; font-weight:700 !important;}
+  .backBtn{width:44px !important; height:44px !important; min-height:44px !important; padding:0 !important; border-radius:22px !important; border:none !important; background:rgba(255,255,255,.12) !important; font-size:0 !important; display:flex !important; align-items:center; justify-content:center;}
+  .backBtn[hidden]{display:none !important;}
+  .header{flex-wrap:nowrap !important; justify-content:flex-start !important; gap:12px !important; padding:calc(14px + env(safe-area-inset-top)) 16px 16px !important; border-radius:0 0 24px 24px !important;}
+  .header .backBtn{order:1 !important; flex:none;}
+  .header .headerLeft{order:2 !important; flex:1; min-width:0;}
+  .header .kicker, .header .brandLine{display:none !important;}
+  .header h1{font-size:21px !important;}
+  .header .sub{margin-top:2px !important; font-size:13px !important;}
+  .backBtn::before{content:''; width:10px; height:10px; border-top:2.6px solid #fbf8ee; border-right:2.6px solid #fbf8ee; transform:rotate(45deg); margin-left:4px;}
   /* ===== ✍️ التوقيع ===== */
   .sigPad{display:block; width:100%; height:170px; border:1.5px dashed var(--mus); border-radius:12px; touch-action:none; cursor:crosshair;
     background:#fff linear-gradient(transparent calc(100% - 42px), #e0d8bd calc(100% - 42px), #e0d8bd calc(100% - 41px), transparent calc(100% - 41px));}
@@ -1041,10 +1097,6 @@
       <span class="brandLine"></span>
       <div class="sub" id="pageSub">جاري التحميل...</div>
     </div>
-  </div>
-  <div class="hadithBox" id="hadithBox">
-    <span class="hadithText" id="hadithText"></span>
-    <span class="hadithRef" id="hadithRef"></span>
   </div>
   <button class="backBtn" id="backBtn" hidden onclick="goBack_()">⟵ رجوع</button>
 </div>
@@ -1102,8 +1154,13 @@
     <div class="homeTop">
       <div class="hAvatar" id="homeAvatar">؟</div>
       <div class="wText"><div class="hi" id="homeHi">أهلاً بيك</div><div class="name" id="homeUserName"></div></div>
-      <button type="button" class="gpsChip" id="gpsChip" hidden onclick="onGpsChip_()"><span class="dot"></span><span id="gpsChipText">الموقع</span></button>
+      <div class="hChips"><span class="dateChip" id="homeDate"></span><button type="button" class="gpsChip" id="gpsChip" hidden onclick="onGpsChip_()"><span class="dot"></span><span id="gpsChipText">الموقع</span></button></div>
     </div>
+    <div class="hadithBox" id="hadithBox">
+      <span class="hadithText" id="hadithText"></span>
+      <span class="hadithRef" id="hadithRef"></span>
+    </div>
+
     <div class="todayCard" id="repStats" hidden>
       <div class="tcHead"><span id="tcDate">النهارده</span><span id="tcPlan">خط السير <b id="stPlan">0/0</b></span></div>
       <div class="tcGrid">
@@ -2264,7 +2321,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.13.3';
+  const APP_VERSION_ = 'v1.15.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -2292,6 +2349,7 @@
     const home = (name === 'viewHome' || name === 'viewLogin' || name === 'viewOtp');
     document.getElementById('backBtn').hidden = home;
     document.body.classList.toggle('inner', !home);
+    document.body.classList.toggle('c2home', name === 'viewHome');
     const tab = { viewHome: 'home', viewWallet: 'wallet', viewProfile: 'profile' }[name];
     const showTabs = !!(tab && state.user && !state.isAdmin);
     document.getElementById('tabBar').hidden = !showTabs;
@@ -2418,6 +2476,8 @@
     state.visit = null;
     setTitle_('TOUCH EL ZENOUKI');
     setView('viewHome');
+    (function(){ const d = new Date(), w = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()];
+      document.getElementById('homeDate').textContent = w + ' ' + d.getDate() + '/' + (d.getMonth() + 1); })();
     if(state.isAdmin){
       if(!state.repOptions.length){
         callApi('bootstrapHome', [state.auth]).then(function(d){ setRepOptions_(d.repOptions); }).catch(function(){});
@@ -2921,9 +2981,16 @@
     const btns = [];
     if(c.phone) btns.push('<a href="tel:' + escapeHtml(c.phone.replace(/[^\d+]/g, '')) + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>اتصال</a>');
     if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>الاتجاهات</a>');
+    if(invoicesOn_() && !c.demo) btns.push('<a href="#" onclick="openCustInvoices_(); return false;"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>فواتيره</a>');
     btns.push('<a href="#" onclick="openExpenseSheet_({ kind: \'إكرامية\', customerCode: state.visit.cust.code }); return false;"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M12 9v12M3 13h18"/><path d="M12 9c-1.5-4-6-4-6-1.5S10 9 12 9zM12 9c1.5-4 6-4 6-1.5S14 9 12 9z"/></svg>إكرامية</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
+    if(invoicesOn_() && !c.demo){
+      fetchInvoices_(c.code).then(function(r){
+        if(!state.visit || state.visit.cust.code !== c.code || !r.data.lastDate) return;
+        document.getElementById('vSub').insertAdjacentHTML('beforeend', '<br>📄 آخر فاتورة في السيستم: <b>' + ymdToDmy_(r.data.lastDate) + '</b>' + (r.fresh ? '' : ' <span style="color:var(--gold-d)">(نسخة قديمة)</span>'));
+      }).catch(function(){});
+    }
     ['visitNotes', 'pickSearch', 'retSearch', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
     const rr = (state.rep && state.rep.returnReasons) || [];
     document.getElementById('retReason').innerHTML = '<option value="">اختار السبب...</option>' +
@@ -4597,6 +4664,67 @@
   function norm_(s){ return String(s == null ? '' : s).trim(); }
 
   // ---------- الطباعة (A4 زي الدفتر الورق) ----------
+  // ================== 📄 فواتير التاجر — بتتقري من جهاز الشركة (Postgres) عن طريق n8n، قراية بس ==================
+  // التطبيق كله على Supabase، والفواتير بس من جهازك. لو جهازك مش متاح بيعرض آخر نسخة اتحفظت على الموبايل.
+  const INVOICES_URL = 'https://CHANGE-ME.ts.net/webhook/field-invoices'; // ← لينك Tailscale Funnel + مسار الـ webhook
+  const INVOICES_KEY = 'CHANGE_ME_SECRET';                                // ← نفس المفتاح اللي في n8n
+  const INV_CACHE_ = 'tf_inv:';
+  function invoicesOn_(){ return INVOICES_URL.indexOf('CHANGE-ME') === -1; }
+  function invCacheGet_(c){ try{ return JSON.parse(localStorage.getItem(INV_CACHE_ + c) || 'null'); }catch(e){ return null; } }
+  function invCacheSet_(c, v){ try{ localStorage.setItem(INV_CACHE_ + c, JSON.stringify({ t: Date.now(), v: v })); }catch(e){} }
+  var invInflight_ = {};
+  function fetchInvoices_(code){
+    if(invInflight_[code]) return invInflight_[code];
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
+    const url = INVOICES_URL + '?acct=' + encodeURIComponent(code) + '&k=' + encodeURIComponent(INVOICES_KEY);
+    const p = fetch(url, { signal: ctrl ? ctrl.signal : undefined, cache: 'no-store' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d || d.ok !== true) throw new Error((d && d.error) || 'bad');
+        invCacheSet_(code, d);
+        return { data: d, fresh: true };
+      })
+      .catch(function(err){
+        const c = invCacheGet_(code);
+        if(c) return { data: c.v, fresh: false, at: c.t };
+        throw err;
+      })
+      .finally(function(){ if(timer) clearTimeout(timer); delete invInflight_[code]; });
+    invInflight_[code] = p;
+    return p;
+  }
+  function openCustInvoices_(){
+    const v = state.visit;
+    if(!v) return;
+    const c = v.cust;
+    dl_.stack = [];
+    dlBackBtn_();
+    dlOpen_('📄 فواتير ' + c.name, 'من سيستم الشركة — آخر 12 شهر');
+    const body = document.getElementById('dlBody');
+    const cached = invCacheGet_(c.code);
+    body.innerHTML = cached ? invHtml_(cached.v, cached.t, true) : '<div class="aiStatus">جاري جلب الفواتير من الشركة...</div>';
+    fetchInvoices_(c.code)
+      .then(function(r){ if(!document.getElementById('dlOverlay').hidden) body.innerHTML = invHtml_(r.data, r.at, !r.fresh); })
+      .catch(function(){ if(!cached) body.innerHTML = '<div class="aiStatus err">جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية</div>'; });
+  }
+  function invHtml_(d, at, stale){
+    let h = '';
+    if(stale) h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">⚠️ دي آخر نسخة اتحفظت على الموبايل' +
+      (at ? ' (' + new Date(at).toLocaleString('ar-EG', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) + ')' : '') + ' — جهاز الشركة مش متاح دلوقتي</div>';
+    if(!d.invoices || !d.invoices.length) return h + '<div class="empty">مفيش فواتير للتاجر ده في آخر 12 شهر</div>';
+    h += dlSum_([d.invoices.length + ' فاتورة', 'آخر شراء ' + ymdToDmy_(d.lastDate), fmt(d.total12m) + ' ج']);
+    h += d.invoices.map(function(inv){
+      return '<details class="docCard"><summary><div class="dTop"><b>' + escapeHtml(inv.inv) + '</b></div>' +
+        '<div class="dMeta">' + ymdToDmy_(inv.date) + ' — ' + inv.lines.length + ' صنف</div>' +
+        '<span class="copyBtn" style="pointer-events:none; direction:ltr;">' + fmt(inv.total) + '</span></summary>' +
+        '<div class="dLines">' + inv.lines.map(function(l){
+          return '<div class="dLine"><span class="dCode">' + escapeHtml(l.code) + '</span><span class="dName">' + escapeHtml(l.name) + '</span><span class="dQty">' + fmt(l.qty) + '</span></div>';
+        }).join('') + '</div></details>';
+    }).join('');
+    return h;
+  }
+
   // ================== ✍️ التوقيع ==================
   var sig_ = { ctx: null, drawing: false, dirty: false, last: null };
   var sigMem_ = {};
