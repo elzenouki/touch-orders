@@ -2458,7 +2458,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.20.0';
+  const APP_VERSION_ = 'v1.20.1';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4536,7 +4536,7 @@
   }
   document.getElementById('dlBody').addEventListener('click', function(e){
     if(onCopyClick_(e)) return;
-    const row = e.target.closest('[data-vid]');
+    const row = e.target.closest('.tapRow[data-vid], .rLink[data-vid]');
     if(row) openVisitDetail_(row.dataset.vid);
   });
   function openVisitDetail_(id){
@@ -5313,8 +5313,8 @@
     const rows = {};
     ld_.caps.forEach(function(c){ const r = rows[c.c] = rows[c.c] || { c: c.c, n: c.n || '', q: {} }; r.q[c.v] = c.q; if(c.n) r.n = c.n; });
     let h = '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
-      return '<div class="lVRow"><input data-vid="' + v.id + '" data-k="name" value="' + escapeHtml(v.name) + '"><input data-vid="' + v.id + '" data-k="sort" type="number" value="' + v.sort + '" title="الترتيب">' +
-        '<label class="lSw"><input type="checkbox" data-vid="' + v.id + '" data-k="active"' + (v.active !== false ? ' checked' : '') + '> شغّالة</label></div>';
+      return '<div class="lVRow"><input data-lvid="' + v.id + '" data-k="name" value="' + escapeHtml(v.name) + '"><input data-lvid="' + v.id + '" data-k="sort" type="number" value="' + v.sort + '" title="الترتيب">' +
+        '<label class="lSw"><input type="checkbox" data-lvid="' + v.id + '" data-k="active"' + (v.active !== false ? ' checked' : '') + '> شغّالة</label></div>';
     }).join('') + '<div class="lVRow"><input id="ldNewVeh" placeholder="＋ نوع عربية جديد (مثلاً: تريلا)"></div>' +
       '<button type="button" class="aGo wide" onclick="ldSaveVehicles_()">حفظ العربيات</button>';
     h += '<div class="sectionLabel" style="margin:18px 0 6px;">السعات</div>' +
@@ -5333,7 +5333,7 @@
   }
   function ldSaveVehicles_(){
     const m = {};
-    ldBody_().querySelectorAll('[data-vid]').forEach(function(i){ const o = m[i.dataset.vid] = m[i.dataset.vid] || { id: i.dataset.vid }; o[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.value; });
+    ldBody_().querySelectorAll('[data-lvid]').forEach(function(i){ const o = m[i.dataset.lvid] = m[i.dataset.lvid] || { id: i.dataset.lvid }; o[i.dataset.k] = i.type === 'checkbox' ? i.checked : i.value; });
     const list = Object.keys(m).map(function(k){ return m[k]; });
     const nv = document.getElementById('ldNewVeh').value.trim();
     if(nv) list.push({ name: nv, sort: 99 });
