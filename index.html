@@ -2458,7 +2458,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.20.1';
+  const APP_VERSION_ = 'v1.20.2';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -6557,7 +6557,7 @@
         if(state.isOwner) ldApi_('roles').then(function(l){
           const wh = {}; (l || []).forEach(function(x){ if(x.role === 'warehouse') wh[x.email] = 1; });
           document.querySelectorAll('.whRoleBtn').forEach(function(b){ b.dataset.on = wh[b.dataset.email] ? '1' : ''; b.textContent = wh[b.dataset.email] ? '🏬 شيل المخزن' : '🏬 خليه مخزن'; });
-        }).catch(function(){ document.querySelectorAll('.whRoleBtn').forEach(function(b){ b.hidden = true; }); });
+        }).catch(function(e){ toast_('⚠️ صلاحية المخزن: ' + e.message); });
       })
       .catch(onError);
   }
