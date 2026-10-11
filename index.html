@@ -1203,6 +1203,65 @@
   .pw.cmp .pwT thead tr.g th{font-size:10px; letter-spacing:1px;}
   .pw.cmp .pwSign{margin-top:6px;}
   .pw, .pdfPage{font-family:'Alexandria',Tahoma,Arial,sans-serif !important;}
+
+  /* ===== 🚚 رسم العربية ===== */
+  .truckSvg{display:block; width:100%; height:auto; max-width:420px; margin:0 auto;}
+  .truckSvg.sm{max-width:150px;}
+  .truckSvg .truckLoad rect{transition:height .5s ease, y .5s ease;}
+  .truckBox{background:linear-gradient(180deg,#fff 0%,#f6f2e4 100%); border:1px solid var(--oline); border-radius:18px; padding:12px 12px 10px; margin:8px 0 12px;}
+  .truckBox.over{border-color:#e8b4a8; background:linear-gradient(180deg,#fff 0%,#fbece8 100%);}
+  .truckMsg{text-align:center; font-weight:800; font-size:13.5px; color:var(--o3); margin-top:6px;}
+  .truckBox.over .truckMsg{color:#a8432f;} .truckBox.near .truckMsg{color:#8a640a;} .truckBox.ok .truckMsg{color:#2b7a4f;}
+  .truckMsg small{display:block; font-weight:600; color:var(--omut); font-size:11.5px;}
+  .truckLegend{display:flex; flex-wrap:wrap; gap:6px 12px; justify-content:center; margin-top:8px; font-size:12px; color:var(--o3);}
+  .truckLegend span{display:inline-flex; align-items:center; gap:5px;}
+  .truckLegend i{width:11px; height:11px; border-radius:3px; display:inline-block;}
+  .truckLegend b{direction:ltr;}
+  .planTruck{max-width:170px; margin:4px auto 2px;}
+  /* ===== 🏬 صفحة أمين المخزن ===== */
+  body.whRole #hadithBox{display:none !important;}
+  .whHero{background:var(--o1); color:#fbf8ee; border-radius:22px; padding:16px; margin-bottom:16px;
+    box-shadow:inset 0 0 0 4px var(--o1), inset 0 0 0 5px rgba(217,162,27,.85), 0 12px 26px rgba(47,53,25,.2);}
+  .whHeroTop{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .whKicker{font-size:12.5px; color:var(--musl); font-weight:700;}
+  .whTitle{font-family:var(--fTitle); font-size:22px; font-weight:700; margin-top:2px;}
+  .whRefresh{width:42px; height:42px; border-radius:50%; border:none; background:rgba(255,255,255,.12); color:#fbf8ee; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .whStats{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-top:14px;}
+  .whStat{background:rgba(255,255,255,.08); border-radius:14px; padding:9px 4px; text-align:center;}
+  .whStat b{display:block; font-family:var(--fTitle); font-size:22px; line-height:1.2; direction:ltr;}
+  .whStat span{font-size:10.5px; color:#e4e2c6; font-weight:600;}
+  .whStat.hot{background:var(--mus); color:var(--o3);} .whStat.hot span{color:var(--o3);}
+  .whUpd{font-size:11px; color:#c9c7a8; margin-top:8px; text-align:left;}
+  .whSec{display:flex; align-items:center; gap:8px; font-family:var(--fTitle); font-size:17px; font-weight:700; color:var(--o3); margin:18px 2px 10px;}
+  .whSec span{font-family:'Alexandria',sans-serif; font-size:12px; background:var(--o1); color:#fbf8ee; border-radius:10px; padding:1px 9px;}
+  .whCard{background:var(--ocard); border:1px solid var(--oline); border-radius:20px; padding:12px; margin-bottom:12px; cursor:pointer; box-shadow:0 6px 16px rgba(47,53,25,.07);}
+  .whCardTop{display:flex; gap:12px; align-items:center;}
+  .whTruck{flex:0 0 132px;}
+  .whInfo{flex:1; min-width:0;}
+  .whSerial{font-size:13px; color:var(--omut);} .whSerial b{font-family:var(--fTitle); font-size:20px; color:var(--o3);}
+  .whVeh{display:inline-block; background:#fbf1d6; color:#8a640a; border-radius:9px; padding:1px 9px; font-weight:800; font-size:12.5px; margin:3px 0;}
+  .whMeta{font-size:12.5px; color:var(--omut); line-height:1.7; overflow-wrap:anywhere;}
+  .whBtns{display:grid; grid-template-columns:1fr 1.4fr; gap:8px; margin-top:10px;}
+  .whBtns button{height:44px; border-radius:13px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:800; font-size:13.5px; cursor:pointer;}
+  .whBtns button.go{background:var(--o1); color:#fbf8ee; border-color:var(--o1); box-shadow:inset 0 0 0 1.5px var(--mus);}
+  .whEmpty{background:var(--ocard); border:1.5px dashed var(--oline); border-radius:20px; padding:18px; text-align:center;}
+  .whEmpty .truckSvg{max-width:220px; opacity:.75;}
+  .whEmpty b{display:block; font-family:var(--fTitle); font-size:18px; color:var(--o3); margin-top:6px;}
+  .whEmpty small{color:var(--omut);}
+  .whRow{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #ebe5cf; border-radius:14px; padding:10px 12px; margin-bottom:8px; cursor:pointer;}
+  .whRow > div{flex:1; min-width:0;} .whRow b{display:block; color:var(--o3); font-size:14.5px;} .whRow small{display:block; color:var(--omut); font-size:12px; margin-top:2px;}
+  .whRow .lBar{margin-top:6px;}
+  .whDone{margin:14px 0 4px;} .whDone summary{cursor:pointer; font-weight:800; color:var(--o3); padding:8px 2px;}
+  .whTools{background:var(--ocard); border:1px solid var(--oline); border-radius:20px; padding:4px 14px; margin-top:18px;}
+  .whTools button{display:flex; align-items:center; gap:12px; width:100%; background:none; border:none; border-bottom:1px solid #ebe5cf; padding:12px 2px; font-family:inherit; text-align:right; cursor:pointer;}
+  .whTools button:last-child{border-bottom:none;}
+  .whTools button > span:first-child{width:40px; height:40px; border-radius:12px; background:#eef0dc; display:flex; align-items:center; justify-content:center; font-size:19px; flex:none;}
+  .whTools button div{flex:1;} .whTools b{display:block; font-family:var(--fTitle); font-size:17px; color:var(--o3);} .whTools small{color:var(--omut); font-size:12px;}
+  .lCapTools{display:grid; grid-template-columns:1fr; gap:8px; margin:10px 0 4px;}
+  .lCapTools input{height:42px; border:1px solid var(--oline); border-radius:12px; padding:0 12px; font-family:inherit; width:100%; box-sizing:border-box; margin:0;}
+  .lCapAdd{display:grid; grid-template-columns:1fr 1.6fr auto; gap:6px;}
+  .lCapAdd button{height:42px; border:none; border-radius:12px; background:var(--o1); color:#fbf8ee; font-family:inherit; font-weight:800; padding:0 14px; cursor:pointer;}
+  .lCap tr.newRow td{background:#fbf1d6;}
 </style>
 </head>
 <body>
@@ -1365,6 +1424,22 @@
           <button class="adminLink wide ic-logout" onclick="handleLogout()"><div class="icon"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><polyline points="15 8 19 12 15 16"/><line x1="19" y1="12" x2="9" y2="12"/></svg></div><div class="title">تسجيل خروج</div></button>
         </div>
       </div>
+    </div>
+    <!-- أمين المخزن -->
+    <div id="whHome" hidden>
+      <div class="whHero">
+        <div class="whHeroTop"><div><div class="whKicker">🏬 مخزن التحميلات</div><div class="whTitle">التحميلات المطلوبة</div></div>
+          <button type="button" class="whRefresh" onclick="whLoad_()" aria-label="تحديث"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><polyline points="20 4 20 11 13 11"/></svg></button></div>
+        <div class="whStats" id="whStats"></div>
+        <div class="whUpd" id="whUpd"></div>
+      </div>
+      <div id="whList"><div class="aiStatus">جاري التحميل...</div></div>
+      <div class="whTools">
+        <button type="button" onclick="ldSettings_()"><span>⚙️</span><div><b>سعات العربيات</b><small>العربية تشيل كام قطعة من كل صنف</small></div><span class="cGo">‹</span></button>
+        <button type="button" onclick="openLoadsAdmin_()"><span>📋</span><div><b>كل التحميلات</b><small>القديمة واللي خلصت</small></div><span class="cGo">‹</span></button>
+        <button type="button" onclick="openScreen('profile')"><span>👤</span><div><b>حسابي</b><small>البصمة والإعدادات</small></div><span class="cGo">‹</span></button>
+      </div>
+      <button type="button" class="logoutLink" onclick="handleLogout()"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><polyline points="15 8 19 12 15 16"/><line x1="19" y1="12" x2="9" y2="12"/></svg> تسجيل خروج</button>
     </div>
   </div>
 
@@ -2461,7 +2536,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.22.0';
+  const APP_VERSION_ = 'v1.23.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -2491,7 +2566,7 @@
     document.body.classList.toggle('inner', !home);
     document.body.classList.toggle('c2home', name === 'viewHome');
     const tab = { viewHome: 'home', viewWallet: 'wallet', viewProfile: 'profile' }[name];
-    const showTabs = !!(tab && state.user && !state.isAdmin);
+    const showTabs = !!(tab && state.user && !state.isAdmin && !document.body.classList.contains('whRole'));
     document.getElementById('tabBar').hidden = !showTabs;
     document.body.classList.toggle('tabs', showTabs);
     if(showTabs) document.querySelectorAll('#tabBar button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab === tab); });
@@ -2621,6 +2696,13 @@
     (function(){ const d = new Date(), w = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()];
       document.getElementById('homeDate').textContent = w + ' ' + d.getDate() + '/' + (d.getMonth() + 1); })();
     ldWhoami_();
+    const cachedRole = ld_.role || ((localCacheGet_('role') || {}).v);
+    if(!state.isAdmin && cachedRole === 'warehouse'){
+      whEnter_();
+      if(!_pkOfferShownThisSession_) setTimeout(function(){ maybeOfferPasskey_(false); }, 2500);
+      return;
+    }
+    whLeave_();
     if(state.isAdmin){
       if(!state.repOptions.length){
         callApi('bootstrapHome', [state.auth]).then(function(d){ setRepOptions_(d.repOptions); }).catch(function(){});
@@ -2662,6 +2744,7 @@
       : 'متأكد إنك عاوز تسجل خروج؟';
     if(!confirm(msg)) return;
     stopTracking_();
+    whLeave_();
     localCacheClearAll_();
     clearAuth();
     state.auth = null; state.user = null; state.isAdmin = false; state.rep = null; state.repOptions = [];
@@ -4349,6 +4432,7 @@
     document.getElementById('dlOverlay').hidden = true;
     document.body.style.overflow = '';
     dl_.stack = [];
+    if(typeof isWh_ === 'function' && isWh_() && state.screen === null) whLoad_(true);
   }
   function dlBack_(){
     const prev = dl_.stack.pop();
@@ -5116,6 +5200,8 @@
   function ldRenderRoute_(){
     const items = ldSelItems_(), fills = ldFill_(items);
     let h = '<div class="sectionLabel" style="margin:0 0 8px;">نوع العربية</div><div class="lVehs">' + fills.map(function(f){ return ldBar_(f, f.v.id === ld_.vehicle); }).join('') + '</div>';
+    const selV = (ld_.veh || []).find(function(v){ return v.id === ld_.vehicle; });
+    if(selV) h += ldTruckBlock_(items, selV.id, selV.name);
     h += '<div class="sectionLabel" style="margin:14px 0 8px;">الترتيب (' + ld_.stops.length + ' تاجر)</div>';
     h += ld_.stops.map(function(s, i){
       return '<div class="lStop"><span class="lSeq">' + (i + 1) + '</span><div class="lStopB"><b>' + escapeHtml(s.name || s.customer_code) + '</b><small>' +
@@ -5244,7 +5330,7 @@
       const cls = r.pct == null ? 'mut' : r.pct > 90 ? 'gold' : 'green';
       return '<div class="aRow"><div class="aTop"><b>رحلة ' + (i + 1) + '</b>' +
         (r.vehicle ? '<span class="lChip ' + cls + '">🚚 ' + escapeHtml(r.vehicle.name) + ' • ' + r.pct + '%</span>' : r.tooBig ? '<span class="lChip red">⚠️ أكبر من أكبر عربية</span>' : '') + '</div>' +
-        (r.pct != null ? '<span class="lBar ' + cls + '" style="margin:6px 0 4px;"><i style="width:' + Math.min(100, r.pct) + '%"></i></span>' : '') +
+        (r.pct != null ? '<div class="planTruck">' + ldTruckSvg_(r.pct, (ldFillSegs_(ldStopItems_(r.stops), r.vehicle.id) || {}).segs, ldVehKind_(r.vehicle.id), true) + '</div>' : '') +
         '<div class="aSub">' + escapeHtml([r.stops.length + ' تاجر', fmt(r.pcs) + ' قطعة', r.km ? '~' + r.km + ' كم بين التجار' : '', r.noLoc ? 'من غير لوكيشن' : '',
           r.areas.length ? r.areas.slice(0, 3).join('، ') + (r.areas.length > 3 ? ' +' + (r.areas.length - 3) : '') : '',
           r.oldest ? 'أقدم طلبية من ' + r.oldest + ' يوم' : ''].filter(Boolean).join(' • ')) + '</div>' +
@@ -5315,9 +5401,7 @@
     ldBody_().innerHTML = h;
   }
   function ldOpen_(id){
-    dlPush_(); dlBackBtn_();
-    document.getElementById('dlTitle').textContent = '🚚 تحميلة';
-    document.getElementById('dlSub').textContent = '';
+    dlEnter_('🚚 تحميلة', '');
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     Promise.all([ldApi_('detail', { id: id }), ldVehicles_()]).then(function(x){ ld_.cur = x[0]; ldRenderDetail_(); }).catch(ldErr_);
   }
@@ -5332,6 +5416,7 @@
       const order = ['requested', 'approved', 'loaded', 'done'], k = order.indexOf(L.status);
       return '<span class="' + (k >= i ? 'on' : '') + '">' + s[1] + '</span>';
     }).join('') + '</div>';
+    h += ldTruckBlock_(d.items.map(function(i){ return { code: i.code, name: i.name, qty: Number(i.qty) }; }), L.vehicle_id, L.vehicle);
     if(L.notes) h += '<div class="note" style="margin:8px 0;">📝 ' + escapeHtml(L.notes) + '</div>';
     if(L.driver || L.plate) h += '<div class="note" style="margin:8px 0;">🚚 السواق: <b>' + escapeHtml(L.driver || '—') + '</b> • العربية: <b>' + escapeHtml(L.plate || '—') + '</b></div>';
     if(L.reject_reason) h += '<div class="note" style="margin:8px 0; color:var(--red)">سبب الرفض: ' + escapeHtml(L.reject_reason) + '</div>';
@@ -5372,7 +5457,11 @@
     }).join('');
     ldBody_().innerHTML = h;
     const av = document.getElementById('ldApprVehs');
-    if(av) av.querySelectorAll('.lVeh').forEach(function(b){ b.onclick = function(){ ld_.apprVeh = Number(b.dataset.v); av.querySelectorAll('.lVeh').forEach(function(x){ x.classList.toggle('on', x === b); }); }; });
+    if(av) av.querySelectorAll('.lVeh').forEach(function(b){ b.onclick = function(){
+      ld_.apprVeh = Number(b.dataset.v); av.querySelectorAll('.lVeh').forEach(function(x){ x.classList.toggle('on', x === b); });
+      const tb = ldBody_().querySelector('.truckBox'), v = (ld_.veh || []).find(function(x){ return x.id === ld_.apprVeh; });
+      if(tb) tb.outerHTML = ldTruckBlock_(ld_.cur.items.map(function(i){ return { code: i.code, name: i.name, qty: Number(i.qty) }; }), ld_.apprVeh, v && v.name);
+    }; });
   }
   function ldReload_(){ return ldApi_('detail', { id: ld_.cur.load.id }).then(function(r){ ld_.cur = r; ldRenderDetail_(); }); }
   function ldAct_(act, args, msg){
@@ -5482,9 +5571,7 @@
   }
   // سعات العربيات: الصق من Excel (كود | اسم | ربع نقل | نص نقل | ...) أو عدّل بإيدك
   function ldSettings_(){
-    dlPush_(); dlBackBtn_();
-    document.getElementById('dlTitle').textContent = '⚙️ العربيات والسعات';
-    document.getElementById('dlSub').textContent = 'العربية تشيل كام قطعة من كل صنف لوحده';
+    dlEnter_(ld_.role === 'warehouse' ? '⚙️ سعات العربيات' : '⚙️ العربيات والسعات', 'العربية تشيل كام قطعة من كل صنف لوحده');
     ld_.veh = null;
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     ldVehicles_().then(ldRenderSettings_).catch(ldErr_);
@@ -5493,23 +5580,27 @@
     const V = ld_.veh;
     const rows = {};
     ld_.caps.forEach(function(c){ const r = rows[c.c] = rows[c.c] || { c: c.c, n: c.n || '', q: {} }; r.q[c.v] = c.q; if(c.n) r.n = c.n; });
-    let h = '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
+    const isWhR = ld_.role === 'warehouse';
+    let h = isWhR ? '<div class="note" style="margin-bottom:8px;">اكتب العربية تشيل كام قطعة من الصنف ده <b>لوحده</b> لو اتحمّلت بيه كلها. السيستم بيستخدم الأرقام دي يحسب امتلاء العربية ويقترح نوعها.</div>' : '';
+    if(!isWhR) h += '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
       return '<div class="lVRow"><input data-lvid="' + v.id + '" data-k="name" value="' + escapeHtml(v.name) + '"><input data-lvid="' + v.id + '" data-k="sort" type="number" value="' + v.sort + '" title="الترتيب">' +
         '<label class="lSw"><input type="checkbox" data-lvid="' + v.id + '" data-k="active"' + (v.active !== false ? ' checked' : '') + '> شغّالة</label></div>';
     }).join('') + '<div class="lVRow"><input id="ldNewVeh" placeholder="＋ نوع عربية جديد (مثلاً: تريلا)"></div>' +
       '<button type="button" class="aGo wide" onclick="ldSaveVehicles_()">حفظ العربيات</button>';
-    h += '<div class="sectionLabel" style="margin:18px 0 6px;">السعات</div>' +
+    h += '<div class="sectionLabel" style="margin:' + (isWhR ? '0' : '18px') + ' 0 6px;">السعات</div>' +
       '<div class="note" style="margin-bottom:6px;">الصق من Excel بالأعمدة دي (سطر العناوين الأول):<br><b>كود الصنف | اسم الصنف | ' + V.map(function(v){ return escapeHtml(v.name); }).join(' | ') + '</b></div>' +
       '<textarea id="ldPaste" rows="4" placeholder="الصق هنا..." style="direction:ltr;"></textarea><button type="button" class="aGo wide" onclick="ldPasteCaps_()">استورد اللي اتلصق</button>';
+    h += '<div class="lCapTools"><input type="search" placeholder="🔎 دوّر على صنف بالاسم أو الكود..." oninput="ldCapFilter_(this.value)">' +
+      '<div class="lCapAdd"><input id="ldNewCode" placeholder="الكود" dir="ltr"><input id="ldNewName" placeholder="اسم الصنف"><button type="button" onclick="ldCapAddRow_()">＋ ضيف</button></div></div>';
     const keys = Object.keys(rows);
     h += '<div class="lCapWrap"><table class="lCap"><thead><tr><th>الصنف</th>' + V.map(function(v){ return '<th>' + escapeHtml(v.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       (keys.length ? keys.map(function(k){
         const r = rows[k];
-        return '<tr><td><b>' + escapeHtml(r.n || r.c) + '</b><small>' + escapeHtml(r.c) + '</small></td>' + V.map(function(v){
+        return '<tr data-k="' + escapeHtml(normAr_(r.c + ' ' + (r.n || ''))) + '"><td><b>' + escapeHtml(r.n || r.c) + '</b><small>' + escapeHtml(r.c) + '</small></td>' + V.map(function(v){
           return '<td><input type="number" min="0" data-c="' + escapeHtml(r.c) + '" data-n="' + escapeHtml(r.n) + '" data-v="' + v.id + '" value="' + (r.q[v.id] != null ? r.q[v.id] : '') + '"></td>';
         }).join('') + '</tr>';
       }).join('') : '<tr><td colspan="' + (V.length + 1) + '" class="empty">لسه مفيش سعات — الصقها من Excel فوق</td></tr>') + '</tbody></table></div>' +
-      (keys.length ? '<button type="button" class="aGo wide" onclick="ldSaveCaps_()">حفظ التعديلات</button>' : '');
+      (keys.length ? '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">حفظ التعديلات</button>' : '');
     ldBody_().innerHTML = h;
   }
   function ldSaveVehicles_(){
@@ -5546,6 +5637,234 @@
     ldApi_('caps_save', { caps: caps }).then(function(){ showLoading(false); toast_('✔ اتحفظ'); ld_.veh = null; return ldVehicles_().then(ldRenderSettings_); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
+  // ================== 🚚 رسم العربية بصندوق شفاف بيتملى ==================
+  const LD_SEG_COLORS_ = ['#56672f', '#d9a21b', '#2c548f', '#a8432f', '#8a8c6c'];
+  var _truckN_ = 0;
+  // نوع العربية من ترتيبها (الأصغر الأول): 0 دبابة … 3 أكبر عربية — بيحدد طول الصندوق في الرسم
+  function ldVehKind_(vid, vname){
+    const list = (ld_.veh || []).filter(function(v){ return v.active !== false; });
+    let i = list.findIndex(function(v){ return (vid != null && v.id === vid) || (vname && v.name === vname); });
+    if(i < 0) i = 1;
+    return Math.min(3, Math.round(i * 3 / Math.max(1, list.length - 1)));
+  }
+  // نصيب كل صنف من امتلاء عربية معيّنة — للألوان جوه الصندوق
+  function ldFillSegs_(items, vid){
+    const capMap = {}, perV = [];
+    ld_.caps.forEach(function(c){ if(c.v !== vid) return; capMap[c.c] = Number(c.q); perV.push(Number(c.q)); });
+    if(!perV.length) return null;
+    perV.sort(function(a, b){ return a - b; });
+    const median = perV[Math.floor(perV.length / 2)];
+    const by = {};
+    let est = 0;
+    items.forEach(function(it){
+      const k = it.code || it.name, cap = capMap[it.code];
+      if(!cap) est++;
+      const x = by[k] = by[k] || { name: it.name || it.code, pct: 0, qty: 0 };
+      x.pct += Number(it.qty) / (cap || median) * 100;
+      x.qty += Number(it.qty);
+    });
+    const segs = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.pct - a.pct; });
+    const top = segs.slice(0, 4);
+    const rest = segs.slice(4);
+    if(rest.length) top.push({ name: 'باقي الأصناف (' + rest.length + ')', pct: rest.reduce(function(t, s){ return t + s.pct; }, 0), qty: rest.reduce(function(t, s){ return t + s.qty; }, 0) });
+    const pct = Math.round(segs.reduce(function(t, s){ return t + s.pct; }, 0));
+    top.forEach(function(s, i){ s.color = LD_SEG_COLORS_[i]; });
+    return { pct: pct, segs: top, est: est };
+  }
+  // pct: نسبة الامتلاء، segs: [{pct, color}] من تحت لفوق، kind: 0..3، small: رسم صغير للكروت
+  function ldTruckSvg_(pct, segs, kind, small){
+    const id = 'tk' + (++_truckN_);
+    kind = kind == null ? 1 : kind;
+    const boxW = [128, 168, 192, 222][kind], boxH = [58, 74, 78, 84][kind];
+    const cabW = kind === 0 ? 62 : 58, gap = 6, x0 = 14, base = 118;
+    const bx = x0 + cabW + gap, by = base - boxH, W = bx + boxW + 12;
+    const over = pct != null && pct > 100;
+    const fillH = pct == null ? 0 : Math.min(100, pct) / 100 * (boxH - 6);
+    const tone = pct == null ? '#b9b49c' : over ? '#a8432f' : pct > 90 ? '#d9a21b' : '#2b7a4f';
+    let layers = '';
+    if(pct != null && pct > 0){
+      const list = segs && segs.length ? segs : [{ pct: pct, color: tone }];
+      const tot = list.reduce(function(t, s){ return t + s.pct; }, 0) || 1;
+      let y = base - 3;
+      list.forEach(function(s){
+        const h = fillH * s.pct / tot;
+        y -= h;
+        layers += '<rect x="' + (bx + 3) + '" y="' + y.toFixed(1) + '" width="' + (boxW - 6) + '" height="' + h.toFixed(1) + '" fill="' + s.color + '"/>';
+      });
+      layers += '<rect x="' + (bx + 3) + '" y="' + (base - 3 - fillH).toFixed(1) + '" width="' + (boxW - 6) + '" height="' + fillH.toFixed(1) + '" fill="url(#' + id + 'c)"/>';
+    }
+    const overH = over ? Math.min(26, (pct - 100) / 100 * boxH) : 0;
+    const wheel = function(cx){ return '<circle cx="' + cx + '" cy="' + (base + 8) + '" r="11" fill="#2f3519"/><circle cx="' + cx + '" cy="' + (base + 8) + '" r="4.5" fill="#d6cfb1"/>'; };
+    const label = pct == null ? 'مفيش سعات' : pct + '%';
+    const vy = Math.max(0, Math.min(by, base - 64) - 10 - overH), vh = base + 26 - vy;
+    return '<svg class="truckSvg' + (small ? ' sm' : '') + '" viewBox="0 ' + vy.toFixed(0) + ' ' + W + ' ' + vh.toFixed(0) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="امتلاء العربية ' + label + '">' +
+      '<defs>' +
+        '<pattern id="' + id + 'c" width="22" height="14" patternUnits="userSpaceOnUse"><rect width="22" height="14" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.2"/><line x1="11" y1="0" x2="11" y2="4" stroke="#fff" stroke-opacity=".3"/></pattern>' +
+        '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#eef2e4" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".3"/></linearGradient>' +
+        '<pattern id="' + id + 'h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#fbe8e4"/><line x1="0" y1="0" x2="0" y2="7" stroke="#a8432f" stroke-width="3"/></pattern>' +
+      '</defs>' +
+      // الأرض والظل
+      '<ellipse cx="' + (W / 2) + '" cy="' + (base + 20) + '" rx="' + (W / 2 - 8) + '" ry="4" fill="#2f3519" opacity=".12"/>' +
+      // الشاسيه
+      '<rect x="' + (x0 + 4) + '" y="' + (base - 2) + '" width="' + (bx + boxW - x0 - 4) + '" height="8" rx="3" fill="#3a3f22"/>' +
+      // الكابينة (وش العربية ناحية الشمال)
+      '<path d="M' + (x0 + cabW) + ' ' + (base - 2) + ' V' + (base - 58) + ' Q' + (x0 + cabW) + ' ' + (base - 64) + ' ' + (x0 + cabW - 6) + ' ' + (base - 64) +
+        ' H' + (x0 + 22) + ' Q' + (x0 + 14) + ' ' + (base - 64) + ' ' + (x0 + 10) + ' ' + (base - 56) + ' L' + (x0 + 2) + ' ' + (base - 34) +
+        ' Q' + x0 + ' ' + (base - 30) + ' ' + x0 + ' ' + (base - 24) + ' V' + (base - 2) + ' Z" fill="#3f4c22"/>' +
+      '<path d="M' + (x0 + 14) + ' ' + (base - 54) + ' Q' + (x0 + 17) + ' ' + (base - 58) + ' ' + (x0 + 22) + ' ' + (base - 58) + ' H' + (x0 + cabW - 8) + ' V' + (base - 36) + ' H' + (x0 + 7) + ' Z" fill="#dfe8ef"/>' +
+      '<path d="M' + (x0 + 16) + ' ' + (base - 55) + ' L' + (x0 + 26) + ' ' + (base - 55) + ' L' + (x0 + 14) + ' ' + (base - 38) + ' L' + (x0 + 10) + ' ' + (base - 38) + ' Z" fill="#fff" opacity=".55"/>' +
+      '<rect x="' + (x0 + cabW - 22) + '" y="' + (base - 30) + '" width="9" height="3" rx="1.5" fill="#d6cfb1"/>' +
+      '<rect x="' + (x0 - 1) + '" y="' + (base - 20) + '" width="7" height="6" rx="2" fill="#f2cf6b"/>' +
+      '<rect x="' + (x0 - 2) + '" y="' + (base - 9) + '" width="12" height="6" rx="2" fill="#2f3519"/>' +
+      // الصندوق الشفاف + المحتوى
+      '<g class="truckLoad">' + layers + '</g>' +
+      (over ? '<rect x="' + (bx + 3) + '" y="' + (by - overH) + '" width="' + (boxW - 6) + '" height="' + overH + '" fill="url(#' + id + 'h)" stroke="#a8432f" stroke-dasharray="4 3"/>' : '') +
+      '<rect x="' + bx + '" y="' + by + '" width="' + boxW + '" height="' + boxH + '" rx="5" fill="url(#' + id + 'g)" stroke="' + (over ? '#a8432f' : '#3f4c22') + '" stroke-width="2.5"/>' +
+      '<line x1="' + (bx + 8) + '" y1="' + (by + 6) + '" x2="' + (bx + boxW * .45) + '" y2="' + (by + 6) + '" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>' +
+      // الكاوتش
+      wheel(x0 + 30) + wheel(bx + boxW - 30) + (kind >= 2 ? wheel(bx + boxW - 56) : '') +
+      // النسبة
+      '<text x="' + (bx + boxW / 2) + '" y="' + (by + boxH / 2 + 8) + '" text-anchor="middle" font-family="Alexandria,Cairo,sans-serif" font-weight="800" font-size="' + (pct == null ? 13 : 24) + '" fill="' + (pct == null ? '#7d7f62' : '#2f3519') + '" stroke="#fff" stroke-width="4" paint-order="stroke" direction="ltr">' + label + '</text>' +
+      '</svg>';
+  }
+  // رسم كبير + شرح الألوان
+  function ldTruckBlock_(items, vid, vname){
+    const f = vid != null && items && items.length ? ldFillSegs_(items, vid) : null;
+    const kind = ldVehKind_(vid, vname);
+    const pct = f ? f.pct : null;
+    const cls = pct == null ? '' : pct > 100 ? ' over' : pct > 90 ? ' near' : ' ok';
+    let h = '<div class="truckBox' + cls + '">' + ldTruckSvg_(pct, f && f.segs, kind, false);
+    if(f){
+      h += '<div class="truckMsg">' + (pct > 100 ? '⚠️ الحمولة أكبر من العربية بـ ' + (pct - 100) + '% — شيل طلبية أو اختار عربية أكبر'
+        : pct > 90 ? 'العربية تقريبًا مليانة — فاضل ' + (100 - pct) + '%' : 'فاضل ' + (100 - pct) + '% في العربية') +
+        (f.est ? ' <small>(' + f.est + ' صنف مالوش سعة — اتحسب بالتقريب)</small>' : '') + '</div>';
+      h += '<div class="truckLegend">' + f.segs.map(function(s){
+        return '<span><i style="background:' + s.color + '"></i>' + escapeHtml(s.name) + ' <b>' + Math.round(s.pct) + '%</b></span>';
+      }).join('') + '</div>';
+    } else if(vid != null){
+      h += '<div class="truckMsg">سعات العربية دي لسه مادخلتش — ادخل ⚙️ السعات</div>';
+    }
+    return h + '</div>';
+  }
+
+  // ================== 🏬 شاشة أمين المخزن ==================
+  // صفحة لوحدها: التحميلات المطلوبة بس + سعات العربيات. مفيش زيارات ولا خط سير ولا تتبع موقع.
+  var wh_ = { list: [], timer: null, loading: false };
+  function isWh_(){ return document.body.classList.contains('whRole'); }
+  function whEnter_(){
+    document.body.classList.add('whRole');
+    stopTracking_();
+    ['repHome', 'adminHome', 'repStats'].forEach(function(id){ document.getElementById(id).hidden = true; });
+    document.getElementById('gpsChip').hidden = true;
+    document.getElementById('whHome').hidden = false;
+    document.getElementById('homeHi').textContent = 'أمين المخزن';
+    document.getElementById('tabBar').hidden = true;
+    document.body.classList.remove('tabs');
+    whLoad_();
+    if(!wh_.timer) wh_.timer = setInterval(function(){
+      if(isWh_() && state.screen === null && !document.hidden && document.getElementById('dlOverlay').hidden) whLoad_(true);
+    }, 60000);
+  }
+  function whLeave_(){
+    document.body.classList.remove('whRole');
+    document.getElementById('whHome').hidden = true;
+  }
+  function whLoad_(quiet){
+    if(wh_.loading) return;
+    wh_.loading = true;
+    if(!quiet && !wh_.list.length) document.getElementById('whList').innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    Promise.all([ldApi_('list'), ldVehicles_()]).then(function(x){
+      wh_.list = x[0] || [];
+      wh_.at = new Date();
+      whRender_();
+    }).catch(function(e){
+      if(!wh_.list.length) document.getElementById('whList').innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>';
+    }).then(function(){ wh_.loading = false; });
+  }
+  function whRender_(){
+    const L = wh_.list;
+    const waiting = L.filter(function(x){ return x.status === 'approved'; });
+    const onRoad = L.filter(function(x){ return x.status === 'loaded'; });
+    const weekAgo = Date.now() - 7 * 864e5;
+    const done = L.filter(function(x){ return x.status === 'done' && new Date(x.created_at).getTime() > weekAgo; });
+    const pcs = waiting.reduce(function(t, x){ return t + Number(x.pieces || 0); }, 0);
+    document.getElementById('whStats').innerHTML =
+      '<div class="whStat hot"><b>' + waiting.length + '</b><span>مستنية التحميل</span></div>' +
+      '<div class="whStat"><b>' + fmt(pcs) + '</b><span>قطعة مطلوبة</span></div>' +
+      '<div class="whStat"><b>' + onRoad.length + '</b><span>في الطريق</span></div>' +
+      '<div class="whStat"><b>' + done.length + '</b><span>خلصت (7 أيام)</span></div>';
+    document.getElementById('whUpd').textContent = wh_.at ? 'آخر تحديث ' + wh_.at.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' }) : '';
+    let h = '<div class="whSec">🚚 مستنية التحميل <span>' + waiting.length + '</span></div>';
+    if(!waiting.length){
+      h += '<div class="whEmpty">' + ldTruckSvg_(0, null, 2, false) + '<b>مفيش تحميلات مستنية 👌</b><small>أول ما المدير يوافق على تحميلة هتظهر هنا</small></div>';
+    } else {
+      h += waiting.map(function(x){
+        const kind = ldVehKind_(null, x.vehicle);
+        return '<div class="whCard" onclick="ldOpen_(' + x.id + ')">' +
+          '<div class="whCardTop"><div class="whTruck">' + ldTruckSvg_(x.fill != null ? Math.round(x.fill) : null, null, kind, true) + '</div>' +
+          '<div class="whInfo"><div class="whSerial">تحميلة <b>#' + x.serial + '</b></div>' +
+          '<div class="whVeh">' + escapeHtml(x.vehicle || '—') + '</div>' +
+          '<div class="whMeta">👤 ' + escapeHtml(x.rep || '') + '</div>' +
+          '<div class="whMeta">' + x.stops + ' تاجر • ' + fmt(x.pieces) + ' قطعة • ' + whAgo_(x.created_at) + '</div></div></div>' +
+          '<div class="whBtns"><button type="button" onclick="event.stopPropagation(); whPrint_(' + x.id + ')">🖨 إذن الصرف</button>' +
+          '<button type="button" class="go" onclick="event.stopPropagation(); ldOpen_(' + x.id + ')">افتح وأكّد الخروج ←</button></div></div>';
+      }).join('');
+    }
+    if(onRoad.length){
+      h += '<div class="whSec">🛣 في الطريق <span>' + onRoad.length + '</span></div>' + onRoad.map(function(x){
+        const p = x.stops ? Math.round(x.done_stops * 100 / x.stops) : 0;
+        return '<div class="whRow" onclick="ldOpen_(' + x.id + ')"><div><b>#' + x.serial + ' — ' + escapeHtml(x.rep || '') + '</b>' +
+          '<small>' + escapeHtml([x.vehicle, x.driver ? 'السواق: ' + x.driver : '', x.plate].filter(Boolean).join(' • ')) + '</small>' +
+          '<span class="lBar green"><i style="width:' + p + '%"></i></span><small>اتسلّم ' + x.done_stops + ' من ' + x.stops + ' تاجر</small></div><span class="cGo">‹</span></div>';
+      }).join('');
+    }
+    if(done.length){
+      h += '<details class="whDone"><summary>✔ خلصت آخر 7 أيام (' + done.length + ')</summary>' + done.map(function(x){
+        return '<div class="whRow" onclick="ldOpen_(' + x.id + ')"><div><b>#' + x.serial + ' — ' + escapeHtml(x.rep || '') + '</b><small>' + escapeHtml((x.vehicle || '') + ' • ' + admDay_(x.created_at)) + '</small></div><span class="cGo">‹</span></div>';
+      }).join('') + '</details>';
+    }
+    document.getElementById('whList').innerHTML = h;
+  }
+  function whAgo_(t){
+    const m = Math.round((Date.now() - new Date(t).getTime()) / 60000);
+    if(!(m >= 0)) return '';
+    if(m < 60) return 'من ' + Math.max(1, m) + ' دقيقة';
+    if(m < 1440) return 'من ' + Math.round(m / 60) + ' ساعة';
+    return 'من ' + Math.round(m / 1440) + ' يوم';
+  }
+  function whPrint_(id){
+    showLoading(true);
+    ldApi_('detail', { id: id }).then(function(r){ showLoading(false); ld_.cur = r; ldPrint_(); })
+      .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+  }
+  // يفتح شاشة من تحت: لو مقفولة يبدأ من الأول، ولو مفتوحة يحط الحالية في "رجوع"
+  function dlEnter_(title, sub){
+    if(document.getElementById('dlOverlay').hidden){ dl_.stack = []; dlOpen_(title, sub); }
+    else {
+      dlPush_();
+      document.getElementById('dlTitle').textContent = title;
+      document.getElementById('dlSub').textContent = sub || '';
+    }
+    dlBackBtn_();
+  }
+  // فلترة جدول السعات + إضافة صنف
+  function ldCapFilter_(q){
+    q = normAr_(normalizeDigits(q || ''));
+    ldBody_().querySelectorAll('.lCap tbody tr[data-k]').forEach(function(tr){ tr.hidden = !!q && tr.dataset.k.indexOf(q) === -1; });
+  }
+  function ldCapAddRow_(){
+    const code = (document.getElementById('ldNewCode').value || '').trim();
+    const name = (document.getElementById('ldNewName').value || '').trim();
+    if(!code) return showMsg('اكتب كود الصنف', 'error');
+    if(ldBody_().querySelector('.lCap input[data-c="' + CSS.escape(code) + '"]')) return showMsg('الصنف ده موجود في الجدول — دوّر عليه وعدّل', 'error');
+    const tb = ldBody_().querySelector('.lCap tbody');
+    const empty = tb.querySelector('.empty'); if(empty) empty.parentNode.remove();
+    tb.insertAdjacentHTML('afterbegin', '<tr data-k="' + escapeHtml(normAr_(code + ' ' + name)) + '" class="newRow"><td><b>' + escapeHtml(name || code) + '</b><small>' + escapeHtml(code) + '</small></td>' +
+      ld_.veh.map(function(v){ return '<td><input type="number" min="0" data-c="' + escapeHtml(code) + '" data-n="' + escapeHtml(name) + '" data-v="' + v.id + '"></td>'; }).join('') + '</tr>');
+    if(!ldBody_().querySelector('#ldCapSave')) tb.closest('.lCapWrap').insertAdjacentHTML('afterend', '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">حفظ التعديلات</button>');
+    document.getElementById('ldNewCode').value = ''; document.getElementById('ldNewName').value = '';
+    const first = tb.querySelector('tr.newRow input'); if(first) first.focus();
+  }
   // الدور (مندوب/مدير/مخزن) + عدد اللي مستني — بيتطلب مرة مع الرئيسية
   function ldWhoami_(){
     if(!state.auth) return;
@@ -5554,7 +5873,12 @@
       const b = document.getElementById('ldBadge'); if(b){ b.textContent = r.waiting || ''; b.hidden = !r.waiting; }
       const wh = document.getElementById('whBox');
       if(wh){ wh.hidden = r.role !== 'warehouse'; document.getElementById('whCount').textContent = r.waiting ? r.waiting + ' تحميلة مستنية' : 'مفيش تحميلات مستنية'; }
-      document.body.classList.toggle('whRole', r.role === 'warehouse');
+      const was = isWh_();
+      localCacheSet_('role', r.role);
+      if(state.screen === null && !state.isAdmin){
+        if(r.role === 'warehouse' && !was) goHome();
+        else if(r.role !== 'warehouse' && was){ whLeave_(); goHome(); }
+      }
     }).catch(function(){});
   }
 
