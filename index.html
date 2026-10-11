@@ -1172,8 +1172,11 @@
   .pwSheet.full .pwHalf{height:auto; overflow:visible;}
   .pwCut{height:0; border-top:1.5px dashed #888; position:relative; margin:0 6mm;}
   .pwCut span{position:absolute; top:-7px; left:50%; transform:translateX(-50%); background:#fff; padding:0 8px; font-size:8px; color:#666; font-weight:800;}
-  .pwSheet:not(.full) .pwT{table-layout:fixed;}
-  .pwSheet:not(.full) .pwT td.nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pwT{table-layout:fixed;}
+  .pwT td.nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pwT td.cd{direction:ltr; white-space:nowrap; overflow:hidden; font-weight:800; color:#3f4c22; font-size:9.5px;}
+  .pwT tr.tot td.cont{text-align:center; font-weight:900; color:#8a640a; letter-spacing:.5px;}
+  .pwFoot .pg{font-size:8.5px; font-weight:900; color:#2f3519;}
   /* التوقيع لازق في الاسم: العنوان ← التوقيع ← خط ← الاسم تحته على طول */
   .pwSign{margin-top:8px !important;}
   .pwSign > div{display:flex; flex-direction:column; align-items:center; width:28% !important;}
@@ -5821,28 +5824,29 @@
   }
 
   // ================== 🖨 طباعة الحافظة: نسختين على ورقة A4 ==================
-  // لحد 8 سطور: نسختين عاديين | لحد 12: نسختين بخط أصغر | أكتر من كده: كل نسخة في صفحة لوحدها
-  const WALLET_ROWS_HALF_ = 8, WALLET_ROWS_CMP_ = 12;
+  // كل صفحة فيها 8 سطور، وكل ورقة A4 = نسختين من نفس الصفحة. لو البيانات أكتر، بتكمل في صفحة جديدة بنفس الشكل
+  const WALLET_ROWS_PAGE_ = 8;
   async function walletSignatures_(rep){
     const mgr = state.isAdmin && state.user ? state.user.name : '';
     if(!state.isAdmin && state.user) rep = state.user.name; // المندوب: توقيعه هو المتسجل على الموبايل ده
     const r = await Promise.all([fetchSignature_(rep), mgr && mgr !== rep ? fetchSignature_(mgr) : Promise.resolve('')]);
     return { rep: r[0], mgr: r[1], mgrName: r[1] ? mgr : '' };
   }
-  function walletCopyHtml_(w, label, sigs, minRows, compact){
+  function walletCopyHtml_(w, label, sigs, chunk, pg, pages){
     const t = w.totals;
     // التحويلات (إنستاباي / بنك / محفظة) بتتكتب في خانة النقدي — الشيكات بس في خانة الشيكات
     const cashCol = (Number(t.cash) || 0) + (Number(t.transfers) || 0);
     const chqCol = Number(t.cheques) || 0;
     const netCol = cashCol - (Number(t.expenses) || 0);
-    const n = Math.max(minRows, w.payments.length, w.expenses.length);
+    const last = pg === pages;
     let rows = '';
-    for(let i = 0; i < n; i++){
-      const p = w.payments[i], e = w.expenses[i];
-      let pin = '<td></td><td></td><td class="sep"></td>';
+    for(let i = 0; i < WALLET_ROWS_PAGE_; i++){
+      const p = chunk.pay[i], e = chunk.exp[i];
+      let pin = '<td></td><td></td><td></td><td class="sep"></td>';
       if(p){
         const tag = p.kind === 'cheque' ? 'شيك' + (p.chequeDate ? ' ' + p.chequeDate : '') : p.kind === 'transfer' ? p.method : '';
         pin = '<td class="n">' + (p.kind !== 'cheque' ? fmt(p.amount) : '') + '</td><td class="n">' + (p.kind === 'cheque' ? fmt(p.amount) : '') + '</td>' +
+          '<td class="cd">' + escapeHtml(p.customerCode || '') + '</td>' +
           '<td class="nm sep">' + escapeHtml(p.customerName) + (tag ? ' <small>(' + escapeHtml(tag) + ')</small>' : '') + '</td>';
       }
       let eout = '<td></td><td class="sep"></td>';
@@ -5852,13 +5856,18 @@
       }
       rows += '<tr>' + pin + eout + '<td></td></tr>';
     }
+    const totRow = last
+      ? '<tr class="tot"><td class="n">' + fmt(cashCol) + '</td><td class="n">' + (chqCol ? fmt(chqCol) : '') + '</td>' +
+          '<td class="lbl sep" colspan="2">الإجمالي : <span style="direction:ltr; display:inline-block; color:#3f4c22;">' + fmt(t.collected) + '</span></td>' +
+          '<td class="n">' + (t.expenses ? fmt(t.expenses) : '') + '</td><td class="lbl sep">الإجمالي :</td><td class="n">' + fmt(netCol) + '</td></tr>'
+      : '<tr class="tot"><td colspan="7" class="cont">يتبع في صفحة ' + (pg + 1) + ' ←</td></tr>';
     const serial = w.open ? '' : String(w.serial).padStart(7, '0');
     const now = new Date();
     const today = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
     const dateTxt = w.open ? today : String(w.closedAt || '').split(' ')[0];
     const period = w.from ? (w.to && w.to !== w.from ? 'من ' + w.from + ' إلى ' + w.to : w.from) : '';
     const img = function(s){ return s && s.indexOf('data:image/png;base64,') === 0 ? '<img src="' + escapeHtml(s) + '" alt="">' : ''; };
-    return '<div class="pw' + (compact ? ' cmp' : '') + '">' +
+    return '<div class="pw">' +
       '<div class="pwMark"><b>TOUCH</b><i>ZENOUKI</i></div>' +
       (w.open ? '<div class="pwDraft">مسودة — لسه ماتقفلتش</div>' : '') +
       '<div class="pwTop"><div class="pwCo">الزنوكى لصناعة الاجهزة الكهربائية</div><div class="pwLogo"><b>TOUCH</b><small>ZENOUKI GROUP</small></div></div>' +
@@ -5866,18 +5875,16 @@
       '<div class="pwLine"><div class="f">مسلسل (<span class="v s">' + (w.open ? '' : escapeHtml(String(w.serial))) + '</span>)</div><div></div></div>' +
       '<div class="pwLine"><div class="f">إسم المندوب :<span class="v">' + escapeHtml(w.rep) + '</span></div>' +
         '<div class="f">التاريخ<span class="v s">' + escapeHtml(period && period !== dateTxt ? period : dateTxt) + '</span></div></div>' +
-      '<table class="pwT"><colgroup><col style="width:11%"><col style="width:11%"><col style="width:26%"><col style="width:11%"><col style="width:27%"><col style="width:14%"></colgroup>' +
-      '<thead><tr class="g"><th colspan="3" class="sep">الـــوارد</th><th colspan="2" class="sep">المنصـــرف</th><th>الصافي</th></tr>' +
-      '<tr><th>القيمة نقدا</th><th>القيمة شيكات</th><th class="sep">اسم العميـــل</th><th>القيمة</th><th class="sep">بيان الصرف</th><th>صافى النقدى</th></tr></thead>' +
-      '<tbody>' + rows +
-      '<tr class="tot"><td class="n">' + fmt(cashCol) + '</td><td class="n">' + (chqCol ? fmt(chqCol) : '') + '</td><td class="lbl sep">الإجمالي : <span style="direction:ltr; display:inline-block; color:#3f4c22;">' + fmt(t.collected) + '</span></td>' +
-        '<td class="n">' + (t.expenses ? fmt(t.expenses) : '') + '</td><td class="lbl sep">الإجمالي :</td><td class="n">' + fmt(netCol) + '</td></tr></tbody></table>' +
-      (Number(t.transfers) ? '<div class="pwPer">منها تحويلات (إنستاباي / بنك / محفظة): ' + fmt(t.transfers) + ' ج — النقدي المطلوب تسليمه في الإيد: ' + fmt(netCol - Number(t.transfers)) + ' ج</div>' : '') +
+      '<table class="pwT"><colgroup><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:22%"><col style="width:10%"><col style="width:26%"><col style="width:13%"></colgroup>' +
+      '<thead><tr class="g"><th colspan="4" class="sep">الـــوارد</th><th colspan="2" class="sep">المنصـــرف</th><th>الصافي</th></tr>' +
+      '<tr><th>القيمة نقدا</th><th>القيمة شيكات</th><th>كود العميل</th><th class="sep">اسم العميـــل</th><th>القيمة</th><th class="sep">بيان الصرف</th><th>صافى النقدى</th></tr></thead>' +
+      '<tbody>' + rows + totRow + '</tbody></table>' +
+      (last && Number(t.transfers) ? '<div class="pwPer">منها تحويلات (إنستاباي / بنك / محفظة): ' + fmt(t.transfers) + ' ج — النقدي المطلوب تسليمه في الإيد: ' + fmt(netCol - Number(t.transfers)) + ' ج</div>' : '') +
       '<div class="pwSign">' +
         '<div><div class="sl">توقيع المندوب</div><div class="sg">' + img(sigs.rep) + '</div><div class="sn">' + escapeHtml(w.rep) + '</div></div>' +
         '<div><div class="sl">إعتماد المدير المباشر</div><div class="sg">' + img(sigs.mgr) + '</div><div class="sn">' + (escapeHtml(sigs.mgrName || '') || '&nbsp;') + '</div></div>' +
         '<div><div class="sl">أمين الخزينة</div><div class="sg"></div><div class="sn">&nbsp;</div></div></div>' +
-      '<div class="pwFoot"><b>' + label + '</b><span>F-SA-8.6-07-01</span></div></div>';
+      '<div class="pwFoot"><b>' + label + '</b>' + (pages > 1 ? '<span class="pg">صفحة ' + pg + ' من ' + pages + '</span>' : '') + '<span>F-SA-8.6-07-01</span></div></div>';
   }
   async function walletDoc_(w){
     // اسم المندوب: من الحافظة، ولو مش راجع من السيرفر ناخده من المندوب المختار / اللي داخل
@@ -5885,14 +5892,16 @@
     w = Object.assign({}, w, { rep: repName });
     let sigs = { rep: '', mgr: '', mgrName: '' };
     try{ sigs = await walletSignatures_(repName); }catch(e){}
-    const count = Math.max(w.payments.length, w.expenses.length);
-    const mode = count <= WALLET_ROWS_HALF_ ? 'half' : count <= WALLET_ROWS_CMP_ ? 'cmp' : 'full';
-    const minRows = mode === 'half' ? WALLET_ROWS_HALF_ : mode === 'cmp' ? WALLET_ROWS_CMP_ : 8;
-    const a = walletCopyHtml_(w, 'نسخة الشركة', sigs, minRows, mode === 'cmp');
-    const b = walletCopyHtml_(w, 'نسخة المندوب', sigs, minRows, mode === 'cmp');
-    const html = mode === 'full'
-      ? '<div class="pwSheet full"><div class="pwHalf">' + a + '</div></div><div class="pwSheet full"><div class="pwHalf">' + b + '</div></div>'
-      : '<div class="pwSheet"><div class="pwHalf">' + a + '</div><div class="pwCut"><span>✂ قص هنا</span></div><div class="pwHalf">' + b + '</div></div>';
+    const R = WALLET_ROWS_PAGE_;
+    const pages = Math.max(1, Math.ceil(Math.max(w.payments.length, w.expenses.length) / R));
+    let html = '';
+    for(let pg = 1; pg <= pages; pg++){
+      const s = (pg - 1) * R;
+      const chunk = { pay: w.payments.slice(s, s + R), exp: w.expenses.slice(s, s + R) };
+      html += '<div class="pwSheet"><div class="pwHalf">' + walletCopyHtml_(w, 'نسخة الشركة', sigs, chunk, pg, pages) + '</div>' +
+        '<div class="pwCut"><span>✂ قص هنا</span></div>' +
+        '<div class="pwHalf">' + walletCopyHtml_(w, 'نسخة المندوب', sigs, chunk, pg, pages) + '</div></div>';
+    }
     const serial = w.open ? '' : String(w.serial).padStart(7, '0');
     const title = 'حافظة ' + repName + (serial ? ' ' + serial : ' (مسودة)');
     return { w: w, sigs: sigs, html: html, title: title, fileName: title.replace(/[\\\/:*?"<>|]/g, ' ') + '.pdf' };
