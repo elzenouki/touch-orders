@@ -2461,7 +2461,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.20.3';
+  const APP_VERSION_ = 'v1.21.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5012,6 +5012,7 @@
 
   // ---------- المندوب ----------
   function openLoads_(tab){
+    ld_.adm = false;
     ld_.tab = tab || 'pending';
     dl_.stack = []; dlBackBtn_();
     dlOpen_('🚚 تحميلاتي', 'الطلبيات اللي لسه ماخرجتش وخط سير العربية');
@@ -5036,7 +5037,7 @@
     return Object.keys(m).map(function(k){ return m[k]; });
   }
   function ldRenderPending_(){
-    let h = ldTabs_();
+    let h = ld_.adm ? ldAdmHead_() : ldTabs_();
     if(!ld_.pending.length) return ldBody_().innerHTML = h + '<div class="empty">مفيش طلبيات مستنية تحميل 👌</div>';
     h += '<div class="note" style="margin-bottom:8px;">علّم الطلبيات اللي عاوزها تتحمّل في عربية واحدة — وبعدين رتّب خط السير.</div>';
     const byArea = {};
@@ -5048,7 +5049,7 @@
         const pcs = d.lines.reduce(function(s, l){ return s + (Number(l.qty) || 0); }, 0);
         h += '<div class="aRow lDoc' + (on ? ' on' : '') + '" onclick="ldToggle_(' + i + ')"><div class="aTop"><span class="lChk">' + (on ? '✔' : '') + '</span><b>' + escapeHtml(d.customer_name || d.customer_code) + '</b>' +
           '<span class="chip' + (d.days > 3 ? ' red' : '') + '">' + (d.days ? 'من ' + d.days + ' يوم' : 'النهارده') + '</span></div>' +
-          '<div class="aSub">' + escapeHtml(d.lines.slice(0, 4).map(function(l){ return l.name + ' ×' + fmt(l.qty); }).join('، ') + (d.lines.length > 4 ? ' +' + (d.lines.length - 4) : '')) + ' • ' + fmt(pcs) + ' قطعة</div>' +
+          '<div class="aSub">' + (ld_.adm && !ld_.admRep && d.rep ? '👤 <b>' + escapeHtml(d.rep) + '</b> • ' : '') + escapeHtml(d.lines.slice(0, 4).map(function(l){ return l.name + ' ×' + fmt(l.qty); }).join('، ') + (d.lines.length > 4 ? ' +' + (d.lines.length - 4) : '')) + ' • ' + fmt(pcs) + ' قطعة</div>' +
           '<div class="aBtns"><button type="button" onclick="event.stopPropagation(); ldCloseDoc_(' + i + ')">اتسلّمت من غير تحميلة / اتلغت</button></div></div>';
       });
     });
@@ -5079,7 +5080,7 @@
     const d = ld_.pending[i];
     confirmModal_('طلبية <b>' + escapeHtml(d.customer_name || '') + '</b> اتسلّمت من غير تحميلة أو اتلغت؟<br>هتختفي من القايمة دي.', 'أيوه', 'رجوع').then(function(ok){
       if(!ok) return;
-      ldApi_('close_doc', { doc_id: d.doc_id }).then(function(){ toast_('✔ اتشالت من القايمة'); ldLoadTab_(); }).catch(function(e){ showMsg(e.message, 'error'); });
+      ldApi_('close_doc', { doc_id: d.doc_id }).then(function(){ toast_('✔ اتشالت من القايمة'); if(ld_.adm) ldAdmLoad_(); else ldLoadTab_(); }).catch(function(e){ showMsg(e.message, 'error'); });
     });
   }
   // ترتيب أولي: الأقرب فالأقرب (اللي مالوش موقع في الآخر بالمنطقة)
@@ -5121,7 +5122,7 @@
         '<button type="button" ' + (i ? '' : 'disabled') + ' onclick="ldMove_(' + i + ',-1)">↑</button><button type="button" ' + (i < ld_.stops.length - 1 ? '' : 'disabled') + ' onclick="ldMove_(' + i + ',1)">↓</button></div>';
     }).join('');
     h += '<label style="margin-top:12px; display:block;">ملاحظات للمدير والمخزن (اختياري)</label><textarea id="ldNotes" rows="2" placeholder="مثلاً: التحميل بدري، التاجر الأول بيقفل الساعة 12">' + escapeHtml(ld_.notes || '') + '</textarea>';
-    h += '<button type="button" class="aGo wide" onclick="ldSend_()">📨 ابعت للمدير</button>';
+    h += '<button type="button" class="aGo wide" onclick="ldSend_()">' + (ld_.adm ? '✔ اعتمد التحميلة — تروح للمخزن على طول' : '📨 ابعت للمدير') + '</button>';
     ldBody_().innerHTML = h;
     ldBody_().querySelectorAll('.lVeh').forEach(function(b){ b.onclick = function(){ ld_.notes = (document.getElementById('ldNotes') || {}).value; ld_.vehicle = Number(b.dataset.v); ldRenderRoute_(); }; });
   }
@@ -5134,11 +5135,30 @@
   function ldSend_(){
     if(!ld_.vehicle) return showMsg('اختار نوع العربية', 'error');
     const f = ldFill_(ldSelItems_()).find(function(x){ return x.v.id === ld_.vehicle; });
+    // المدير: التحميلة بتتسجل باسم المندوب لو كل الطلبيات بتاعته، ولو أكتر من مندوب بتتسجل باسم المدير
+    let forRep = '';
+    if(ld_.adm){
+      const reps = {};
+      ld_.pending.forEach(function(d){ if(ld_.sel[d.doc_id] && d.rep) reps[d.rep] = 1; });
+      const rk = Object.keys(reps);
+      forRep = ld_.admRep || (rk.length === 1 ? rk[0] : '');
+    }
     const go = function(){
       showLoading(true);
-      ldApi_('create', { vehicle_id: ld_.vehicle, fill: f && f.pct, notes: (document.getElementById('ldNotes') || {}).value || '',
-        stops: ld_.stops.map(function(s){ return { customer_code: s.customer_code, doc_ids: s.docs }; }) })
-        .then(function(r){ showLoading(false); ld_.notes = ''; toast_('📨 اتبعتت تحميلة رقم ' + r.serial + ' للمدير'); dl_.stack = []; dlBackBtn_(); ld_.tab = 'mine'; ldLoadTab_(); })
+      const args = { vehicle_id: ld_.vehicle, fill: f && f.pct, notes: (document.getElementById('ldNotes') || {}).value || '',
+        stops: ld_.stops.map(function(s){ return { customer_code: s.customer_code, doc_ids: s.docs }; }) };
+      if(ld_.adm){ args.rep = forRep; args.approve = true; }
+      ldApi_('create', args)
+        .then(function(r){
+          showLoading(false); ld_.notes = '';
+          if(ld_.adm){
+            toast_('✔ تحميلة رقم ' + r.serial + ' اتعملت واتوافق عليها' + (forRep ? ' — باسم ' + forRep : ''));
+            ld_.status = 'approved';
+            openLoadsAdmin_();
+            return;
+          }
+          toast_('📨 اتبعتت تحميلة رقم ' + r.serial + ' للمدير'); dl_.stack = []; dlBackBtn_(); ld_.tab = 'mine'; ldLoadTab_();
+        })
         .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
     };
     if(f && f.pct > 100) confirmModal_('الطلبيات دي <b>أكبر من العربية</b> (' + f.pct + '%). تبعتها كده؟', 'ابعت', 'رجوع').then(function(ok){ if(ok) go(); });
@@ -5290,9 +5310,31 @@
     return '<div class="aTabs">' + tabs.map(function(x){
       const n = ld_.list.filter(function(l){ return x[0].split(',').indexOf(l.status) !== -1; }).length;
       return '<button type="button" class="' + (x[0] === ld_.status ? 'on' : '') + '" onclick="ld_.status=\'' + x[0] + '\'; ldRenderList_(true)">' + x[1] + (n ? ' (' + n + ')' : '') + '</button>';
-    }).join('') + '</div>' + (ld_.role === 'owner' || ld_.role === 'admin' ? '<div class="aBtns" style="margin:-2px 0 10px;"><button type="button" onclick="ldSettings_()">⚙️ العربيات والسعات</button></div>' : '');
+    }).join('') + '</div>' + (ld_.role === 'owner' || ld_.role === 'admin' ? '<div class="aBtns" style="margin:-2px 0 10px;"><button type="button" class="ok" onclick="ldAdminNew_()">＋ تحميلة جديدة</button><button type="button" onclick="ldSettings_()">⚙️ العربيات والسعات</button></div>' : '');
+  }
+  // المدير: يعمل تحميلة بنفسه من طلبيات أي مندوب (أو كذا مندوب مع بعض) وتتعتمد على طول
+  function ldAdminNew_(){
+    ld_.adm = true;
+    ld_.admRep = '';
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '＋ تحميلة جديدة';
+    document.getElementById('dlSub').textContent = 'اختار الطلبيات — التحميلة هتتعتمد على طول وتروح للمخزن';
+    ldAdmLoad_();
+  }
+  function ldAdmHead_(){
+    return '<label style="display:block; margin-bottom:10px;">المندوب<select id="ldAdmRep" onchange="ld_.admRep=this.value; ldAdmLoad_()" style="margin:6px 0 0;">' +
+      '<option value="">كل المناديب</option>' + state.repOptions.map(function(n){
+        return '<option value="' + escapeHtml(n) + '"' + (n === ld_.admRep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>';
+      }).join('') + '</select></label>';
+  }
+  function ldAdmLoad_(){
+    ldBody_().innerHTML = ldAdmHead_() + '<div class="aiStatus">جاري التحميل...</div>';
+    Promise.all([ldApi_('pending', ld_.admRep ? { rep: ld_.admRep } : { all: true }), ldVehicles_()])
+      .then(function(x){ ld_.pending = x[0] || []; ld_.sel = {}; ldRenderPending_(); })
+      .catch(ldErr_);
   }
   function openLoadsAdmin_(){
+    ld_.adm = false;
     dl_.stack = []; dlBackBtn_();
     dlOpen_('🚚 التحميلات', ld_.role === 'warehouse' ? 'أكّد التحميلات اللي اتوافق عليها لما تخرج' : 'وافق على طلبات المناديب وتابع التسليم');
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
