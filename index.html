@@ -2461,7 +2461,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.21.0';
+  const APP_VERSION_ = 'v1.22.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5039,6 +5039,7 @@
   function ldRenderPending_(){
     let h = ld_.adm ? ldAdmHead_() : ldTabs_();
     if(!ld_.pending.length) return ldBody_().innerHTML = h + '<div class="empty">مفيش طلبيات مستنية تحميل 👌</div>';
+    if(ld_.pending.length > 1) h += '<button type="button" class="bigAction" style="margin:0 0 10px;" onclick="ldSuggestRoutes_()">🧭 اقترح خطوط سير حسب قرب التجار</button>';
     h += '<div class="note" style="margin-bottom:8px;">علّم الطلبيات اللي عاوزها تتحمّل في عربية واحدة — وبعدين رتّب خط السير.</div>';
     const byArea = {};
     ld_.pending.forEach(function(d, i){ (byArea[d.area || 'من غير منطقة'] = byArea[d.area || 'من غير منطقة'] || []).push(i); });
@@ -5131,6 +5132,141 @@
     const j = i + d; if(j < 0 || j >= ld_.stops.length) return;
     const t = ld_.stops[i]; ld_.stops[i] = ld_.stops[j]; ld_.stops[j] = t;
     ldRenderRoute_();
+  }
+  // ================== 🧭 اقتراح خطوط سير للعربيات ==================
+  // بيقسّم الطلبيات اللي لسه ماخرجتش لرحلات حسب قرب التجار من بعض (من اللوكيشن المتسجل):
+  // يبدأ بأبعد تاجر، ويضم له الأقرب فالأقرب طول ما العربية تشيل وطول ما المسافة لأقرب تاجر في الرحلة أقل من 25 كم.
+  // التجار اللي مالهمش لوكيشن بيتجمعوا حسب المنطقة. وكل رحلة بتاخد أصغر عربية تشيلها.
+  const LD_MAX_GAP_KM_ = 25, LD_MAX_STOPS_ = 12;
+  function ldStopsFromDocs_(docs){
+    const by = {}, order = [];
+    docs.forEach(function(d){
+      let s = by[d.customer_code];
+      if(!s){
+        s = by[d.customer_code] = { customer_code: d.customer_code, name: d.customer_name, area: d.area, lat: d.lat, lng: d.lng, docs: [], lines: [], pcs: 0, reps: {}, maxDays: 0 };
+        order.push(s);
+      }
+      s.docs.push(d.doc_id);
+      d.lines.forEach(function(l){ s.lines.push({ code: l.code, name: l.name, qty: Number(l.qty) || 0 }); s.pcs += Number(l.qty) || 0; });
+      if(d.rep) s.reps[d.rep] = 1;
+      s.maxDays = Math.max(s.maxDays, Number(d.days) || 0);
+    });
+    return order;
+  }
+  function ldStopItems_(stops){
+    const out = [];
+    stops.forEach(function(s){ s.lines.forEach(function(l){ out.push(l); }); });
+    return out;
+  }
+  function ldRouteKm_(stops){
+    let km = 0;
+    for(let i = 1; i < stops.length; i++){
+      const a = stops[i - 1], b = stops[i];
+      if(a.lat != null && b.lat != null) km += distM_(a.lat, a.lng, b.lat, b.lng) / 1000;
+    }
+    return Math.round(km * 1.3); // الطريق الفعلي أطول من الخط المستقيم بحوالي 30%
+  }
+  function ldPlanRoutes_(){
+    const stops = ldStopsFromDocs_(ld_.pending);
+    const hasCaps = ld_.caps.length > 0;
+    const fits = function(list){
+      if(list.length > LD_MAX_STOPS_) return false;
+      return !hasCaps || !!ldSuggest_(ldFill_(ldStopItems_(list)));
+    };
+    const loc = stops.filter(function(s){ return s.lat != null; });
+    const noLoc = stops.filter(function(s){ return s.lat == null; });
+    let center = state.lastPos ? { lat: state.lastPos.lat, lng: state.lastPos.lng } : null;
+    if(!center && loc.length){
+      center = { lat: loc.reduce(function(t, s){ return t + s.lat; }, 0) / loc.length, lng: loc.reduce(function(t, s){ return t + s.lng; }, 0) / loc.length };
+    }
+    const groups = [];
+    const left = loc.slice();
+    while(left.length){
+      left.sort(function(a, b){ return distM_(center.lat, center.lng, b.lat, b.lng) - distM_(center.lat, center.lng, a.lat, a.lng); });
+      const r = [left.shift()];
+      if(fits(r)){
+        for(;;){
+          let bi = -1, bd = Infinity;
+          left.forEach(function(s, i){
+            let d = Infinity;
+            r.forEach(function(x){ d = Math.min(d, distM_(x.lat, x.lng, s.lat, s.lng)); });
+            if(d < bd){ bd = d; bi = i; }
+          });
+          if(bi < 0 || bd > LD_MAX_GAP_KM_ * 1000) break;
+          if(!fits(r.concat([left[bi]]))) break;
+          r.push(left.splice(bi, 1)[0]);
+        }
+      }
+      groups.push(r);
+    }
+    // اللي مالهمش لوكيشن: حسب المنطقة
+    const byArea = {};
+    noLoc.forEach(function(s){ (byArea[s.area || 'من غير منطقة'] = byArea[s.area || 'من غير منطقة'] || []).push(s); });
+    Object.keys(byArea).forEach(function(ar){
+      let cur = [];
+      byArea[ar].forEach(function(s){
+        if(cur.length && !fits(cur.concat([s]))){ groups.push(cur); cur = []; }
+        cur.push(s);
+      });
+      if(cur.length) groups.push(cur);
+    });
+    return groups.map(function(g){
+      const ordered = ldOrderStops_(g);
+      const fills = ldFill_(ldStopItems_(ordered));
+      const sug = ldSuggest_(fills);
+      const areas = {}, reps = {};
+      ordered.forEach(function(s){ if(s.area) areas[s.area] = 1; Object.keys(s.reps).forEach(function(r){ reps[r] = 1; }); });
+      return {
+        stops: ordered, vehicle: sug ? sug.v : null, pct: sug ? sug.pct : null,
+        tooBig: hasCaps && !sug, km: ldRouteKm_(ordered),
+        pcs: ordered.reduce(function(t, s){ return t + s.pcs; }, 0),
+        docs: ordered.reduce(function(t, s){ return t.concat(s.docs); }, []),
+        noLoc: ordered.every(function(s){ return s.lat == null; }),
+        areas: Object.keys(areas), reps: Object.keys(reps),
+        oldest: ordered.reduce(function(t, s){ return Math.max(t, s.maxDays); }, 0),
+      };
+    }).sort(function(a, b){ return b.oldest - a.oldest || b.pcs - a.pcs; }); // الأقدم الأول
+  }
+  function ldSuggestRoutes_(){
+    if(!ld_.pending.length) return;
+    ld_.plan = ldPlanRoutes_();
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '🧭 خطوط سير مقترحة';
+    document.getElementById('dlSub').textContent = ld_.plan.length + ' رحلة من ' + ld_.pending.length + ' طلبية — حسب قرب التجار من بعض';
+    ldRenderPlan_();
+  }
+  function ldRenderPlan_(){
+    let h = '';
+    if(!ld_.caps.length) h += '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">⚠️ سعات العربيات لسه مادخلتش — التقسيم بالقرب بس (' + LD_MAX_STOPS_ + ' تاجر بالكتير في الرحلة) ومن غير اقتراح عربية.</div>';
+    const noLocCount = ld_.plan.reduce(function(t, r){ return t + r.stops.filter(function(s){ return s.lat == null; }).length; }, 0);
+    if(noLocCount) h += '<div class="note" style="margin-bottom:10px;">📍 ' + noLocCount + ' تاجر مالهمش لوكيشن — اتجمعوا حسب المنطقة. ثبّت مواقعهم في الزيارة الجاية عشان التقسيم يبقى أدق.</div>';
+    h += ld_.plan.map(function(r, i){
+      const cls = r.pct == null ? 'mut' : r.pct > 90 ? 'gold' : 'green';
+      return '<div class="aRow"><div class="aTop"><b>رحلة ' + (i + 1) + '</b>' +
+        (r.vehicle ? '<span class="lChip ' + cls + '">🚚 ' + escapeHtml(r.vehicle.name) + ' • ' + r.pct + '%</span>' : r.tooBig ? '<span class="lChip red">⚠️ أكبر من أكبر عربية</span>' : '') + '</div>' +
+        (r.pct != null ? '<span class="lBar ' + cls + '" style="margin:6px 0 4px;"><i style="width:' + Math.min(100, r.pct) + '%"></i></span>' : '') +
+        '<div class="aSub">' + escapeHtml([r.stops.length + ' تاجر', fmt(r.pcs) + ' قطعة', r.km ? '~' + r.km + ' كم بين التجار' : '', r.noLoc ? 'من غير لوكيشن' : '',
+          r.areas.length ? r.areas.slice(0, 3).join('، ') + (r.areas.length > 3 ? ' +' + (r.areas.length - 3) : '') : '',
+          r.oldest ? 'أقدم طلبية من ' + r.oldest + ' يوم' : ''].filter(Boolean).join(' • ')) + '</div>' +
+        (ld_.adm && r.reps.length ? '<div class="aSub">👤 ' + escapeHtml(r.reps.join('، ')) + '</div>' : '') +
+        '<div class="aSub" style="margin-top:4px;">' + r.stops.map(function(s, k){ return (k + 1) + '. ' + escapeHtml(s.name || s.customer_code); }).join(' ← ') + '</div>' +
+        '<div class="aBtns">' + (r.tooBig ? '' : '<button type="button" class="ok" onclick="ldPickPlan_(' + i + ')">اختار الرحلة دي ←</button>') +
+        (r.stops.some(function(s){ return s.lat != null; }) ? '<button type="button" onclick="ldPlanMap_(' + i + ')">🗺 الخريطة</button>' : '') + '</div></div>';
+    }).join('');
+    h += '<div class="note" style="margin-top:8px;">الاقتراح بيبدأ بالرحلة اللي فيها أقدم طلبية. لما تختار رحلة، تقدر تعدّل الترتيب والعربية قبل ما تبعت.</div>';
+    ldBody_().innerHTML = h;
+  }
+  function ldPickPlan_(i){
+    const r = ld_.plan[i];
+    ld_.sel = {};
+    r.docs.forEach(function(id){ ld_.sel[id] = true; });
+    ldRoute_();
+  }
+  function ldPlanMap_(i){
+    const pts = ld_.plan[i].stops.filter(function(s){ return s.lat != null; }).map(function(s){ return s.lat + ',' + s.lng; });
+    if(!pts.length) return;
+    const dest = pts[pts.length - 1], way = pts.slice(0, -1).slice(0, 9);
+    window.open('https://www.google.com/maps/dir/?api=1&destination=' + dest + (way.length ? '&waypoints=' + encodeURIComponent(way.join('|')) : '') + '&travelmode=driving', '_blank');
   }
   function ldSend_(){
     if(!ld_.vehicle) return showMsg('اختار نوع العربية', 'error');
