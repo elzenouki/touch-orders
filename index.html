@@ -2538,7 +2538,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.23.1';
+  const APP_VERSION_ = 'v1.24.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5643,10 +5643,18 @@
   const LD_SEG_COLORS_ = ['#56672f', '#d9a21b', '#2c548f', '#a8432f', '#8a8c6c'];
   var _truckN_ = 0;
   // نوع العربية من ترتيبها (الأصغر الأول): 0 دبابة … 3 أكبر عربية — بيحدد طول الصندوق في الرسم
+  // نوع الرسمة من اسم العربية: 0 دبابة/ربع نقل • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000 طويل
+  // لو الاسم مش معروف: من ترتيبها (الأصغر الأول)
   function ldVehKind_(vid, vname){
     const list = (ld_.veh || []).filter(function(v){ return v.active !== false; });
-    let i = list.findIndex(function(v){ return (vid != null && v.id === vid) || (vname && v.name === vname); });
-    if(i < 0) i = 1;
+    const v = list.find(function(x){ return (vid != null && x.id === vid) || (vname && x.name === vname); });
+    const n = normAr_(String((v && v.name) || vname || ''));
+    if(/دباب|ربع|بيك|pick/i.test(n)) return 0;
+    if(/تلت|ثلث|نص نقل|نصف/.test(n)) return 1;
+    if(/8000|طويل|nqr/i.test(n)) return 3;
+    if(/7000|جامبو|jumbo|npr/i.test(n)) return 2;
+    let i = list.indexOf(v);
+    if(i < 0) i = 2;
     return Math.min(3, Math.round(i * 3 / Math.max(1, list.length - 1)));
   }
   // نصيب كل صنف من امتلاء عربية معيّنة — للألوان جوه الصندوق
@@ -5673,61 +5681,131 @@
     top.forEach(function(s, i){ s.color = LD_SEG_COLORS_[i]; });
     return { pct: pct, segs: top, est: est };
   }
-  // pct: نسبة الامتلاء، segs: [{pct, color}] من تحت لفوق، kind: 0..3، small: رسم صغير للكروت
+  // pct: نسبة الامتلاء، segs: [{pct, color}] من تحت لفوق، kind: 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000، small: رسم صغير للكروت
+  // كل العربيات مترسومة بنفس المقياس (الوش ناحية اليمين زي صورة الجامبو) — فالدبابة بتبان أصغر من الجامبو فعلاً
   function ldTruckSvg_(pct, segs, kind, small){
     const id = 'tk' + (++_truckN_);
-    kind = kind == null ? 1 : kind;
-    const boxW = [128, 168, 192, 222][kind], boxH = [58, 74, 78, 84][kind];
-    const cabW = kind === 0 ? 62 : 58, gap = 6, x0 = 14, base = 118;
-    const bx = x0 + cabW + gap, by = base - boxH, W = bx + boxW + 12;
+    kind = kind == null ? 2 : kind;
+    const G = 134; // الأرض (تحت الكاوتش)
+    const K = [
+      { box: [96, 60, 212, 118], fill: [100, 64, 208, 114], wheels: [[130, 12], [270, 12]], open: true },  // دبابة
+      { box: [56, 42, 248, 120], fill: [60, 46, 244, 116], wheels: [[102, 13], [276, 13]], open: true },   // تلت
+      { box: [40, 20, 244, 120], fill: [44, 24, 240, 116], wheels: [[92, 14], [274, 14]], luton: true },  // جامبو 7000
+      { box: [8, 18, 244, 120], fill: [12, 22, 240, 116], wheels: [[54, 14], [88, 14], [274, 14]], luton: true }, // 8000 طويل
+    ][kind];
+    const bx = K.box[0], by = K.box[1], bx2 = K.box[2], bb = K.box[3];
+    const fx = K.fill[0], fy = K.fill[1], fw = K.fill[2] - fx, fh = K.fill[3] - fy;
     const over = pct != null && pct > 100;
-    const fillH = pct == null ? 0 : Math.min(100, pct) / 100 * (boxH - 6);
+    const fillH = pct == null ? 0 : Math.min(100, pct) / 100 * fh;
     const tone = pct == null ? '#b9b49c' : over ? '#a8432f' : pct > 90 ? '#d9a21b' : '#2b7a4f';
-    let layers = '';
+    const overH = over ? Math.min(22, (pct - 100) / 100 * fh) : 0;
+    const P = [];
+    // ---- defs ----
+    P.push('<defs>' +
+      '<clipPath id="' + id + 'k"><rect x="' + fx + '" y="' + fy + '" width="' + fw + '" height="' + fh + '" rx="2"/></clipPath>' +
+      '<pattern id="' + id + 'c" width="18" height="12" patternUnits="userSpaceOnUse"><rect width="18" height="12" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="1.1"/><line x1="9" y1="0" x2="9" y2="3.5" stroke="#fff" stroke-opacity=".35"/></pattern>' +
+      '<linearGradient id="' + id + 'g" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".45" stop-color="#e9f1f6" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".28"/></linearGradient>' +
+      '<linearGradient id="' + id + 'w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e6e9ec"/></linearGradient>' +
+      '<linearGradient id="' + id + 'd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a2f28"/><stop offset="1" stop-color="#1f1a16"/></linearGradient>' +
+      '<linearGradient id="' + id + 'q" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d5566"/><stop offset=".55" stop-color="#22313b"/><stop offset="1" stop-color="#4a6475"/></linearGradient>' +
+      '<pattern id="' + id + 'h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#fbe8e4"/><line x1="0" y1="0" x2="0" y2="7" stroke="#a8432f" stroke-width="3"/></pattern>' +
+      '<pattern id="' + id + 's" width="10" height="6" patternUnits="userSpaceOnUse"><rect width="5" height="6" fill="#d23b2b"/><rect x="5" width="5" height="6" fill="#fff"/></pattern>' +
+    '</defs>');
+    // ---- ظل الأرض ----
+    P.push('<ellipse cx="' + ((bx + 306) / 2) + '" cy="' + (G + 3) + '" rx="' + ((306 - bx) / 2 + 6) + '" ry="4.5" fill="#2f3519" opacity=".13"/>');
+    // ---- الشاسيه ----
+    P.push('<rect x="' + (bx + 4) + '" y="' + (bb - 1) + '" width="' + (300 - bx - 4) + '" height="7" rx="2" fill="#2b2b2b"/>');
+    // ---- البضاعة جوه الصندوق ----
     if(pct != null && pct > 0){
       const list = segs && segs.length ? segs : [{ pct: pct, color: tone }];
       const tot = list.reduce(function(t, s){ return t + s.pct; }, 0) || 1;
-      let y = base - 3;
+      let y = fy + fh, layers = '';
       list.forEach(function(s){
-        const h = fillH * s.pct / tot;
-        y -= h;
-        layers += '<rect x="' + (bx + 3) + '" y="' + y.toFixed(1) + '" width="' + (boxW - 6) + '" height="' + h.toFixed(1) + '" fill="' + s.color + '"/>';
+        const h = fillH * s.pct / tot; y -= h;
+        layers += '<rect x="' + fx + '" y="' + y.toFixed(1) + '" width="' + fw + '" height="' + h.toFixed(1) + '" fill="' + s.color + '"/>';
       });
-      layers += '<rect x="' + (bx + 3) + '" y="' + (base - 3 - fillH).toFixed(1) + '" width="' + (boxW - 6) + '" height="' + fillH.toFixed(1) + '" fill="url(#' + id + 'c)"/>';
+      layers += '<rect x="' + fx + '" y="' + (fy + fh - fillH).toFixed(1) + '" width="' + fw + '" height="' + fillH.toFixed(1) + '" fill="url(#' + id + 'c)"/>';
+      P.push('<g class="truckLoad" clip-path="url(#' + id + 'k)">' + layers + '</g>');
     }
-    const overH = over ? Math.min(26, (pct - 100) / 100 * boxH) : 0;
-    const wheel = function(cx){ return '<circle cx="' + cx + '" cy="' + (base + 8) + '" r="11" fill="#2f3519"/><circle cx="' + cx + '" cy="' + (base + 8) + '" r="4.5" fill="#d6cfb1"/>'; };
+    // ---- الصندوق ----
+    if(K.luton){
+      // جامبو: صندوق مقفول — جنبه إزاز شفاف، وفي الآخر الجزء الأسود بتاع اللوجو والقوس الأخضر زي العربية بالظبط
+      const dw = kind === 3 ? 58 : 50; // عرض الجزء الأسود
+      P.push('<path d="M' + bx + ' ' + (by + 4) + ' Q' + bx + ' ' + by + ' ' + (bx + 4) + ' ' + by + ' H' + (bx + dw) + ' Q' + (bx + dw - 16) + ' ' + ((by + bb) / 2) + ' ' + (bx + dw - 6) + ' ' + bb + ' H' + bx + ' Z" fill="url(#' + id + 'd)" opacity=".94"/>');
+      P.push('<path d="M' + (bx + dw + 1) + ' ' + by + ' Q' + (bx + dw - 15) + ' ' + ((by + bb) / 2) + ' ' + (bx + dw - 5) + ' ' + bb + '" fill="none" stroke="#7cc242" stroke-width="4"/>');
+      P.push('<text x="' + (bx + dw / 2 - 6) + '" y="' + (by + 22) + '" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="' + (dw > 52 ? 10.5 : 9) + '" fill="#fff">TOUCH</text>' +
+        '<text x="' + (bx + dw / 2 - 6) + '" y="' + (by + 28) + '" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="3.6" fill="#fff" letter-spacing=".5">ZENOUKI GROUP</text>');
+      // باب ورا خشب
+      P.push('<rect x="' + (bx - 5) + '" y="' + (by + 6) + '" width="6" height="' + (bb - by - 12) + '" rx="1" fill="#a87a4a" stroke="#6e4e2c" stroke-width=".8"/>');
+      // الإزاز
+      P.push('<rect x="' + (bx + dw - 4) + '" y="' + (by + 2) + '" width="' + (bx2 - bx - dw + 2) + '" height="' + (bb - by - 4) + '" fill="url(#' + id + 'g)"/>');
+      // اللوتون فوق الكابينة
+      P.push('<path d="M' + bx2 + ' ' + by + ' H290 Q300 ' + by + ' 300 ' + (by + 10) + ' V' + (by + 36) + ' Q300 ' + (by + 40) + ' 296 ' + (by + 40) + ' H' + bx2 + ' Z" fill="url(#' + id + 'd)"/>');
+      P.push('<rect x="' + bx2 + '" y="' + (by + 40) + '" width="7" height="' + (bb - by - 40) + '" fill="#f1f2f3" stroke="#c8ccd0" stroke-width=".8"/>');
+      // الإطار
+      P.push('<rect x="' + bx + '" y="' + by + '" width="' + (bx2 - bx) + '" height="' + (bb - by) + '" rx="3" fill="none" stroke="' + (over ? '#a8432f' : '#e3e6e8') + '" stroke-width="3"/>' +
+        '<rect x="' + (bx - 1.5) + '" y="' + (by - 1.5) + '" width="' + (bx2 - bx + 3) + '" height="' + (bb - by + 3) + '" rx="4" fill="none" stroke="#5b636a" stroke-width=".8"/>');
+      P.push('<line x1="' + (bx + dw + 6) + '" y1="' + (by + 6) + '" x2="' + (bx + dw + (bx2 - bx - dw) * .45) + '" y2="' + (by + 6) + '" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>');
+    } else {
+      // تلت / دبابة: صندوق مفتوح — جوانب حديد وحبال، والشفاف هو ارتفاع الشحنة
+      const cage = kind === 1;
+      P.push('<rect x="' + bx + '" y="' + by + '" width="' + (bx2 - bx) + '" height="' + (bb - by) + '" fill="url(#' + id + 'g)"/>');
+      const sideTop = cage ? by : bb - 22; // الدبابة: الجنب الحديد واطي، وفوقه الحمولة بالحبال
+      P.push('<rect x="' + bx + '" y="' + sideTop + '" width="' + (bx2 - bx) + '" height="' + (bb - sideTop) + '" fill="' + (cage ? 'none' : 'rgba(225,229,232,.55)') + '" stroke="' + (over ? '#a8432f' : '#9aa3aa') + '" stroke-width="2.4"/>');
+      if(cage){
+        // قفص التلت: قوايم كل شوية + سقالة فوق
+        for(let x = bx + 24; x < bx2 - 4; x += 24) P.push('<line x1="' + x + '" y1="' + by + '" x2="' + x + '" y2="' + bb + '" stroke="#9aa3aa" stroke-width="1.6"/>');
+        P.push('<line x1="' + bx + '" y1="' + ((by + bb) / 2) + '" x2="' + bx2 + '" y2="' + ((by + bb) / 2) + '" stroke="#9aa3aa" stroke-width="1.2" stroke-dasharray="3 3"/>');
+        P.push('<rect x="' + (bx - 2) + '" y="' + (by - 3) + '" width="' + (bx2 - bx + 4) + '" height="4" rx="2" fill="#7d868d"/>');
+      } else {
+        // الحبال فوق الدبابة
+        P.push('<rect x="' + bx + '" y="' + by + '" width="' + (bx2 - bx) + '" height="' + (sideTop - by) + '" fill="none" stroke="#9aa3aa" stroke-width="1.2" stroke-dasharray="4 3"/>');
+        P.push('<path d="M' + (bx + 2) + ' ' + (by + 2) + ' L' + (bx2 - 2) + ' ' + (sideTop - 2) + ' M' + (bx2 - 2) + ' ' + (by + 2) + ' L' + (bx + 2) + ' ' + (sideTop - 2) + '" stroke="#c7a46a" stroke-width="1.1" opacity=".75"/>');
+      }
+    }
+    if(over) P.push('<rect x="' + fx + '" y="' + (by - overH - 2) + '" width="' + fw + '" height="' + overH + '" fill="url(#' + id + 'h)" stroke="#a8432f" stroke-dasharray="4 3"/>');
+    // ---- الكابينة ----
+    if(kind === 0){
+      // دبابة: كابينة بكبوت قدام
+      P.push('<path d="M214 ' + (bb + 1) + ' V74 Q214 66 222 66 H252 Q258 66 262 72 L276 94 H296 Q306 94 306 104 V' + (bb + 1) + ' Z" fill="url(#' + id + 'w)" stroke="#c4c9cd" stroke-width="1"/>');
+      P.push('<path d="M222 72 H250 Q254 72 257 76 L268 92 H222 Z" fill="url(#' + id + 'q)"/>');
+      P.push('<path d="M226 74 L236 74 L228 90 L224 90 Z" fill="#fff" opacity=".35"/>');
+      P.push('<line x1="244" y1="94" x2="244" y2="' + (bb - 2) + '" stroke="#c4c9cd" stroke-width="1"/><rect x="232" y="98" width="8" height="2.5" rx="1" fill="#8d959b"/>');
+      P.push('<rect x="300" y="98" width="6" height="6" rx="1.5" fill="#f2cf6b"/><rect x="296" y="' + (bb - 8) + '" width="12" height="7" rx="2" fill="#9aa3aa"/>');
+      P.push('<rect x="258" y="84" width="3" height="10" rx="1" fill="#2b2b2b"/>');
+    } else {
+      // كابينة إيسوزو بيضا (وش مسطح)
+      const cx = kind === 1 ? 252 : 244, top = kind === 1 ? 66 : 60;
+      P.push('<path d="M' + cx + ' ' + (bb + 1) + ' V' + (top + 4) + ' Q' + cx + ' ' + top + ' ' + (cx + 4) + ' ' + top + ' H294 Q306 ' + top + ' 306 ' + (top + 12) + ' V' + (bb + 1) + ' Z" fill="url(#' + id + 'w)" stroke="#c4c9cd" stroke-width="1"/>');
+      P.push('<path d="M' + (cx + 8) + ' ' + (top + 6) + ' H292 Q298 ' + (top + 6) + ' 298 ' + (top + 12) + ' V' + (top + 30) + ' H' + (cx + 8) + ' Z" fill="url(#' + id + 'q)" stroke="#1b1b1b" stroke-width="1.6"/>');
+      P.push('<path d="M' + (cx + 12) + ' ' + (top + 9) + ' L' + (cx + 22) + ' ' + (top + 9) + ' L' + (cx + 14) + ' ' + (top + 27) + ' L' + (cx + 11) + ' ' + (top + 27) + ' Z" fill="#fff" opacity=".3"/>');
+      P.push('<line x1="' + (cx + 5) + '" y1="' + (top + 6) + '" x2="' + (cx + 5) + '" y2="' + (bb - 4) + '" stroke="#c4c9cd" stroke-width="1"/>');
+      if(kind < 2) P.push('<rect x="' + (cx + 10) + '" y="' + (top + 34) + '" width="9" height="2.6" rx="1" fill="#8d959b"/>');
+      // المراية
+      P.push('<rect x="306" y="' + (top + 6) + '" width="3.5" height="20" rx="1.5" fill="#1b1b1b"/><line x1="300" y1="' + (top + 10) + '" x2="306" y2="' + (top + 10) + '" stroke="#1b1b1b" stroke-width="1.4"/>');
+      // البادج
+      if(kind >= 2){
+        P.push('<rect x="' + (cx + 10) + '" y="' + (top + 33) + '" width="26" height="12" rx="1.2" fill="#1f5fa8"/><rect x="' + (cx + 10) + '" y="' + (top + 39) + '" width="26" height="6" fill="#fff"/>' +
+          '<text x="' + (cx + 23) + '" y="' + (top + 38) + '" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="4.6" font-weight="900" fill="#fff">JUMBO</text>' +
+          '<text x="' + (cx + 23) + '" y="' + (top + 44.3) + '" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="5.4" font-weight="900" fill="#1b1b1b">' + (kind === 3 ? '8000' : '7000') + '</text>');
+      }
+      P.push('<rect x="300" y="' + (bb - 12) + '" width="9" height="12" rx="2" fill="#f4f5f6" stroke="#c4c9cd" stroke-width=".8"/><rect x="303" y="' + (bb - 22) + '" width="4" height="6" rx="1" fill="#f2cf6b"/>');
+    }
+    // ---- حماية جانبية حمرا وبيضا (الجامبو) ----
+    if(kind >= 2) P.push('<rect x="' + (K.wheels[K.wheels.length - 2][0] + 22) + '" y="' + (bb + 7) + '" width="' + (K.wheels[K.wheels.length - 1][0] - K.wheels[K.wheels.length - 2][0] - 70) + '" height="5" fill="url(#' + id + 's)"/>');
+    // ---- الكاوتش ----
+    K.wheels.forEach(function(w){
+      const x = w[0], r = w[1], cy = G - r;
+      P.push('<path d="M' + (x - r - 4) + ' ' + (cy + 1) + ' A' + (r + 4) + ' ' + (r + 4) + ' 0 0 1 ' + (x + r + 4) + ' ' + (cy + 1) + '" fill="#2b2b2b"/>' +
+        '<circle cx="' + x + '" cy="' + cy + '" r="' + r + '" fill="#1b1b1b"/><circle cx="' + x + '" cy="' + cy + '" r="' + (r * .52) + '" fill="#5a6066"/>' +
+        '<circle cx="' + x + '" cy="' + cy + '" r="' + (r * .2) + '" fill="#cfd4d8"/>');
+    });
+    // ---- النسبة ----
     const label = pct == null ? 'مفيش سعات' : pct + '%';
-    const vy = Math.max(0, Math.min(by, base - 64) - 10 - overH), vh = base + 26 - vy;
-    return '<svg class="truckSvg' + (small ? ' sm' : '') + '" viewBox="0 ' + vy.toFixed(0) + ' ' + W + ' ' + vh.toFixed(0) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="امتلاء العربية ' + label + '">' +
-      '<defs>' +
-        '<pattern id="' + id + 'c" width="22" height="14" patternUnits="userSpaceOnUse"><rect width="22" height="14" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.2"/><line x1="11" y1="0" x2="11" y2="4" stroke="#fff" stroke-opacity=".3"/></pattern>' +
-        '<linearGradient id="' + id + 'g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#eef2e4" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".3"/></linearGradient>' +
-        '<pattern id="' + id + 'h" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#fbe8e4"/><line x1="0" y1="0" x2="0" y2="7" stroke="#a8432f" stroke-width="3"/></pattern>' +
-      '</defs>' +
-      // الأرض والظل
-      '<ellipse cx="' + (W / 2) + '" cy="' + (base + 20) + '" rx="' + (W / 2 - 8) + '" ry="4" fill="#2f3519" opacity=".12"/>' +
-      // الشاسيه
-      '<rect x="' + (x0 + 4) + '" y="' + (base - 2) + '" width="' + (bx + boxW - x0 - 4) + '" height="8" rx="3" fill="#3a3f22"/>' +
-      // الكابينة (وش العربية ناحية الشمال)
-      '<path d="M' + (x0 + cabW) + ' ' + (base - 2) + ' V' + (base - 58) + ' Q' + (x0 + cabW) + ' ' + (base - 64) + ' ' + (x0 + cabW - 6) + ' ' + (base - 64) +
-        ' H' + (x0 + 22) + ' Q' + (x0 + 14) + ' ' + (base - 64) + ' ' + (x0 + 10) + ' ' + (base - 56) + ' L' + (x0 + 2) + ' ' + (base - 34) +
-        ' Q' + x0 + ' ' + (base - 30) + ' ' + x0 + ' ' + (base - 24) + ' V' + (base - 2) + ' Z" fill="#3f4c22"/>' +
-      '<path d="M' + (x0 + 14) + ' ' + (base - 54) + ' Q' + (x0 + 17) + ' ' + (base - 58) + ' ' + (x0 + 22) + ' ' + (base - 58) + ' H' + (x0 + cabW - 8) + ' V' + (base - 36) + ' H' + (x0 + 7) + ' Z" fill="#dfe8ef"/>' +
-      '<path d="M' + (x0 + 16) + ' ' + (base - 55) + ' L' + (x0 + 26) + ' ' + (base - 55) + ' L' + (x0 + 14) + ' ' + (base - 38) + ' L' + (x0 + 10) + ' ' + (base - 38) + ' Z" fill="#fff" opacity=".55"/>' +
-      '<rect x="' + (x0 + cabW - 22) + '" y="' + (base - 30) + '" width="9" height="3" rx="1.5" fill="#d6cfb1"/>' +
-      '<rect x="' + (x0 - 1) + '" y="' + (base - 20) + '" width="7" height="6" rx="2" fill="#f2cf6b"/>' +
-      '<rect x="' + (x0 - 2) + '" y="' + (base - 9) + '" width="12" height="6" rx="2" fill="#2f3519"/>' +
-      // الصندوق الشفاف + المحتوى
-      '<g class="truckLoad">' + layers + '</g>' +
-      (over ? '<rect x="' + (bx + 3) + '" y="' + (by - overH) + '" width="' + (boxW - 6) + '" height="' + overH + '" fill="url(#' + id + 'h)" stroke="#a8432f" stroke-dasharray="4 3"/>' : '') +
-      '<rect x="' + bx + '" y="' + by + '" width="' + boxW + '" height="' + boxH + '" rx="5" fill="url(#' + id + 'g)" stroke="' + (over ? '#a8432f' : '#3f4c22') + '" stroke-width="2.5"/>' +
-      '<line x1="' + (bx + 8) + '" y1="' + (by + 6) + '" x2="' + (bx + boxW * .45) + '" y2="' + (by + 6) + '" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>' +
-      // الكاوتش
-      wheel(x0 + 30) + wheel(bx + boxW - 30) + (kind >= 2 ? wheel(bx + boxW - 56) : '') +
-      // النسبة
-      '<text x="' + (bx + boxW / 2) + '" y="' + (by + boxH / 2 + 8) + '" text-anchor="middle" font-family="Alexandria,Cairo,sans-serif" font-weight="800" font-size="' + (pct == null ? 13 : 24) + '" fill="' + (pct == null ? '#7d7f62' : '#2f3519') + '" stroke="#fff" stroke-width="4" paint-order="stroke" direction="ltr">' + label + '</text>' +
-      '</svg>';
+    P.push('<text x="' + (fx + fw / 2 + (K.luton ? 18 : 0)) + '" y="' + (fy + fh / 2 + 8) + '" text-anchor="middle" font-family="Alexandria,Cairo,sans-serif" font-weight="800" font-size="' + (pct == null ? 13 : (kind === 0 ? 19 : 24)) + '" fill="' + (pct == null ? '#7d7f62' : '#2f3519') + '" stroke="#fff" stroke-width="4" paint-order="stroke" direction="ltr">' + label + '</text>');
+    const minY = Math.min(by - overH - 6, kind === 0 ? 60 : by) - 4;
+    const minX = 0; // نفس المقياس لكل العربيات
+    return '<svg class="truckSvg' + (small ? ' sm' : '') + '" viewBox="' + minX + ' ' + minY.toFixed(0) + ' ' + (318 - minX) + ' ' + (G + 10 - minY).toFixed(0) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="امتلاء العربية ' + label + '">' + P.join('') + '</svg>';
   }
   // رسم كبير + شرح الألوان
   function ldTruckBlock_(items, vid, vname){
