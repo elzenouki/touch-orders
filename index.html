@@ -1264,6 +1264,28 @@
   .lCapAdd{display:grid; grid-template-columns:1fr 1.6fr auto; gap:6px;}
   .lCapAdd button{height:42px; border:none; border-radius:12px; background:var(--o1); color:#fbf8ee; font-family:inherit; font-weight:800; padding:0 14px; cursor:pointer;}
   .lCap tr.newRow td{background:#fbf1d6;}
+
+  /* فلتر الطلبيات بالصنف */
+  .dlFilter{width:100%; box-sizing:border-box; height:44px; border:1px solid var(--oline); border-radius:12px; padding:0 12px; font-family:inherit; margin:4px 0 8px;}
+  .dlFiltSum{background:#fbf1d6; color:#8a640a; border-radius:10px; padding:7px 12px; font-size:13px; font-weight:700; margin-bottom:8px;}
+  .dlFiltSum b{direction:ltr; display:inline-block;}
+  .docCard[hidden]{display:none !important;}
+  .dlItem.tapItem{cursor:pointer;} .dlItem.tapItem:active{background:#f6f2e4;}
+  .dlItem .cGo{flex:none; color:var(--muted2); font-weight:900;}
+
+  /* ===== 💰 المتأخرات ===== */
+  .ovHero{display:grid; grid-template-columns:1.6fr 1fr; gap:8px; background:var(--o1); color:#fbf8ee; border-radius:18px; padding:14px; margin-bottom:12px; box-shadow:inset 0 0 0 1.5px var(--mus);}
+  .ovHero span{display:block; font-size:12px; color:#e4e2c6; font-weight:600;}
+  .ovHero b{display:block; font-family:var(--fTitle); font-size:26px; direction:ltr; text-align:right; line-height:1.3;}
+  .ovHero b small{font-size:13px; color:#f2cf6b;}
+  .ovRep{display:block; width:100%; text-align:right; background:#fff; border:1px solid var(--oline); border-radius:14px; padding:10px 12px; margin-bottom:8px; font-family:inherit; cursor:pointer;}
+  .ovRepTop{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .ovRepTop b{color:var(--o3); font-size:15px;} .ovRepTop span{color:#a8432f; font-weight:900; direction:ltr; white-space:nowrap;}
+  .ovBar{height:7px; background:#eee9dc; border-radius:5px; margin:7px 0 4px; overflow:hidden;} .ovBar i{display:block; height:100%; background:linear-gradient(90deg,#a8432f,#d9a21b); border-radius:5px;}
+  .ovRep small{color:var(--omut); font-size:11.5px;}
+  .ovAmt{flex:none; font-weight:900; font-size:16px; color:#a8432f; direction:ltr;}
+  .ovVisit{background:#fbece8; color:#a8432f; border:1px solid #e8b4a8; border-radius:12px; padding:8px 12px; margin-top:8px; font-weight:700; font-size:13.5px;}
+  .ovVisit b{direction:ltr; display:inline-block;}
 </style>
 </head>
 <body>
@@ -1368,6 +1390,7 @@
         <button type="button" class="qa" onclick="openDayReport_('', '')"><span class="qi r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>تقرير اليوم</button>
         <button type="button" class="qa" onclick="openLoads_()"><span class="qi y"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4.5L21 12.5V16h-8z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>تحميلاتي</button>
         <button type="button" class="qa" onclick="openScreen('myorders')"><span class="qi p"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>سجل زياراتي</button>
+        <button type="button" class="qa" onclick="openOverdues_()"><span class="qi r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg></span>متأخراتي</button>
         <button type="button" class="qa" onclick="openScreen('report')"><span class="qi n"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/></svg></span>أرقامي</button>
       </div>
       <div class="routeHead" id="routeAnchor">
@@ -1397,6 +1420,10 @@
         <button class="homeBtn returns" onclick="openScreen('unvisited')">
           <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c73e3e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
           <div><div class="title">تجار ماتزاروش</div><div class="desc">اللي محدش راحلهم من فترة</div></div>
+        </button>
+        <button class="homeBtn returns" onclick="openOverdues_()">
+          <div class="icon" style="color:#c73e3e"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg></div>
+          <div><div class="title">المتأخرات</div><div class="desc">متأخرات كل مندوب وكل العملاء</div></div>
         </button>
         <button class="homeBtn loadsBtn" onclick="openLoadsAdmin_()">
           <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4.5L21 12.5V16h-8z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></div>
@@ -2538,7 +2565,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.24.0';
+  const APP_VERSION_ = 'v1.26.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -2664,9 +2691,24 @@
       state.repOptions.map(function(n){ return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
     if(cur && state.repOptions.indexOf(cur) !== -1) sel.value = cur;
   }
+  // حسابات المخزن مش مناديب — بتتشال من التقارير وقوايم المناديب
+  var whNames_ = (function(){ try{ return JSON.parse(localStorage.getItem('tf_wh_names') || '[]'); }catch(e){ return []; } })();
+  function isWhName_(n){ return whNames_.indexOf(String(n || '').trim()) !== -1; }
+  function loadWhNames_(){
+    if(!state.isAdmin || !state.auth) return Promise.resolve();
+    return ldApi_('wh_names').then(function(l){
+      const before = whNames_.join('|');
+      whNames_ = (l || []).map(function(x){ return String(x || '').trim(); }).filter(Boolean);
+      try{ localStorage.setItem('tf_wh_names', JSON.stringify(whNames_)); }catch(e){}
+      if(before !== whNames_.join('|')){
+        state.repOptions = (state.repOptions || []).filter(function(n){ return !isWhName_(n); });
+        if(state.screen === 'report' && state.lastReport) renderReport_(state.lastReport);
+      }
+    }).catch(function(){});
+  }
   function setRepOptions_(list){
     if(!list || !list.length) return;
-    state.repOptions = list.slice();
+    state.repOptions = list.filter(function(n){ return !isWhName_(n); });
     localCacheSet_('repOptions', state.repOptions);
   }
 
@@ -2698,6 +2740,7 @@
     (function(){ const d = new Date(), w = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()];
       document.getElementById('homeDate').textContent = w + ' ' + d.getDate() + '/' + (d.getMonth() + 1); })();
     ldWhoami_();
+    loadWhNames_();
     const cachedRole = ld_.role || ((localCacheGet_('role') || {}).v);
     if(!state.isAdmin && cachedRole === 'warehouse'){
       whEnter_();
@@ -3214,6 +3257,7 @@
     btns.push('<a href="#" onclick="openExpenseSheet_({ kind: \'إكرامية\', customerCode: state.visit.cust.code }); return false;"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M12 9v12M3 13h18"/><path d="M12 9c-1.5-4-6-4-6-1.5S10 9 12 9zM12 9c1.5-4 6-4 6-1.5S14 9 12 9z"/></svg>إكرامية</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
     document.getElementById('vBtns').hidden = !btns.length;
+    if(!c.demo) ovVisitNote_(c); else { const o = document.getElementById('vOv'); if(o) o.remove(); }
     if(invoicesOn_() && !c.demo){
       fetchInvoices_(c.code).then(function(r){
         if(!state.visit || state.visit.cust.code !== c.code || !r.data.lastDate) return;
@@ -4330,6 +4374,8 @@
   }
   function pctTxt_(p){ return p == null ? '—' : p + '%'; }
   function renderReport_(r){
+    state.lastReport = r;
+    r = Object.assign({}, r, { reps: (r.reps || []).filter(function(p){ return !isWhName_(p.rep); }) });
     const t = r.totals;
     let html = '<div class="note" style="margin-bottom:10px;">من ' + escapeHtml(r.from) + ' إلى ' + escapeHtml(r.to) + (r.repFilter ? ' — ' + escapeHtml(r.repFilter) : '') + '</div>';
     const T = function(k, cls, val, lbl){ return '<div class="tile tap' + (cls ? ' ' + cls : '') + '" data-k="' + k + '"><b>' + val + '</b><span>' + lbl + '</span></div>'; };
@@ -4455,7 +4501,7 @@
     dlBackBtn_();
     const sub = (rep ? rep + ' • ' : (state.isAdmin ? 'كل المناديب • ' : '')) + (from === to ? from : 'من ' + from + ' لـ ' + to);
     dlOpen_(DL_TITLES_[kind] || 'التفاصيل', sub);
-    dl_.cur = { kind: kind, rep: rep };
+    dl_.cur = { kind: kind, rep: rep, from: from, to: to };
     callApi('getReportList', [state.auth, dmyToYmd_(from), dmyToYmd_(to), rep || '', kind])
       .then(function(r){
         if(document.getElementById('dlOverlay').hidden || dl_.cur.kind !== kind) return;
@@ -4479,6 +4525,7 @@
       const q = r.docs.reduce(function(s, d){ return s + d.qty; }, 0);
       let h = dlSum_([r.total + (k === 'returns' ? ' مرتجع' : k === 'remote' ? ' مستند' : ' طلبية'), fmt(q) + ' قطعة',
         r.payments && r.payments.length ? r.payments.length + ' تحصيل' : '']);
+      if(r.docs.length > 1) h += '<input type="search" class="dlFilter" placeholder="🔎 فلتر بصنف (اسم أو كود) أو تاجر..." oninput="dlDocFilter_(this.value)"><div class="dlFiltSum" id="dlFiltSum" hidden></div>';
       h += r.docs.length ? r.docs.map(function(d){ return dlDocCard_(d, showRep, false); }).join('') : (r.payments && r.payments.length ? '' : dlEmpty_());
       h += dlMore_(r.docs.length, r.total, 'مستند');
       if(r.payments && r.payments.length) h += '<div class="dayHead">💵 تحصيل من غير زيارة</div>' + r.payments.map(function(p){ return dlPayRow_(p, showRep); }).join('');
@@ -4491,10 +4538,11 @@
       if(!r.items.length) return h + dlEmpty_();
       h += '<button type="button" class="copyBtn wide" data-copy="items">📋 نسخ كل الأصناف (الكود والكمية)</button>';
       h += '<div class="dlItems' + (ret ? ' ret' : '') + '">' + r.items.map(function(i, n){
-        return '<div class="dlItem"><span class="iNo">' + (n + 1) + '</span><div class="iMain"><b>' + escapeHtml(i.itemName) + '</b><small>' + escapeHtml(i.itemCode) +
+        return '<div class="dlItem tapItem" data-i="' + n + '"><span class="iNo">' + (n + 1) + '</span><div class="iMain"><b>' + escapeHtml(i.itemName) + '</b><small>' + escapeHtml(i.itemCode) +
           ' • ' + i.docs + (ret ? ' مرتجع' : ' طلبية') + ' • ' + i.customers + ' تاجر' + (i.reasons ? ' • ' + escapeHtml(i.reasons) : '') + '</small></div>' +
-          '<span class="iQty">' + (ret ? '-' : '') + fmt(i.qty) + '</span></div>';
+          '<span class="iQty">' + (ret ? '-' : '') + fmt(i.qty) + '</span><span class="cGo">‹</span></div>';
       }).join('') + '</div>';
+      h = h.replace('<div class="dlItems', '<div class="note" style="margin:6px 0;">👆 دوس على أي صنف تشوف مين ' + (ret ? 'رجّعه' : 'طلبه') + '</div><div class="dlItems');
       dl_.items = r.items;
       return h;
     }
@@ -4553,7 +4601,7 @@
     dl_.docs = dl_.docs || {};
     dl_.docs[d.orderId] = d;
     const copied = wasCopied_(d.orderId);
-    return '<details class="docCard' + (ret ? ' ret' : '') + (copied ? ' copied' : '') + '"' + (open ? ' open' : '') + '>' +
+    return '<details class="docCard' + (ret ? ' ret' : '') + (copied ? ' copied' : '') + '"' + (open ? ' open' : '') + ' data-oid="' + escapeHtml(d.orderId) + '">' +
       '<summary><div class="dTop"><b>' + escapeHtml(d.customerName) + '</b><span class="oCode">' + escapeHtml(d.customerCode) + '</span></div>' +
       '<div class="dMeta">' + escapeHtml([d.date + ' ' + d.time, showRep ? d.rep : '', d.orderId].filter(Boolean).join(' • ')) + '</div>' +
       '<div class="dlChips in">' + '<span class="chip ' + (ret ? 'red' : 'green') + '">' + (ret ? '↩ مرتجع' : '🧾 طلبية') + ' • ' + d.count + ' صنف • ' + (ret ? '-' : '') + fmt(d.qty) + ' قطعة</span>' +
@@ -4625,9 +4673,74 @@
   }
   document.getElementById('dlBody').addEventListener('click', function(e){
     if(onCopyClick_(e)) return;
+    const it = e.target.closest('.tapItem[data-i]');
+    if(it && dl_.items){ dlItemCustomers_(dl_.items[Number(it.dataset.i)]); return; }
     const row = e.target.closest('.tapRow[data-vid], .rLink[data-vid]');
     if(row) openVisitDetail_(row.dataset.vid);
   });
+  // فلتر الطلبيات بصنف أو تاجر
+  function dlDocFilter_(q){
+    const nq = normAr_(normalizeDigits(q || ''));
+    const sum = document.getElementById('dlFiltSum');
+    let docs = 0, qty = 0;
+    const cust = {};
+    document.querySelectorAll('#dlBody .docCard[data-oid]').forEach(function(card){
+      const d = (dl_.docs || {})[card.dataset.oid];
+      if(!d){ return; }
+      if(!nq){ card.hidden = false; return; }
+      const custHit = normAr_(d.customerName + ' ' + d.customerCode).indexOf(nq) !== -1;
+      const lines = d.lines.filter(function(l){ return normAr_(l.itemName + ' ' + l.itemCode).indexOf(nq) !== -1; });
+      const hit = custHit || lines.length > 0;
+      card.hidden = !hit;
+      if(hit){
+        docs++; cust[d.customerCode || d.customerName] = 1;
+        (lines.length ? lines : d.lines).forEach(function(l){ qty += Math.abs(Number(l.qty) || 0); });
+      }
+    });
+    if(sum){
+      sum.hidden = !nq;
+      sum.innerHTML = docs ? '<b>' + docs + '</b> طلبية • <b>' + Object.keys(cust).length + '</b> تاجر • <b>' + fmt(qty) + '</b> قطعة' : 'مفيش طلبيات فيها «' + escapeHtml(q) + '»';
+    }
+  }
+  // مين طلب الصنف ده (أو رجّعه) في نفس الفترة
+  function dlItemCustomers_(item){
+    if(!item || !dl_.cur || !dl_.cur.from) return;
+    const ret = dl_.cur.kind === 'returnQty';
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = (ret ? '↩ مين رجّع ' : '📦 مين طلب ') + item.itemName;
+    document.getElementById('dlSub').textContent = item.itemCode + ' • ' + (dl_.cur.rep || 'كل المناديب') + ' • ' + (dl_.cur.from === dl_.cur.to ? dl_.cur.from : 'من ' + dl_.cur.from + ' لـ ' + dl_.cur.to);
+    const body = document.getElementById('dlBody');
+    body.innerHTML = '<div class="aiStatus">جاري التحميل...</div>'; body.scrollTop = 0;
+    callApi('getReportList', [state.auth, dmyToYmd_(dl_.cur.from), dmyToYmd_(dl_.cur.to), dl_.cur.rep || '', ret ? 'returns' : 'orders']).then(function(r){
+      const by = {};
+      (r.docs || []).forEach(function(d){
+        dl_.docs = dl_.docs || {}; dl_.docs[d.orderId] = d;
+        d.lines.forEach(function(l){
+          if(String(l.itemCode) !== String(item.itemCode) && !(item.itemCode === '' && l.itemName === item.itemName)) return;
+          const k = d.customerCode || d.customerName;
+          const c = by[k] = by[k] || { code: d.customerCode, name: d.customerName, reps: {}, qty: 0, docs: [], last: '' };
+          c.qty += Math.abs(Number(l.qty) || 0);
+          if(c.docs.indexOf(d.orderId) === -1) c.docs.push(d.orderId);
+          if(d.rep) c.reps[d.rep] = 1;
+          if(!c.last) c.last = d.date;
+        });
+      });
+      const list = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.qty - a.qty; });
+      const tot = list.reduce(function(t, c){ return t + c.qty; }, 0);
+      let h = dlSum_([list.length + ' تاجر', (ret ? '-' : '') + fmt(tot) + ' قطعة']);
+      h += list.length ? list.map(function(c, n){
+        return '<div class="listRow"><div class="lMain"><div class="lName">' + (n + 1) + '. ' + escapeHtml(c.name) + ' <span class="oCode">' + escapeHtml(c.code) + '</span></div>' +
+          '<div class="lSub">' + escapeHtml([c.docs.length + (ret ? ' مرتجع' : ' طلبية'), 'آخر مرة ' + c.last, Object.keys(c.reps).join('، ')].filter(Boolean).join(' • ')) + '</div></div>' +
+          '<span class="lNum" style="font-weight:900; font-size:16px; direction:ltr; color:' + (ret ? 'var(--red)' : 'var(--navy)') + ';">' + (ret ? '-' : '') + fmt(c.qty) + '</span></div>';
+      }).join('') : dlEmpty_();
+      if(r.total > (r.docs || []).length) h += '<div class="note" style="text-align:center; margin:8px 0;">⚠️ الحساب على أحدث ' + r.docs.length + ' طلبية من ' + r.total + ' — اختار فترة أقصر أو مندوب واحد عشان النتيجة تبقى كاملة</div>';
+      if(list.length) h += '<button type="button" class="copyBtn wide" onclick="dlCopyCust_(this)" data-t="' + escapeHtml(list.map(function(c){ return c.code + '\t' + c.name + '\t' + c.qty; }).join('\n')) + '">📋 نسخ القايمة (كود التاجر | الاسم | الكمية)</button>';
+      body.innerHTML = h;
+    }).catch(function(err){ body.innerHTML = '<div class="aiStatus err">' + escapeHtml(err.message) + '</div>'; });
+  }
+  function dlCopyCust_(b){
+    copyText_(b.dataset.t.replace(/\\t/g, '\t').replace(/\\n/g, '\n')).then(function(){ toast_('📋 اتنسخت القايمة'); }).catch(function(){ showAlertModal_('الموبايل رفض النسخ — جرّب تاني', 'error'); });
+  }
   function openVisitDetail_(id){
     dlPush_();
     dlBackBtn_();
@@ -5639,6 +5752,118 @@
     ldApi_('caps_save', { caps: caps }).then(function(){ showLoading(false); toast_('✔ اتحفظ'); ld_.veh = null; return ldVehicles_().then(ldRenderSettings_); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
+  // ================== 💰 المتأخرات ==================
+  // n8n بيحسبها كل ساعتين من أرصدة العملاء (رصيد الإقفال − مدين > 500) ويرفعها لـ Supabase (ملف overdues.sql)
+  // المندوب: متأخرات عملاؤه بس • المدير: الكل متقسم على المناديب
+  var ov_ = { rows: null, at: 0, synced: null, rep: '', q: '' };
+  function ovApi_(args){
+    return fetch(SB_RPC_URL.replace(/\/api$/, '/overdues_api'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
+      body: JSON.stringify({ auth: state.auth, args: args || {} }),
+    }).then(function(r){ return r.json(); }, function(){ throw new Error('تعذر الاتصال بالسيرفر'); }).then(function(d){
+      if(d && d.ok === true) return d.result;
+      throw new Error(d && d.code === 'PGRST202' ? 'لسه ملف overdues.sql ماتشغّلش في Supabase' : ((d && (d.error || d.message)) || 'حصل خطأ'));
+    });
+  }
+  function ovLoad_(force){
+    if(!force && ov_.rows && Date.now() - ov_.at < 5 * 60000) return Promise.resolve(ov_.rows);
+    return ovApi_({}).then(function(r){
+      ov_.rows = (r.rows || []).filter(function(x){ return !isWhName_(x.rep); });
+      ov_.synced = r.synced_at; ov_.at = Date.now();
+      try{ localStorage.setItem('tf_ov_' + ((state.auth && state.auth.email) || ''), JSON.stringify({ rows: ov_.rows, synced: ov_.synced })); }catch(e){}
+      return ov_.rows;
+    });
+  }
+  function ovCached_(){
+    if(ov_.rows) return ov_.rows;
+    try{ const c = JSON.parse(localStorage.getItem('tf_ov_' + ((state.auth && state.auth.email) || '')) || 'null'); if(c){ ov_.rows = c.rows; ov_.synced = c.synced; } }catch(e){}
+    return ov_.rows;
+  }
+  function ovAgo_(t){
+    if(!t) return '';
+    const m = Math.round((Date.now() - new Date(t).getTime()) / 60000);
+    return m < 60 ? 'من ' + Math.max(1, m) + ' دقيقة' : m < 1440 ? 'من ' + Math.round(m / 60) + ' ساعة' : 'من ' + Math.round(m / 1440) + ' يوم';
+  }
+  function openOverdues_(rep){
+    ov_.rep = rep || ''; ov_.q = '';
+    dlEnter_('💰 ' + (state.isAdmin ? 'المتأخرات' : 'متأخراتي'), state.isAdmin ? 'كل المناديب' : 'عملاءك اللي عليهم متأخرات');
+    const cached = ovCached_();
+    if(cached) ovRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    ovLoad_(true).then(ovRender_).catch(function(e){ if(!cached) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  function ovRender_(){
+    const all = ov_.rows || [];
+    const nq = normAr_(normalizeDigits(ov_.q || ''));
+    let rows = all.filter(function(r){
+      if(ov_.rep === '—') { if(r.rep) return false; }
+      else if(ov_.rep && r.rep !== ov_.rep) return false;
+      return !nq || normAr_([r.name, r.code, r.area, r.book_name].join(' ')).indexOf(nq) !== -1;
+    });
+    const tot = rows.reduce(function(t, r){ return t + Number(r.amount); }, 0);
+    document.getElementById('dlSub').textContent = (ov_.rep === '—' ? 'من غير مندوب' : ov_.rep || (state.isAdmin ? 'كل المناديب' : 'عملاءك')) + (ov_.synced ? ' • اتحدثت ' + ovAgo_(ov_.synced) : '');
+    let h = '<div class="ovHero"><div><span>إجمالي المتأخرات</span><b>' + fmt(tot) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + rows.length + '</b></div></div>';
+    // المدير: كروت المناديب
+    if(state.isAdmin && !ov_.rep && !nq){
+      const by = {};
+      all.forEach(function(r){ const k = r.rep || '—'; const x = by[k] = by[k] || { rep: k, n: 0, t: 0 }; x.n++; x.t += Number(r.amount); });
+      const reps = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return (a.rep === '—') - (b.rep === '—') || b.t - a.t; });
+      const mx = reps.reduce(function(m, x){ return Math.max(m, x.t); }, 0) || 1;
+      h += '<div class="sectionLabel" style="margin:4px 0 8px;">حسب المندوب</div>' + reps.map(function(x){
+        return '<button type="button" class="ovRep" data-rep="' + escapeHtml(x.rep) + '"><div class="ovRepTop"><b>' + (x.rep === '—' ? '⚠️ عملاء من غير مندوب' : escapeHtml(x.rep)) + '</b><span>' + fmt(x.t) + ' ج</span></div>' +
+          '<div class="ovBar"><i style="width:' + Math.max(3, Math.round(x.t * 100 / mx)) + '%"></i></div><small>' + x.n + ' عميل' + (x.rep === '—' ? ' — اسمهم في الأرصدة مش متطابق مع التطبيق' : '') + '</small></button>';
+      }).join('');
+      h += '<div class="sectionLabel" style="margin:14px 0 8px;">كل العملاء</div>';
+    } else if(state.isAdmin && ov_.rep){
+      h += '<button type="button" class="rLink" style="margin-bottom:8px;" onclick="ov_.rep=\'\'; ovRender_()">← كل المناديب</button>';
+    }
+    h += '<input type="search" class="dlFilter" id="ovQ" placeholder="🔎 دوّر على عميل بالاسم أو الكود أو المنطقة..." value="' + escapeHtml(ov_.q) + '" oninput="ov_.q=this.value; ovRenderList_()">';
+    h += '<div id="ovList"></div>';
+    if(rows.length) h += '<button type="button" class="copyBtn wide" onclick="ovCopy_()">📋 نسخ القايمة (الكود | الاسم | المتأخرات' + (state.isAdmin ? ' | المندوب' : '') + ')</button>';
+    h += '<div class="note" style="margin-top:8px;">المتأخرات = رصيد الإقفال − المدين، واللي فوق 500 ج بس. بتتحدث لوحدها كل ساعتين.</div>';
+    ldBody_().innerHTML = h;
+    ldBody_().querySelectorAll('.ovRep').forEach(function(b){ b.onclick = function(){ ov_.rep = b.dataset.rep; ovRender_(); ldBody_().scrollTop = 0; }; });
+    ovRenderList_(rows);
+  }
+  function ovFiltered_(){
+    const nq = normAr_(normalizeDigits(ov_.q || ''));
+    return (ov_.rows || []).filter(function(r){
+      if(ov_.rep === '—') { if(r.rep) return false; }
+      else if(ov_.rep && r.rep !== ov_.rep) return false;
+      return !nq || normAr_([r.name, r.code, r.area, r.book_name].join(' ')).indexOf(nq) !== -1;
+    });
+  }
+  function ovRenderList_(rows){
+    rows = rows || ovFiltered_();
+    const box = document.getElementById('ovList'); if(!box) return;
+    const mine = !state.isAdmin && state.rep ? state.rep.customers : null;
+    box.innerHTML = rows.length ? rows.slice(0, 400).map(function(r, n){
+      const known = mine && r.code && mine.some(function(c){ return String(c.code) === String(r.code); });
+      return '<div class="listRow ovRow"><div class="lMain"><div class="lName">' + (n + 1) + '. ' + escapeHtml(r.name) + (r.code ? ' <span class="oCode">' + escapeHtml(r.code) + '</span>' : '') + '</div>' +
+        '<div class="lSub">' + escapeHtml([r.area, state.isAdmin ? (r.rep || 'من غير مندوب') : '', r.book_name && normAr_(r.book_name) !== normAr_(r.name) ? 'في الأرصدة: ' + r.book_name : ''].filter(Boolean).join(' • ')) + '</div>' +
+        '<div class="dlLinks">' + (r.phone ? '<a href="tel:' + escapeHtml(String(r.phone).replace(/[^\d+]/g, '')) + '">📞 اتصال</a>' : '') +
+        (known ? '<a href="#" onclick="dlClose_(); openVisit_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\', \'home\'); return false;">👣 زيارة / تحصيل</a>' : '') + '</div></div>' +
+        '<span class="ovAmt">' + fmt(r.amount) + '</span></div>';
+    }).join('') + (rows.length > 400 ? '<div class="note" style="text-align:center;">ظاهر أول 400 — دوّر بالاسم عشان تلاقي الباقي</div>' : '')
+      : '<div class="empty">' + ((ov_.rows || []).length ? 'مفيش نتايج' : 'مفيش متأخرات 👌') + '</div>';
+  }
+  function ovCopy_(){
+    const rows = ovFiltered_();
+    copyText_(rows.map(function(r){ return [r.code || '', r.name, Math.round(r.amount)].concat(state.isAdmin ? [r.rep || ''] : []).join('\t'); }).join('\n'))
+      .then(function(){ toast_('📋 اتنسخ ' + rows.length + ' عميل'); }).catch(function(){ showAlertModal_('الموبايل رفض النسخ — جرّب تاني', 'error'); });
+  }
+  // زيارة التاجر: لو عليه متأخرات تظهر فوق
+  function ovVisitNote_(c){
+    const rows = ovCached_();
+    const show = function(rs){
+      if(!state.visit || state.visit.cust.code !== c.code) return;
+      const r = (rs || []).find(function(x){ return x.code && String(x.code) === String(c.code); });
+      const old = document.getElementById('vOv'); if(old) old.remove();
+      if(r) document.getElementById('vSub').insertAdjacentHTML('afterend', '<div id="vOv" class="ovVisit">💰 عليه متأخرات <b>' + fmt(r.amount) + ' ج</b> — متنساش التحصيل</div>');
+    };
+    show(rows);
+    if(!rows || Date.now() - ov_.at > 5 * 60000) ovLoad_(true).then(show).catch(function(){});
+  }
+
   // ================== 🚚 رسم العربية بصندوق شفاف بيتملى ==================
   const LD_SEG_COLORS_ = ['#56672f', '#d9a21b', '#2c548f', '#a8432f', '#8a8c6c'];
   var _truckN_ = 0;
