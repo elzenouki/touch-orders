@@ -1286,6 +1286,41 @@
   .ovAmt{flex:none; font-weight:900; font-size:16px; color:#a8432f; direction:ltr;}
   .ovVisit{background:#fbece8; color:#a8432f; border:1px solid #e8b4a8; border-radius:12px; padding:8px 12px; margin-top:8px; font-weight:700; font-size:13.5px;}
   .ovVisit b{direction:ltr; display:inline-block;}
+
+  /* ===== 📈 البيع والتحصيل ===== */
+  .pfMonths{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;}
+  .pfMonths::-webkit-scrollbar{display:none;}
+  .pfMonths button{flex:none; height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;}
+  .pfMonths button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1); box-shadow:inset 0 0 0 1.5px var(--mus);}
+  .pfHero{background:var(--o1); color:#fbf8ee; border-radius:18px; padding:14px 16px; box-shadow:inset 0 0 0 1.5px var(--mus); position:relative;}
+  .pfHero span{font-size:12.5px; color:#e4e2c6; font-weight:600;}
+  .pfHero b{display:block; font-family:var(--fTitle); font-size:30px; direction:ltr; text-align:right; line-height:1.3;}
+  .pfHero b small{font-size:14px; color:#f2cf6b;}
+  .pfHero .pfD{position:absolute; left:14px; top:14px;}
+  .pfD{font-style:normal; font-size:11.5px; font-weight:800; border-radius:8px; padding:1px 7px; direction:ltr; display:inline-block;}
+  .pfD.up{background:#dff3e6; color:#2b7a4f;} .pfD.dn{background:#fbe8e4; color:#a8432f;}
+  .pfTiles{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;}
+  .pfTiles > div{background:#fff; border:1px solid var(--oline); border-radius:14px; padding:10px 12px;}
+  .pfTiles > div.gold{background:#fbf1d6; border-color:#ecd59a;}
+  .pfTiles span{display:block; font-size:12px; color:var(--omut); font-weight:600;}
+  .pfTiles b{display:block; font-family:var(--fTitle); font-size:20px; color:var(--o3); direction:ltr; text-align:right;}
+  .pfYtd{font-size:12.5px; color:var(--omut); text-align:center; margin:2px 0 10px;} .pfYtd b{color:var(--o3); direction:ltr; display:inline-block;}
+  .pfChart{background:#fff; border:1px solid var(--oline); border-radius:16px; padding:10px 8px 6px;}
+  .pfLeg{display:flex; gap:14px; justify-content:center; font-size:11.5px; color:var(--omut); margin-bottom:6px;}
+  .pfLeg i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-left:4px; vertical-align:-1px;}
+  i.s{background:#56672f;} i.c{background:#d9a21b;}
+  .pfBars{display:flex; gap:3px; align-items:stretch; height:130px; direction:ltr;}
+  .pfCol{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; background:none; border:none; padding:0; cursor:pointer; border-radius:6px;}
+  .pfCol.on{background:#f6f2e4;}
+  .pfPair{flex:1; width:100%; display:flex; gap:2px; align-items:flex-end; justify-content:center; padding:0 2px;}
+  .pfPair i{display:block; width:42%; border-radius:3px 3px 0 0; min-height:1px;}
+  .pfCol small{font-size:9.5px; color:var(--omut); font-weight:700; margin-top:3px;}
+  .pfRep{display:block; width:100%; text-align:right; background:#fff; border:1px solid var(--oline); border-radius:14px; padding:10px 12px; margin-bottom:8px; font-family:inherit; cursor:pointer;}
+  .pfRepTop{display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;} .pfRepTop b{color:var(--o3); font-size:15px;}
+  .pfRepRow{display:grid; grid-template-columns:44px 1fr auto; gap:8px; align-items:center; font-size:12px; color:var(--omut);}
+  .pfRepRow .ovBar{margin:3px 0;} .pfRepRow .ovBar i.s{background:#56672f;} .pfRepRow .ovBar i.c{background:#d9a21b;}
+  .pfRepRow b{color:var(--o3); direction:ltr; font-size:13.5px; min-width:78px; text-align:left;}
+  .pfRep small{color:var(--omut); font-size:11.5px;}
 </style>
 </head>
 <body>
@@ -1390,6 +1425,7 @@
         <button type="button" class="qa" onclick="openDayReport_('', '')"><span class="qi r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>تقرير اليوم</button>
         <button type="button" class="qa" onclick="openLoads_()"><span class="qi y"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4.5L21 12.5V16h-8z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>تحميلاتي</button>
         <button type="button" class="qa" onclick="openScreen('myorders')"><span class="qi p"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>سجل زياراتي</button>
+        <button type="button" class="qa" onclick="openPerf_()"><span class="qi g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></span>بيعي وتحصيلي</button>
         <button type="button" class="qa" onclick="openOverdues_()"><span class="qi r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg></span>متأخراتي</button>
         <button type="button" class="qa" onclick="openScreen('report')"><span class="qi n"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/></svg></span>أرقامي</button>
       </div>
@@ -1420,6 +1456,10 @@
         <button class="homeBtn returns" onclick="openScreen('unvisited')">
           <div class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c73e3e" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></div>
           <div><div class="title">تجار ماتزاروش</div><div class="desc">اللي محدش راحلهم من فترة</div></div>
+        </button>
+        <button class="homeBtn sales" onclick="openPerf_()">
+          <div class="icon" style="color:#2b7a4f"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
+          <div><div class="title">بيع وتحصيل المناديب</div><div class="desc">من جهاز الشركة — كل مندوب كل شهر</div></div>
         </button>
         <button class="homeBtn returns" onclick="openOverdues_()">
           <div class="icon" style="color:#c73e3e"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg></div>
@@ -2565,7 +2605,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.26.0';
+  const APP_VERSION_ = 'v1.27.1';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5752,19 +5792,118 @@
     ldApi_('caps_save', { caps: caps }).then(function(){ showLoading(false); toast_('✔ اتحفظ'); ld_.veh = null; return ldVehicles_().then(ldRenderSettings_); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
+  // ================== 📈 البيع والتحصيل (من السيستم) ==================
+  // بيتحسب على جهاز الشركة من يومية المبيعات + النقدي + الشيكات (نفس "الموقف") — ورك فلو "تقارير التطبيق — من الجهاز"
+  var pf_ = { rows: null, synced: null, ym: '', rep: '' };
+  const PF_MONTHS_ = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  function pfYmLabel_(ym, short){ const p = ym.split('-'); const m = PF_MONTHS_[Number(p[1]) - 1] || ym; return short ? m.slice(0, 3) : m + ' ' + p[0]; }
+  function pfNowYm_(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+  // التقارير دي بتتقري من جهاز الشركة على طول (n8n ← Postgres) — نفس طريق فواتير التاجر، مفيش نسخ لـ Supabase
+  function localReport_(kind){
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 45000) : null;
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', kind);
+    return fetch(INVOICES_URL.replace(/\/webhook\/[^\/]+$/, '/webhook/field-reports'), { method: 'POST', body: b, cache: 'no-store', signal: ctrl ? ctrl.signal : undefined })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); }, function(e){ throw e.message ? e : new Error('جهاز الشركة مش متاح دلوقتي'); })
+      .finally(function(){ if(timer) clearTimeout(timer); });
+  }
+  function pfApi_(){ return localReport_('perf'); }
+  function openPerf_(){
+    pf_.ym = pfNowYm_(); pf_.rep = '';
+    dlEnter_('📈 ' + (state.isAdmin ? 'بيع وتحصيل المناديب' : 'بيعي وتحصيلي'), 'من جهاز الشركة');
+    const key = 'tf_pf_' + ((state.auth && state.auth.email) || '');
+    if(!pf_.rows){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c){ pf_.rows = c.rows; pf_.synced = c.synced; } }catch(e){} }
+    if(pf_.rows) pfRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    pfApi_().then(function(r){
+      pf_.rows = (r.rows || []).filter(function(x){ return !isWhName_(x.app); });
+      pf_.synced = r.synced_at;
+      try{ localStorage.setItem(key, JSON.stringify({ rows: pf_.rows, synced: pf_.synced })); }catch(e){}
+      if(!document.getElementById('dlOverlay').hidden) pfRender_();
+    }).catch(function(e){ if(!pf_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  function pfSum_(rows){
+    const t = { sales: 0, cash: 0, cheque: 0 };
+    rows.forEach(function(r){ t.sales += Number(r.sales) || 0; t.cash += Number(r.cash) || 0; t.cheque += Number(r.cheque) || 0; });
+    t.coll = t.cash + t.cheque; t.pct = t.sales > 0 ? Math.round(t.coll * 100 / t.sales) : null;
+    return t;
+  }
+  function pfPrevYm_(ym){ const p = ym.split('-').map(Number); const d = new Date(p[0], p[1] - 2, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+  function pfDelta_(a, b){
+    if(!b || pf_.ym === pfNowYm_()) return ''; // الشهر الحالي لسه ماخلصش — المقارنة هتبقى ظالمة
+    const d = Math.round((a - b) * 100 / Math.abs(b));
+    return '<i class="pfD ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>';
+  }
+  function pfRender_(){
+    const all = pf_.rows || [];
+    const repRows = pf_.rep ? all.filter(function(r){ return r.rep === pf_.rep; }) : all;
+    const yms = {};
+    all.forEach(function(r){ yms[r.ym] = 1; });
+    yms[pfNowYm_()] = 1;
+    const months = Object.keys(yms).sort().slice(-13);
+    if(months.indexOf(pf_.ym) === -1) pf_.ym = months[months.length - 1];
+    const cur = pfSum_(repRows.filter(function(r){ return r.ym === pf_.ym; }));
+    const prev = pfSum_(repRows.filter(function(r){ return r.ym === pfPrevYm_(pf_.ym); }));
+    const yr = pf_.ym.slice(0, 4);
+    const ytd = pfSum_(repRows.filter(function(r){ return r.ym.slice(0, 4) === yr && r.ym <= pf_.ym; }));
+    const repName = pf_.rep ? (all.find(function(r){ return r.rep === pf_.rep; }) || {}) : null;
+    document.getElementById('dlTitle').textContent = '📈 ' + (pf_.rep ? (repName.app || pf_.rep) : state.isAdmin ? 'بيع وتحصيل المناديب' : 'بيعي وتحصيلي');
+    document.getElementById('dlSub').textContent = 'من جهاز الشركة' + (pf_.synced ? ' • اتحسب ' + ovAgo_(pf_.synced) : '');
+    let h = '';
+    if(state.isAdmin && pf_.rep) h += '<button type="button" class="rLink" style="margin-bottom:8px;" onclick="pf_.rep=\'\'; pfRender_()">← كل المناديب</button>';
+    if(!state.isAdmin && !all.length){
+      ldBody_().innerHTML = '<div class="empty">مفيش أرقام ليك في السيستم لسه.<br><small>لو اسمك في السيستم مكتوب بشكل مختلف، كلّم المسؤول يربطه بحسابك.</small></div>';
+      return;
+    }
+    // الشهور
+    h += '<div class="pfMonths">' + months.slice().reverse().map(function(ym){
+      return '<button type="button" class="' + (ym === pf_.ym ? 'on' : '') + '" onclick="pf_.ym=\'' + ym + '\'; pfRender_()">' + pfYmLabel_(ym) + '</button>';
+    }).join('') + '</div>';
+    // الأرقام
+    h += '<div class="pfHero"><span>المبيعات — ' + pfYmLabel_(pf_.ym) + '</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' + pfDelta_(cur.sales, prev.sales) + '</div>';
+    h += '<div class="pfTiles">' +
+      '<div><span>💵 تحصيل نقدي</span><b>' + fmt(cur.cash) + '</b></div>' +
+      '<div><span>🏦 تحصيل شيكات</span><b>' + fmt(cur.cheque) + '</b></div>' +
+      '<div class="gold"><span>💰 إجمالي التحصيل</span><b>' + fmt(cur.coll) + '</b>' + pfDelta_(cur.coll, prev.coll) + '</div>' +
+      '<div><span>نسبة التحصيل للبيع</span><b>' + (cur.pct == null ? '—' : cur.pct + '%') + '</b></div></div>';
+    h += '<div class="pfYtd">من أول ' + yr + ': بيع <b>' + fmt(ytd.sales) + '</b> • تحصيل <b>' + fmt(ytd.coll) + '</b>' + (ytd.pct != null ? ' • ' + ytd.pct + '%' : '') + '</div>';
+    // رسم الشهور
+    const ser = months.slice(-12).map(function(ym){ const s = pfSum_(repRows.filter(function(r){ return r.ym === ym; })); s.ym = ym; return s; });
+    const mx = ser.reduce(function(m, s){ return Math.max(m, s.sales, s.coll); }, 0) || 1;
+    h += '<div class="pfChart"><div class="pfLeg"><span><i class="s"></i>بيع</span><span><i class="c"></i>تحصيل</span></div><div class="pfBars">' + ser.map(function(s){
+      return '<button type="button" class="pfCol' + (s.ym === pf_.ym ? ' on' : '') + '" onclick="pf_.ym=\'' + s.ym + '\'; pfRender_()" title="' + pfYmLabel_(s.ym) + '">' +
+        '<div class="pfPair"><i class="s" style="height:' + Math.round(s.sales * 100 / mx) + '%"></i><i class="c" style="height:' + Math.round(s.coll * 100 / mx) + '%"></i></div><small>' + pfYmLabel_(s.ym, true) + '</small></button>';
+    }).join('') + '</div></div>';
+    // المدير: المناديب
+    if(state.isAdmin && !pf_.rep){
+      const by = {};
+      all.filter(function(r){ return r.ym === pf_.ym; }).forEach(function(r){
+        const x = by[r.rep] = by[r.rep] || { rep: r.rep, app: r.app, rows: [] }; x.rows.push(r);
+      });
+      const list = Object.keys(by).map(function(k){ const x = by[k]; return Object.assign(x, pfSum_(x.rows)); }).sort(function(a, b){ return b.sales - a.sales; });
+      const mxs = list.reduce(function(m, x){ return Math.max(m, x.sales, x.coll); }, 0) || 1;
+      h += '<div class="sectionLabel" style="margin:14px 0 8px;">المناديب — ' + pfYmLabel_(pf_.ym) + '</div>';
+      h += list.length ? list.map(function(x, i){
+        return '<button type="button" class="pfRep" data-rep="' + escapeHtml(x.rep) + '"><div class="pfRepTop"><b>' + (i + 1) + '. ' + escapeHtml(x.app || x.rep) + '</b>' +
+          (x.app ? '' : '<span class="chip">مش متربط بحساب</span>') + '</div>' +
+          '<div class="pfRepRow"><span>بيع</span><div class="ovBar"><i class="s" style="width:' + Math.max(2, Math.round(x.sales * 100 / mxs)) + '%"></i></div><b>' + fmt(x.sales) + '</b></div>' +
+          '<div class="pfRepRow"><span>تحصيل</span><div class="ovBar"><i class="c" style="width:' + Math.max(2, Math.round(x.coll * 100 / mxs)) + '%"></i></div><b>' + fmt(x.coll) + '</b></div>' +
+          '<small>نقدي ' + fmt(x.cash) + ' • شيكات ' + fmt(x.cheque) + (x.pct != null ? ' • ' + x.pct + '% من البيع' : '') + '</small></button>';
+      }).join('') : '<div class="empty">مفيش أرقام في الشهر ده</div>';
+      if(list.some(function(x){ return !x.app; })) h += '<div class="note" style="margin-top:6px;">«مش متربط بحساب» = الاسم في السيستم مش زي اسم المندوب في التطبيق، فالمندوب مش هيشوف أرقامه. اربطه: في Supabase افتح جدول <b>reps</b> واكتب اسمه زي السيستم بالظبط في عمود <b>sys_name</b> قدام حسابه.</div>';
+    }
+    h += '<div class="note" style="margin-top:10px;">الأرقام من يومية المبيعات والتحصيل (نقدي + شيكات) على جهاز الشركة — نفس تقرير «الموقف».</div>';
+    ldBody_().innerHTML = h;
+    ldBody_().querySelectorAll('.pfRep').forEach(function(b){ b.onclick = function(){ pf_.rep = b.dataset.rep; pfRender_(); ldBody_().scrollTop = 0; }; });
+    const on = ldBody_().querySelector('.pfMonths .on'); if(on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
+
   // ================== 💰 المتأخرات ==================
-  // n8n بيحسبها كل ساعتين من أرصدة العملاء (رصيد الإقفال − مدين > 500) ويرفعها لـ Supabase (ملف overdues.sql)
+  // بتتحسب على جهاز الشركة من أرصدة العملاء (رصيد الإقفال − مدين > 500) — ورك فلو "تقارير التطبيق — من الجهاز"
   // المندوب: متأخرات عملاؤه بس • المدير: الكل متقسم على المناديب
   var ov_ = { rows: null, at: 0, synced: null, rep: '', q: '' };
-  function ovApi_(args){
-    return fetch(SB_RPC_URL.replace(/\/api$/, '/overdues_api'), {
-      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
-      body: JSON.stringify({ auth: state.auth, args: args || {} }),
-    }).then(function(r){ return r.json(); }, function(){ throw new Error('تعذر الاتصال بالسيرفر'); }).then(function(d){
-      if(d && d.ok === true) return d.result;
-      throw new Error(d && d.code === 'PGRST202' ? 'لسه ملف overdues.sql ماتشغّلش في Supabase' : ((d && (d.error || d.message)) || 'حصل خطأ'));
-    });
-  }
+  function ovApi_(){ return localReport_('overdue'); }
   function ovLoad_(force){
     if(!force && ov_.rows && Date.now() - ov_.at < 5 * 60000) return Promise.resolve(ov_.rows);
     return ovApi_({}).then(function(r){
@@ -5800,7 +5939,7 @@
       return !nq || normAr_([r.name, r.code, r.area, r.book_name].join(' ')).indexOf(nq) !== -1;
     });
     const tot = rows.reduce(function(t, r){ return t + Number(r.amount); }, 0);
-    document.getElementById('dlSub').textContent = (ov_.rep === '—' ? 'من غير مندوب' : ov_.rep || (state.isAdmin ? 'كل المناديب' : 'عملاءك')) + (ov_.synced ? ' • اتحدثت ' + ovAgo_(ov_.synced) : '');
+    document.getElementById('dlSub').textContent = (ov_.rep === '—' ? 'من غير مندوب' : ov_.rep || (state.isAdmin ? 'كل المناديب' : 'عملاءك')) + (ov_.synced ? ' • اتحسبت ' + ovAgo_(ov_.synced) : '');
     let h = '<div class="ovHero"><div><span>إجمالي المتأخرات</span><b>' + fmt(tot) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + rows.length + '</b></div></div>';
     // المدير: كروت المناديب
     if(state.isAdmin && !ov_.rep && !nq){
@@ -5819,7 +5958,7 @@
     h += '<input type="search" class="dlFilter" id="ovQ" placeholder="🔎 دوّر على عميل بالاسم أو الكود أو المنطقة..." value="' + escapeHtml(ov_.q) + '" oninput="ov_.q=this.value; ovRenderList_()">';
     h += '<div id="ovList"></div>';
     if(rows.length) h += '<button type="button" class="copyBtn wide" onclick="ovCopy_()">📋 نسخ القايمة (الكود | الاسم | المتأخرات' + (state.isAdmin ? ' | المندوب' : '') + ')</button>';
-    h += '<div class="note" style="margin-top:8px;">المتأخرات = رصيد الإقفال − المدين، واللي فوق 500 ج بس. بتتحدث لوحدها كل ساعتين.</div>';
+    h += '<div class="note" style="margin-top:8px;">المتأخرات = رصيد الإقفال − المدين، واللي فوق 500 ج بس — من جهاز الشركة على طول.</div>';
     ldBody_().innerHTML = h;
     ldBody_().querySelectorAll('.ovRep').forEach(function(b){ b.onclick = function(){ ov_.rep = b.dataset.rep; ovRender_(); ldBody_().scrollTop = 0; }; });
     ovRenderList_(rows);
