@@ -707,7 +707,7 @@
   #printArea{display:none;}
   @media print{
     @page{size:A4 portrait; margin:0;}
-    html, body{background:#fff !important;}
+    html, body{background:#fff !important; height:auto !important; min-height:0 !important; overflow:visible !important; padding:0 !important; margin:0 !important;}
     body > *:not(#printArea){display:none !important;}
     #printArea{display:block !important;}
   }
@@ -733,7 +733,7 @@
   .pwT{width:100%; border-collapse:collapse; margin-top:5px; border:1.5px solid #2f3519;}
   .pwT th, .pwT td{border:1px solid #2f3519; padding:1px 4px; text-align:center; height:20px;}
   .pwT thead th{background:#e6e0c6; font-weight:900; font-size:10px;}
-  .pwT thead tr.g th{letter-spacing:2px; font-size:11px;}
+  .pwT thead tr.g th{font-size:11px;}
   .pwT .sep{border-left:1.5px solid #2f3519;}
   .pwT td.n{font-weight:800; direction:ltr; white-space:nowrap; color:#3f4c22; font-size:10.5px;}
   .pwT td.nm{text-align:center; color:#3f4c22; font-weight:800;}
@@ -1173,9 +1173,11 @@
   .pwCut{height:0; border-top:1.5px dashed #888; position:relative; margin:0 6mm;}
   .pwCut span{position:absolute; top:-7px; left:50%; transform:translateX(-50%); background:#fff; padding:0 8px; font-size:8px; color:#666; font-weight:800;}
   .pwT{table-layout:fixed;}
-  .pwT td.nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pwT td.nm{white-space:normal; padding:0 3px;}
+  .pwT td.nm .nmx{max-height:21px; overflow:hidden; line-height:10.5px; font-size:8.5px; unicode-bidi:plaintext; word-break:break-word;}
+  .pwT td.nm .nmx.one{line-height:18px; font-size:10px;}
   .pwT td.cd{direction:ltr; white-space:nowrap; overflow:hidden; font-weight:800; color:#3f4c22; font-size:9.5px;}
-  .pwT tr.tot td.cont{text-align:center; font-weight:900; color:#8a640a; letter-spacing:.5px;}
+  .pwT tr.tot td.cont{text-align:center; font-weight:900; color:#8a640a;}
   .pwFoot .pg{font-size:8.5px; font-weight:900; color:#2f3519;}
   /* التوقيع لازق في الاسم: العنوان ← التوقيع ← خط ← الاسم تحته على طول */
   .pwSign{margin-top:8px !important;}
@@ -1200,7 +1202,7 @@
   .pw.cmp{padding-top:4mm;}
   .pw.cmp .pwT th, .pw.cmp .pwT td{height:15px; padding:0 3px; font-size:9px; line-height:1.1;}
   .pw.cmp .pwT td.n{font-size:9.5px;}
-  .pw.cmp .pwT thead tr.g th{font-size:10px; letter-spacing:1px;}
+  .pw.cmp .pwT thead tr.g th{font-size:10px;}
   .pw.cmp .pwSign{margin-top:6px;}
   .pw, .pdfPage{font-family:'Alexandria',Tahoma,Arial,sans-serif !important;}
 
@@ -2536,7 +2538,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.23.0';
+  const APP_VERSION_ = 'v1.23.1';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -6334,6 +6336,8 @@
     const r = await Promise.all([fetchSignature_(rep), mgr && mgr !== rep ? fetchSignature_(mgr) : Promise.resolve('')]);
     return { rep: r[0], mgr: r[1], mgrName: r[1] ? mgr : '' };
   }
+  // الاسم: سطر واحد لو قصير، ولو طويل ينزل سطرين بخط أصغر بدل ما يتقص (القص بيبوّظ الحروف في الطباعة)
+  function walletNm_(html, len){ return '<div class="nmx' + (len <= 30 ? ' one' : '') + '">' + html + '</div>'; }
   function walletCopyHtml_(w, label, sigs, chunk, pg, pages){
     const t = w.totals;
     // التحويلات (إنستاباي / بنك / محفظة) بتتكتب في خانة النقدي — الشيكات بس في خانة الشيكات
@@ -6349,12 +6353,12 @@
         const tag = p.kind === 'cheque' ? 'شيك' + (p.chequeDate ? ' ' + p.chequeDate : '') : p.kind === 'transfer' ? p.method : '';
         pin = '<td class="n">' + (p.kind !== 'cheque' ? fmt(p.amount) : '') + '</td><td class="n">' + (p.kind === 'cheque' ? fmt(p.amount) : '') + '</td>' +
           '<td class="cd">' + escapeHtml(p.customerCode || '') + '</td>' +
-          '<td class="nm sep">' + escapeHtml(p.customerName) + (tag ? ' <small>(' + escapeHtml(tag) + ')</small>' : '') + '</td>';
+          '<td class="nm sep">' + walletNm_(escapeHtml(p.customerName) + (tag ? ' <small>(' + escapeHtml(tag) + ')</small>' : ''), String(p.customerName || '').length + (tag ? tag.length + 3 : 0)) + '</td>';
       }
       let eout = '<td></td><td class="sep"></td>';
       if(e){
-        eout = '<td class="n">' + fmt(e.amount) + '</td><td class="nm sep">' + escapeHtml(e.kind + (e.customerName ? ' ' + e.customerName : '')) +
-          (e.notes ? ' <small>(' + escapeHtml(e.notes) + ')</small>' : '') + '</td>';
+        eout = '<td class="n">' + fmt(e.amount) + '</td><td class="nm sep">' + walletNm_(escapeHtml(e.kind + (e.customerName ? ' ' + e.customerName : '')) +
+          (e.notes ? ' <small>(' + escapeHtml(e.notes) + ')</small>' : ''), String(e.kind || '').length + String(e.customerName || '').length + String(e.notes || '').length + 4) + '</td>';
       }
       rows += '<tr>' + pin + eout + '<td></td></tr>';
     }
