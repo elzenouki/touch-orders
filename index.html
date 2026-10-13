@@ -2605,7 +2605,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.27.6';
+  const APP_VERSION_ = 'v1.27.7';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -6634,7 +6634,7 @@
   // المندوب كان بيبعت "Location: لينك" وبعدها رسالة أول سطر فيها اسم التاجر ← بنجمّعهم ونقترح العميل من التطبيق وإنت بتراجع وتحفظ
   var wi_ = { places: [], custs: [], rep: '' };
   function wiNorm_(s){
-    return String(s || '').replace(/[ً-ْـ‎‏]/g, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+    return String(s || '').replace(/[ً-ْـ\u200e\u200f]/g, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
       .replace(/[()\[\]{}"'«»,.،\-_/]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
   }
   function wiOpen_(){
@@ -6658,7 +6658,7 @@
     return f.text();
   }
   function wiParse_(txt){
-    txt = String(txt).replace(/[‎‏‪-‮]/g, '');
+    txt = String(txt).replace(/[\u200e\u200f\u202a-\u202e]/g, '');
     const hdr = /^\[?(\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?|ص|م)?\]?\s*(?:-\s*)?([^:\n]{1,60}):\s?([\s\S]*)$/;
     const msgs = []; let cur = null;
     txt.split(/\r?\n/).forEach(function(line){
