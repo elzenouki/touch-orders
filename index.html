@@ -2605,7 +2605,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.27.7';
+  const APP_VERSION_ = 'v1.28.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -6512,6 +6512,7 @@
       '<label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--o3);"><input type="checkbox" id="locMiss" style="width:auto; height:auto;"' + (loc_.missing ? ' checked' : '') + ' onchange="admLoad_()"> اللي من غير موقع بس</label>' +
       '<button type="button" class="aGo" onclick="admLoad_()">عرض</button></div>';
     h += '<button type="button" class="ghost" style="width:100%; margin-bottom:8px;" onclick="wiOpen_()">📥 استيراد مواقع من محادثة واتساب</button>';
+    h += '<button type="button" class="ghost" style="width:100%; margin-bottom:8px;" onclick="rpOpen_()">🗺 اقتراح خطوط سير من المواقع</button>';
     if(loc_.res && !adm_.loading) h += '<div class="note" style="margin-bottom:8px;">📍 ' + fmt(loc_.res.total - loc_.res.missing) + ' عميل ليهم موقع من ' + fmt(loc_.res.total) + ' — فاضل <b>' + fmt(loc_.res.missing) + '</b></div>';
     if(adm_.loading) return body.innerHTML = h + '<div class="aiStatus">جاري التحميل...</div>';
     if(adm_.err) return body.innerHTML = h + '<div class="aiStatus err">' + escapeHtml(adm_.err) + '</div>';
@@ -6809,6 +6810,197 @@
         locCall_('set', { code: p.pick, lat: p.lat, lng: p.lng }).then(function(){ done++; }, function(){ fail++; }).then(function(){ step(k + 1); });
       };
       step(0);
+    });
+  }
+  // ---------- 🗺 اقتراح خطوط السير: تقسيم تجار المندوب على أيام الشغل حسب أماكنهم ← تراجع ← توافق = تتحفظ كأيام زيارة ----------
+  const RP_DAYS_ = ['الاحد', 'الاثنين', 'الثلاثاء', 'الاربعاء', 'الخميس', 'الجمعة', 'السبت']; // نفس الكتابة اللي في عمود visit_days
+  const RP_ORDER_ = [6, 0, 1, 2, 3, 4, 5]; // الأسبوع بيبدأ السبت
+  const RP_COLORS_ = ['#c0392b', '#2471a3', '#1e8449', '#b9770e', '#7d3c98', '#117a65', '#566573'];
+  var rp_ = { rep: '', rows: [], days: [6, 0, 1, 2, 3, 4], plan: null, backup: null, map: null, layer: null };
+  function rpCall_(act, args){
+    return fetch(SB_RPC_URL.replace(/\/api$/, '/route_plan'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
+      body: JSON.stringify({ auth: state.auth, act: act, args: args || {} }),
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok === true) return d.result;
+      throw new Error(d && d.code === 'PGRST202' ? 'لسه ملف route_plan.sql ماتشغّلش في Supabase' : ((d && (d.error || d.message)) || 'حصل خطأ'));
+    }, function(){ throw new Error('تعذر الاتصال بالسيرفر'); });
+  }
+  function rpOpen_(){
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '🗺 اقتراح خطوط سير';
+    document.getElementById('dlSub').textContent = 'تقسيم التجار على أيام الأسبوع حسب أماكنهم';
+    if(!rp_.rep && adm_.rep) rp_.rep = adm_.rep;
+    document.getElementById('dlBody').innerHTML = '<div class="aForm">' +
+      '<label>المندوب<select id="rpRep"><option value="">— اختار —</option>' + state.repOptions.map(function(n){ return '<option' + (n === rp_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select></label>' +
+      '<div><div style="font-size:12.5px; color:var(--omut); font-weight:700; margin-bottom:6px;">أيام الشغل</div><div style="display:flex; flex-wrap:wrap; gap:6px;">' +
+      RP_ORDER_.map(function(d){ return '<label style="display:flex; flex-direction:row; align-items:center; gap:4px; border:1px solid var(--oline); border-radius:10px; padding:6px 9px; background:#fff; font-size:13px; color:var(--o3);"><input type="checkbox" class="rpDay" value="' + d + '" style="width:auto; height:auto;"' + (rp_.days.indexOf(d) !== -1 ? ' checked' : '') + '>' + RP_DAYS_[d] + '</label>'; }).join('') + '</div></div>' +
+      '<button type="button" class="aGo wide" onclick="rpRun_()">اقترح</button><div id="rpOut"></div></div>';
+  }
+  function rpRun_(){
+    rp_.rep = document.getElementById('rpRep').value;
+    rp_.days = Array.prototype.map.call(document.querySelectorAll('.rpDay:checked'), function(e){ return +e.value; })
+      .sort(function(a, b){ return RP_ORDER_.indexOf(a) - RP_ORDER_.indexOf(b); });
+    if(!rp_.rep) return showMsg('اختار المندوب', 'error');
+    if(!rp_.days.length) return showMsg('اختار يوم شغل واحد على الأقل', 'error');
+    const out = document.getElementById('rpOut');
+    out.innerHTML = '<div class="aiStatus">جاري الحساب...</div>';
+    rpCall_('custs', { rep: rp_.rep }).then(function(r){
+      rp_.rows = r.rows || []; rp_.backup = r.backup;
+      const pts = rp_.rows.filter(function(c){ return c.lat != null && c.lng != null && c.day !== 'مغلق'; });
+      if(pts.length < 2){ out.innerHTML = '<div class="aiStatus err">المندوب ده ليه ' + pts.length + ' تاجر بس ليهم موقع — دخّل المواقع الأول من «📍 المواقع»</div>'; return; }
+      const groups = rpCluster_(pts, rp_.days.length);
+      rp_.plan = {};
+      groups.forEach(function(g, i){ g.forEach(function(c){ rp_.plan[c.code] = rp_.days[i]; }); });
+      rpRender_();
+    }).catch(function(e){ out.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  // k-means متوازن: كل يوم تقريبًا نفس العدد، والتجار القريبين من بعض في نفس اليوم — وبعدين الأيام مترتبة ورا بعض جغرافيًا
+  function rpCluster_(pts, k){
+    k = Math.min(k, pts.length);
+    const P = pts.map(function(c){ return { c: c, x: c.lng * Math.cos(c.lat * Math.PI / 180), y: c.lat }; });
+    const d2 = function(a, b){ const dx = a.x - b.x, dy = a.y - b.y; return dx * dx + dy * dy; };
+    // بداية ثابتة (مش عشوائية): أبعد نقطة عن اللي قبلها
+    let C = [P.reduce(function(m, p){ return p.y > m.y ? p : m; }, P[0])].map(function(p){ return { x: p.x, y: p.y }; });
+    while(C.length < k){
+      let best = null, bd = -1;
+      P.forEach(function(p){ const d = Math.min.apply(null, C.map(function(c){ return d2(p, c); })); if(d > bd){ bd = d; best = p; } });
+      C.push({ x: best.x, y: best.y });
+    }
+    const cap = Math.ceil(P.length / k);
+    let asg = [];
+    for(let it = 0; it < 25; it++){
+      // توزيع بالسعة: اللي فرق المسافة عنده بين أقرب يومين أكبر بياخد مكانه الأول
+      const cnt = C.map(function(){ return 0; });
+      const order = P.map(function(p, i){
+        const ds = C.map(function(c){ return d2(p, c); }).slice().sort(function(a, b){ return a - b; });
+        return { i: i, regret: (ds[1] || 0) - ds[0] };
+      }).sort(function(a, b){ return b.regret - a.regret; });
+      const next = [];
+      order.forEach(function(o){
+        const p = P[o.i];
+        const ch = C.map(function(c, j){ return { j: j, d: d2(p, c) }; }).sort(function(a, b){ return a.d - b.d; });
+        const pick = ch.find(function(x){ return cnt[x.j] < cap; }) || ch[0];
+        cnt[pick.j]++; next[o.i] = pick.j;
+      });
+      const same = asg.length && next.every(function(v, i){ return v === asg[i]; });
+      asg = next;
+      C = C.map(function(c, j){
+        const m = P.filter(function(p, i){ return asg[i] === j; });
+        return m.length ? { x: m.reduce(function(s, p){ return s + p.x; }, 0) / m.length, y: m.reduce(function(s, p){ return s + p.y; }, 0) / m.length } : c;
+      });
+      if(same) break;
+    }
+    // ترتيب الأيام: نبدأ من أقرب مجموعة للشمال (ناحية الشركة) ونمشي للأقرب فالأقرب
+    const left = C.map(function(c, j){ return j; });
+    let cur = left.reduce(function(m, j){ return C[j].y > C[m].y ? j : m; }, left[0]);
+    const seq = [];
+    while(left.length){
+      seq.push(cur); left.splice(left.indexOf(cur), 1);
+      if(!left.length) break;
+      const from = C[cur];
+      cur = left.reduce(function(m, j){ return d2(C[j], from) < d2(C[m], from) ? j : m; }, left[0]);
+    }
+    return seq.map(function(j){ return P.filter(function(p, i){ return asg[i] === j; }).map(function(p){ return p.c; }); });
+  }
+  // ترتيب تجار اليوم: أقرب جار + تحسين 2-opt — للعرض بس (التطبيق عند المندوب بيرتّب حسب مكانه وقتها)
+  function rpOrder_(list){
+    if(list.length < 3) return list.slice();
+    const D = function(a, b){ return distM_(a.lat, a.lng, b.lat, b.lng); };
+    let start = list.reduce(function(m, c){ return c.lat > m.lat ? c : m; }, list[0]);
+    const rest = list.filter(function(c){ return c !== start; }), route = [start];
+    while(rest.length){
+      const l = route[route.length - 1];
+      let bi = 0; rest.forEach(function(c, i){ if(D(l, c) < D(l, rest[bi])) bi = i; });
+      route.push(rest.splice(bi, 1)[0]);
+    }
+    for(let imp = true, n = 0; imp && n < 50; n++){
+      imp = false;
+      for(let i = 0; i < route.length - 2; i++) for(let j = i + 2; j < route.length - 1; j++){
+        if(D(route[i], route[j]) + D(route[i + 1], route[j + 1]) < D(route[i], route[i + 1]) + D(route[j], route[j + 1]) - 1){
+          route.splice.apply(route, [i + 1, j - i].concat(route.slice(i + 1, j + 1).reverse())); imp = true;
+        }
+      }
+    }
+    return route;
+  }
+  function rpKm_(r){ let m = 0; for(let i = 1; i < r.length; i++) m += distM_(r[i - 1].lat, r[i - 1].lng, r[i].lat, r[i].lng); return Math.round(m / 1000); }
+  function rpRender_(){
+    const out = document.getElementById('rpOut');
+    if(!out) return;
+    const located = rp_.rows.filter(function(c){ return rp_.plan[c.code] != null; });
+    const closed = rp_.rows.filter(function(c){ return c.day === 'مغلق'; }).length;
+    const noLoc = rp_.rows.length - located.length - closed;
+    const changed = located.filter(function(c){ return c.day !== RP_DAYS_[rp_.plan[c.code]]; }).length;
+    let h = '<div class="note" style="margin:10px 0;">📍 <b>' + located.length + '</b> تاجر اتقسموا على <b>' + rp_.days.length + '</b> أيام (حوالي ' + Math.ceil(located.length / rp_.days.length) + ' في اليوم)' +
+      (noLoc ? ' • ' + noLoc + ' من غير موقع هيفضلوا على أيامهم' : '') + (closed ? ' • ' + closed + ' مغلق مش داخلين' : '') +
+      '<br>هيتغيّر يوم <b>' + changed + '</b> تاجر عن الخطة الحالية. المسافات تقريبية (خط مستقيم).</div>';
+    h += '<div id="rpMap" style="height:300px; border-radius:14px; overflow:hidden; border:1px solid var(--oline); background:#eee; margin-bottom:10px;"></div>';
+    rp_.routes = {};
+    rp_.days.forEach(function(d, i){
+      const list = rpOrder_(located.filter(function(c){ return rp_.plan[c.code] === d; }));
+      rp_.routes[d] = list;
+      const col = RP_COLORS_[i % RP_COLORS_.length];
+      h += '<details class="docCard" style="border-right:5px solid ' + col + ';"' + (i === 0 ? ' open' : '') + '><summary><div class="dTop"><b>' + RP_DAYS_[d] + '</b></div><div class="dMeta">' + list.length + ' تاجر • ~' + rpKm_(list) + ' كم' +
+        (list.length ? ' • ' + escapeHtml(Array.from(new Set(list.map(function(c){ return c.area; }).filter(Boolean))).slice(0, 3).join('، ')) : '') + '</div></summary>' +
+        list.map(function(c, n){
+          return '<div style="display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px solid #eee;"><span style="min-width:22px; height:22px; border-radius:11px; background:' + col + '; color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center;">' + (n + 1) + '</span>' +
+            '<div style="flex:1; min-width:0;"><b style="font-size:13.5px;">' + escapeHtml(c.name) + '</b><div style="font-size:11.5px; color:var(--omut);">' + escapeHtml([c.code, c.area, c.day && c.day !== RP_DAYS_[d] ? 'كان: ' + (c.day || '—') : ''].filter(Boolean).join(' • ')) + '</div></div>' +
+            '<select style="width:auto; flex:0 0 auto; max-width:120px; height:32px; padding:0 6px; border-radius:9px; border:1px solid var(--oline); font-family:inherit; font-size:12.5px;" onchange="rpMove_(\'' + escapeHtml(c.code).replace(/'/g, '&#39;') + '\', this.value)">' +
+            rp_.days.map(function(x){ return '<option value="' + x + '"' + (x === d ? ' selected' : '') + '>' + RP_DAYS_[x] + '</option>'; }).join('') + '</select></div>';
+        }).join('') + '</details>';
+    });
+    h += '<div style="position:sticky; bottom:0; background:var(--obg, #f3efe2); padding:10px 0; display:flex; flex-direction:column; gap:8px;">' +
+      '<button type="button" class="aGo wide" onclick="rpSave_()">✔ وافق — خليها خطة السير</button>' +
+      (rp_.backup ? '<button type="button" class="ghost" onclick="rpUndo_()">↩ رجّع الخطة اللي قبل آخر حفظ (' + admDay_(rp_.backup.at) + ')</button>' : '') + '</div>';
+    out.innerHTML = h;
+    rpMap_();
+  }
+  function rpMap_(){
+    ensureLeaflet_().then(function(){
+      if(rp_.map){ try{ rp_.map.remove(); }catch(e){} rp_.map = null; }
+      const el = document.getElementById('rpMap');
+      if(!el) return;
+      const m = rp_.map = L.map(el);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(m);
+      const all = [];
+      rp_.days.forEach(function(d, i){
+        const col = RP_COLORS_[i % RP_COLORS_.length], r = rp_.routes[d] || [];
+        if(r.length > 1) L.polyline(r.map(function(c){ return [c.lat, c.lng]; }), { color: col, weight: 2, opacity: .6 }).addTo(m);
+        r.forEach(function(c, n){
+          all.push([c.lat, c.lng]);
+          L.circleMarker([c.lat, c.lng], { radius: 7, color: '#fff', weight: 2, fillColor: col, fillOpacity: 1 }).addTo(m)
+            .bindPopup('<b>' + escapeHtml(c.name) + '</b><br>' + RP_DAYS_[d] + ' — رقم ' + (n + 1));
+        });
+      });
+      if(all.length) m.fitBounds(all, { padding: [20, 20] });
+    }).catch(function(e){ const el = document.getElementById('rpMap'); if(el) el.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function rpMove_(code, d){
+    rp_.plan[code] = +d;
+    const open = Array.prototype.map.call(document.querySelectorAll('#rpOut details'), function(x){ return x.open; });
+    const top = document.getElementById('dlBody').scrollTop;
+    rpRender_();
+    document.querySelectorAll('#rpOut details').forEach(function(x, i){ x.open = !!open[i]; });
+    document.getElementById('dlBody').scrollTop = top;
+  }
+  function rpSave_(){
+    const plan = Object.keys(rp_.plan).map(function(code){ return { code: code, day: RP_DAYS_[rp_.plan[code]] }; });
+    confirmModal_('هتتحفظ أيام زيارة <b>' + plan.length + '</b> تاجر لـ <b>' + escapeHtml(rp_.rep) + '</b>.<br>المندوب هيلاقيها في «خط سير النهارده».<br><br>الخطة القديمة بتتحفظ وتقدر ترجّعها بزرار.', 'احفظ', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      rpCall_('save', { rep: rp_.rep, plan: plan }).then(function(n){
+        showLoading(false); toast_('✅ اتحفظت خطة ' + n + ' تاجر');
+        rpRun_();
+      }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
+  }
+  function rpUndo_(){
+    confirmModal_('ترجّع أيام الزيارة زي ما كانت قبل آخر حفظ لـ <b>' + escapeHtml(rp_.rep) + '</b>؟', 'رجّع', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      rpCall_('undo', { rep: rp_.rep }).then(function(n){ showLoading(false); toast_('↩ اترجعت أيام ' + n + ' تاجر'); rpRun_(); })
+        .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
     });
   }
   // تنفيذ أي مسح: تأكيد ← السيرفر ← رسالة ← تحديث القايمة
