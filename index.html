@@ -2605,7 +2605,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.27.4';
+  const APP_VERSION_ = 'v1.27.5';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -6391,7 +6391,7 @@
 
   // ================== 🛠 إدارة البيانات (للمشرفين) — بتكلّم دالة admin_data في Supabase (ملف admin_data.sql) ==================
   // أي مسح بيروح "سلة المحذوفات" 30 يوم وتقدر ترجّعه. الحاجات اللي في حافظة اتقفلت مابتتمسحش لحد ما الحافظة تتفك.
-  const ADM_TABS_ = [['cust', 'العملاء'], ['visit', 'الزيارات'], ['doc', 'الطلبيات والمرتجع'], ['pay', 'التحصيل'], ['exp', 'المصروفات'], ['trash', 'المحذوفات']];
+  const ADM_TABS_ = [['cust', 'العملاء'], ['visit', 'الزيارات'], ['doc', 'الطلبيات والمرتجع'], ['pay', 'التحصيل'], ['exp', 'المصروفات'], ['loc', '📍 المواقع'], ['trash', 'المحذوفات']];
   const ADM_METHODS_ = { cash: 'كاش', cheque: 'شيك', check: 'شيك', instapay: 'انستاباي', transfer: 'تحويل', wallet: 'محفظة' };
   var adm_ = { tab: 'cust', from: '', to: '', rep: '', q: '', rows: [], lines: [], seq: 0 };
   function admCall_(act, args){
@@ -6423,6 +6423,7 @@
   }
   function admLoad_(){
     admReadFilters_();
+    if(adm_.tab === 'loc') return locLoad_();
     const act = { cust: 'cust_list', visit: 'visit_list', doc: 'doc_list', pay: 'pay_list', exp: 'exp_list', trash: 'trash_list' }[adm_.tab];
     const my = ++adm_.seq;
     adm_.loading = true; adm_.err = '';
@@ -6445,6 +6446,7 @@
     let h = '<div class="aTabs">' + ADM_TABS_.map(function(x){
       return '<button type="button" class="' + (x[0] === t ? 'on' : '') + '" onclick="admTab_(\'' + x[0] + '\')">' + x[1] + '</button>';
     }).join('') + '</div>';
+    if(t === 'loc') return locRender_(body, h);
     if(t !== 'trash'){
       h += '<div class="aFil">';
       if(t !== 'cust') h += '<label>من<input type="date" id="admFrom" value="' + escapeHtml(adm_.from) + '"></label><label>لـ<input type="date" id="admTo" value="' + escapeHtml(adm_.to) + '"></label>';
@@ -6481,6 +6483,151 @@
         ' • بيتمسح نهائي بعد ' + Math.max(0, 30 - Math.floor((Date.now() - new Date(r.at)) / 864e5)) + ' يوم</div>' + admBtns_(i, [['↩ رجّع', 'admRestore_', 'ok']]) + '</div>';
     }).join('');
     body.innerHTML = h;
+  }
+  // ---------- 📍 مواقع العملاء: تختار العميل وتلصق لينك الموقع (من واتساب/جوجل ماب) أو تحدده على الخريطة ----------
+  var loc_ = { missing: true, res: null, map: null, mk: null, pt: null, i: -1 };
+  function locCall_(act, args){
+    return fetch(SB_RPC_URL.replace(/\/api$/, '/cust_location'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
+      body: JSON.stringify({ auth: state.auth, act: act, args: args || {} }),
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok === true) return d.result;
+      throw new Error(d && d.code === 'PGRST202' ? 'لسه ملف cust_location.sql ماتشغّلش في Supabase' : ((d && (d.error || d.message)) || 'حصل خطأ'));
+    }, function(){ throw new Error('تعذر الاتصال بالسيرفر'); });
+  }
+  function locLoad_(){
+    const m = document.getElementById('locMiss');
+    if(m) loc_.missing = m.checked;
+    const my = ++adm_.seq;
+    adm_.loading = true; adm_.err = '';
+    admRender_();
+    return locCall_('list', { rep: adm_.rep, q: adm_.q, missing: loc_.missing })
+      .then(function(r){ if(my === adm_.seq){ loc_.res = r; adm_.rows = r.rows || []; adm_.loading = false; admRender_(); } })
+      .catch(function(e){ if(my === adm_.seq){ adm_.rows = []; adm_.loading = false; adm_.err = e.message; admRender_(); } });
+  }
+  function locRender_(body, h){
+    h += '<div class="aFil"><select id="admRep"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){
+      return '<option value="' + escapeHtml(n) + '"' + (n === adm_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select>' +
+      '<input type="search" id="admQ" placeholder="اسم التاجر أو الكود أو الموبايل" value="' + escapeHtml(adm_.q) + '" onkeydown="if(event.key===\'Enter\') admLoad_()">' +
+      '<label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--o3);"><input type="checkbox" id="locMiss" style="width:auto; height:auto;"' + (loc_.missing ? ' checked' : '') + ' onchange="admLoad_()"> اللي من غير موقع بس</label>' +
+      '<button type="button" class="aGo" onclick="admLoad_()">عرض</button></div>';
+    if(loc_.res && !adm_.loading) h += '<div class="note" style="margin-bottom:8px;">📍 ' + fmt(loc_.res.total - loc_.res.missing) + ' عميل ليهم موقع من ' + fmt(loc_.res.total) + ' — فاضل <b>' + fmt(loc_.res.missing) + '</b></div>';
+    if(adm_.loading) return body.innerHTML = h + '<div class="aiStatus">جاري التحميل...</div>';
+    if(adm_.err) return body.innerHTML = h + '<div class="aiStatus err">' + escapeHtml(adm_.err) + '</div>';
+    const rows = adm_.rows;
+    if(!rows.length) return body.innerHTML = h + '<div class="empty">' + (loc_.missing ? '🎉 كل العملاء ليهم موقع' : 'مفيش حاجة بالبحث ده') + '</div>';
+    body.innerHTML = h + rows.map(function(r, i){
+      const has = r.lat != null && r.lng != null;
+      return '<div class="aRow" onclick="locEdit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.name || '') + '</b><span class="chip">' + escapeHtml(r.code) + '</span></div>' +
+        '<div class="aSub">' + (has ? '✅ ليه موقع' : '<span style="color:var(--red)">⚠️ من غير موقع</span>') + ' • ' + [r.rep, r.area, r.address].filter(Boolean).map(escapeHtml).join(' • ') + '</div></div>';
+    }).join('');
+  }
+  // بيطلّع الإحداثيات من أي شكل: لينك جوجل ماب / لينك موقع واتساب / "30.07, 31.24" / 30°04'15"N 31°14'42"E
+  function locParse_(txt){
+    let s = String(txt || '');
+    try{ s = decodeURIComponent(s); }catch(e){}
+    s = normalizeDigits(s).replace(/٫/g, '.').replace(/،/g, ',');
+    if(!s.trim()) return null;
+    let m, la = null, ln = null;
+    const pats = [/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/, /[?&](?:q|query|ll|destination|daddr|center|sll)=(?:loc:)?\s*(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/i,
+      /\/(?:place|search|dir)\/\+?(-?\d+\.\d+)\s*,\s*\+?(-?\d+\.\d+)/, /geo:(-?\d+\.\d+),(-?\d+\.\d+)/i, /@(-?\d+\.\d+),(-?\d+\.\d+)/, /(-?\d{1,2}\.\d{3,})\s*[,\s]\s*(-?\d{1,3}\.\d{3,})/];
+    for(let i = 0; i < pats.length && la == null; i++){ m = s.match(pats[i]); if(m){ la = +m[1]; ln = +m[2]; } }
+    if(la == null && (m = s.match(/(\d+)°\s*(\d+)['′]\s*([\d.]+)["″]?\s*([NS])[\s,]*(\d+)°\s*(\d+)['′]\s*([\d.]+)["″]?\s*([EW])/i))){
+      la = (+m[1] + m[2] / 60 + m[3] / 3600) * (/s/i.test(m[4]) ? -1 : 1); ln = (+m[5] + m[6] / 60 + m[7] / 3600) * (/w/i.test(m[8]) ? -1 : 1);
+    }
+    if(la == null) return /goo\.gl|maps\.app/i.test(s) ? { short: true } : { bad: true };
+    if(!(la >= 21.5 && la <= 32) && la >= 24.5 && la <= 37 && ln >= 21.5 && ln <= 32){ const t = la; la = ln; ln = t; }
+    if(!(la >= 21.5 && la <= 32 && ln >= 24.5 && ln <= 37)) return { out: true };
+    return { lat: Math.round(la * 1e6) / 1e6, lng: Math.round(ln * 1e6) / 1e6 };
+  }
+  function locEdit_(i){
+    const r = adm_.rows[i];
+    loc_.i = i; loc_.pt = r.lat != null && r.lng != null ? { lat: +r.lat, lng: +r.lng } : null;
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '📍 موقع العميل';
+    document.getElementById('dlSub').textContent = r.name + ' (' + r.code + ')';
+    const next = i + 1 < adm_.rows.length;
+    const body = document.getElementById('dlBody');
+    body.innerHTML = '<div class="aForm">' +
+      '<label>الصق لينك الموقع (من واتساب أو جوجل ماب) أو الإحداثيات<textarea id="locIn" rows="2" dir="ltr" placeholder="https://maps.google.com/?q=30.0712,31.2451" oninput="locInput_()"></textarea></label>' +
+      '<button type="button" class="ghost" onclick="locPasteBtn_()">📋 لصق</button>' +
+      '<div class="note" id="locMsg">' + (loc_.pt ? '✅ ليه موقع دلوقتي — لو عاوز تغيّره الصق الجديد أو دوس على الخريطة' : 'أو دوس على الخريطة في مكان المحل') + '</div>' +
+      '<div id="locMap" style="height:280px; border-radius:14px; overflow:hidden; border:1px solid var(--oline); background:#eee;"></div>' +
+      '<div class="aBtns"><button type="button" class="ok" onclick="locSave_(' + (next ? 'true' : 'false') + ')">💾 حفظ' + (next ? ' ← اللي بعده' : '') + '</button>' +
+      (next ? '<button type="button" class="ghost" onclick="locSave_(false)">حفظ ورجوع</button>' : '') + '</div>' +
+      '<div class="aBtns"><button type="button" class="ghost" onclick="locOpenMaps_()">🗺 افتحه في جوجل ماب</button>' + (r.lat != null ? '<button type="button" class="del" onclick="locClear_()">🗑 امسح الموقع</button>' : '') + '</div>' +
+      '<details class="note"><summary><b>إزاي أجيب اللينك من واتساب؟</b></summary>' +
+      '<b>من الكمبيوتر (الأسهل):</b> افتح واتساب ويب ← رسالة الموقع ← دوس عليها ← هتفتح جوجل ماب ← انسخ اللينك من فوق والصقه هنا.<br>' +
+      '<b>من الموبايل:</b> دوس على رسالة الموقع ← افتحها في جوجل ماب ← دوس دوسة طويلة على الدبوس الأحمر ← هتظهر الإحداثيات فوق (زي 30.0712, 31.2451) ← انسخها والصقها هنا.<br>' +
+      'لينكات <b>maps.app.goo.gl</b> القصيرة مش بتشتغل هنا — افتحها الأول وانسخ اللينك الطويل أو الإحداثيات.</details></div>';
+    ensureLeaflet_().then(function(){
+      if(loc_.map){ try{ loc_.map.remove(); }catch(e){} loc_.map = null; loc_.mk = null; }
+      const el = document.getElementById('locMap');
+      if(!el) return;
+      const m = loc_.map = L.map(el).setView(loc_.pt ? [loc_.pt.lat, loc_.pt.lng] : [30.05, 31.24], loc_.pt ? 17 : 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(m);
+      if(loc_.pt) locSetPt_(loc_.pt.lat, loc_.pt.lng, false);
+      m.on('click', function(e){ locSetPt_(e.latlng.lat, e.latlng.lng, false); locMsg_('📍 اتحدد من الخريطة — دوس حفظ'); });
+    }).catch(function(e){ const el = document.getElementById('locMap'); if(el) el.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function locMsg_(t, bad){ const e = document.getElementById('locMsg'); if(e){ e.innerHTML = t; e.style.color = bad ? 'var(--red)' : ''; } }
+  function locSetPt_(lat, lng, fly){
+    loc_.pt = { lat: Math.round(lat * 1e6) / 1e6, lng: Math.round(lng * 1e6) / 1e6 };
+    if(!loc_.map) return;
+    if(!loc_.mk){
+      loc_.mk = L.marker([lat, lng], { draggable: true, icon: L.divIcon({ className: '', html: '<div style="font-size:38px; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));">📍</div>', iconSize: [38, 38], iconAnchor: [19, 36] }) }).addTo(loc_.map);
+      loc_.mk.on('dragend', function(){ const p = loc_.mk.getLatLng(); loc_.pt = { lat: Math.round(p.lat * 1e6) / 1e6, lng: Math.round(p.lng * 1e6) / 1e6 }; locMsg_('📍 اتحرّك — دوس حفظ'); });
+    } else loc_.mk.setLatLng([lat, lng]);
+    if(fly) loc_.map.setView([lat, lng], 17);
+  }
+  function locInput_(){
+    const v = document.getElementById('locIn').value;
+    const p = locParse_(v);
+    if(!p) return;
+    if(p.short) return locMsg_('⚠️ ده لينك مختصر (goo.gl) — افتحه الأول وانسخ اللينك الطويل أو الإحداثيات', true);
+    if(p.bad) return locMsg_('⚠️ مش لاقي إحداثيات في الكلام ده', true);
+    if(p.out) return locMsg_('⚠️ الموقع ده برّه مصر — اتأكد إنه اللينك الصح', true);
+    locSetPt_(p.lat, p.lng, true);
+    locMsg_('✅ لقيت الموقع: <span dir="ltr">' + p.lat + ', ' + p.lng + '</span> — اتأكد منه على الخريطة ودوس حفظ');
+  }
+  function locPasteBtn_(){
+    if(!navigator.clipboard || !navigator.clipboard.readText) return locMsg_('دوس دوسة طويلة جوه المربع واختار لصق', true);
+    navigator.clipboard.readText().then(function(t){ document.getElementById('locIn').value = t; locInput_(); })
+      .catch(function(){ locMsg_('دوس دوسة طويلة جوه المربع واختار لصق', true); });
+  }
+  function locOpenMaps_(){
+    const r = adm_.rows[loc_.i];
+    window.open(loc_.pt ? 'https://maps.google.com/?q=' + loc_.pt.lat + ',' + loc_.pt.lng : 'https://www.google.com/maps/search/' + encodeURIComponent((r.name || '') + ' ' + (r.area || '')), '_blank');
+  }
+  function locDone_(r, goNext){
+    const i = loc_.i;
+    if(loc_.missing && r.lat != null) adm_.rows.splice(i, 1);
+    if(loc_.res) loc_.res.missing = Math.max(0, loc_.res.missing + (r.lat != null ? -1 : 1));
+    dl_.stack = []; dlBackBtn_();
+    const ni = loc_.missing && r.lat != null ? i : i + 1;
+    if(goNext && ni < adm_.rows.length){ admRender_(); locEdit_(ni); } else admRender_();
+  }
+  function locSave_(goNext){
+    const r = adm_.rows[loc_.i];
+    if(!loc_.pt) return locMsg_('⚠️ الصق اللينك أو دوس على الخريطة الأول', true);
+    const had = r.lat != null;
+    showLoading(true);
+    locCall_('set', { code: r.code, lat: loc_.pt.lat, lng: loc_.pt.lng }).then(function(){
+      showLoading(false); toast_('✅ اتحفظ موقع ' + r.name);
+      r.lat = loc_.pt.lat; r.lng = loc_.pt.lng;
+      if(had && loc_.res) loc_.res.missing++;
+      locDone_(r, goNext);
+    }).catch(function(e){ showLoading(false); locMsg_('⚠️ ' + escapeHtml(e.message), true); });
+  }
+  function locClear_(){
+    const r = adm_.rows[loc_.i];
+    confirmModal_('تمسح موقع <b>' + escapeHtml(r.name) + '</b>؟<br>المندوب هيسجّله تاني في أول زيارة.', 'امسح', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      locCall_('set', { code: r.code, lat: null, lng: null }).then(function(){
+        showLoading(false); toast_('🗑 اتمسح الموقع'); r.lat = null; r.lng = null; locDone_(r, false);
+      }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
   }
   // تنفيذ أي مسح: تأكيد ← السيرفر ← رسالة ← تحديث القايمة
   function admDo_(text, act, args, done){
