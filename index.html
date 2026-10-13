@@ -2605,7 +2605,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.27.5';
+  const APP_VERSION_ = 'v1.27.6';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -6511,6 +6511,7 @@
       '<input type="search" id="admQ" placeholder="اسم التاجر أو الكود أو الموبايل" value="' + escapeHtml(adm_.q) + '" onkeydown="if(event.key===\'Enter\') admLoad_()">' +
       '<label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--o3);"><input type="checkbox" id="locMiss" style="width:auto; height:auto;"' + (loc_.missing ? ' checked' : '') + ' onchange="admLoad_()"> اللي من غير موقع بس</label>' +
       '<button type="button" class="aGo" onclick="admLoad_()">عرض</button></div>';
+    h += '<button type="button" class="ghost" style="width:100%; margin-bottom:8px;" onclick="wiOpen_()">📥 استيراد مواقع من محادثة واتساب</button>';
     if(loc_.res && !adm_.loading) h += '<div class="note" style="margin-bottom:8px;">📍 ' + fmt(loc_.res.total - loc_.res.missing) + ' عميل ليهم موقع من ' + fmt(loc_.res.total) + ' — فاضل <b>' + fmt(loc_.res.missing) + '</b></div>';
     if(adm_.loading) return body.innerHTML = h + '<div class="aiStatus">جاري التحميل...</div>';
     if(adm_.err) return body.innerHTML = h + '<div class="aiStatus err">' + escapeHtml(adm_.err) + '</div>';
@@ -6627,6 +6628,187 @@
       locCall_('set', { code: r.code, lat: null, lng: null }).then(function(){
         showLoading(false); toast_('🗑 اتمسح الموقع'); r.lat = null; r.lng = null; locDone_(r, false);
       }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
+  }
+  // ---------- 📥 استيراد مواقع من محادثة واتساب (تصدير الدردشة) ----------
+  // المندوب كان بيبعت "Location: لينك" وبعدها رسالة أول سطر فيها اسم التاجر ← بنجمّعهم ونقترح العميل من التطبيق وإنت بتراجع وتحفظ
+  var wi_ = { places: [], custs: [], rep: '' };
+  function wiNorm_(s){
+    return String(s || '').replace(/[ً-ْـ‎‏]/g, '').replace(/[إأآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+      .replace(/[()\[\]{}"'«»,.،\-_/]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+  function wiOpen_(){
+    dlPush_(); dlBackBtn_();
+    document.getElementById('dlTitle').textContent = '📥 مواقع من واتساب';
+    document.getElementById('dlSub').textContent = 'من ملف "تصدير الدردشة"';
+    document.getElementById('dlBody').innerHTML = '<div class="aForm">' +
+      '<div class="note">من محادثة المندوب في واتساب: <b>تصدير الدردشة ← بدون وسائط</b>، وبعدين اختار الملف هنا (.zip أو .txt). التطبيق بيدوّر على كل "موقع" وبعده اسم التاجر، ويقترحلك العميل — وإنت بتراجع قبل الحفظ. العملاء اللي ليهم موقع خلاص مش بيتغيّروا إلا لو اخترت.</div>' +
+      '<label>مندوب مين؟<select id="wiRep"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){ return '<option>' + escapeHtml(n) + '</option>'; }).join('') + '</select></label>' +
+      '<label>ملف المحادثة<input type="file" id="wiFile" accept=".zip,.txt,text/plain,application/zip" style="height:auto; padding:8px;"></label>' +
+      '<button type="button" class="aGo wide" onclick="wiRun_()">اقرا الملف</button><div id="wiOut"></div></div>';
+  }
+  function wiReadFile_(f){
+    if(/\.zip$/i.test(f.name) || /zip/.test(f.type)){
+      return loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js').then(function(){ return JSZip.loadAsync(f); }).then(function(z){
+        const t = Object.keys(z.files).filter(function(n){ return /\.txt$/i.test(n); });
+        if(!t.length) throw new Error('الملف المضغوط مافيهوش محادثة (.txt)');
+        return Promise.all(t.map(function(n){ return z.files[n].async('string'); })).then(function(a){ return a.join('\n'); });
+      });
+    }
+    return f.text();
+  }
+  function wiParse_(txt){
+    txt = String(txt).replace(/[‎‏‪-‮]/g, '');
+    const hdr = /^\[?(\d{1,2}[\/.]\d{1,2}[\/.]\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp]\.?[Mm]\.?|ص|م)?\]?\s*(?:-\s*)?([^:\n]{1,60}):\s?([\s\S]*)$/;
+    const msgs = []; let cur = null;
+    txt.split(/\r?\n/).forEach(function(line){
+      const m = line.match(hdr);
+      if(m){
+        let h = +m[2] % 12; const ap = (m[4] || '').toLowerCase();
+        if(/p|م/.test(ap)) h += 12; else if(!ap) h = +m[2];
+        cur = { d: m[1], min: h * 60 + (+m[3]), who: m[5].trim(), body: m[6] };
+        msgs.push(cur);
+      } else if(cur) cur.body += '\n' + line;
+    });
+    const locRe = /https?:\/\/maps\.google\.[a-z.]+\/\?q=(-?\d+\.\d+),(-?\d+\.\d+)/i;
+    const out = [];
+    msgs.forEach(function(mm, i){
+      const g = mm.body.match(locRe);
+      if(!g) return;
+      let name = '';
+      for(let j = i + 1; j < Math.min(i + 7, msgs.length); j++){
+        const n = msgs[j];
+        if(n.d !== mm.d || n.min - mm.min > 20) break;
+        if(n.who !== mm.who) continue;
+        if(locRe.test(n.body)) break;
+        const b = n.body.trim();
+        if(!b || /omitted|attached|deleted|محذوف|<.*>|null/i.test(b)) continue;
+        name = b.split('\n')[0].replace(/\s*(متابع[هة]|تسليم|دفع[هة]|تحصيل)[\s\S]*$/, '').trim();
+        break;
+      }
+      if(!name || name.length < 2 || /^(متابع|this message)/i.test(name)) return;
+      out.push({ lat: +g[1], lng: +g[2], name: name, d: mm.d, who: mm.who });
+    });
+    return out;
+  }
+  function wiDist_(a, b){
+    const R = 6371000, r = Math.PI / 180, dLa = (b.lat - a.lat) * r, dLn = (b.lng - a.lng) * r;
+    const x = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLn / 2) * Math.sin(dLn / 2);
+    return 2 * R * Math.asin(Math.sqrt(x));
+  }
+  function wiMed_(a){ a = a.slice().sort(function(x, y){ return x - y; }); return a[Math.floor(a.length / 2)]; }
+  // نفس الاسم = نفس المكان (إلا لو بعيد أكتر من 1 كم = فرع تاني) • اسمين شبه بعض (غلطة كتابة) وقريبين (≤ 150 م) = نفس المحل
+  // (المحلات في السوق بتبقى جنب بعض، فمابنجمعش أسامي مختلفة بالمسافة لوحدها)
+  function wiCluster_(pts){
+    const groups = [];
+    pts.forEach(function(p){
+      const k = wiNorm_(p.name);
+      let g = groups.find(function(x){ return x.keys[k] && wiDist_(x.c, p) < 1000; });
+      if(!g){ g = { keys: {}, names: {}, pts: [], c: p }; groups.push(g); }
+      g.keys[k] = 1; g.names[p.name] = (g.names[p.name] || 0) + 1; g.pts.push(p);
+      g.c = { lat: wiMed_(g.pts.map(function(x){ return x.lat; })), lng: wiMed_(g.pts.map(function(x){ return x.lng; })) };
+    });
+    for(let i = 0; i < groups.length; i++) for(let j = groups.length - 1; j > i; j--){
+      if(wiDist_(groups[i].c, groups[j].c) <= 150 && Object.keys(groups[i].names).some(function(x){ return Object.keys(groups[j].names).some(function(y){ return wiSim_(x, y) >= 0.6; }); })){
+        const a = groups[i], b = groups.splice(j, 1)[0];
+        Object.assign(a.keys, b.keys); Object.keys(b.names).forEach(function(n){ a.names[n] = (a.names[n] || 0) + b.names[n]; });
+        a.pts = a.pts.concat(b.pts);
+        a.c = { lat: wiMed_(a.pts.map(function(x){ return x.lat; })), lng: wiMed_(a.pts.map(function(x){ return x.lng; })) };
+      }
+    }
+    return groups.map(function(g){
+      const names = Object.keys(g.names).sort(function(x, y){ return g.names[y] - g.names[x]; });
+      return { names: names, n: g.pts.length, lat: Math.round(g.c.lat * 1e6) / 1e6, lng: Math.round(g.c.lng * 1e6) / 1e6, last: g.pts[g.pts.length - 1].d };
+    }).sort(function(a, b){ return b.n - a.n; });
+  }
+  function wiBigr_(s){ const a = {}; s = s.replace(/\s/g, ''); for(let i = 0; i < s.length - 1; i++) a[s.substr(i, 2)] = 1; return a; }
+  function wiSim_(a, b){
+    a = wiNorm_(a); b = wiNorm_(b);
+    if(!a || !b) return 0;
+    if(a === b) return 1;
+    const strip = function(s){ return s.replace(/(^|\s)(ال)?(معرض|مخزن|محل|سنتر|شركه|مؤسسه|موسسه|مول|الجديد|للاجهزه|الكهربائيه|للادوات|المنزليه|اسيوط|قنا|سوهاج|جرجا|ارمنت|الاقصر|منفلوط|نجع|حمادي|فرشوط|طهطا|البلينا|ابوتيج|اخميم|المنيا|ملوي|ديروط|القوصيه|قوص|اسنا|ادفو|اسوان|الغنايم|الكوامل|ابو|النمرس|المطاعنه|كيمان)(?=\s|$)/g, ' ').replace(/\s+/g, ' ').trim(); };
+    const a2 = strip(a) || a, b2 = strip(b) || b;
+    if(a2 === b2) return 0.95;
+    if((' ' + b2 + ' ').indexOf(' ' + a2 + ' ') !== -1 || (' ' + a2 + ' ').indexOf(' ' + b2 + ' ') !== -1) return 0.85;
+    const x = wiBigr_(a2), y = wiBigr_(b2); let inter = 0, nx = 0, ny = 0;
+    for(const k in x){ nx++; if(y[k]) inter++; } for(const k in y) ny++;
+    return nx + ny ? 2 * inter / (nx + ny) : 0;
+  }
+  function wiRun_(){
+    const f = document.getElementById('wiFile').files[0];
+    wi_.rep = document.getElementById('wiRep').value;
+    if(!f) return showMsg('اختار ملف المحادثة الأول', 'error');
+    const out = document.getElementById('wiOut');
+    out.innerHTML = '<div class="aiStatus">جاري القراية...</div>';
+    Promise.all([wiReadFile_(f), locCall_('list', { rep: wi_.rep, missing: false })]).then(function(r){
+      const pts = wiParse_(r[0]);
+      wi_.custs = (r[1] && r[1].rows) || [];
+      if(!pts.length){ out.innerHTML = '<div class="aiStatus err">مالقيتش مواقع جنبها اسم تاجر في الملف ده</div>'; return; }
+      if(!wi_.custs.length){ out.innerHTML = '<div class="aiStatus err">مفيش عملاء للمندوب ده في التطبيق</div>'; return; }
+      wi_.places = wiCluster_(pts).map(function(p){
+        const cands = wi_.custs.map(function(c){
+          let s = 0; p.names.forEach(function(n){ s = Math.max(s, wiSim_(n, c.name)); });
+          if(s > 0.3 && c.area && p.names.some(function(n){ return wiNorm_(n).indexOf(wiNorm_(c.area)) !== -1; })) s = Math.min(1, s + 0.1);
+          return { c: c, s: s };
+        }).filter(function(x){ return x.s >= 0.3; }).sort(function(a, b){ return b.s - a.s; }).slice(0, 6);
+        const top = cands[0], second = cands[1];
+        const sure = top && top.s >= 0.6 && (!second || top.s - second.s >= 0.1);
+        return Object.assign(p, { cands: cands, pick: sure ? top.c.code : '', on: !!(sure && top.c.lat == null) });
+      });
+      // لو مكانين اتقترحوا لنفس العميل: نسيب الأكتر زيارات بس
+      wi_.places.sort(function(a, b){ return (b.cands.length ? 1 : 0) - (a.cands.length ? 1 : 0) || (b.pick ? 1 : 0) - (a.pick ? 1 : 0) || b.n - a.n; });
+      const seen = {};
+      wi_.places.forEach(function(p){ if(p.pick){ if(seen[p.pick]){ p.on = false; p.dup = true; } else seen[p.pick] = 1; } });
+      wiRender_(pts.length);
+    }).catch(function(e){ out.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function wiRender_(nPts){
+    const out = document.getElementById('wiOut');
+    if(!out) return;
+    const sel = wi_.places.filter(function(p){ return p.on && p.pick; }).length;
+    let h = '<div class="note" style="margin:10px 0;">لقيت <b>' + (nPts || '') + '</b> موقع ← <b>' + wi_.places.length + '</b> محل. المتعلّم ✅ هيتحفظ — راجع الاقتراحات وغيّر أو شيل العلامة لو غلط.</div>';
+    h += wi_.places.map(function(p, i){
+      const c = p.pick && wi_.custs.find(function(x){ return x.code === p.pick; });
+      return '<div class="aRow" style="cursor:default;' + (p.on && p.pick ? '' : ' opacity:.8;') + '"><div class="aTop"><label style="display:flex; flex-direction:row; gap:8px; align-items:center; font-weight:800; font-size:15px; color:var(--o3); flex:1; min-width:0;"><input type="checkbox" style="width:20px; height:20px; flex:0 0 auto;"' + (p.on && p.pick ? ' checked' : '') + (p.pick ? '' : ' disabled') + ' onchange="wi_.places[' + i + '].on = this.checked; wiCount_()"> ' + escapeHtml(p.names[0]) + '</label>' +
+        '<a class="chip" href="https://maps.google.com/?q=' + p.lat + ',' + p.lng + '" target="_blank" rel="noopener">🗺 ' + p.n + ' مرة</a></div>' +
+        (p.names.length > 1 ? '<div class="aSub">اتكتب كمان: ' + p.names.slice(1, 4).map(escapeHtml).join(' • ') + '</div>' : '') +
+        '<select style="margin-top:6px; width:100%; height:38px; border-radius:10px; border:1px solid var(--oline); font-family:inherit;" onchange="wiPick_(' + i + ', this.value)">' +
+        '<option value="">— مش موجود / تخطّي —</option>' + p.cands.map(function(x){
+          return '<option value="' + escapeHtml(x.c.code) + '"' + (x.c.code === p.pick ? ' selected' : '') + '>' + escapeHtml(x.c.name) + ' (' + escapeHtml(x.c.code) + ')' + (x.c.lat != null ? ' — ليه موقع' : '') + ' ' + Math.round(x.s * 100) + '%</option>';
+        }).join('') + '</select>' +
+        (c && c.lat != null ? '<div class="aSub" style="color:#a8432f">⚠️ العميل ده ليه موقع بالفعل — هيتغيّر لو علّمت عليه</div>' : '') +
+        (p.dup ? '<div class="aSub" style="color:#a8432f">⚠️ مكان تاني اتقترح لنفس العميل (ممكن مخزن/فرع) — اتشال علامته</div>' : '') +
+        (!p.cands.length ? '<div class="aSub">مالقيتش اسم شبهه — ممكن يكون مش متسجل في التطبيق</div>' : '') + '</div>';
+    }).join('');
+    h += '<div style="position:sticky; bottom:0; background:var(--obg, #f3efe2); padding:10px 0;"><button type="button" class="aGo wide" id="wiSave" onclick="wiSave_()">💾 احفظ المختار (' + sel + ')</button></div>';
+    out.innerHTML = h;
+  }
+  function wiCount_(){ const b = document.getElementById('wiSave'); if(b) b.textContent = '💾 احفظ المختار (' + wi_.places.filter(function(p){ return p.on && p.pick; }).length + ')'; }
+  function wiPick_(i, code){
+    const p = wi_.places[i]; p.pick = code; p.dup = false;
+    const c = wi_.custs.find(function(x){ return x.code === code; });
+    p.on = !!code;
+    wiRender_();
+  }
+  function wiSave_(){
+    const list = wi_.places.filter(function(p){ return p.on && p.pick; });
+    if(!list.length) return showMsg('مفيش حاجة متعلّم عليها', 'error');
+    const codes = {}; for(const p of list){ if(codes[p.pick]) return showMsg('فيه عميل متختار لمكانين — شيل واحد منهم', 'error'); codes[p.pick] = 1; }
+    confirmModal_('هتحفظ موقع <b>' + list.length + '</b> عميل؟', 'احفظ', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      let done = 0, fail = 0;
+      const step = function(k){
+        if(k >= list.length){
+          showLoading(false);
+          toast_('✅ اتحفظ ' + done + ' موقع' + (fail ? ' — ' + fail + ' ماتحفظوش' : ''));
+          dl_.stack = []; dlBackBtn_(); admLoad_();
+          return;
+        }
+        const p = list[k];
+        locCall_('set', { code: p.pick, lat: p.lat, lng: p.lng }).then(function(){ done++; }, function(){ fail++; }).then(function(){ step(k + 1); });
+      };
+      step(0);
     });
   }
   // تنفيذ أي مسح: تأكيد ← السيرفر ← رسالة ← تحديث القايمة
