@@ -5326,6 +5326,27 @@
       return { v: v, pct: Math.round(f * 100), est: est };
     });
   }
+  // لو الطلبيات أكبر من أكبر عربية: محتاجة كام عربية؟ بنملّي أكبر عربية على الآخر،
+  // واللي يفضل بنحطه في أصغر عربية تشيله (الامتلاء بيتناسب مع الكمية).
+  function ldMultiTrucks_(items){
+    const fills = ldFill_(items).filter(function(f){ return f.pct != null && f.pct > 0; });
+    if(!fills.length) return null;
+    const big = fills.reduce(function(a, b){ return b.pct < a.pct ? b : a; });
+    let n = Math.floor(big.pct / 100);
+    const restK = (big.pct - n * 100) / big.pct;
+    const parts = [];
+    let rest = null;
+    if(restK > 0.001){
+      rest = fills.map(function(f){ return { v: f.v, pct: Math.ceil(f.pct * restK) }; })
+        .filter(function(x){ return x.pct <= 100; })
+        .sort(function(a, b){ return b.pct - a.pct; })[0] || null;
+      // الباقي مايتشالش غير في عربية كبيرة كمان
+      if(!rest) rest = { v: big.v, pct: Math.ceil(big.pct * restK) };
+    }
+    if(n) parts.push(n + ' × ' + big.v.name + ' (مليانة)');
+    if(rest) parts.push('1 × ' + rest.v.name + ' (' + rest.pct + '%)');
+    return { count: n + (rest ? 1 : 0), text: parts.join(' + ') };
+  }
   function ldSuggest_(fills){ return fills.find(function(f){ return f.pct != null && f.pct <= 100; }) || null; }
   function ldBar_(f, on){
     const cls = f.pct == null ? 'mut' : f.pct > 100 ? 'red' : f.pct > 90 ? 'gold' : 'green';
@@ -5402,7 +5423,7 @@
     const custs = {}; docs.forEach(function(d){ custs[d.customer_code] = 1; });
     const fills = ldFill_(items), sug = ldSuggest_(fills);
     f.innerHTML = '<div class="lFootIn"><div><b>' + docs.length + ' طلبية • ' + Object.keys(custs).length + ' تاجر • ' + fmt(pcs) + ' قطعة</b>' +
-      '<small>' + (sug ? '🚚 العربية المناسبة: <b>' + escapeHtml(sug.v.name) + '</b> (' + sug.pct + '%)' : fills.some(function(x){ return x.pct != null; }) ? '⚠️ أكبر من أكبر عربية — قسّمها على تحميلتين' : 'سعات العربيات لسه مادخلتش') + '</small></div>' +
+      '<small>' + (sug ? '🚚 العربية المناسبة: <b>' + escapeHtml(sug.v.name) + '</b> (' + sug.pct + '%)' : fills.some(function(x){ return x.pct != null; }) ? (function(){ const mt = ldMultiTrucks_(items); return '⚠️ أكبر من أكبر عربية — محتاجة ' + (mt ? mt.count + ' عربيات: ' + escapeHtml(mt.text) : 'أكتر من عربية'); })() : 'سعات العربيات لسه مادخلتش') + '</small></div>' +
       '<button type="button" class="aGo" onclick="ldRoute_()">التالي: خط السير ←</button></div>';
   }
   function ldCloseDoc_(i){
@@ -5902,7 +5923,7 @@
       ordered.forEach(function(s){ if(s.area) areas[s.area] = 1; Object.keys(s.reps).forEach(function(r){ reps[r] = 1; }); });
       return {
         stops: ordered, vehicle: sug ? sug.v : null, pct: sug ? sug.pct : null,
-        tooBig: hasCaps && !sug, km: ldRouteKm_(ordered), late: ldLateCount_(ordered),
+        tooBig: hasCaps && !sug, multi: hasCaps && !sug ? ldMultiTrucks_(ldStopItems_(ordered)) : null, km: ldRouteKm_(ordered), late: ldLateCount_(ordered),
         lateTxt: (function(){ const e = ldEtas_(ordered); return ordered.filter(function(s, k){ return e[k].late; }).map(function(s){
           const k = ordered.indexOf(s); return (s.name || s.customer_code) + ': يوصل ' + ctFmt_(e[k].eta) + ' وهو بيقفل ' + ctFmt_(e[k].close); }); })(),
         pcs: ordered.reduce(function(t, s){ return t + s.pcs; }, 0),
@@ -5933,7 +5954,8 @@
     h += ld_.plan.map(function(r, i){
       const cls = r.pct == null ? 'mut' : r.pct > 90 ? 'gold' : 'green';
       return '<div class="aRow"><div class="aTop"><b>رحلة ' + (i + 1) + '</b>' +
-        (r.vehicle ? '<span class="lChip ' + cls + '">🚚 ' + escapeHtml(r.vehicle.name) + ' • ' + r.pct + '%</span>' : r.tooBig ? '<span class="lChip red">⚠️ أكبر من أكبر عربية</span>' : '') + '</div>' +
+        (r.vehicle ? '<span class="lChip ' + cls + '">🚚 ' + escapeHtml(r.vehicle.name) + ' • ' + r.pct + '%</span>' : r.tooBig ? '<span class="lChip red">⚠️ محتاجة ' + (r.multi ? r.multi.count + ' عربيات' : 'أكتر من عربية') + '</span>' : '') + '</div>' +
+        (r.tooBig && r.multi ? '<div class="aSub" style="color:#a8432f; font-weight:800;">🚚 ' + escapeHtml(r.multi.text) + '</div>' : '') +
         (r.pct != null ? '<div class="planTruck">' + ldTruckSvg_(r.pct, (ldFillSegs_(ldStopItems_(r.stops), r.vehicle.id) || {}).segs, ldVehKind_(r.vehicle.id), true) + '</div>' : '') +
         '<div class="aSub">' + escapeHtml([r.stops.length + ' تاجر', fmt(r.pcs) + ' قطعة', r.km ? '~' + r.km + ' كم بين التجار' : '', r.noLoc ? 'من غير لوكيشن' : '',
           r.areas.length ? r.areas.slice(0, 3).join('، ') + (r.areas.length > 3 ? ' +' + (r.areas.length - 3) : '') : '',
