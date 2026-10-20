@@ -3,7 +3,8 @@
 -- آمن تشغّله أكتر من مرة، ومش بيلمس أي جدول موجود.
 --
 -- • جدول جديد customer_close_times: لكل تاجر (بكوده) الساعة اللي بيقفل فيها.
--- • دالة close_times_api: التطبيق بيكلمها عشان يقرا المواعيد أو يحفظ ميعاد.
+-- • جدول جديد app_settings: إعدادات عامة — دلوقتي فيه مكان المخزن (اللي العربيات بتخرج منه).
+-- • دالة close_times_api: التطبيق بيكلمها عشان يقرا المواعيد ومكان المخزن، أو يحفظهم.
 --   التأكد من المستخدم (إيميل + PIN) بيتم بنفس دالة التحميلات loads_api الموجودة —
 --   فلازم يكون ملف loads.sql متشغّل قبل كده (وهو متشغّل لأن شاشة التحميلات شغالة).
 
@@ -14,9 +15,18 @@ create table if not exists public.customer_close_times (
   updated_at    timestamptz not null default now()
 );
 
--- محدش يقدر يقرا أو يكتب في الجدول مباشرة — بس عن طريق الدالة تحت
+create table if not exists public.app_settings (
+  key        text primary key,
+  value      jsonb not null,
+  updated_by text,
+  updated_at timestamptz not null default now()
+);
+
+-- محدش يقدر يقرا أو يكتب في الجداول دي مباشرة — بس عن طريق الدالة تحت
 alter table public.customer_close_times enable row level security;
 revoke all on public.customer_close_times from anon, authenticated;
+alter table public.app_settings enable row level security;
+revoke all on public.app_settings from anon, authenticated;
 
 create or replace function public.close_times_api(auth jsonb, act text, args jsonb default '{}'::jsonb)
 returns jsonb
@@ -29,6 +39,8 @@ declare
   who text := lower(trim(coalesce(auth->>'email', '')));
   code text;
   t text;
+  lat double precision;
+  lng double precision;
 begin
   -- التأكد إن الإيميل والـ PIN صح (بطلب خفيف لدالة التحميلات)
   begin
@@ -42,8 +54,25 @@ begin
   end if;
 
   if act = 'list' then
-    return jsonb_build_object('ok', true, 'result', coalesce(
-      (select jsonb_object_agg(customer_code, to_char(close_time, 'HH24:MI')) from public.customer_close_times), '{}'::jsonb));
+    return jsonb_build_object('ok', true, 'result', jsonb_build_object(
+      'times', coalesce((select jsonb_object_agg(customer_code, to_char(close_time, 'HH24:MI')) from public.customer_close_times), '{}'::jsonb),
+      'wh', (select value from public.app_settings where key = 'warehouse')));
+
+  elsif act = 'set_wh' then
+    begin
+      lat := (args->>'lat')::double precision;
+      lng := (args->>'lng')::double precision;
+    exception when others then
+      lat := null;
+    end;
+    if lat is null or lng is null or lat not between -90 and 90 or lng not between -180 and 180 then
+      return jsonb_build_object('ok', false, 'error', 'المكان مش مظبوط');
+    end if;
+    insert into public.app_settings (key, value, updated_by, updated_at)
+    values ('warehouse', jsonb_build_object('lat', lat, 'lng', lng), who, now())
+    on conflict (key) do update
+      set value = excluded.value, updated_by = excluded.updated_by, updated_at = now();
+    return jsonb_build_object('ok', true, 'result', jsonb_build_object('lat', lat, 'lng', lng));
 
   elsif act = 'set' then
     code := trim(coalesce(args->>'customer_code', ''));

@@ -5407,12 +5407,13 @@
   function ldOrderStops_(stops){
     const withLoc = stops.filter(function(s){ return s.lat != null; }), noLoc = stops.filter(function(s){ return s.lat == null; });
     const out = [];
-    let cur = state.lastPos ? { lat: state.lastPos.lat, lng: state.lastPos.lng } : null;
+    const wh = ldWh_();
+    let cur = wh || (state.lastPos ? { lat: state.lastPos.lat, lng: state.lastPos.lng } : null);
     let t = ldDepart_();
     const left = withLoc.slice();
     while(left.length){
       const opts = left.map(function(s, i){
-        const arr = out.length ? t + ldDriveMin_(cur, s) : t; // أول تاجر = ميعاد وصول العربية لأول محطة
+        const arr = out.length || wh ? t + ldDriveMin_(cur, s) : t; // من غير مخزن: أول تاجر = ميعاد وصول العربية لأول محطة
         const cl = ctCloseMin_(s.customer_code);
         return { i: i, s: s, arr: arr, cl: cl, d: cur ? distM_(cur.lat, cur.lng, s.lat, s.lng) : 0 };
       });
@@ -5484,7 +5485,8 @@
   // ================== ⏰ مواعيد قفل التجار (بيتا — ملف beta/close_times.sql) ==================
   // المندوب بيكتب التاجر بيقفل الساعة كام (من شاشة الزيارة أو العميل الجديد)، وترتيب التحميلات بيراعيه.
   const CT_CACHE_ = 'tf_close_times';
-  var ct_ = { map: null, loaded: false, inflight: null, missing: false };
+  const WH_CACHE_ = 'tf_wh_loc';
+  var ct_ = { map: null, wh: undefined, loaded: false, inflight: null, missing: false };
   function ctApi_(act, args){
     return fetch(SB_RPC_URL.replace(/\/api$/, '/close_times_api'), {
       method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_PUBLIC_KEY },
@@ -5506,7 +5508,11 @@
     if(ct_.loaded && !force) return Promise.resolve(ctMap_());
     if(ct_.inflight) return ct_.inflight;
     ct_.inflight = ctApi_('list').then(function(m){
-      ct_.map = m || {}; ct_.loaded = true; ctKeep_(); return ct_.map;
+      m = m || {};
+      ct_.map = m.times || {}; ct_.loaded = true; ctKeep_();
+      ct_.wh = m.wh && m.wh.lat != null ? { lat: +m.wh.lat, lng: +m.wh.lng } : null;
+      try{ localStorage.setItem(WH_CACHE_, JSON.stringify(ct_.wh)); }catch(e){}
+      return ct_.map;
     }).catch(function(){ return ctMap_(); }).then(function(m){ ct_.inflight = null; return m; });
     return ct_.inflight;
   }
@@ -5557,16 +5563,66 @@
     ctSave_(state.visit.cust.code, v);
   }
 
+  // ---------- 🏬 مكان المخزن (نقطة خروج العربية) ----------
+  function ldWh_(){
+    if(ct_.wh === undefined){ try{ ct_.wh = JSON.parse(localStorage.getItem(WH_CACHE_) || 'null'); }catch(e){ ct_.wh = null; } }
+    return ct_.wh;
+  }
+  function ldCanSetWh_(){ return ld_.role === 'owner' || ld_.role === 'admin' || ld_.role === 'warehouse'; }
+  function ldWhOpen_(after){
+    ld_.notes = (document.getElementById('ldNotes') || {}).value || ld_.notes;
+    ld_.whAfter = after;
+    dlEnter_('🏬 مكان المخزن', 'العربية بتخرج منه — وكل المواعيد بتتحسب منه');
+    const w = ldWh_();
+    ldBody_().innerHTML =
+      (w ? '<div class="note" style="margin-bottom:10px;">المكان الحالي: <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + w.lat + ',' + w.lng + '">' + w.lat.toFixed(5) + ', ' + w.lng.toFixed(5) + ' 🗺</a></div>'
+         : '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">لسه مكان المخزن ماتحددش.</div>') +
+      '<button type="button" class="aGo wide" onclick="ldWhHere_()">📍 أنا في المخزن دلوقتي — خد موقعي</button>' +
+      '<label style="display:block; margin-top:14px;">أو الصق لينك جوجل ماب أو الإحداثيات</label>' +
+      '<input id="ldWhTxt" dir="ltr" placeholder="30.0712, 31.2451 أو لينك من جوجل ماب">' +
+      '<button type="button" class="aGo wide" style="margin-top:8px;" onclick="ldWhPaste_()">✔ احفظ</button>' +
+      '<div class="note" style="margin-top:10px;">في جوجل ماب: دوس ضغطة طويلة على مكان المخزن، والأرقام اللي هتظهر فوق انسخها هنا.</div>';
+  }
+  function ldWhHere_(){
+    showLoading(true);
+    getPos_({ timeout: 20000, maxAge: 0 }).then(function(p){
+      showLoading(false);
+      if(p.acc > 200) return showMsg('دقة الموقع ضعيفة (±' + p.acc + ' م) — اطلع برّه شوية وجرّب تاني، أو الصق الإحداثيات', 'error');
+      ldWhSave_(p.lat, p.lng);
+    }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+  }
+  function ldWhPaste_(){
+    const t = (document.getElementById('ldWhTxt').value || '').replace(/%2C/gi, ',');
+    const m = /(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/.exec(t);
+    if(!m) return showMsg('مش لاقي إحداثيات في اللي اتكتب — الصق رقمين زي 30.0712, 31.2451', 'error');
+    ldWhSave_(+m[1], +m[2]);
+  }
+  function ldWhSave_(lat, lng){
+    showLoading(true);
+    ctApi_('set_wh', { lat: lat, lng: lng }).then(function(){
+      showLoading(false);
+      ct_.wh = { lat: lat, lng: lng };
+      try{ localStorage.setItem(WH_CACHE_, JSON.stringify(ct_.wh)); }catch(e){}
+      toast_('🏬 اتحفظ مكان المخزن');
+      // نرجع للشاشة اللي قبلها ونحسب من جديد من المخزن
+      const prev = dl_.stack.pop();
+      if(prev){ document.getElementById('dlTitle').textContent = prev.title; document.getElementById('dlSub').textContent = prev.sub; }
+      dlBackBtn_();
+      if(ld_.whAfter === 'ldRePlan_()') ldRePlan_();
+      else { ld_.stops = ldOrderStops_(ld_.stops); ldRenderRoute_(); }
+    }).catch(function(e){ showLoading(false); showMsg('ماتحفظش: ' + e.message, 'error'); });
+  }
+
   // ---------- حساب وقت وصول العربية لكل تاجر ----------
-  const LD_SPEED_KMH_ = 25;   // متوسط سرعة العربية جوه البلد بالزحمة
-  const LD_STOP_MIN_ = 15;    // وقت التسليم عند كل تاجر (تنزيل + توقيع)
+  const LD_SPEED_KMH_ = 60;   // متوسط سرعة العربية
+  const LD_STOP_MIN_ = 60;    // وقت التنزيل والتسليم عند كل تاجر
   const LD_NOLOC_MIN_ = 15;   // تقدير المشوار لتاجر مالوش لوكيشن
   const LD_DEP_KEY_ = 'tf_ld_depart';
   function ldDriveMin_(a, b){
     if(!a || !b || a.lat == null || b.lat == null) return LD_NOLOC_MIN_;
     return distM_(a.lat, a.lng, b.lat, b.lng) * 1.3 / 1000 / LD_SPEED_KMH_ * 60; // الطريق أطول من الخط المستقيم ~30%
   }
-  // ميعاد وصول العربية لأول تاجر: اللي اتكتب آخر مرة النهارده، أو بعد ساعة من دلوقتي (ومش قبل 10 الصبح)
+  // ميعاد خروج العربية من المخزن (أو وصولها لأول تاجر لو المخزن ماتحددش): اللي اتكتب آخر مرة النهارده، أو بعد ساعة من دلوقتي (ومش قبل 10 الصبح)
   function ldDepart_(){
     if(ld_.depart != null) return ld_.depart;
     try{
@@ -5588,15 +5644,19 @@
   function ldDepBox_(after){
     const m = ldDepart_() % (24 * 60);
     const v = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
-    return '<div class="ldDep"><b>🚚 العربية توصل لأول تاجر الساعة</b><input type="time" dir="ltr" value="' + v + '" onchange="ldSetDepart_(this.value, \'' + after + '\')">' +
-      (after === 'ldReorder_()' ? '<button type="button" class="aGo" style="margin:0;" onclick="ldReorder_()">🔁 رتّب حسب المواعيد</button>' : '') + '</div>';
+    const wh = ldWh_();
+    return '<div class="ldDep"><b>' + (wh ? '🚚 العربية هتخرج من المخزن الساعة' : '🚚 العربية توصل لأول تاجر الساعة') + '</b><input type="time" dir="ltr" value="' + v + '" onchange="ldSetDepart_(this.value, \'' + after + '\')">' +
+      (after === 'ldReorder_()' ? '<button type="button" class="aGo" style="margin:0;" onclick="ldReorder_()">🔁 رتّب حسب المواعيد</button>' : '') + '</div>' +
+      (ldCanSetWh_() ? '<div class="aBtns" style="margin:0 0 8px;"><button type="button" onclick="ldWhOpen_(\'' + after + '\')">🏬 ' + (wh ? 'غيّر مكان المخزن' : 'حدد مكان المخزن') + '</button></div>' : '') +
+      (!wh ? '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">🏬 مكان المخزن لسه ماتحددش' + (ldCanSetWh_() ? '' : ' (المدير أو أمين المخزن يحدده)') + ' — الحساب بيبدأ من أول تاجر.</div>' : '');
   }
   // لكل تاجر بالترتيب: هيوصله إمتى، وبيقفل إمتى، ومتأخر ولا لأ
   function ldEtas_(stops){
-    let t = ldDepart_(), prev = null;
+    const wh = ldWh_();
+    let t = ldDepart_(), prev = wh;
     return stops.map(function(s, i){
-      const est = i > 0 && (prev.lat == null || s.lat == null);
-      if(i > 0) t += ldDriveMin_(prev, s);
+      const est = !!prev && (prev.lat == null || s.lat == null);
+      if(prev) t += ldDriveMin_(prev, s);
       const cl = ctCloseMin_(s.customer_code);
       const r = { eta: t, close: cl, late: cl != null && t > cl, est: est };
       t += LD_STOP_MIN_; prev = s;
@@ -5620,7 +5680,7 @@
     if(late) h += '<div class="note" style="margin-bottom:8px; color:#a8432f; font-weight:800;">⚠️ ' + late + ' تاجر العربية مش هتلحقهم قبل ما يقفلوا — جرّب "رتّب حسب المواعيد"، أو خرّج العربية بدري، أو شيلهم من التحميلة دي.</div>';
     else if(known) h += '<div class="note" style="margin-bottom:8px; color:#1f6b45; font-weight:800;">✔ العربية هتلحق كل التجار قبل ما يقفلوا</div>';
     const last = etas[etas.length - 1];
-    if(withNote) h += '<div class="note" style="margin-bottom:8px;">التقدير: سرعة ~' + LD_SPEED_KMH_ + ' كم/س و' + LD_STOP_MIN_ + ' دقيقة تسليم عند كل تاجر • آخر تاجر حوالي ' + ctFmt_(last.eta) +
+    if(withNote) h += '<div class="note" style="margin-bottom:8px;">التقدير: سرعة ~' + LD_SPEED_KMH_ + ' كم/س و' + (LD_STOP_MIN_ === 60 ? 'ساعة' : LD_STOP_MIN_ + ' دقيقة') + ' تنزيل عند كل تاجر • آخر تاجر حوالي ' + ctFmt_(last.eta) +
       (known < etas.length ? ' • ' + (etas.length - known) + ' تاجر مالهمش ميعاد قفل' : '') + '</div>';
     return h;
   }
@@ -5628,7 +5688,7 @@
   function ldNotesWithTimes_(notes){
     const etas = ldEtas_(ld_.stops);
     if(!etas.some(function(e){ return e.close != null; })) return notes;
-    const line = '⏰ أول تاجر ' + ctFmt_(ldDepart_()) + ' | ' + ld_.stops.map(function(s, i){
+    const line = (ldWh_() ? '⏰ الخروج من المخزن ' : '⏰ أول تاجر ') + ctFmt_(ldDepart_()) + ' | ' + ld_.stops.map(function(s, i){
       return (i + 1) + '. ' + (s.name || s.customer_code) + ' يوصل ' + ctFmt_(etas[i].eta) + (etas[i].close != null ? ' (يقفل ' + ctFmt_(etas[i].close) + (etas[i].late ? ' ⚠️' : '') + ')' : '');
     }).join(' • ');
     return notes ? notes + '\n' + line : line;
@@ -5676,7 +5736,7 @@
     };
     const loc = stops.filter(function(s){ return s.lat != null; });
     const noLoc = stops.filter(function(s){ return s.lat == null; });
-    let center = state.lastPos ? { lat: state.lastPos.lat, lng: state.lastPos.lng } : null;
+    let center = ldWh_() || (state.lastPos ? { lat: state.lastPos.lat, lng: state.lastPos.lng } : null);
     if(!center && loc.length){
       center = { lat: loc.reduce(function(t, s){ return t + s.lat; }, 0) / loc.length, lng: loc.reduce(function(t, s){ return t + s.lng; }, 0) / loc.length };
     }
