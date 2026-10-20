@@ -1021,6 +1021,18 @@
   .ctRow input{width:auto; min-width:120px; margin:0; padding:7px 9px; font-size:15px;}
   .ctRow.need{border-color:rgba(168,67,47,.45); background:#fbefec;}
   .ctRow.need span{color:#a8432f;}
+  .bayBox{background:#fff; border:1px solid #ebe5cf; border-radius:13px; padding:10px; margin:12px 0;}
+  .bayBox > b{display:block; color:var(--o3); font-size:14.5px;}
+  .bayBox > small{display:block; color:var(--omut); font-size:12px; margin:2px 0 8px; line-height:1.6;}
+  .bayEnds{display:flex; justify-content:space-between; font-size:11.5px; font-weight:800; color:var(--omut); margin-bottom:3px;}
+  .bayBar{display:flex; height:46px; border:2px solid #3f4c22; border-radius:6px; overflow:hidden; background:#f3f0e3;}
+  .bayBar i{display:flex; align-items:center; justify-content:center; font-style:normal; color:#fff; font-weight:900; font-size:15px; min-width:20px; border-left:2px solid #fff;}
+  .bayList{margin-top:8px;}
+  .bayRow{display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px dashed #e6e0c8; font-size:13px;}
+  .bayRow:first-child{border-top:0;}
+  .bayRow em{flex:none; width:22px; height:22px; border-radius:6px; color:#fff; font-style:normal; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:12px;}
+  .bayRow span{flex:1; min-width:0;} .bayRow span b{color:var(--o3);} .bayRow span small{display:block; color:var(--omut); font-size:11.5px;}
+  .lpBay{display:flex; height:40px; border:2px solid #000; margin:8px 0 4px;} .lpBay i{flex:1; display:flex; align-items:center; justify-content:center; font-style:normal; font-weight:900; border-left:1px solid #000;}
   .ctDays{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;}
   .ctDays button{flex:1 0 auto; min-width:52px; padding:6px 4px; border-radius:9px; border:1px solid var(--border); background:#fff; font:inherit; font-size:12.5px; font-weight:800; color:var(--muted2); cursor:pointer;}
   .ctDays button.on{background:#a8432f; border-color:#a8432f; color:#fff;}
@@ -5491,6 +5503,7 @@
     let h = '<div class="sectionLabel" style="margin:0 0 8px;">نوع العربية</div><div class="lVehs">' + fills.map(function(f){ return ldBar_(f, f.v.id === ld_.vehicle); }).join('') + '</div>';
     const selV = (ld_.veh || []).find(function(v){ return v.id === ld_.vehicle; });
     if(selV) h += ldTruckBlock_(items, selV.id, selV.name);
+    h += ldBayHtml_(ldRouteBayStops_(), ld_.vehicle);
     h += '<div class="sectionLabel" style="margin:14px 0 8px;">الترتيب (' + ld_.stops.length + ' تاجر)</div>';
     h += ldDepBox_('ldReorder_()');
     const etas = ldEtas_(ld_.stops), late = etas.filter(function(e){ return e.late; }).length;
@@ -5510,6 +5523,16 @@
     ld_.notes = (document.getElementById('ldNotes') || {}).value;
     ld_.stops = ldOrderStops_(ld_.stops);
     ldRenderRoute_();
+  }
+  // التجار بترتيب التسليم مع أصنافهم (من الطلبيات المختارة) — لرسم ترتيب التحميل
+  function ldRouteBayStops_(){
+    const byDoc = {};
+    ld_.pending.forEach(function(d){ byDoc[d.doc_id] = d; });
+    return ld_.stops.map(function(s){
+      const lines = [];
+      s.docs.forEach(function(id){ const d = byDoc[id]; if(d) d.lines.forEach(function(l){ lines.push(l); }); });
+      return { name: s.name || s.customer_code, lines: lines.length ? lines : [{ qty: s.pcs || 0 }] };
+    });
   }
   function ldMove_(i, d){
     ld_.notes = (document.getElementById('ldNotes') || {}).value;
@@ -6071,6 +6094,8 @@
     h += '<details class="lItems"><summary>إجمالي الأصناف (' + d.items.length + ')</summary>' + d.items.map(function(i){
       return '<div class="uAct"><span>' + escapeHtml(i.name || i.code) + ' <small style="color:var(--omut)">' + escapeHtml(i.code || '') + '</small></span><span>' + fmt(i.qty) + '</span></div>';
     }).join('') + '</details>';
+    // ترتيب التحميل (للمخزن) — من ترتيب التسليم
+    h += ldBayHtml_(d.stops.slice().sort(function(a, b){ return a.seq - b.seq; }).map(function(s){ return { name: s.customer_name || s.customer_code, lines: s.lines }; }), L.vehicle_id);
     // التجار بالترتيب
     const canDeliver = L.status === 'loaded' && (mine || isMgr);
     h += d.stops.map(function(s, si){
@@ -6145,6 +6170,8 @@
       d.items.map(function(i, k){ return '<tr><td>' + (k + 1) + '</td><td>' + e(i.code || '') + '</td><td>' + e(i.name || '') + '</td><td><b>' + fmt(i.qty) + '</b></td><td></td></tr>'; }).join('') +
       '<tr class="tot"><td colspan="3">الإجمالي</td><td>' + fmt(d.items.reduce(function(s, i){ return s + Number(i.qty); }, 0)) + '</td><td></td></tr></tbody></table>' +
       (L.notes ? '<div class="lpNote">ملاحظات: ' + e(L.notes) + '</div>' : '') + sig(['أمين المخزن', 'السواق', 'المندوب']) + '</div>';
+    const bay = ldBayPrint_(d.stops.slice().sort(function(a, b){ return a.seq - b.seq; }).map(function(s){ return { name: s.customer_name || s.customer_code, lines: s.lines }; }));
+    if(bay) h += '<div class="lpPage">' + head('ترتيب التحميل في العربية') + bay + sig(['أمين المخزن', 'السواق']) + '</div>';
     h += '<div class="lpPage">' + head('كشف توزيع') + d.stops.map(function(s){
       return '<div class="lpStop"><div class="lpStopH"><span>' + s.seq + '</span><b>' + e(s.customer_name || s.customer_code) + '</b><small>' + e([s.area, s.address, s.phone].filter(Boolean).join(' • ')) + '</small></div>' +
         '<table class="lpTbl sm"><tbody>' + s.lines.map(function(l){ return '<tr><td>' + e(l.code || '') + '</td><td>' + e(l.name || '') + '</td><td><b>' + fmt(l.qty) + '</b></td><td style="width:22%">استلم: ......</td></tr>'; }).join('') +
@@ -6646,6 +6673,56 @@
     return '<svg class="truckSvg' + (small ? ' sm' : '') + '" viewBox="' + minX + ' ' + minY.toFixed(0) + ' ' + (318 - minX) + ' ' + (G + 10 - minY).toFixed(0) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="امتلاء العربية ' + label + '">' + P.join('') + '</svg>';
   }
   // رسم كبير + شرح الألوان
+  // ================== 📦 ترتيب التحميل جوه العربية (بيتا) ==================
+  // أول تاجر هيستلم بيتحمّل آخر واحد عشان يبقى عند الباب، وآخر تاجر بيتحمّل الأول في الصدر (ناحية الكابينة).
+  const BAY_COLORS_ = ['#56672f', '#d9a21b', '#2c548f', '#a8432f', '#7a5c99', '#2b7a77', '#b5652a', '#5d6d7e'];
+  // حجم بضاعة التاجر في العربية دي (بالسعات) — ولو مفيش سعات بعدد القطع
+  function ldStopShare_(lines, vid){
+    let cap = {}, med = 0;
+    if(vid != null){
+      const perV = [];
+      ld_.caps.forEach(function(c){ if(c.v === vid){ cap[c.c] = Number(c.q); perV.push(Number(c.q)); } });
+      perV.sort(function(a, b){ return a - b; });
+      med = perV.length ? perV[Math.floor(perV.length / 2)] : 0;
+    }
+    return lines.reduce(function(t, l){
+      const q = Number(l.qty) || 0, c = cap[l.code] || med;
+      return t + (c ? q / c * 100 : q);
+    }, 0);
+  }
+  // stops بترتيب التسليم: [{ name, lines: [{code, qty}] }]
+  function ldBayHtml_(stops, vid){
+    if(!stops || stops.length < 2) return '';
+    const n = stops.length;
+    const rows = stops.map(function(s, i){
+      const pcs = s.lines.reduce(function(t, l){ return t + (Number(l.qty) || 0); }, 0);
+      return { seq: i + 1, name: s.name, pcs: pcs, share: ldStopShare_(s.lines, vid), color: BAY_COLORS_[i % BAY_COLORS_.length] };
+    });
+    const tot = rows.reduce(function(t, r){ return t + r.share; }, 0) || 1;
+    const load = rows.slice().reverse(); // ترتيب التحميل: آخر واحد في التسليم بيدخل الأول
+    // الشريط: يمين = الصدر (الكابينة)، شمال = الباب
+    let h = '<div class="bayBox"><b>📦 ترتيب التحميل في العربية</b><small>آخر تاجر في التسليم يتحمّل الأول في الصدر، وأول تاجر يتحمّل آخر واحد عشان يبقى عند الباب وينزل على طول.</small>' +
+      '<div class="bayEnds"><span>🚛 الصدر (جنب الكابينة)</span><span>الباب 🚪</span></div><div class="bayBar">' +
+      load.map(function(r){ return '<i style="flex:' + Math.max(r.share / tot, 0.06).toFixed(3) + '; background:' + r.color + ';" title="' + escapeHtml(r.name) + '">' + r.seq + '</i>'; }).join('') + '</div>';
+    h += '<div class="bayList">' + load.map(function(r, k){
+      return '<div class="bayRow"><em style="background:' + r.color + '">' + r.seq + '</em><span><b>' + (k === 0 ? 'حمّل الأول' : k === n - 1 ? 'حمّل آخر واحد' : 'حمّل ' + (k + 1)) + ':</b> ' + escapeHtml(r.name) +
+        '<small>تسليم رقم ' + r.seq + ' • ' + fmt(r.pcs) + ' قطعة' + (k === 0 ? ' • في الصدر' : k === n - 1 ? ' • عند الباب' : '') + '</small></span></div>';
+    }).join('') + '</div></div>';
+    return h;
+  }
+  // نفس الترتيب لورقة الطباعة (أبيض وأسود)
+  function ldBayPrint_(stops){
+    if(!stops || stops.length < 2) return '';
+    const e = escapeHtml, load = stops.map(function(s, i){ return { seq: i + 1, s: s }; }).reverse();
+    return '<div class="lpNote" style="margin-top:0;">حمّل بالترتيب ده: رقم 1 في الجدول يدخل الأول في الصدر (جنب الكابينة) — وآخر رقم يتحمّل آخر واحد عند الباب. الرقم اللي على كل خانة = ترتيب التسليم.</div>' +
+      '<div style="display:flex; justify-content:space-between; font-weight:700; font-size:12px;"><span>الصدر (الكابينة)</span><span>الباب</span></div>' +
+      '<div class="lpBay">' + load.map(function(x){ return '<i>' + x.seq + '</i>'; }).join('') + '</div>' +
+      '<table class="lpTbl"><thead><tr><th>ترتيب التحميل</th><th>التاجر</th><th>رقم التسليم</th><th>القطع</th><th>✔</th></tr></thead><tbody>' +
+      load.map(function(x, k){
+        const pcs = x.s.lines.reduce(function(t, l){ return t + (Number(l.qty) || 0); }, 0);
+        return '<tr><td><b>' + (k + 1) + '</b>' + (k === 0 ? ' (الصدر)' : k === load.length - 1 ? ' (الباب)' : '') + '</td><td>' + e(x.s.name || '') + '</td><td>' + x.seq + '</td><td>' + fmt(pcs) + '</td><td></td></tr>';
+      }).join('') + '</tbody></table>';
+  }
   function ldTruckBlock_(items, vid, vname){
     const f = vid != null && items && items.length ? ldFillSegs_(items, vid) : null;
     const kind = ldVehKind_(vid, vname);
