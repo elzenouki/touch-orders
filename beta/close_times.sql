@@ -4,7 +4,8 @@
 --
 -- • جدول جديد customer_close_times: لكل تاجر (بكوده) الساعة اللي بيقفل فيها، وأيام أجازته في الأسبوع
 --   (off_days: أرقام الأيام — 0 الأحد، 1 الاتنين، ... 5 الجمعة، 6 السبت).
--- • جدول جديد app_settings: إعدادات عامة — دلوقتي فيه مكان المخزن (اللي العربيات بتخرج منه).
+-- • جدول جديد close_times_settings: إعدادات المواعيد — دلوقتي فيه مكان المخزن (اللي العربيات بتخرج منه).
+--   (اسمه مختلف عن أي جدول موجود عندك عشان مايلمسش حاجة قديمة)
 -- • دالة close_times_api: التطبيق بيكلمها عشان يقرا المواعيد ومكان المخزن، أو يحفظهم.
 --   التأكد من المستخدم (إيميل + PIN) بيتم بنفس دالة التحميلات loads_api الموجودة —
 --   فلازم يكون ملف loads.sql متشغّل قبل كده (وهو متشغّل لأن شاشة التحميلات شغالة).
@@ -19,7 +20,7 @@ create table if not exists public.customer_close_times (
 alter table public.customer_close_times add column if not exists off_days smallint[] not null default '{}';
 alter table public.customer_close_times alter column close_time drop not null;
 
-create table if not exists public.app_settings (
+create table if not exists public.close_times_settings (
   key        text primary key,
   value      jsonb not null,
   updated_by text,
@@ -29,8 +30,8 @@ create table if not exists public.app_settings (
 -- محدش يقدر يقرا أو يكتب في الجداول دي مباشرة — بس عن طريق الدالة تحت
 alter table public.customer_close_times enable row level security;
 revoke all on public.customer_close_times from anon, authenticated;
-alter table public.app_settings enable row level security;
-revoke all on public.app_settings from anon, authenticated;
+alter table public.close_times_settings enable row level security;
+revoke all on public.close_times_settings from anon, authenticated;
 
 create or replace function public.close_times_api(auth jsonb, act text, args jsonb default '{}'::jsonb)
 returns jsonb
@@ -62,7 +63,7 @@ begin
     return jsonb_build_object('ok', true, 'result', jsonb_build_object(
       'cust', coalesce((select jsonb_object_agg(customer_code, jsonb_build_object('t', to_char(close_time, 'HH24:MI'), 'off', to_jsonb(off_days)))
                         from public.customer_close_times), '{}'::jsonb),
-      'wh', (select value from public.app_settings where key = 'warehouse')));
+      'wh', (select value from public.close_times_settings where key = 'warehouse')));
 
   elsif act = 'set_wh' then
     begin
@@ -74,7 +75,7 @@ begin
     if lat is null or lng is null or lat not between -90 and 90 or lng not between -180 and 180 then
       return jsonb_build_object('ok', false, 'error', 'المكان مش مظبوط');
     end if;
-    insert into public.app_settings (key, value, updated_by, updated_at)
+    insert into public.close_times_settings (key, value, updated_by, updated_at)
     values ('warehouse', jsonb_build_object('lat', lat, 'lng', lng), who, now())
     on conflict (key) do update
       set value = excluded.value, updated_by = excluded.updated_by, updated_at = now();
