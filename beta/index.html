@@ -1021,6 +1021,11 @@
   .ctRow input{width:auto; min-width:120px; margin:0; padding:7px 9px; font-size:15px;}
   .ctRow.need{border-color:rgba(168,67,47,.45); background:#fbefec;}
   .ctRow.need span{color:#a8432f;}
+  .ctDays{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;}
+  .ctDays button{flex:1 0 auto; min-width:52px; padding:6px 4px; border-radius:9px; border:1px solid var(--border); background:#fff; font:inherit; font-size:12.5px; font-weight:800; color:var(--muted2); cursor:pointer;}
+  .ctDays button.on{background:#a8432f; border-color:#a8432f; color:#fff;}
+  .ctOffLbl{font-size:12.5px; font-weight:800; color:var(--muted2); margin-top:8px;}
+  .ldEta.off{color:#a8432f;}
   .ldEta{display:block; font-size:12px; font-weight:800; margin-top:2px; color:#1f6b45;}
   .ldEta.late{color:#a8432f;} .ldEta.mut{color:var(--omut);}
   .ldDep{display:flex; align-items:center; gap:8px; margin:12px 0 8px; flex-wrap:wrap;}
@@ -1552,6 +1557,7 @@
       <div class="vSub" id="vSub"></div>
       <div class="visitBtns" id="vBtns"></div>
       <div class="ctRow" id="vCloseRow"><span id="vCloseLbl">⏰ التاجر بيقفل الساعة</span><input type="time" id="vCloseTime" dir="ltr" onchange="ctVisitChanged_()"></div>
+      <div id="vOffBox"><div class="ctOffLbl">📅 أجازته الأسبوعية (دوس على اليوم):</div><div class="ctDays" id="vOffDays"></div></div>
       <div class="locBox" id="locBox">📍 جاري تحديد موقعك...</div>
       <div class="phoneNote" id="phoneNote" hidden>📞 من غير زيارة (التاجر كلّمك أو حوّل فلوس) — من غير موقع، ومش هتتحسب زيارة</div>
     </div>
@@ -3310,7 +3316,7 @@
         if(!state.rep.customers.some(function(c){ return c.code === r.customer.code; })) state.rep.customers.push(r.customer);
         localCacheSet_('rep', state.rep);
         const ncClose = document.getElementById('ncClose').value;
-        if(ncClose) ctSave_(r.customer.code, ncClose, true);
+        if(ncClose) ctSave_(r.customer.code, { t: ncClose }, true);
         showMsg(r.existed ? 'العميل ده متسجل بالفعل — كمّل الزيارة' : 'اتضاف العميل ✔', 'success');
         openVisit_(r.customer.code, 'home');
       })
@@ -5368,12 +5374,17 @@
         h += '<div class="aRow lDoc' + (on ? ' on' : '') + '" onclick="ldToggle_(' + i + ')"><div class="aTop"><span class="lChk">' + (on ? '✔' : '') + '</span><b>' + escapeHtml(d.customer_name || d.customer_code) + '</b>' +
           '<span class="chip' + (d.days > 3 ? ' red' : '') + '">' + (d.days ? 'من ' + d.days + ' يوم' : 'النهارده') + '</span></div>' +
           '<div class="aSub">' + (ld_.adm && !ld_.admRep && d.rep ? '👤 <b>' + escapeHtml(d.rep) + '</b> • ' : '') + escapeHtml(d.lines.slice(0, 4).map(function(l){ return l.name + ' ×' + fmt(l.qty); }).join('، ') + (d.lines.length > 4 ? ' +' + (d.lines.length - 4) : '')) + ' • ' + fmt(pcs) + ' قطعة</div>' +
-          '<div class="aBtns"><button type="button" onclick="event.stopPropagation(); ldCloseDoc_(' + i + ')">اتسلّمت من غير تحميلة / اتلغت</button></div></div>';
+          ctInfoHtml_(d.customer_code) +
+          '<div class="aBtns"><button type="button" onclick="event.stopPropagation(); ldCtEdit_(' + i + ')">⏰ القفل والأجازة</button><button type="button" onclick="event.stopPropagation(); ldCloseDoc_(' + i + ')">اتسلّمت من غير تحميلة / اتلغت</button></div></div>';
       });
     });
     h += '<div class="lFoot" id="ldFoot"></div>';
     ldBody_().innerHTML = h;
     ldRenderFoot_();
+  }
+  function ldCtEdit_(i){
+    const d = ld_.pending[i];
+    ctEditOpen_(d.customer_code, d.customer_name, function(){ ldRenderPending_(); });
   }
   function ldToggle_(i){
     const d = ld_.pending[i];
@@ -5405,6 +5416,9 @@
   // في كل خطوة بنختار أقرب تاجر العربية تلحقه قبل ما يقفل، بشرط إن اختياره ميضيّعش تاجر تاني ميعاده أقرب.
   // ولو مفيش حد ينفع، بنروح للي ميعاده أقرب. اللي مالوش موقع في الآخر بالمنطقة (والأبدر قفلًا الأول).
   function ldOrderStops_(stops){
+    const wd = ldWd_();
+    const offS = stops.filter(function(s){ return ctIsOff_(s.customer_code, wd); });
+    stops = stops.filter(function(s){ return !ctIsOff_(s.customer_code, wd); });
     const withLoc = stops.filter(function(s){ return s.lat != null; }), noLoc = stops.filter(function(s){ return s.lat == null; });
     const out = [];
     const wh = ldWh_();
@@ -5434,7 +5448,7 @@
       if(ca != null || cb != null) return (ca == null ? Infinity : ca) - (cb == null ? Infinity : cb);
       return String(a.area).localeCompare(String(b.area), 'ar');
     });
-    return out.concat(noLoc);
+    return out.concat(noLoc).concat(offS);
   }
   function ldRoute_(){
     const by = {};
@@ -5497,32 +5511,61 @@
       throw new Error((d && (d.error || d.message)) || 'حصل خطأ');
     });
   }
+  // كل تاجر: { t: 'HH:MM' أو '', off: [أرقام أيام الأجازة — 0 الأحد ... 6 السبت] }
+  const CT_DAYS_ = ['الأحد', 'الاتنين', 'التلات', 'الأربع', 'الخميس', 'الجمعة', 'السبت'];
+  const CT_WEEK_ = [6, 0, 1, 2, 3, 4, 5]; // ترتيب العرض: من السبت للجمعة
+  function ctNorm_(m){
+    const out = {};
+    Object.keys(m || {}).forEach(function(k){
+      const v = m[k];
+      if(typeof v === 'string') out[k] = { t: v, off: [] }; // نسخة البيتا الأولى كانت بتحفظ الساعة بس
+      else if(v) out[k] = { t: v.t || '', off: (v.off || []).map(Number) };
+    });
+    return out;
+  }
   function ctMap_(){
-    if(!ct_.map){ try{ ct_.map = JSON.parse(localStorage.getItem(CT_CACHE_) || '{}') || {}; }catch(e){ ct_.map = {}; } }
+    if(!ct_.map){ try{ ct_.map = ctNorm_(JSON.parse(localStorage.getItem(CT_CACHE_) || '{}')); }catch(e){ ct_.map = {}; } }
     return ct_.map;
   }
   function ctKeep_(){ try{ localStorage.setItem(CT_CACHE_, JSON.stringify(ctMap_())); }catch(e){} }
-  function ctGet_(code){ return ctMap_()[code] || ''; }
+  function ctEnt_(code){ return ctMap_()[code] || { t: '', off: [] }; }
+  function ctGet_(code){ return ctEnt_(code).t || ''; }
+  function ctIsOff_(code, wd){ return ctEnt_(code).off.indexOf(wd) !== -1; }
+  function ctOffText_(off){ return CT_WEEK_.filter(function(d){ return off.indexOf(d) !== -1; }).map(function(d){ return CT_DAYS_[d]; }).join(' و'); }
+  // سطر صغير تحت اسم التاجر: بيقفل إمتى وأجازته إمتى
+  function ctInfoHtml_(code){
+    const e = ctEnt_(code), p = [];
+    if(e.t) p.push('⏰ بيقفل ' + ctFmt_(ctToMin_(e.t)));
+    if(e.off.length) p.push('📅 أجازته ' + ctOffText_(e.off));
+    return '<div class="aSub" style="color:' + (p.length ? 'var(--o3)' : 'var(--omut)') + '; font-weight:700;">' + (p.length ? escapeHtml(p.join(' • ')) : '⏰ ميعاد القفل والأجازة مش متسجلين') + '</div>';
+  }
+  function ctDaysHtml_(off, fn){
+    return CT_WEEK_.map(function(d){
+      return '<button type="button" class="' + (off.indexOf(d) !== -1 ? 'on' : '') + '" onclick="' + fn + '(' + d + ')">' + CT_DAYS_[d] + '</button>';
+    }).join('');
+  }
   // بتجيب كل المواعيد من السيرفر — ومابترفضش أبدًا (لو فيه مشكلة بتكمّل بالنسخة اللي على الموبايل)
   function ctLoad_(force){
     if(ct_.loaded && !force) return Promise.resolve(ctMap_());
     if(ct_.inflight) return ct_.inflight;
     ct_.inflight = ctApi_('list').then(function(m){
       m = m || {};
-      ct_.map = m.times || {}; ct_.loaded = true; ctKeep_();
+      ct_.map = ctNorm_(m.cust || m.times); ct_.loaded = true; ctKeep_();
       ct_.wh = m.wh && m.wh.lat != null ? { lat: +m.wh.lat, lng: +m.wh.lng } : null;
       try{ localStorage.setItem(WH_CACHE_, JSON.stringify(ct_.wh)); }catch(e){}
       return ct_.map;
     }).catch(function(){ return ctMap_(); }).then(function(m){ ct_.inflight = null; return m; });
     return ct_.inflight;
   }
-  function ctSave_(code, hhmm, quiet){
-    const m = ctMap_();
-    if(hhmm) m[code] = hhmm; else delete m[code];
+  // patch: { t } و/أو { off } — الباقي بيفضل زي ما هو
+  function ctSave_(code, patch, quiet){
+    const m = ctMap_(), cur = ctEnt_(code);
+    const e = { t: patch.t != null ? patch.t : cur.t, off: patch.off != null ? patch.off.slice() : cur.off.slice() };
+    if(e.t || e.off.length) m[code] = e; else delete m[code];
     ctKeep_();
-    return ctApi_('set', { customer_code: code, close_time: hhmm || '' })
-      .then(function(){ if(!quiet) toast_(hhmm ? '⏰ اتحفظ: بيقفل ' + ctFmt_(ctToMin_(hhmm)) : 'اتمسح ميعاد القفل'); })
-      .catch(function(e){ showMsg('ميعاد القفل ماتحفظش: ' + e.message, 'error'); });
+    return ctApi_('set', { customer_code: code, close_time: e.t || '', off_days: e.off })
+      .then(function(){ if(!quiet) toast_('⏰ اتحفظ'); })
+      .catch(function(err){ showMsg('ميعاد القفل/الأجازة ماتحفظش: ' + err.message, 'error'); throw err; });
   }
   function ctToMin_(hhmm){
     const m = /^(\d{1,2}):(\d{2})/.exec(hhmm || '');
@@ -5543,11 +5586,13 @@
   function ctVisitFill_(c){
     const row = document.getElementById('vCloseRow');
     row.hidden = !!c.demo;
+    document.getElementById('vOffBox').hidden = !!c.demo;
     if(c.demo) return;
     const paint = function(){
       if(!state.visit || state.visit.cust.code !== c.code) return;
       const v = ctGet_(c.code);
       document.getElementById('vCloseTime').value = v;
+      document.getElementById('vOffDays').innerHTML = ctDaysHtml_(ctEnt_(c.code).off, 'ctVisitDay_');
       row.classList.toggle('need', !v);
       document.getElementById('vCloseLbl').textContent = v ? '⏰ التاجر بيقفل الساعة' : '⏰ اكتب التاجر بيقفل الساعة كام';
     };
@@ -5560,7 +5605,46 @@
     const row = document.getElementById('vCloseRow');
     row.classList.toggle('need', !v);
     document.getElementById('vCloseLbl').textContent = v ? '⏰ التاجر بيقفل الساعة' : '⏰ اكتب التاجر بيقفل الساعة كام';
-    ctSave_(state.visit.cust.code, v);
+    ctSave_(state.visit.cust.code, { t: v }).catch(function(){});
+  }
+  function ctVisitDay_(d){
+    if(!state.visit) return;
+    const code = state.visit.cust.code, off = ctEnt_(code).off.slice(), k = off.indexOf(d);
+    if(k === -1) off.push(d); else off.splice(k, 1);
+    ctSave_(code, { off: off }).catch(function(){});
+    document.getElementById('vOffDays').innerHTML = ctDaysHtml_(off, 'ctVisitDay_');
+  }
+
+  // ---------- شاشة تعديل ميعاد القفل والأجازة لأي تاجر (للمدير وصاحب الحساب والمندوب) ----------
+  function ctEditOpen_(code, name, done){
+    const e = ctEnt_(code);
+    ct_.ed = { code: code, off: e.off.slice(), done: done };
+    dlEnter_('⏰ القفل والأجازة', (name || '') + ' (' + code + ')');
+    ldBody_().innerHTML = '<div class="aForm">' +
+      '<label>التاجر بيقفل الساعة كام؟<input type="time" id="ctEdT" dir="ltr" value="' + escapeHtml(e.t || '') + '"></label>' +
+      '<div class="ctOffLbl">📅 أجازته الأسبوعية (دوس على اليوم — ممكن أكتر من يوم):</div><div class="ctDays" id="ctEdDays">' + ctDaysHtml_(ct_.ed.off, 'ctEdDay_') + '</div>' +
+      '<button type="button" class="aGo wide" style="margin-top:14px;" onclick="ctEdSave_()">✔ حفظ</button>' +
+      ((e.t || e.off.length) ? '<button type="button" class="ghost" style="margin-top:8px; width:100%;" onclick="document.getElementById(\'ctEdT\').value=\'\'; ct_.ed.off=[]; ctEdSave_()">🗑 مسح الميعاد والأجازة</button>' : '') +
+      '</div>';
+  }
+  function ctEdDay_(d){
+    const off = ct_.ed.off, k = off.indexOf(d);
+    if(k === -1) off.push(d); else off.splice(k, 1);
+    document.getElementById('ctEdDays').innerHTML = ctDaysHtml_(off, 'ctEdDay_');
+  }
+  function ctEdSave_(){
+    const ed = ct_.ed;
+    if(!ed) return;
+    showLoading(true);
+    ctSave_(ed.code, { t: document.getElementById('ctEdT').value, off: ed.off }, true).then(function(){
+      showLoading(false);
+      toast_('⏰ اتحفظ');
+      // نرجع للشاشة اللي قبلها ونعرضها من جديد بالبيانات الجديدة
+      const prev = dl_.stack.pop();
+      if(prev){ document.getElementById('dlTitle').textContent = prev.title; document.getElementById('dlSub').textContent = prev.sub; }
+      dlBackBtn_();
+      if(ed.done) ed.done();
+    }).catch(function(){ showLoading(false); });
   }
 
   // ---------- 🏬 مكان المخزن (نقطة خروج العربية) ----------
@@ -5634,6 +5718,25 @@
     m = Math.max(10 * 60, Math.ceil(m / 15) * 15);
     return (ld_.depart = m);
   }
+  // يوم التسليم: النهارده أو أي يوم في الأسبوع الجاي — عشان نعرف مين أجازته اليوم ده
+  function ldDayOff_(){
+    if(ld_.dayOff == null) ld_.dayOff = new Date().getHours() >= 17 ? 1 : 0; // بعد 5 العصر غالبًا التحميل لبكره
+    return ld_.dayOff;
+  }
+  function ldWd_(){ const d = new Date(); d.setDate(d.getDate() + ldDayOff_()); return d.getDay(); }
+  function ldDayName_(){ const o = ldDayOff_(); return (o === 0 ? 'النهارده ' : o === 1 ? 'بكره ' : '') + CT_DAYS_[ldWd_()]; }
+  function ldDayBox_(after){
+    let opts = '';
+    for(let o = 0; o < 7; o++){
+      const d = new Date(); d.setDate(d.getDate() + o);
+      opts += '<option value="' + o + '"' + (o === ldDayOff_() ? ' selected' : '') + '>' + (o === 0 ? 'النهارده — ' : o === 1 ? 'بكره — ' : '') + CT_DAYS_[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1) + '</option>';
+    }
+    return '<div class="ldDep"><b>📅 يوم التسليم</b><select style="width:auto; margin:0;" onchange="ldSetDay_(this.value, \'' + after + '\')">' + opts + '</select></div>';
+  }
+  function ldSetDay_(v, after){
+    ld_.dayOff = +v;
+    if(after === 'ldReorder_()') ldReorder_(); else if(after === 'ldRePlan_()') ldRePlan_();
+  }
   function ldSetDepart_(v, after){
     const m = ctToMin_(v);
     if(m == null) return;
@@ -5645,16 +5748,17 @@
     const m = ldDepart_() % (24 * 60);
     const v = String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
     const wh = ldWh_();
-    return '<div class="ldDep"><b>' + (wh ? '🚚 العربية هتخرج من المخزن الساعة' : '🚚 العربية توصل لأول تاجر الساعة') + '</b><input type="time" dir="ltr" value="' + v + '" onchange="ldSetDepart_(this.value, \'' + after + '\')">' +
+    return ldDayBox_(after) + '<div class="ldDep"><b>' + (wh ? '🚚 العربية هتخرج من المخزن الساعة' : '🚚 العربية توصل لأول تاجر الساعة') + '</b><input type="time" dir="ltr" value="' + v + '" onchange="ldSetDepart_(this.value, \'' + after + '\')">' +
       (after === 'ldReorder_()' ? '<button type="button" class="aGo" style="margin:0;" onclick="ldReorder_()">🔁 رتّب حسب المواعيد</button>' : '') + '</div>' +
       (ldCanSetWh_() ? '<div class="aBtns" style="margin:0 0 8px;"><button type="button" onclick="ldWhOpen_(\'' + after + '\')">🏬 ' + (wh ? 'غيّر مكان المخزن' : 'حدد مكان المخزن') + '</button></div>' : '') +
       (!wh ? '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">🏬 مكان المخزن لسه ماتحددش' + (ldCanSetWh_() ? '' : ' (المدير أو أمين المخزن يحدده)') + ' — الحساب بيبدأ من أول تاجر.</div>' : '');
   }
   // لكل تاجر بالترتيب: هيوصله إمتى، وبيقفل إمتى، ومتأخر ولا لأ
   function ldEtas_(stops){
-    const wh = ldWh_();
+    const wh = ldWh_(), wd = ldWd_();
     let t = ldDepart_(), prev = wh;
     return stops.map(function(s, i){
+      if(ctIsOff_(s.customer_code, wd)) return { eta: null, close: null, late: false, off: true, est: false }; // أجازته — العربية مش هتروحله
       const est = !!prev && (prev.lat == null || s.lat == null);
       if(prev) t += ldDriveMin_(prev, s);
       const cl = ctCloseMin_(s.customer_code);
@@ -5663,10 +5767,11 @@
       return r;
     });
   }
-  function ldLateCount_(stops){ return ldEtas_(ldOrderStops_(stops)).filter(function(e){ return e.late; }).length; }
+  function ldLateCount_(stops){ return ldEtas_(ldOrderStops_(stops)).filter(function(e){ return e.late || e.off; }).length; }
   function ldAnyClose_(docs){ return docs.some(function(d){ return !!ctGet_(d.customer_code); }); }
   function ldEtaHtml_(e){
     if(!e) return '';
+    if(e.off) return '<span class="ldEta off">⛔ أجازته يوم ' + CT_DAYS_[ldWd_()] + ' — مش هيستلم، شيله من التحميلة دي</span>';
     const eta = (e.est ? '~' : '') + ctFmt_(e.eta);
     if(e.close == null) return '<span class="ldEta mut">🕒 يوصل ' + eta + ' • ميعاد القفل مش متسجل</span>';
     if(e.late) return '<span class="ldEta late">⚠️ يوصل ' + eta + ' — بعد ما يقفل (' + ctFmt_(e.close) + ')</span>';
@@ -5676,6 +5781,10 @@
     let h = '';
     if(ct_.missing) h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">⚠️ لسه ملف close_times.sql ماتشغّلش في Supabase — المواعيد اللي على الموبايل بس هي اللي محسوبة.</div>';
     const known = etas.filter(function(e){ return e.close != null; }).length;
+    if(!etas.length) return h;
+    const offN = etas.filter(function(e){ return e.off; }).length;
+    if(offN) h += '<div class="note" style="margin-bottom:8px; color:#a8432f; font-weight:800;">⛔ ' + offN + ' تاجر أجازتهم يوم ' + CT_DAYS_[ldWd_()] + ' — مش هيستلموا. شيلهم من التحميلة أو غيّر يوم التسليم.</div>';
+    etas = etas.filter(function(e){ return !e.off; });
     if(!etas.length) return h;
     if(late) h += '<div class="note" style="margin-bottom:8px; color:#a8432f; font-weight:800;">⚠️ ' + late + ' تاجر العربية مش هتلحقهم قبل ما يقفلوا — جرّب "رتّب حسب المواعيد"، أو خرّج العربية بدري، أو شيلهم من التحميلة دي.</div>';
     else if(known) h += '<div class="note" style="margin-bottom:8px; color:#1f6b45; font-weight:800;">✔ العربية هتلحق كل التجار قبل ما يقفلوا</div>';
@@ -5687,8 +5796,9 @@
   // بنضيف للملاحظات سطر بمواعيد كل تاجر عشان المدير والمخزن والسواق يشوفوها في التحميلة
   function ldNotesWithTimes_(notes){
     const etas = ldEtas_(ld_.stops);
-    if(!etas.some(function(e){ return e.close != null; })) return notes;
-    const line = (ldWh_() ? '⏰ الخروج من المخزن ' : '⏰ أول تاجر ') + ctFmt_(ldDepart_()) + ' | ' + ld_.stops.map(function(s, i){
+    if(!etas.some(function(e){ return e.close != null || e.off; }) && !ldWh_()) return notes;
+    const line = '📅 ' + ldDayName_() + ' | ' + (ldWh_() ? '⏰ الخروج من المخزن ' : '⏰ أول تاجر ') + ctFmt_(ldDepart_()) + ' | ' + ld_.stops.map(function(s, i){
+      if(etas[i].off) return (i + 1) + '. ' + (s.name || s.customer_code) + ' ⛔ أجازة';
       return (i + 1) + '. ' + (s.name || s.customer_code) + ' يوصل ' + ctFmt_(etas[i].eta) + (etas[i].close != null ? ' (يقفل ' + ctFmt_(etas[i].close) + (etas[i].late ? ' ⚠️' : '') + ')' : '');
     }).join(' • ');
     return notes ? notes + '\n' + line : line;
@@ -5728,7 +5838,9 @@
     return Math.round(km * 1.3); // الطريق الفعلي أطول من الخط المستقيم بحوالي 30%
   }
   function ldPlanRoutes_(){
-    const stops = ldStopsFromDocs_(ld_.pending);
+    const wd = ldWd_(), allStops = ldStopsFromDocs_(ld_.pending);
+    ld_.planOff = allStops.filter(function(s){ return ctIsOff_(s.customer_code, wd); });
+    const stops = allStops.filter(function(s){ return !ctIsOff_(s.customer_code, wd); });
     const hasCaps = ld_.caps.length > 0;
     const fits = function(list){
       if(list.length > LD_MAX_STOPS_) return false;
@@ -5809,6 +5921,8 @@
     const noLocCount = ld_.plan.reduce(function(t, r){ return t + r.stops.filter(function(s){ return s.lat == null; }).length; }, 0);
     if(noLocCount) h += '<div class="note" style="margin-bottom:10px;">📍 ' + noLocCount + ' تاجر مالهمش لوكيشن — اتجمعوا حسب المنطقة. ثبّت مواقعهم في الزيارة الجاية عشان التقسيم يبقى أدق.</div>';
     h += ldDepBox_('ldRePlan_()');
+    if(ld_.planOff && ld_.planOff.length) h += '<div class="note" style="margin-bottom:10px; color:#a8432f;">⛔ ' + ld_.planOff.length + ' تاجر أجازتهم يوم ' + CT_DAYS_[ldWd_()] + ' واتشالوا من الاقتراح: ' +
+      escapeHtml(ld_.planOff.map(function(s){ return s.name || s.customer_code; }).join('، ')) + '</div>';
     if(!ct_.missing && !ldAnyClose_(ld_.pending)) h += '<div class="note" style="margin-bottom:10px;">⏰ مفيش ولا تاجر هنا متسجل له ميعاد قفل — الترتيب بالقرب بس. المندوب يكتب الميعاد من شاشة زيارة التاجر.</div>';
     h += ld_.plan.map(function(r, i){
       const cls = r.pct == null ? 'mut' : r.pct > 90 ? 'gold' : 'green';
@@ -6692,6 +6806,7 @@
   function admLoad_(){
     admReadFilters_();
     if(adm_.tab === 'loc') return locLoad_();
+    if(adm_.tab === 'cust' && !ct_.loaded) ctLoad_().then(function(){ if(adm_.tab === 'cust' && !dl_.stack.length && !adm_.loading) admRender_(); });
     const act = { cust: 'cust_list', visit: 'visit_list', doc: 'doc_list', pay: 'pay_list', exp: 'exp_list', trash: 'trash_list' }[adm_.tab];
     const my = ++adm_.seq;
     adm_.loading = true; adm_.err = '';
@@ -6734,7 +6849,8 @@
     h += rows.map(function(r, i){
       if(t === 'cust') return '<div class="aRow" onclick="admCustEdit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.name || '') + '</b><span class="chip">' + escapeHtml(r.code) + '</span></div>' +
         '<div class="aSub">' + [r.rep, r.area, r.phone, r.system_code ? 'كود السيستم ' + r.system_code : '', r.visits + ' زيارة', r.last_visit ? 'آخر زيارة ' + admDay_(r.last_visit) : ''].filter(Boolean).map(escapeHtml).join(' • ') + '</div>' +
-        admBtns_(i, [['✏️ تعديل', 'admCustEdit_'], ['🔀 دمج في عميل تاني', 'admCustMerge_'], ['🗑 مسح', 'admCustDel_', 'del']]) + '</div>';
+        ctInfoHtml_(r.code) +
+        admBtns_(i, [['⏰ القفل والأجازة', 'admCustClose_'], ['✏️ تعديل', 'admCustEdit_'], ['🔀 دمج في عميل تاني', 'admCustMerge_'], ['🗑 مسح', 'admCustDel_', 'del']]) + '</div>';
       if(t === 'visit') return '<div class="aRow" onclick="admVisit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.customer_name || r.customer_code || '') + '</b><span class="chip">' + admDay_(r.day) + ' ' + admTime_(r.at) + '</span></div>' +
         '<div class="aSub">' + [r.rep, r.result, r.order_lines ? r.order_lines + ' صنف طلبية' : '', r.return_lines ? r.return_lines + ' صنف مرتجع' : '', +r.paid ? 'تحصيل ' + fmt(r.paid) : '', r.reason, r.notes].filter(Boolean).map(escapeHtml).join(' • ') +
         (r.exported ? ' <span class="aWarn">اتصدّر للسيستم</span>' : '') + '</div>' + admBtns_(i, [['🔍 التفاصيل', 'admVisit_'], ['🗑 مسح الزيارة كلها', 'admVisitDel_', 'del']]) + '</div>';
@@ -7314,6 +7430,10 @@
     const r = adm_.rows[i], dst = document.getElementById('admDst').value.trim();
     if(!dst || dst === r.code) return showMsg('اكتب كود العميل الصح', 'error');
     admDo_('تدمج <b>' + escapeHtml(r.name) + '</b> (' + escapeHtml(r.code) + ') في العميل <b>' + escapeHtml(dst) + '</b>؟', 'cust_merge', { src: r.code, dst: dst }).catch(function(){});
+  }
+  function admCustClose_(i){
+    const r = adm_.rows[i];
+    ctEditOpen_(r.code, r.name, function(){ admRender_(); });
   }
   function admCustEdit_(i){
     const r = adm_.rows[i];
