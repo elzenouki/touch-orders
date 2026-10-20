@@ -5712,11 +5712,13 @@
     if(ld_.depart != null) return ld_.depart;
     try{
       const sv = JSON.parse(localStorage.getItem(LD_DEP_KEY_) || 'null');
-      if(sv && sv.day === ymd_(new Date())) return (ld_.depart = sv.min);
+      if(sv && sv.day === ymd_(new Date()) && sv.off === ldDayOff_()) return (ld_.depart = sv.min);
     }catch(e){}
+    // تسليم يوم تاني: الصبح 9. تسليم النهارده: بعد ساعة من دلوقتي (ومش قبل 9 الصبح)
+    if(ldDayOff_() > 0) return (ld_.depart = 9 * 60);
     const n = new Date();
     let m = n.getHours() * 60 + n.getMinutes() + 60;
-    m = Math.max(10 * 60, Math.ceil(m / 15) * 15);
+    m = Math.max(9 * 60, Math.ceil(m / 15) * 15);
     return (ld_.depart = m);
   }
   // يوم التسليم: النهارده أو أي يوم في الأسبوع الجاي — عشان نعرف مين أجازته اليوم ده
@@ -5736,13 +5738,14 @@
   }
   function ldSetDay_(v, after){
     ld_.dayOff = +v;
+    ld_.depart = null; // ميعاد الخروج يتحسب من جديد لليوم ده
     if(after === 'ldReorder_()') ldReorder_(); else if(after === 'ldRePlan_()') ldRePlan_();
   }
   function ldSetDepart_(v, after){
     const m = ctToMin_(v);
     if(m == null) return;
     ld_.depart = m;
-    try{ localStorage.setItem(LD_DEP_KEY_, JSON.stringify({ day: ymd_(new Date()), min: m })); }catch(e){}
+    try{ localStorage.setItem(LD_DEP_KEY_, JSON.stringify({ day: ymd_(new Date()), off: ldDayOff_(), min: m })); }catch(e){}
     if(after === 'ldReorder_()') ldReorder_(); else if(after === 'ldRePlan_()') ldRePlan_();
   }
   function ldDepBox_(after){
@@ -5900,6 +5903,8 @@
       return {
         stops: ordered, vehicle: sug ? sug.v : null, pct: sug ? sug.pct : null,
         tooBig: hasCaps && !sug, km: ldRouteKm_(ordered), late: ldLateCount_(ordered),
+        lateTxt: (function(){ const e = ldEtas_(ordered); return ordered.filter(function(s, k){ return e[k].late; }).map(function(s){
+          const k = ordered.indexOf(s); return (s.name || s.customer_code) + ': يوصل ' + ctFmt_(e[k].eta) + ' وهو بيقفل ' + ctFmt_(e[k].close); }); })(),
         pcs: ordered.reduce(function(t, s){ return t + s.pcs; }, 0),
         docs: ordered.reduce(function(t, s){ return t.concat(s.docs); }, []),
         noLoc: ordered.every(function(s){ return s.lat == null; }),
@@ -5933,7 +5938,8 @@
         '<div class="aSub">' + escapeHtml([r.stops.length + ' تاجر', fmt(r.pcs) + ' قطعة', r.km ? '~' + r.km + ' كم بين التجار' : '', r.noLoc ? 'من غير لوكيشن' : '',
           r.areas.length ? r.areas.slice(0, 3).join('، ') + (r.areas.length > 3 ? ' +' + (r.areas.length - 3) : '') : '',
           r.oldest ? 'أقدم طلبية من ' + r.oldest + ' يوم' : ''].filter(Boolean).join(' • ')) + '</div>' +
-        (r.late ? '<div class="aSub" style="color:#a8432f; font-weight:800;">⚠️ ' + r.late + ' تاجر العربية مش هتلحقهم قبل ما يقفلوا</div>' : '') +
+        (r.late ? '<div class="aSub" style="color:#a8432f; font-weight:800;">⚠️ ' + r.late + ' تاجر العربية مش هتلحقهم قبل ما يقفلوا' +
+          (r.lateTxt.length ? '<br><small>' + escapeHtml(r.lateTxt.join(' • ')) + (r.stops.length === 1 ? ' — حتى لو العربية رايحاله لوحده. خرّج العربية بدري أو غيّر يوم التسليم.' : '') + '</small>' : '') + '</div>' : '') +
         (ld_.adm && r.reps.length ? '<div class="aSub">👤 ' + escapeHtml(r.reps.join('، ')) + '</div>' : '') +
         '<div class="aSub" style="margin-top:4px;">' + r.stops.map(function(s, k){ return (k + 1) + '. ' + escapeHtml(s.name || s.customer_code); }).join(' ← ') + '</div>' +
         '<div class="aBtns">' + (r.tooBig ? '' : '<button type="button" class="ok" onclick="ldPickPlan_(' + i + ')">اختار الرحلة دي ←</button>') +
