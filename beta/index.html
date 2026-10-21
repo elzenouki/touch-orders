@@ -1021,6 +1021,11 @@
   .ctRow input{width:auto; min-width:120px; margin:0; padding:7px 9px; font-size:15px;}
   .ctRow.need{border-color:rgba(168,67,47,.45); background:#fbefec;}
   .ctRow.need span{color:#a8432f;}
+  /* بيتا: الشاشة ماتتحركش يمين وشمال — الشارات الطويلة بتنزل سطر جديد بدل ما توسّع الكارت */
+  #dlBody{overflow-x:hidden;}
+  #dlBody .aTop{flex-wrap:wrap; row-gap:5px;}
+  #dlBody .lChip{white-space:normal; max-width:100%;}
+  #dlBody .aRow, #dlBody .note, #dlBody .aSub{overflow-wrap:anywhere;}
   .fleetBox{background:#fff; border:1px solid #ebe5cf; border-radius:13px; padding:10px; margin-bottom:10px;}
   .fleetBox > b{display:block; color:var(--o3); font-size:14.5px; margin-bottom:6px;}
   .fleetRow{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13.5px; font-weight:700;}
