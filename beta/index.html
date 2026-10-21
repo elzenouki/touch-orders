@@ -5879,6 +5879,24 @@
   // يبدأ بأبعد تاجر، ويضم له الأقرب فالأقرب طول ما العربية تشيل وطول ما المسافة لأقرب تاجر في الرحلة أقل من 25 كم.
   // التجار اللي مالهمش لوكيشن بيتجمعوا حسب المنطقة. وكل رحلة بتاخد أصغر عربية تشيلها.
   const LD_MAX_GAP_KM_ = 25, LD_MAX_STOPS_ = 12;
+  // بيتا: الرحلة 6 فروع بالكتير — ولو الفروع قريبة جدًا من بعض (كلهم في دايرة 10 كم) لحد 8.
+  // ماعدا المناديب اللي العربية بتقعد معاهم أسبوع (زي علاء شريف): من غير حد للفروع ومن غير حساب مواعيد اليوم،
+  // ورحلاتهم مابتتخلطش مع مناديب تانيين.
+  const LD_STOPS_MAX_ = 6, LD_STOPS_CLOSE_ = 8, LD_CLOSE_KM_ = 10;
+  const LD_WEEK_REPS_ = ['علاء شريف'];
+  function ldWeekRep_(name){ const n = normAr_(name); return LD_WEEK_REPS_.some(function(x){ return n.indexOf(normAr_(x)) !== -1; }); }
+  function ldWeekStop_(s){ return Object.keys(s.reps || {}).some(ldWeekRep_); }
+  function ldSpreadKm_(list){
+    const pts = list.filter(function(s){ return s.lat != null; });
+    if(pts.length < list.length) return Infinity; // فيه تاجر مالوش لوكيشن — مانعرفش قريب ولا لأ
+    let m = 0;
+    for(let i = 0; i < pts.length; i++) for(let j = i + 1; j < pts.length; j++) m = Math.max(m, distM_(pts[i].lat, pts[i].lng, pts[j].lat, pts[j].lng));
+    return m / 1000;
+  }
+  function ldMaxStops_(list){
+    if(list.length && list.every(ldWeekStop_)) return Infinity;
+    return ldSpreadKm_(list) <= LD_CLOSE_KM_ ? LD_STOPS_CLOSE_ : LD_STOPS_MAX_;
+  }
   function ldStopsFromDocs_(docs){
     const by = {}, order = [];
     docs.forEach(function(d){
@@ -5913,7 +5931,9 @@
     const stops = allStops.filter(function(s){ return !ctIsOff_(s.customer_code, wd); });
     const hasCaps = ld_.caps.length > 0;
     const fits = function(list){
-      if(list.length > LD_MAX_STOPS_) return false;
+      const wk = list.filter(ldWeekStop_).length;
+      if(wk && wk < list.length) return false; // عربية مندوب الأسبوع مابتتخلطش
+      if(list.length > ldMaxStops_(list)) return false;
       return !hasCaps || !!ldSuggest_(ldFill_(ldStopItems_(list)));
     };
     const loc = stops.filter(function(s){ return s.lat != null; });
@@ -5940,8 +5960,8 @@
           let took = false;
           for(let k = 0; k < cands.length; k++){
             const next = r.concat([left[cands[k].i]]);
-            if(!fits(next)){ if(k === 0) break; continue; }
-            if(ldLateCount_(next) > ldLateCount_(r)) continue;
+            if(!fits(next)) continue;
+            if(!next.every(ldWeekStop_) && ldLateCount_(next) > ldLateCount_(r)) continue;
             r.push(left.splice(cands[k].i, 1)[0]); took = true; break;
           }
           if(!took) break;
@@ -5964,11 +5984,11 @@
       const ordered = ldOrderStops_(g);
       const fills = ldFill_(ldStopItems_(ordered));
       const sug = ldSuggest_(fills);
-      const areas = {}, reps = {};
+      const areas = {}, reps = {}, week = ordered.every(ldWeekStop_);
       ordered.forEach(function(s){ if(s.area) areas[s.area] = 1; Object.keys(s.reps).forEach(function(r){ reps[r] = 1; }); });
       return {
         stops: ordered, vehicle: sug ? sug.v : null, pct: sug ? sug.pct : null,
-        tooBig: hasCaps && !sug, multi: hasCaps && !sug ? ldMultiTrucks_(ldStopItems_(ordered)) : null, km: ldRouteKm_(ordered), late: ldLateCount_(ordered),
+        tooBig: hasCaps && !sug, multi: hasCaps && !sug ? ldMultiTrucks_(ldStopItems_(ordered)) : null, km: ldRouteKm_(ordered), late: week ? 0 : ldLateCount_(ordered), week: week,
         lateTxt: (function(){ const e = ldEtas_(ordered); return ordered.filter(function(s, k){ return e[k].late; }).map(function(s){
           const k = ordered.indexOf(s); return (s.name || s.customer_code) + ': يوصل ' + ctFmt_(e[k].eta) + ' وهو بيقفل ' + ctFmt_(e[k].close); }); })(),
         pcs: ordered.reduce(function(t, s){ return t + s.pcs; }, 0),
@@ -5990,7 +6010,7 @@
   }
   function ldRenderPlan_(){
     let h = '';
-    if(!ld_.caps.length) h += '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">⚠️ سعات العربيات لسه مادخلتش — التقسيم بالقرب بس (' + LD_MAX_STOPS_ + ' تاجر بالكتير في الرحلة) ومن غير اقتراح عربية.</div>';
+    if(!ld_.caps.length) h += '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">⚠️ سعات العربيات لسه مادخلتش — التقسيم بالقرب بس (' + LD_STOPS_MAX_ + ' تاجر بالكتير في الرحلة) ومن غير اقتراح عربية.</div>';
     const noLocCount = ld_.plan.reduce(function(t, r){ return t + r.stops.filter(function(s){ return s.lat == null; }).length; }, 0);
     if(noLocCount) h += '<div class="note" style="margin-bottom:10px;">📍 ' + noLocCount + ' تاجر مالهمش لوكيشن — اتجمعوا حسب المنطقة. ثبّت مواقعهم في الزيارة الجاية عشان التقسيم يبقى أدق.</div>';
     h += ldDepBox_('ldRePlan_()');
@@ -6001,6 +6021,7 @@
     h += ld_.plan.map(function(r, i){
       const cls = r.pct == null ? 'mut' : r.pct > 90 ? 'gold' : 'green';
       return '<div class="aRow"' + (r.wait ? ' style="opacity:.72"' : '') + '><div class="aTop"><b>رحلة ' + (i + 1) + '</b>' +
+        (r.week ? '<span class="lChip">🗓 عربية أسبوع — من غير حد للفروع</span>' : '') +
         (r.assign ? '<span class="lChip green">✅ تطلع: ' + escapeHtml(r.assign.map(function(a){ return (a.n ? a.n + ' × ' : '') + a.v.name; }).join(' + ')) + '</span>' : r.wait ? '<span class="lChip wait">⏳ تستنى — مفيش عربية فاضية</span>' : '') +
         (r.vehicle ? '<span class="lChip ' + cls + '">🚚 ' + escapeHtml(r.vehicle.name) + ' • ' + r.pct + '%</span>' : r.tooBig ? '<span class="lChip red">⚠️ محتاجة ' + (r.multi ? r.multi.count + ' عربيات' : 'أكتر من عربية') + '</span>' : '') + '</div>' +
         (r.tooBig && r.multi ? '<div class="aSub" style="color:#a8432f; font-weight:800;">🚚 ' + escapeHtml(r.multi.text) + '</div>' : '') +
@@ -6262,6 +6283,7 @@
   function ldRenderList_(admin){
     let h = admin ? ldAdminTabs_() : ldTabs_();
     const l = ld_.list.filter(function(x){ return !admin || !ld_.status || ld_.status.split(',').indexOf(x.status) !== -1; });
+    if(admin && ld_.status === 'approved' && l.length) h += '<button type="button" class="bigAction" style="margin:0 0 10px;" onclick="ldPdfList_()">📄 PDF بكل التحميلات اللي اتوافق عليها (' + l.length + ') — ابعته للمخزن</button>';
     if(!l.length) return ldBody_().innerHTML = h + '<div class="empty">مفيش تحميلات هنا</div>';
     h += l.map(function(x){
       return '<div class="aRow" onclick="ldOpen_(' + x.id + ')"><div class="aTop"><b>تحميلة #' + x.serial + (admin ? ' — ' + escapeHtml(x.rep || '') : '') + '</b>' + ldChip_(x.status) + '</div>' +
@@ -6293,7 +6315,7 @@
     if(L.reject_reason) h += '<div class="note" style="margin:8px 0; color:var(--red)">سبب الرفض: ' + escapeHtml(L.reject_reason) + '</div>';
     // أزرار حسب الحالة والدور
     const btns = [];
-    if((isMgr || isWh) && ['approved', 'loaded', 'done'].indexOf(L.status) !== -1 || (isMgr && L.status === 'requested')) btns.push('<button type="button" onclick="ldPrint_()">🖨 إذن الصرف وكشف التوزيع</button>');
+    if((isMgr || isWh) && ['approved', 'loaded', 'done'].indexOf(L.status) !== -1 || (isMgr && L.status === 'requested')) btns.push('<button type="button" onclick="ldPrint_()">🖨 إذن الصرف وكشف التوزيع</button>', '<button type="button" class="ok" onclick="ldPdfOne_()">📄 PDF للمخزن</button>');
     const pts = d.stops.filter(function(s){ return s.lat != null; });
     if(pts.length) btns.push('<button type="button" onclick="ldMaps_()">🗺 خط السير على الخريطة</button>');
     if(mine && L.status === 'requested') btns.push('<button type="button" class="del" onclick="ldAct_(\'cancel\')">إلغاء الطلب</button>');
@@ -6342,7 +6364,12 @@
     return ldApi_(act, Object.assign({ id: ld_.cur.load.id }, args || {})).then(function(){ showLoading(false); if(msg) toast_(msg); return ldReload_(); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
-  function ldApprove_(){ ldAct_('approve', { vehicle_id: ld_.apprVeh }, '✔ اتوافق عليها — راحت للمخزن'); }
+  function ldApprove_(){
+    ldAct_('approve', { vehicle_id: ld_.apprVeh }, '✔ اتوافق عليها — راحت للمخزن').then(function(){
+      if(!ld_.cur || ld_.cur.load.status !== 'approved') return;
+      confirmModal_('اتوافق على التحميلة ✔<br>تبعت PDF للمخزن دلوقتي؟', '📄 ابعت PDF', 'بعدين').then(function(ok){ if(ok) ldPdfOne_(); });
+    });
+  }
   function ldReject_(){
     const r = prompt('سبب الرفض (هيظهر للمندوب):');
     if(r === null) return;
@@ -6381,11 +6408,21 @@
   }
   // إذن صرف (الأصناف مجمّعة) + كشف توزيع (التجار بالترتيب) — صفحتين A4
   function ldPrint_(){
-    const d = ld_.cur, L = d.load, e = escapeHtml;
+    const d = ld_.cur, L = d.load;
+    const area = document.getElementById('printArea');
+    if(area.parentNode !== document.body) document.body.appendChild(area);
+    area.innerHTML = '<div class="lpWrap">' + ldPrintPages_(d).join('') + '</div>';
+    document.title = 'تحميلة ' + L.serial;
+    setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
+  }
+  // صفحات الطباعة لتحميلة: إذن صرف + ترتيب التحميل + كشف توزيع
+  function ldPrintPages_(d){
+    const L = d.load, e = escapeHtml, pages = [];
     const head = function(t){ return '<div class="lpHead"><div><b>TOUCH EL ZENOUKI</b><small>المناديب الخارجيين</small></div><div class="lpT">' + t + '</div>' +
       '<div class="lpMeta">تحميلة رقم <b>' + L.serial + '</b><br>' + admDay_(L.created_at) + '<br>المندوب: ' + e(L.rep || '') + '<br>العربية: ' + e(L.vehicle || '') + (L.plate ? ' — ' + e(L.plate) : '') + (L.driver ? '<br>السواق: ' + e(L.driver) : '') + '</div></div>'; };
     const sig = function(a){ return '<div class="lpSig">' + a.map(function(x){ return '<div>' + x + '<span></span></div>'; }).join('') + '</div>'; };
-    let h = '<div class="lpPage">' + head('إذن صرف من المخزن') + '<table class="lpTbl"><thead><tr><th>#</th><th>الكود</th><th>الصنف</th><th>الكمية</th><th>✔</th></tr></thead><tbody>' +
+    let h = '';
+    h += '<div class="lpPage">' + head('إذن صرف من المخزن') + '<table class="lpTbl"><thead><tr><th>#</th><th>الكود</th><th>الصنف</th><th>الكمية</th><th>✔</th></tr></thead><tbody>' +
       d.items.map(function(i, k){ return '<tr><td>' + (k + 1) + '</td><td>' + e(i.code || '') + '</td><td>' + e(i.name || '') + '</td><td><b>' + fmt(i.qty) + '</b></td><td></td></tr>'; }).join('') +
       '<tr class="tot"><td colspan="3">الإجمالي</td><td>' + fmt(d.items.reduce(function(s, i){ return s + Number(i.qty); }, 0)) + '</td><td></td></tr></tbody></table>' +
       (L.notes ? '<div class="lpNote">ملاحظات: ' + e(L.notes) + '</div>' : '') + sig(['أمين المخزن', 'السواق', 'المندوب']) + '</div>';
@@ -6396,11 +6433,75 @@
         '<table class="lpTbl sm"><tbody>' + s.lines.map(function(l){ return '<tr><td>' + e(l.code || '') + '</td><td>' + e(l.name || '') + '</td><td><b>' + fmt(l.qty) + '</b></td><td style="width:22%">استلم: ......</td></tr>'; }).join('') +
         '</tbody></table><div class="lpRecv">توقيع التاجر بالاستلام: ..............................</div></div>';
     }).join('') + '</div>';
-    const area = document.getElementById('printArea');
-    if(area.parentNode !== document.body) document.body.appendChild(area);
-    area.innerHTML = '<div class="lpWrap">' + h + '</div>';
-    document.title = 'تحميلة ' + L.serial;
-    setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
+    // كل صفحة لوحدها
+    const tmp = document.createElement('div');
+    tmp.innerHTML = h;
+    Array.prototype.forEach.call(tmp.children, function(el){ pages.push(el.outerHTML); });
+    return pages;
+  }
+
+  // ================== 📄 PDF للتحميلات (بيتا) — يتبعت للمخزن على واتساب ==================
+  // details: [ldApi_('detail') لكل تحميلة] — كل صفحة بتتصور، ولو أطول من A4 بتتقسم على أكتر من صفحة
+  async function ldBuildPdf_(details){
+    await Promise.all([ensureJsPdfLoaded_(), ensureHtml2CanvasLoaded_()]);
+    const stage = document.createElement('div');
+    stage.className = 'lpWrap';
+    stage.style.cssText = 'position:fixed; left:-12000px; top:0; width:794px; background:#fff; z-index:-1; pointer-events:none;';
+    document.body.appendChild(stage);
+    try{
+      const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+      let first = true;
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      for(let k = 0; k < details.length; k++){
+        const pages = ldPrintPages_(details[k]);
+        for(let p = 0; p < pages.length; p++){
+          stage.innerHTML = pages[p];
+          const el = stage.firstChild;
+          el.style.padding = '34px 40px'; el.style.background = '#fff';
+          const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, windowWidth: 794 });
+          const sliceH = Math.floor(canvas.width * 297 / 210);
+          for(let y = 0; y < canvas.height; y += sliceH){
+            const h = Math.min(sliceH, canvas.height - y);
+            const c = document.createElement('canvas');
+            c.width = canvas.width; c.height = sliceH;
+            const g = c.getContext('2d');
+            g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+            g.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+            if(!first) pdf.addPage();
+            first = false;
+            pdf.addImage(c.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297);
+          }
+        }
+      }
+      return pdf.output('blob');
+    } finally {
+      stage.remove();
+    }
+  }
+  async function ldPdfShare_(details, name){
+    showLoading(true);
+    try{
+      const blob = await ldBuildPdf_(details);
+      showLoading(false);
+      await shareOrDownload_(blob, name, 'share');
+    }catch(e){
+      showLoading(false);
+      showMsg('ماقدرتش أعمل الـ PDF: ' + ((e && e.message) || e), 'error');
+    }
+  }
+  function ldPdfOne_(){
+    const d = ld_.cur;
+    ldPdfShare_([d], 'تحميلة-' + d.load.serial + '.pdf');
+  }
+  // كل التحميلات اللي في التاب ده (مثلاً اللي اتوافق عليها) في PDF واحد
+  function ldPdfList_(){
+    const l = ld_.list.filter(function(x){ return !ld_.status || ld_.status.split(',').indexOf(x.status) !== -1; });
+    if(!l.length) return;
+    showLoading(true);
+    Promise.all(l.map(function(x){ return ldApi_('detail', { id: x.id }); })).then(function(ds){
+      showLoading(false);
+      ldPdfShare_(ds, 'تحميلات-' + ymd_(new Date()) + '.pdf');
+    }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
 
   // ---------- المدير والمخزن ----------
