@@ -2701,6 +2701,20 @@
   function addDays_(d, n){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; }
   function ymdToDmy_(s){ const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
   function dmyToYmd_(s){ const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s || ''); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; }
+  // ============ لينكات الخرايط: آيفون ← خرائط Apple • غير كده ← جوجل ماب ============
+  const IS_IOS_ = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  function mapPinUrl_(lat, lng){
+    return IS_IOS_ ? 'https://maps.apple.com/?ll=' + lat + ',' + lng + '&q=' + lat + ',' + lng : 'https://maps.google.com/?q=' + lat + ',' + lng;
+  }
+  function mapDirUrl_(lat, lng){
+    return IS_IOS_ ? 'https://maps.apple.com/?daddr=' + lat + ',' + lng + '&dirflg=d' : 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng;
+  }
+  // خط سير كامل: pts = ['lat,lng', ...] بالترتيب، origin = نقطة البداية (المخزن) أو فاضي = مكانك دلوقتي
+  function mapRouteUrl_(pts, origin){
+    if(IS_IOS_) return 'https://maps.apple.com/?' + (origin ? 'saddr=' + origin + '&' : '') + pts.map(function(p){ return 'daddr=' + p; }).join('&') + '&dirflg=d';
+    const dest = pts[pts.length - 1], way = pts.slice(0, -1).slice(0, 9); // جوجل بيقبل 9 محطات في النص بالكتير
+    return 'https://www.google.com/maps/dir/?api=1' + (origin ? '&origin=' + origin : '') + '&destination=' + dest + (way.length ? '&waypoints=' + encodeURIComponent(way.join('|')) : '') + '&travelmode=driving';
+  }
   function distM_(a, b, c, d){
     const R = 6371000, r = Math.PI / 180;
     const x = Math.sin((c - a) * r / 2), y = Math.sin((d - b) * r / 2);
@@ -3362,7 +3376,7 @@
       '<br>آخر زيارة: ' + daysAgoText_(c.lastVisitDays) + (c.lastOrder ? ' — آخر طلبية: ' + escapeHtml(c.lastOrder) : '');
     const btns = [];
     if(c.phone) btns.push('<a href="tel:' + escapeHtml(c.phone.replace(/[^\d+]/g, '')) + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>اتصال</a>');
-    if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + c.lat + ',' + c.lng + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>الاتجاهات</a>');
+    if(c.lat != null) btns.push('<a target="_blank" rel="noopener" href="' + mapDirUrl_(c.lat, c.lng) + '"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>الاتجاهات</a>');
     if(invoicesOn_() && !c.demo) btns.push('<a href="#" onclick="openCustInvoices_(); return false;"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>فواتيره</a>');
     btns.push('<a href="#" onclick="openExpenseSheet_({ kind: \'إكرامية\', customerCode: state.visit.cust.code }); return false;"><svg class="ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1.5"/><path d="M12 9v12M3 13h18"/><path d="M12 9c-1.5-4-6-4-6-1.5S10 9 12 9zM12 9c1.5-4 6-4 6-1.5S14 9 12 9z"/></svg>إكرامية</a>');
     document.getElementById('vBtns').innerHTML = btns.join('');
@@ -4693,7 +4707,7 @@
         return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(c.name) + ' <span class="oCode">' + escapeHtml(c.code) + '</span></div>' +
           '<div class="lSub">' + escapeHtml([c.date, showRep ? c.rep : '', c.area, c.address].filter(Boolean).join(' • ')) + '</div>' +
           '<div class="dlLinks">' + (c.phone ? '<a href="tel:' + escapeHtml(String(c.phone).replace(/[^\d+]/g, '')) + '">📞 ' + escapeHtml(c.phone) + '</a>' : '') +
-          (c.lat != null ? '<a target="_blank" rel="noopener" href="https://maps.google.com/?q=' + c.lat + ',' + c.lng + '">📍 المكان</a>' : '') + '</div></div></div>';
+          (c.lat != null ? '<a target="_blank" rel="noopener" href="' + mapPinUrl_(c.lat, c.lng) + '">📍 المكان</a>' : '') + '</div></div></div>';
       }).join('') : dlEmpty_());
     }
     if(r.plan){
@@ -4897,7 +4911,7 @@
       info.push(['خط السير', v.inPlan ? '✔ في خط السير' : '<span style="color:var(--red)">خارج خط السير</span>']);
       info.push(['الموقع', !v.hasLocation ? '<span style="color:var(--red)">⚠️ من غير موقع</span>' :
         (v.distance != null ? (v.far ? '<span style="color:var(--red)">⚠️ بعيد عن المحل ' + fmtDist_(v.distance) + '</span>' : 'عند المحل (' + fmtDist_(v.distance) + ')') : 'اتسجل') +
-        ' — <a target="_blank" rel="noopener" href="https://maps.google.com/?q=' + v.lat + ',' + v.lng + '">📍 افتح الخريطة</a>']);
+        ' — <a target="_blank" rel="noopener" href="' + mapPinUrl_(v.lat, v.lng) + '">📍 افتح الخريطة</a>']);
       let h = '<div class="card dlInfo">' + info.map(function(x){ return '<div><span>' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join('') + '</div>';
       h += r.docs.map(function(d){ return dlDocCard_(d, false, true).replace(/<button type="button" class="rLink" data-vid="[^"]*">👣 الزيارة<\/button>/, ''); }).join('');
       if(r.payments.length) h += '<div class="dayHead">💵 التحصيل</div>' + r.payments.map(function(p){ return dlPayRow_(p, false); }).join('');
@@ -5703,7 +5717,7 @@
     dlEnter_('🏬 مكان المخزن', 'العربية بتخرج منه — وكل المواعيد بتتحسب منه');
     const w = ldWh_();
     ldBody_().innerHTML =
-      (w ? '<div class="note" style="margin-bottom:10px;">المكان الحالي: <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + w.lat + ',' + w.lng + '">' + w.lat.toFixed(5) + ', ' + w.lng.toFixed(5) + ' 🗺</a></div>'
+      (w ? '<div class="note" style="margin-bottom:10px;">المكان الحالي: <a target="_blank" rel="noopener" href="' + mapPinUrl_(w.lat, w.lng) + '">' + w.lat.toFixed(5) + ', ' + w.lng.toFixed(5) + ' 🗺</a></div>'
          : '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">لسه مكان المخزن ماتحددش.</div>') +
       '<button type="button" class="aGo wide" onclick="ldWhHere_()">📍 أنا في المخزن دلوقتي — خد موقعي</button>' +
       '<label style="display:block; margin-top:14px;">أو الصق لينك جوجل ماب أو الإحداثيات</label>' +
@@ -6003,8 +6017,8 @@
   function ldPlanMap_(i){
     const pts = ld_.plan[i].stops.filter(function(s){ return s.lat != null; }).map(function(s){ return s.lat + ',' + s.lng; });
     if(!pts.length) return;
-    const dest = pts[pts.length - 1], way = pts.slice(0, -1).slice(0, 9);
-    window.open('https://www.google.com/maps/dir/?api=1&destination=' + dest + (way.length ? '&waypoints=' + encodeURIComponent(way.join('|')) : '') + '&travelmode=driving', '_blank');
+    const wh = ldWh_(); // الخط بيبدأ من المخزن لو متحدد
+    window.open(mapRouteUrl_(pts, wh ? wh.lat + ',' + wh.lng : ''), '_blank');
   }
   function ldSend_(){
     if(!ld_.vehicle) return showMsg('اختار نوع العربية', 'error');
@@ -6105,7 +6119,7 @@
           return '<div class="uAct"><span>' + escapeHtml(l.name || l.code) + '</span><span>' + (l.delivered != null && Number(l.delivered) !== Number(l.qty) ? '<s>' + fmt(l.qty) + '</s> ' + fmt(l.delivered) : fmt(l.qty)) + '</span></div>';
         }).join('') + '</div>' + (s.note ? '<div class="aSub">📝 ' + escapeHtml(s.note) + '</div>' : '') +
         '<div class="aBtns">' + (s.phone ? '<a class="lBtnA" href="tel:' + escapeHtml(String(s.phone).replace(/[^\d+]/g, '')) + '">📞 اتصال</a>' : '') +
-        (s.lat != null ? '<a class="lBtnA" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lng + '">📍 الاتجاهات</a>' : '') +
+        (s.lat != null ? '<a class="lBtnA" target="_blank" rel="noopener" href="' + mapDirUrl_(s.lat, s.lng) + '">📍 الاتجاهات</a>' : '') +
         (canDeliver && s.status === 'pending' ? '<button type="button" class="ok" onclick="ldDeliver_(' + si + ',\'full\')">✔ اتسلّم كله</button><button type="button" onclick="ldPartial_(' + si + ')">جزء</button><button type="button" class="del" onclick="ldDeliver_(' + si + ',\'refused\')">✖ مارضيش</button>' : '') +
         '</div><div id="ldPart' + si + '"></div></div>';
     }).join('');
@@ -6155,10 +6169,10 @@
     ldDeliver_(si, 'partial', lines, document.getElementById('ldPartNote' + si).value);
   }
   function ldMaps_(){
-    const pts = ld_.cur.stops.filter(function(s){ return s.lat != null; }).map(function(s){ return s.lat + ',' + s.lng; });
+    const pts = ld_.cur.stops.slice().sort(function(a, b){ return a.seq - b.seq; }).filter(function(s){ return s.lat != null; }).map(function(s){ return s.lat + ',' + s.lng; });
     if(!pts.length) return;
-    const dest = pts[pts.length - 1], way = pts.slice(0, -1).slice(0, 9);
-    window.open('https://www.google.com/maps/dir/?api=1&destination=' + dest + (way.length ? '&waypoints=' + encodeURIComponent(way.join('|')) : '') + '&travelmode=driving', '_blank');
+    const wh = ldWh_(); // الخط بيبدأ من المخزن لو متحدد
+    window.open(mapRouteUrl_(pts, wh ? wh.lat + ',' + wh.lng : ''), '_blank');
   }
   // إذن صرف (الأصناف مجمّعة) + كشف توزيع (التجار بالترتيب) — صفحتين A4
   function ldPrint_(){
@@ -7089,7 +7103,7 @@
   }
   function locOpenMaps_(){
     const r = adm_.rows[loc_.i];
-    window.open(loc_.pt ? 'https://maps.google.com/?q=' + loc_.pt.lat + ',' + loc_.pt.lng : 'https://www.google.com/maps/search/' + encodeURIComponent((r.name || '') + ' ' + (r.area || '')), '_blank');
+    window.open(loc_.pt ? mapPinUrl_(loc_.pt.lat, loc_.pt.lng) : (IS_IOS_ ? 'https://maps.apple.com/?q=' : 'https://www.google.com/maps/search/') + encodeURIComponent((r.name || '') + ' ' + (r.area || '')), '_blank');
   }
   function locDone_(r, goNext){
     const i = loc_.i;
@@ -7261,7 +7275,7 @@
     h += wi_.places.map(function(p, i){
       const c = p.pick && wi_.custs.find(function(x){ return x.code === p.pick; });
       return '<div class="aRow" style="cursor:default;' + (p.on && p.pick ? '' : ' opacity:.8;') + '"><div class="aTop"><label style="display:flex; flex-direction:row; gap:8px; align-items:center; font-weight:800; font-size:15px; color:var(--o3); flex:1; min-width:0;"><input type="checkbox" style="width:20px; height:20px; flex:0 0 auto;"' + (p.on && p.pick ? ' checked' : '') + (p.pick ? '' : ' disabled') + ' onchange="wi_.places[' + i + '].on = this.checked; wiCount_()"> ' + escapeHtml(p.names[0]) + '</label>' +
-        '<a class="chip" href="https://maps.google.com/?q=' + p.lat + ',' + p.lng + '" target="_blank" rel="noopener">🗺 ' + p.n + ' مرة</a></div>' +
+        '<a class="chip" href="' + mapPinUrl_(p.lat, p.lng) + '" target="_blank" rel="noopener">🗺 ' + p.n + ' مرة</a></div>' +
         (p.names.length > 1 ? '<div class="aSub">اتكتب كمان: ' + p.names.slice(1, 4).map(escapeHtml).join(' • ') + '</div>' : '') +
         '<select style="margin-top:6px; width:100%; height:38px; border-radius:10px; border:1px solid var(--oline); font-family:inherit;" onchange="wiPick_(' + i + ', this.value)">' +
         '<option value="">— مش موجود / تخطّي —</option>' + p.cands.map(function(x){
