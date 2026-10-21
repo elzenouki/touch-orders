@@ -6001,13 +6001,119 @@
           (r.lateTxt.length ? '<br><small>' + escapeHtml(r.lateTxt.join(' • ')) + (r.stops.length === 1 ? ' — حتى لو العربية رايحاله لوحده. خرّج العربية بدري أو غيّر يوم التسليم.' : '') + '</small>' : '') + '</div>' : '') +
         (ld_.adm && r.reps.length ? '<div class="aSub">👤 ' + escapeHtml(r.reps.join('، ')) + '</div>' : '') +
         '<div class="aSub" style="margin-top:4px;">' + r.stops.map(function(s, k){ return (k + 1) + '. ' + escapeHtml(s.name || s.customer_code); }).join(' ← ') + '</div>' +
-        '<div class="aBtns">' + (r.tooBig ? '' : '<button type="button" class="ok" onclick="ldPickPlan_(' + i + ')">اختار الرحلة دي ←</button>') +
+        '<div class="aBtns">' + (r.tooBig ? (r.multi ? '<button type="button" class="ok" onclick="ldMultiOpen_(' + i + ')">اختار الرحلة دي (' + r.multi.count + ' عربيات) ←</button>' : '')
+          : '<button type="button" class="ok" onclick="ldPickPlan_(' + i + ')">اختار الرحلة دي ←</button>') +
         (r.stops.some(function(s){ return s.lat != null; }) ? '<button type="button" onclick="ldPlanMap_(' + i + ')">🗺 الخريطة</button>' : '') + '</div></div>';
     }).join('');
     h += '<div class="note" style="margin-top:8px;">الاقتراح بيبدأ بالرحلة اللي فيها أقدم طلبية. لما تختار رحلة، تقدر تعدّل الترتيب والعربية قبل ما تبعت.</div>';
     ldBody_().innerHTML = h;
   }
   function ldRePlan_(){ ld_.plan = ldPlanRoutes_(); ldRenderPlan_(); }
+  // ================== 🚚🚚 رحلة محتاجة أكتر من عربية (بيتا) ==================
+  // بنوزّع طلبيات الرحلة على عربيات: كل طلبية بتروح كاملة لعربية واحدة (السيستم مابيقسمش الطلبية).
+  // أكبر طلبية الأول في أول عربية تساعها، ولو مفيش نفتح عربية كبيرة جديدة، وفي الآخر كل عربية بتصغر لأصغر نوع يشيلها.
+  // طلبية لوحدها أكبر من أكبر عربية: بتتبعت تحميلة لوحدها على أكبر عربية، ومكتوب في الملاحظات محتاجة إيه كمان.
+  function ldDocItems_(d){ return d.lines.map(function(l){ return { code: l.code, name: l.name, qty: Number(l.qty) || 0 }; }); }
+  function ldPctOn_(items, vid){ const f = ldFill_(items).find(function(x){ return x.v.id === vid; }); return f ? f.pct : null; }
+  function ldPackTrip_(r){
+    const byId = {};
+    ld_.pending.forEach(function(d){ byId[d.doc_id] = d; });
+    const docs = r.docs.map(function(id){ return byId[id]; }).filter(Boolean);
+    const fillsAll = ldFill_(ldStopItems_(r.stops)).filter(function(f){ return f.pct != null && f.pct > 0; });
+    if(!fillsAll.length) return null;
+    const bigV = fillsAll.reduce(function(a, b){ return b.pct < a.pct ? b : a; }).v; // أكبر عربية = أقل نسبة امتلاء
+    const trucks = [], huge = [];
+    docs.map(function(d){ return { d: d, items: ldDocItems_(d), pct: ldPctOn_(ldDocItems_(d), bigV.id) || 0 }; })
+      .sort(function(a, b){ return b.pct - a.pct; })
+      .forEach(function(x){
+        if(x.pct > 100){ huge.push(x); return; }
+        const t = trucks.find(function(t){ return ldPctOn_(t.items.concat(x.items), bigV.id) <= 100; });
+        if(t){ t.docs.push(x.d); t.items = t.items.concat(x.items); }
+        else trucks.push({ docs: [x.d], items: x.items.slice() });
+      });
+    const out = trucks.map(function(t){
+      const sug = ldSuggest_(ldFill_(t.items));
+      const v = sug ? sug.v : bigV;
+      return { docs: t.docs, items: t.items, v: v, pct: ldPctOn_(t.items, v.id), huge: null };
+    });
+    huge.forEach(function(x){
+      out.unshift({ docs: [x.d], items: x.items, v: bigV, pct: x.pct, huge: ldMultiTrucks_(x.items) });
+    });
+    // ترتيب التجار جوه كل عربية بنفس منطق خط السير (المسافة ومواعيد القفل)
+    out.forEach(function(t){
+      const ids = {};
+      t.docs.forEach(function(d){ ids[d.doc_id] = 1; });
+      t.stops = ldOrderStops_(r.stops.filter(function(s){ return s.docs.some(function(id){ return ids[id]; }); }).map(function(s){
+        const sd = s.docs.filter(function(id){ return ids[id]; });
+        const pcs = t.docs.filter(function(d){ return d.customer_code === s.customer_code; }).reduce(function(a, d){ return a + d.lines.reduce(function(b, l){ return b + (Number(l.qty) || 0); }, 0); }, 0);
+        return { customer_code: s.customer_code, name: s.name, area: s.area, lat: s.lat, lng: s.lng, docs: sd, pcs: pcs };
+      }));
+    });
+    return out;
+  }
+  function ldMultiOpen_(i){
+    const r = ld_.plan[i];
+    ld_.multi = ldPackTrip_(r);
+    if(!ld_.multi || !ld_.multi.length) return showMsg('سعات العربيات ناقصة — مش قادر أقسّم الرحلة', 'error');
+    dlPush_(); dlBackBtn_();
+    const need = ld_.multi.reduce(function(a, t){ return a + (t.huge ? t.huge.count : 1); }, 0);
+    document.getElementById('dlTitle').textContent = '🚚 الرحلة محتاجة ' + need + ' عربيات';
+    document.getElementById('dlSub').textContent = 'هتتبعت ' + ld_.multi.length + (ld_.multi.length === 1 ? ' تحميلة' : ' تحميلات');
+    ldMultiRender_();
+  }
+  function ldMultiRender_(){
+    let h = '<div class="note" style="margin-bottom:10px;">الطلبيات اتوزعت على العربيات دي — كل طلبية بتروح كاملة لعربية واحدة. كل تحميلة ليها رقم لوحدها.</div>';
+    h += ld_.multi.map(function(t, k){
+      const pcs = t.items.reduce(function(a, x){ return a + x.qty; }, 0);
+      return '<div class="aRow"><div class="aTop"><b>تحميلة ' + (k + 1) + '</b><span class="lChip ' + (t.pct > 100 ? 'red' : t.pct > 90 ? 'gold' : 'green') + '">🚚 ' + escapeHtml(t.v.name) + ' • ' + t.pct + '%</span></div>' +
+        '<div class="planTruck">' + ldTruckSvg_(t.pct, (ldFillSegs_(t.items, t.v.id) || {}).segs, ldVehKind_(t.v.id), true) + '</div>' +
+        '<div class="aSub">' + escapeHtml([t.stops.length + ' تاجر', t.docs.length + ' طلبية', fmt(pcs) + ' قطعة'].join(' • ')) + '</div>' +
+        (t.huge ? '<div class="aSub" style="color:#a8432f; font-weight:800;">⚠️ الطلبية دي لوحدها أكبر من أكبر عربية ومينفعش تتقسم في السيستم — محتاجة ' + escapeHtml(t.huge.text) +
+          '. هتتبعت على ' + escapeHtml(t.v.name) + ' ومكتوب في الملاحظات العربيات اللي محتاجاها.</div>' : '') +
+        '<div class="aSub" style="margin-top:4px;">' + t.stops.map(function(s, j){ return (j + 1) + '. ' + escapeHtml(s.name || s.customer_code); }).join(' ← ') + '</div></div>';
+    }).join('');
+    h += '<label style="margin-top:12px; display:block;">ملاحظات للمدير والمخزن (اختياري)</label><textarea id="ldMultiNotes" rows="2"></textarea>';
+    h += '<button type="button" class="aGo wide" onclick="ldMultiSend_()">' + (ld_.adm ? '✔ اعتمد ' : '📨 ابعت ') + (ld_.multi.length === 1 ? 'التحميلة' : ld_.multi.length + ' تحميلات') + (ld_.adm ? ' — تروح للمخزن على طول' : ' للمدير') + '</button>';
+    ldBody_().innerHTML = h;
+  }
+  function ldMultiSend_(){
+    const list = ld_.multi;
+    if(!list || !list.length) return;
+    const userNotes = (document.getElementById('ldMultiNotes') || {}).value || '';
+    confirmModal_('هتتبعت <b>' + list.length + (list.length === 1 ? ' تحميلة' : ' تحميلات') + '</b>. متأكد؟', 'ابعت', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      const done = [];
+      const keepStops = ld_.stops;
+      // بنبعتهم واحدة ورا التانية عشان لو حصلت مشكلة نعرف وقفت عند أنهي عربية
+      list.reduce(function(p, t, k){
+        return p.then(function(){
+          ld_.stops = t.stops;
+          let notes = list.length > 1 ? 'تحميلة ' + (k + 1) + ' من ' + list.length + ' لنفس الرحلة' : '';
+          if(t.huge) notes += (notes ? '\n' : '') + '⚠️ الطلبية دي محتاجة ' + t.huge.count + ' عربيات: ' + t.huge.text;
+          if(userNotes) notes += (notes ? '\n' : '') + userNotes;
+          const args = { vehicle_id: t.v.id, fill: t.pct, notes: ldNotesWithTimes_(notes),
+            stops: t.stops.map(function(s){ return { customer_code: s.customer_code, doc_ids: s.docs }; }) };
+          if(ld_.adm){
+            const reps = {};
+            t.docs.forEach(function(d){ if(d.rep) reps[d.rep] = 1; });
+            const rk = Object.keys(reps);
+            args.rep = ld_.admRep || (rk.length === 1 ? rk[0] : '');
+            args.approve = true;
+          }
+          return ldApi_('create', args).then(function(res){ done.push(res.serial); });
+        });
+      }, Promise.resolve()).then(function(){
+        ld_.stops = keepStops; showLoading(false); ld_.multi = null;
+        toast_('✔ اتعملت ' + done.length + ' تحميلات: ' + done.map(function(x){ return '#' + x; }).join('، '));
+        if(ld_.adm){ ld_.status = 'approved'; openLoadsAdmin_(); return; }
+        dl_.stack = []; dlBackBtn_(); ld_.tab = 'mine'; ldLoadTab_();
+      }).catch(function(e){
+        ld_.stops = keepStops; showLoading(false);
+        showAlertModal_((done.length ? 'اتعمل ' + done.length + ' من ' + list.length + ' (' + done.map(function(x){ return '#' + x; }).join('، ') + ') ووقف عند عربية ' + (done.length + 1) + ': ' : '') + e.message, 'error');
+      });
+    });
+  }
   function ldPickPlan_(i){
     const r = ld_.plan[i];
     ld_.sel = {};
