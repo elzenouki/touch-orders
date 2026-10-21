@@ -1038,6 +1038,14 @@
   .bayRow:first-child{border-top:0;}
   .bayRow em{flex:none; width:22px; height:22px; border-radius:6px; color:#fff; font-style:normal; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:12px;}
   .bayRow span{flex:1; min-width:0;} .bayRow span b{color:var(--o3);} .bayRow span small{display:block; color:var(--omut); font-size:11.5px;}
+  .pdfTruckWrap{margin:14px 0 10px; border:1px solid #d9d3bb; border-radius:10px; padding:10px 12px 8px;}
+  .pdfEnds{display:flex; justify-content:space-between; font-weight:800; font-size:13px; color:#3f4c22;}
+  .pdfTruck{text-align:center;} .pdfTruck svg{display:inline-block;}
+  .pdfSum{text-align:center; font-size:12.5px; font-weight:700; color:#555; margin-top:4px;}
+  .pdfTbl td{vertical-align:middle; padding:7px 6px; border-bottom:1px solid #e6e0c8; font-size:13px;} .pdfTbl td small{display:block; color:#777; font-size:11px;}
+  .pdfDot{display:inline-flex; width:24px; height:24px; border-radius:6px; color:#fff; font-weight:900; align-items:center; justify-content:center;}
+  .pdfLink{color:#1a56b0; text-decoration:underline; font-weight:700;}
+  .pdfBtn{display:inline-block; text-decoration:none; background:#2c548f; color:#fff; border-radius:7px; padding:4px 9px; white-space:nowrap;}
   .lpBay{display:flex; height:40px; border:2px solid #000; margin:8px 0 4px;} .lpBay i{flex:1; display:flex; align-items:center; justify-content:center; font-style:normal; font-weight:900; border-left:1px solid #000;}
   .ctDays{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px;}
   .ctDays button{flex:1 0 auto; min-width:52px; padding:6px 4px; border-radius:9px; border:1px solid var(--border); background:#fff; font:inherit; font-size:12.5px; font-weight:800; color:var(--muted2); cursor:pointer;}
@@ -6440,6 +6448,45 @@
     return pages;
   }
 
+  // صفحة PDF لتحميلة: صورة العربية وفيها ترتيب التحميل + جدول التجار بالتليفون ولينك الموقع (من غير كشف البضاعة)
+  function ldPdfPage_(d){
+    const L = d.load, e = escapeHtml;
+    const stops = d.stops.slice().sort(function(a, b){ return a.seq - b.seq; });
+    const n = stops.length;
+    const rows = stops.map(function(s, i){
+      const pcs = s.lines.reduce(function(t, l){ return t + (Number(l.qty) || 0); }, 0);
+      return { seq: s.seq || i + 1, s: s, pcs: pcs, share: ldStopShare_(s.lines, L.vehicle_id), color: BAY_COLORS_[i % BAY_COLORS_.length] };
+    });
+    const load = rows.slice().reverse(); // ترتيب التحميل: آخر واحد في التسليم بيدخل الأول
+    const items = d.items.map(function(i){ return { code: i.code, name: i.name, qty: Number(i.qty) }; });
+    const f = ldFillSegs_(items, L.vehicle_id);
+    const pct = f ? f.pct : (L.fill != null ? Number(L.fill) : null);
+    let svg = ldTruckSvg_(pct, null, ldVehKind_(L.vehicle_id, L.vehicle), false, load.map(function(r){ return { share: r.share || 1, color: r.color, label: r.seq }; }));
+    // مقاس صريح للصورة — من غيره الـ PDF بيقص العربية
+    const vb = /viewBox="([-\d.]+) ([-\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);
+    if(vb) svg = svg.replace('<svg ', '<svg width="640" height="' + Math.round(640 * vb[4] / vb[3]) + '" style="max-width:none; width:640px; height:auto;" ');
+    const tot = rows.reduce(function(t, r){ return t + r.pcs; }, 0);
+    let h = '<div class="lpPage pdfLd">' +
+      '<div class="lpHead"><div><b>TOUCH EL ZENOUKI</b><small>المناديب الخارجيين</small></div><div class="lpT">تحميلة رقم ' + L.serial + '</div>' +
+      '<div class="lpMeta">' + admDay_(L.created_at) + '<br>المندوب: ' + e(L.rep || '') + '<br>العربية: ' + e(L.vehicle || '') + (L.plate ? ' — ' + e(L.plate) : '') + (L.driver ? '<br>السواق: ' + e(L.driver) : '') + '</div></div>' +
+      '<div class="pdfTruckWrap"><div class="pdfEnds"><span>🚛 الصدر (جنب الكابينة)</span><span>الباب 🚪</span></div>' +
+      '<div class="pdfTruck">' + svg + '</div>' +
+      '<div class="pdfSum">' + n + ' تاجر • ' + fmt(tot) + ' قطعة' + (pct != null ? ' • امتلاء ' + pct + '%' : '') + ' — الرقم على كل خانة = ترتيب التسليم</div></div>' +
+      '<table class="lpTbl pdfTbl"><thead><tr><th>التحميل</th><th>التسليم</th><th>التاجر</th><th>التليفون</th><th>القطع</th><th>الموقع</th></tr></thead><tbody>' +
+      load.map(function(r, k){
+        const s = r.s, ph = String(s.phone || '').replace(/[^\d+]/g, '');
+        return '<tr><td><span class="pdfDot" style="background:' + r.color + '">' + (k + 1) + '</span>' + (k === 0 ? '<small>الصدر</small>' : k === n - 1 ? '<small>الباب</small>' : '') + '</td>' +
+          '<td><b>' + r.seq + '</b></td><td><b>' + e(s.customer_name || s.customer_code) + '</b>' + (s.area || s.address ? '<small>' + e([s.area, s.address].filter(Boolean).join(' • ')) + '</small>' : '') + '</td>' +
+          '<td dir="ltr">' + (ph ? '<span class="pdfLink" data-href="tel:' + e(ph) + '">' + e(s.phone) + '</span>' : '—') + '</td>' +
+          '<td>' + fmt(r.pcs) + '</td>' +
+          '<td>' + (s.lat != null ? '<span class="pdfLink pdfBtn" data-href="https://www.google.com/maps/dir/?api=1&destination=' + s.lat + ',' + s.lng + '">📍 الموقع</span>' : '<small>مالوش لوكيشن</small>') + '</td></tr>';
+      }).join('') + '</tbody></table>' +
+      (L.notes ? '<div class="lpNote">ملاحظات: ' + e(L.notes) + '</div>' : '') +
+      '<div class="lpNote" style="margin-top:6px;">حمّل بترتيب عمود «التحميل»: رقم 1 يدخل الأول في الصدر، والأخير عند الباب. دوس على «📍 الموقع» أو رقم التليفون في الـ PDF يفتحهم على طول.</div>' +
+      '</div>';
+    return h;
+  }
+
   // ================== 📄 PDF للتحميلات (بيتا) — يتبعت للمخزن على واتساب ==================
   // details: [ldApi_('detail') لكل تحميلة] — كل صفحة بتتصور، ولو أطول من A4 بتتقسم على أكتر من صفحة
   async function ldBuildPdf_(details){
@@ -6453,13 +6500,19 @@
       let first = true;
       if(document.fonts && document.fonts.ready) await document.fonts.ready;
       for(let k = 0; k < details.length; k++){
-        const pages = ldPrintPages_(details[k]);
+        const pages = [ldPdfPage_(details[k])];
         for(let p = 0; p < pages.length; p++){
           stage.innerHTML = pages[p];
           const el = stage.firstChild;
           el.style.padding = '34px 40px'; el.style.background = '#fff';
           const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, windowWidth: 794 });
           const sliceH = Math.floor(canvas.width * 297 / 210);
+          // أماكن اللينكات (تليفون/موقع) بالمليمتر — عشان تبقى قابلة للضغط في الـ PDF
+          const mm = 210 / el.offsetWidth, base = el.getBoundingClientRect(), pageMm = 297;
+          const links = Array.prototype.map.call(el.querySelectorAll('[data-href]'), function(a){
+            const r = a.getBoundingClientRect();
+            return { url: a.getAttribute('data-href'), x: (r.left - base.left) * mm, y: (r.top - base.top) * mm, w: r.width * mm, h: r.height * mm };
+          });
           for(let y = 0; y < canvas.height; y += sliceH){
             const h = Math.min(sliceH, canvas.height - y);
             const c = document.createElement('canvas');
@@ -6470,6 +6523,10 @@
             if(!first) pdf.addPage();
             first = false;
             pdf.addImage(c.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297);
+            const top = y / canvas.height * (el.offsetHeight * mm);
+            links.forEach(function(l){
+              if(l.y >= top && l.y < top + pageMm) pdf.link(l.x, l.y - top, l.w, l.h, { url: l.url });
+            });
           }
         }
       }
@@ -6868,7 +6925,8 @@
   }
   // pct: نسبة الامتلاء، segs: [{pct, color}] من تحت لفوق، kind: 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000، small: رسم صغير للكروت
   // كل العربيات مترسومة بنفس المقياس (الوش ناحية اليمين زي صورة الجامبو) — فالدبابة بتبان أصغر من الجامبو فعلاً
-  function ldTruckSvg_(pct, segs, kind, small){
+  // bays (اختياري): [{ share, color, label }] بترتيب التحميل — الأول في الصدر جنب الكابينة، والأخير عند الباب
+  function ldTruckSvg_(pct, segs, kind, small, bays){
     const id = 'tk' + (++_truckN_);
     kind = kind == null ? 2 : kind;
     const G = 134; // الأرض (تحت الكاوتش)
@@ -6901,7 +6959,18 @@
     // ---- الشاسيه ----
     P.push('<rect x="' + (bx + 4) + '" y="' + (bb - 1) + '" width="' + (300 - bx - 4) + '" height="7" rx="2" fill="#2b2b2b"/>');
     // ---- البضاعة جوه الصندوق ----
-    if(pct != null && pct > 0){
+    if(bays && bays.length){
+      // خانة لكل تاجر بعرض حجم بضاعته، من الصدر للباب
+      const totB = bays.reduce(function(t, b){ return t + b.share; }, 0) || 1;
+      const usedW = fw * (pct == null ? 1 : Math.min(100, Math.max(pct, 8)) / 100);
+      let x = fx + fw, cols = '';
+      bays.forEach(function(b){
+        const w = usedW * b.share / totB; x -= w;
+        cols += '<rect x="' + x.toFixed(1) + '" y="' + fy + '" width="' + w.toFixed(1) + '" height="' + fh + '" fill="' + b.color + '" stroke="#fff" stroke-width="1.5"/>' +
+          (w > 9 ? '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (fy + fh / 2 + 6).toFixed(1) + '" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="' + (w > 22 ? 17 : 11) + '" fill="#fff">' + b.label + '</text>' : '');
+      });
+      P.push('<g class="truckLoad" clip-path="url(#' + id + 'k)">' + cols + '</g>');
+    } else if(pct != null && pct > 0){
       const list = segs && segs.length ? segs : [{ pct: pct, color: tone }];
       const tot = list.reduce(function(t, s){ return t + s.pct; }, 0) || 1;
       let y = fy + fh, layers = '';
@@ -6987,7 +7056,7 @@
     });
     // ---- النسبة ----
     const label = pct == null ? 'مفيش سعات' : pct + '%';
-    P.push('<text x="' + (fx + fw / 2 + (K.luton ? 18 : 0)) + '" y="' + (fy + fh / 2 + 8) + '" text-anchor="middle" font-family="Alexandria,Cairo,sans-serif" font-weight="800" font-size="' + (pct == null ? 13 : (kind === 0 ? 19 : 24)) + '" fill="' + (pct == null ? '#7d7f62' : '#2f3519') + '" stroke="#fff" stroke-width="4" paint-order="stroke" direction="ltr">' + label + '</text>');
+    if(!(bays && bays.length)) P.push('<text x="' + (fx + fw / 2 + (K.luton ? 18 : 0)) + '" y="' + (fy + fh / 2 + 8) + '" text-anchor="middle" font-family="Alexandria,Cairo,sans-serif" font-weight="800" font-size="' + (pct == null ? 13 : (kind === 0 ? 19 : 24)) + '" fill="' + (pct == null ? '#7d7f62' : '#2f3519') + '" stroke="#fff" stroke-width="4" paint-order="stroke" direction="ltr">' + label + '</text>');
     const minY = Math.min(by - overH - 6, kind === 0 ? 60 : by) - 4;
     const minX = 0; // نفس المقياس لكل العربيات
     return '<svg class="truckSvg' + (small ? ' sm' : '') + '" viewBox="' + minX + ' ' + minY.toFixed(0) + ' ' + (318 - minX) + ' ' + (G + 10 - minY).toFixed(0) + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="امتلاء العربية ' + label + '">' + P.join('') + '</svg>';
