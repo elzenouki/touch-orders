@@ -1021,6 +1021,12 @@
   .ctRow input{width:auto; min-width:120px; margin:0; padding:7px 9px; font-size:15px;}
   .ctRow.need{border-color:rgba(168,67,47,.45); background:#fbefec;}
   .ctRow.need span{color:#a8432f;}
+  .fleetBox{background:#fff; border:1px solid #ebe5cf; border-radius:13px; padding:10px; margin-bottom:10px;}
+  .fleetBox > b{display:block; color:var(--o3); font-size:14.5px; margin-bottom:6px;}
+  .fleetRow{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13.5px; font-weight:700;}
+  .fleetRow span{flex:1;} .fleetRow input{width:70px; margin:0; padding:6px; text-align:center;}
+  .fleetRow em{font-style:normal; color:var(--omut); font-size:12px;}
+  .lChip.wait{background:#f1ede0; color:#7a6a3a;}
   .bayBox{background:#fff; border:1px solid #ebe5cf; border-radius:13px; padding:10px; margin:12px 0;}
   .bayBox > b{display:block; color:var(--o3); font-size:14.5px;}
   .bayBox > small{display:block; color:var(--omut); font-size:12px; margin:2px 0 8px; line-height:1.6;}
@@ -5610,6 +5616,8 @@
       m = m || {};
       ct_.map = ctNorm_(m.cust || m.times); ct_.loaded = true; ctKeep_();
       ct_.wh = m.wh && m.wh.lat != null ? { lat: +m.wh.lat, lng: +m.wh.lng } : null;
+      ct_.fleet = m.fleet || null;
+      try{ localStorage.setItem('tf_fleet', JSON.stringify(ct_.fleet)); }catch(e){}
       try{ localStorage.setItem(WH_CACHE_, JSON.stringify(ct_.wh)); }catch(e){}
       return ct_.map;
     }).catch(function(){ return ctMap_(); }).then(function(m){ ct_.inflight = null; return m; });
@@ -5974,6 +5982,7 @@
   function ldSuggestRoutes_(){
     if(!ld_.pending.length) return;
     ld_.plan = ldPlanRoutes_();
+    ldAllocFleet_(ld_.plan);
     dlPush_(); dlBackBtn_();
     document.getElementById('dlTitle').textContent = '🧭 خطوط سير مقترحة';
     document.getElementById('dlSub').textContent = ld_.plan.length + ' رحلة من ' + ld_.pending.length + ' طلبية — حسب قرب التجار من بعض';
@@ -5985,12 +5994,14 @@
     const noLocCount = ld_.plan.reduce(function(t, r){ return t + r.stops.filter(function(s){ return s.lat == null; }).length; }, 0);
     if(noLocCount) h += '<div class="note" style="margin-bottom:10px;">📍 ' + noLocCount + ' تاجر مالهمش لوكيشن — اتجمعوا حسب المنطقة. ثبّت مواقعهم في الزيارة الجاية عشان التقسيم يبقى أدق.</div>';
     h += ldDepBox_('ldRePlan_()');
+    h += ldFleetBox_();
     if(ld_.planOff && ld_.planOff.length) h += '<div class="note" style="margin-bottom:10px; color:#a8432f;">⛔ ' + ld_.planOff.length + ' تاجر أجازتهم يوم ' + CT_DAYS_[ldWd_()] + ' واتشالوا من الاقتراح: ' +
       escapeHtml(ld_.planOff.map(function(s){ return s.name || s.customer_code; }).join('، ')) + '</div>';
     if(!ct_.missing && !ldAnyClose_(ld_.pending)) h += '<div class="note" style="margin-bottom:10px;">⏰ مفيش ولا تاجر هنا متسجل له ميعاد قفل — الترتيب بالقرب بس. المندوب يكتب الميعاد من شاشة زيارة التاجر.</div>';
     h += ld_.plan.map(function(r, i){
       const cls = r.pct == null ? 'mut' : r.pct > 90 ? 'gold' : 'green';
-      return '<div class="aRow"><div class="aTop"><b>رحلة ' + (i + 1) + '</b>' +
+      return '<div class="aRow"' + (r.wait ? ' style="opacity:.72"' : '') + '><div class="aTop"><b>رحلة ' + (i + 1) + '</b>' +
+        (r.assign ? '<span class="lChip green">✅ تطلع: ' + escapeHtml(r.assign.map(function(a){ return (a.n ? a.n + ' × ' : '') + a.v.name; }).join(' + ')) + '</span>' : r.wait ? '<span class="lChip wait">⏳ تستنى — مفيش عربية فاضية</span>' : '') +
         (r.vehicle ? '<span class="lChip ' + cls + '">🚚 ' + escapeHtml(r.vehicle.name) + ' • ' + r.pct + '%</span>' : r.tooBig ? '<span class="lChip red">⚠️ محتاجة ' + (r.multi ? r.multi.count + ' عربيات' : 'أكتر من عربية') + '</span>' : '') + '</div>' +
         (r.tooBig && r.multi ? '<div class="aSub" style="color:#a8432f; font-weight:800;">🚚 ' + escapeHtml(r.multi.text) + '</div>' : '') +
         (r.pct != null ? '<div class="planTruck">' + ldTruckSvg_(r.pct, (ldFillSegs_(ldStopItems_(r.stops), r.vehicle.id) || {}).segs, ldVehKind_(r.vehicle.id), true) + '</div>' : '') +
@@ -6008,7 +6019,94 @@
     h += '<div class="note" style="margin-top:8px;">الاقتراح بيبدأ بالرحلة اللي فيها أقدم طلبية. لما تختار رحلة، تقدر تعدّل الترتيب والعربية قبل ما تبعت.</div>';
     ldBody_().innerHTML = h;
   }
-  function ldRePlan_(){ ld_.plan = ldPlanRoutes_(); ldRenderPlan_(); }
+  function ldRePlan_(){ ld_.plan = ldPlanRoutes_(); ldAllocFleet_(ld_.plan); ldRenderPlan_(); }
+
+  // ================== 🚚 العربيات المتاحة (بيتا) ==================
+  // المدير بيكتب عنده كام عربية من كل نوع، والاقتراح بيوزّع الرحلات عليها بالأولوية (الأقدم الأول):
+  // كل رحلة بتاخد أصغر عربية تشيلها — ولو النوع ده خلص بتاخد أكبر منه فاضية. اللي مالهاش عربية بتستنى.
+  function ldFleet_(){
+    if(ct_.fleet === undefined){ try{ ct_.fleet = JSON.parse(localStorage.getItem('tf_fleet') || 'null'); }catch(e){ ct_.fleet = null; } }
+    return ct_.fleet;
+  }
+  function ldFleetOn_(){
+    const f = ldFleet_();
+    return !!f && Object.keys(f).some(function(k){ return +f[k] > 0; });
+  }
+  // عربية من النوع المناسب أو أكبر منه فاضية — بنختار الأضيق اللي يشيل
+  function ldTakeVeh_(items, left, prefer){
+    const fills = ldFill_(items).filter(function(f){ return f.pct != null && f.pct <= 100 && (left[f.v.id] || 0) > 0; });
+    if(!fills.length) return null;
+    let pick = prefer ? fills.find(function(f){ return f.v.id === prefer; }) : null;
+    if(!pick) pick = fills.reduce(function(a, b){ return b.pct > a.pct ? b : a; });
+    left[pick.v.id]--;
+    return pick;
+  }
+  function ldAllocFleet_(plan){
+    plan.forEach(function(r){ r.assign = null; r.wait = false; r.pack = null; });
+    if(!ldFleetOn_() || !ld_.caps.length) return;
+    const f = ldFleet_(), left = {};
+    (ld_.veh || []).forEach(function(v){ if(v.active !== false) left[v.id] = +f[v.id] || 0; });
+    plan.forEach(function(r){
+      if(!r.tooBig){
+        const items = ldStopItems_(r.stops);
+        const got = ldTakeVeh_(items, left, r.vehicle && r.vehicle.id);
+        if(got) r.assign = [{ v: got.v, pct: got.pct }]; else r.wait = true;
+        return;
+      }
+      // رحلة على كذا عربية: لازم كلهم يبقوا فاضيين، غير كده تستنى كلها
+      const pack = ldPackTrip_(r);
+      if(!pack || !pack.length){ r.wait = true; return; }
+      const trial = Object.assign({}, left), got = [];
+      for(let k = 0; k < pack.length; k++){
+        const t = pack[k];
+        if(t.huge){
+          // طلبية أكبر من أكبر عربية: محتاجة كذا عربية من الأكبر
+          if((trial[t.v.id] || 0) < t.huge.count){ r.wait = true; return; }
+          trial[t.v.id] -= t.huge.count; got.push({ v: t.v, pct: t.pct, n: t.huge.count }); continue;
+        }
+        const g = ldTakeVeh_(t.items, trial, t.v.id);
+        if(!g){ r.wait = true; return; }
+        t.v = g.v; t.pct = g.pct; got.push({ v: g.v, pct: g.pct });
+      }
+      Object.keys(trial).forEach(function(k){ left[k] = trial[k]; });
+      r.assign = got; r.pack = pack;
+    });
+    ld_.fleetLeft = left;
+  }
+  function ldFleetBox_(){
+    const vs = (ld_.veh || []).filter(function(v){ return v.active !== false; });
+    if(!vs.length || !ld_.caps.length) return '';
+    const f = ldFleet_() || {}, can = ldCanSetWh_(), on = ldFleetOn_();
+    let h = '<div class="fleetBox"><b>🚚 العربيات المتاحة' + (on ? '' : ' — لسه ماتحددتش') + '</b>';
+    if(!on && !can) return h + '<div class="note">المدير يحدد عنده كام عربية من كل نوع، والاقتراح يوزّع الرحلات عليها.</div></div>';
+    h += vs.map(function(v){
+      const n = +f[v.id] || 0, used = on && ld_.fleetLeft ? n - (ld_.fleetLeft[v.id] || 0) : 0;
+      return '<div class="fleetRow"><span>' + escapeHtml(v.name) + (on ? ' <em>(شغال ' + used + ' من ' + n + ')</em>' : '') + '</span>' +
+        (can ? '<input type="text" inputmode="numeric" maxlength="2" dir="ltr" data-v="' + v.id + '" value="' + n + '">' : '<b>' + n + '</b>') + '</div>';
+    }).join('');
+    if(can) h += '<button type="button" class="aGo wide" style="margin-top:8px;" onclick="ldFleetSave_()">✔ احفظ ووزّع الرحلات</button>';
+    if(on){
+      const ok = ld_.plan.filter(function(r){ return r.assign; }).length, wait = ld_.plan.filter(function(r){ return r.wait; }).length;
+      const rh = function(n){ return n + (n >= 3 && n <= 10 ? ' رحلات' : ' رحلة'); };
+      h += '<div class="note" style="margin-top:8px; font-weight:800;">✅ ' + rh(ok) + ' تطلع ' + (ldDayOff_() === 0 ? 'النهارده' : 'يوم التسليم') + (wait ? ' • ⏳ ' + rh(wait) + ' تستنى (مفيش عربية فاضية)' : '') + '</div>';
+    }
+    return h + '</div>';
+  }
+  function ldFleetSave_(){
+    const counts = {};
+    document.querySelectorAll('.fleetRow input[data-v]').forEach(function(el){
+      const n = Math.max(0, Math.min(99, parseInt(normalizeDigits(el.value || '0'), 10) || 0));
+      counts[el.dataset.v] = n;
+    });
+    showLoading(true);
+    ctApi_('set_fleet', { counts: counts }).then(function(){
+      showLoading(false);
+      ct_.fleet = counts;
+      try{ localStorage.setItem('tf_fleet', JSON.stringify(counts)); }catch(e){}
+      toast_('🚚 اتحفظ عدد العربيات');
+      ldRePlan_();
+    }).catch(function(e){ showLoading(false); showMsg('ماتحفظش: ' + e.message, 'error'); });
+  }
   // ================== 🚚🚚 رحلة محتاجة أكتر من عربية (بيتا) ==================
   // بنوزّع طلبيات الرحلة على عربيات: كل طلبية بتروح كاملة لعربية واحدة (السيستم مابيقسمش الطلبية).
   // أكبر طلبية الأول في أول عربية تساعها، ولو مفيش نفتح عربية كبيرة جديدة، وفي الآخر كل عربية بتصغر لأصغر نوع يشيلها.
@@ -6053,7 +6151,7 @@
   }
   function ldMultiOpen_(i){
     const r = ld_.plan[i];
-    ld_.multi = ldPackTrip_(r);
+    ld_.multi = r.pack || ldPackTrip_(r);
     if(!ld_.multi || !ld_.multi.length) return showMsg('سعات العربيات ناقصة — مش قادر أقسّم الرحلة', 'error');
     dlPush_(); dlBackBtn_();
     const need = ld_.multi.reduce(function(a, t){ return a + (t.huge ? t.huge.count : 1); }, 0);
@@ -6119,6 +6217,7 @@
     ld_.sel = {};
     r.docs.forEach(function(id){ ld_.sel[id] = true; });
     ldRoute_();
+    if(r.assign && r.assign[0] && r.assign[0].v.id !== ld_.vehicle){ ld_.vehicle = r.assign[0].v.id; ldRenderRoute_(); }
   }
   function ldPlanMap_(i){
     const pts = ld_.plan[i].stops.filter(function(s){ return s.lat != null; }).map(function(s){ return s.lat + ',' + s.lng; });
