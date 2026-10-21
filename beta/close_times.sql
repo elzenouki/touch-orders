@@ -4,7 +4,7 @@
 --
 -- • جدول جديد customer_close_times: لكل تاجر (بكوده) الساعة اللي بيقفل فيها، وأيام أجازته في الأسبوع
 --   (off_days: أرقام الأيام — 0 الأحد، 1 الاتنين، ... 5 الجمعة، 6 السبت).
--- • جدول جديد close_times_settings: إعدادات المواعيد — دلوقتي فيه مكان المخزن (اللي العربيات بتخرج منه).
+-- • جدول جديد close_times_settings: إعدادات — مكان المخزن (اللي العربيات بتخرج منه) وعدد العربيات المتاحة من كل نوع.
 --   (اسمه مختلف عن أي جدول موجود عندك عشان مايلمسش حاجة قديمة)
 -- • دالة close_times_api: التطبيق بيكلمها عشان يقرا المواعيد ومكان المخزن، أو يحفظهم.
 --   التأكد من المستخدم (إيميل + PIN) بيتم بنفس دالة التحميلات loads_api الموجودة —
@@ -63,7 +63,18 @@ begin
     return jsonb_build_object('ok', true, 'result', jsonb_build_object(
       'cust', coalesce((select jsonb_object_agg(customer_code, jsonb_build_object('t', to_char(close_time, 'HH24:MI'), 'off', to_jsonb(off_days)))
                         from public.customer_close_times), '{}'::jsonb),
-      'wh', (select value from public.close_times_settings where key = 'warehouse')));
+      'wh', (select value from public.close_times_settings where key = 'warehouse'),
+      'fleet', (select value from public.close_times_settings where key = 'fleet')));
+
+  elsif act = 'set_fleet' then
+    -- عدد العربيات من كل نوع: { "رقم نوع العربية": العدد } — أي حاجة مش أرقام بتتشال
+    insert into public.close_times_settings (key, value, updated_by, updated_at)
+    values ('fleet', coalesce((select jsonb_object_agg(key, least(value::int, 99))
+                               from jsonb_each_text(case when jsonb_typeof(args->'counts') = 'object' then args->'counts' else '{}'::jsonb end)
+                               where key ~ '^[0-9]+$' and value ~ '^[0-9]{1,4}$'), '{}'::jsonb), who, now())
+    on conflict (key) do update
+      set value = excluded.value, updated_by = excluded.updated_by, updated_at = now();
+    return jsonb_build_object('ok', true, 'result', (select value from public.close_times_settings where key = 'fleet'));
 
   elsif act = 'set_wh' then
     begin
