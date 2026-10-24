@@ -1045,6 +1045,53 @@
   .tIc.t1{background:#e3f0e6; color:#2b7a4f;} .tIc.t2{background:#e3eaf6; color:#2c548f;} .tIc.t3{background:#fbf1d8; color:#a8781a;}
   .tIc.t4{background:#f8e3df; color:#a8432f;} .tIc.t5{background:#ece6f6; color:#6a4c9c;} .tIc.t6{background:#eef0e3; color:#56672f;}
   .toolBtn.out{color:#a8432f;}
+  /* ===== بيتا: تقرير زيارات مندوب ===== */
+  .rvHero{display:flex; align-items:center; justify-content:space-between; gap:10px; background:linear-gradient(150deg,#56692c,#2f3b17); color:#fff; border-radius:18px; padding:14px 16px; margin-bottom:10px; border-bottom:3px solid #d9a21b;}
+  .rvHero small{display:block; font-size:11.5px; opacity:.8;} .rvHero b{display:block; font-size:19px; font-weight:800;} .rvHero span{font-size:12px; opacity:.9;}
+  .rvHero img{height:30px; width:auto; opacity:.95;}
+  .rvKpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .rvK{position:relative; background:#fff; border:1px solid #e6dfc6; border-radius:14px; padding:9px 8px 8px; text-align:center; overflow:hidden;}
+  .rvK:before{content:''; position:absolute; top:0; right:0; left:0; height:4px; background:var(--kc);}
+  .rvK i{font-style:normal; font-size:15px;} .rvK b{display:block; font-size:20px; font-weight:900; color:var(--kc);}
+  .rvK span{display:block; font-size:11.5px; font-weight:700; color:var(--o3,#2f3519);} .rvK small{display:block; font-size:10.5px; color:var(--omut,#7d7f62); margin-top:1px;}
+  .rvK.k1{--kc:#3f4c22;} .rvK.k2{--kc:#2b7a4f;} .rvK.k3{--kc:#b9861a;} .rvK.k4{--kc:#6a4c9c;} .rvK.k5{--kc:#2c548f;} .rvK.k6{--kc:#a8432f;}
+  .rvSec{display:flex; align-items:center; justify-content:space-between; margin:16px 0 8px; padding:8px 12px; border-radius:12px; color:#fff; font-size:14px;}
+  .rvSec span{background:rgba(255,255,255,.22); border-radius:10px; padding:1px 10px; font-weight:800;}
+  .rvSec.g{background:#3f4c22;} .rvSec.b{background:#2c548f;} .rvSec.r{background:#a8432f;}
+  .rvCard{background:#fff; border:1px solid #e6dfc6; border-right:4px solid #56672f; border-radius:13px; padding:9px 11px; margin-bottom:7px;}
+  .rvCard.b{border-right-color:#2c548f;}
+  .rvCT{display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;} .rvCT b{font-size:14.5px; color:var(--o3,#2f3519);}
+  .rvChips{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px;}
+  .rvChips .c{font-size:11.5px; font-weight:800; border-radius:9px; padding:2px 8px;}
+  .rvChips .v{background:#eef0e3; color:#3f4c22;} .rvChips .o{background:#e3f0e6; color:#2b7a4f;} .rvChips .p{background:#fbf1d8; color:#8a6512;} .rvChips .n{background:#f3efe3; color:#7d7f62;}
+  .rvSub{font-size:11.5px; color:var(--omut,#7d7f62); margin-top:5px; line-height:1.6;}
+  .rvRow{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid #efe9d6; border-radius:12px; padding:8px 11px; margin-bottom:6px;}
+  .rvRow > div{flex:1; min-width:0;} .rvRow b{font-size:14px; color:var(--o3,#2f3519);} .rvRow small{display:block; font-size:11.5px; color:var(--omut,#7d7f62);}
+  .rvDays{flex:none; font-size:11.5px; font-weight:800; border-radius:10px; padding:3px 9px; background:#f3efe3; color:#7d7f62;}
+  .rvDays.warm{background:#fbf1d8; color:#8a6512;} .rvDays.hot{background:#f8e3df; color:#a8432f;} .rvDays.never{background:#ece6f6; color:#6a4c9c;}
+  /* PDF */
+  .rvPg{padding:0 !important; height:1123px; overflow:hidden; box-sizing:border-box; position:relative; font-family:'Alexandria',sans-serif;}
+  .rvPBand{display:flex; align-items:center; justify-content:space-between; background:linear-gradient(150deg,#56692c,#2f3b17); color:#fff; padding:26px 36px 22px; border-bottom:5px solid #d9a21b;}
+  .rvPBand small{display:block; font-size:13px; opacity:.85;} .rvPBand b{display:block; font-size:28px; font-weight:800; margin:2px 0;} .rvPBand span{font-size:14px;}
+  .rvPBand img{height:46px; width:auto;}
+  .rvPMini{display:flex; align-items:center; justify-content:space-between; padding:18px 36px 10px; border-bottom:2px solid #3f4c22; font-size:13px; font-weight:700; color:#555;}
+  .rvPMini img{height:26px; width:auto;}
+  .rvPIn{padding:16px 36px 60px;}
+  .rvPKs{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:6px;}
+  .rvPK{border:1px solid #e0d9c2; border-top:5px solid var(--kc); border-radius:10px; padding:8px 4px; text-align:center; background:#fcfbf6;}
+  .rvPK b{display:block; font-size:22px; font-weight:900; color:var(--kc);} .rvPK span{display:block; font-size:12px; font-weight:700;} .rvPK small{display:block; font-size:10px; color:#777;}
+  .rvPK.k1{--kc:#3f4c22;} .rvPK.k2{--kc:#2b7a4f;} .rvPK.k3{--kc:#b9861a;} .rvPK.k4{--kc:#6a4c9c;} .rvPK.k5{--kc:#2c548f;} .rvPK.k6{--kc:#a8432f;}
+  .rvPSec{display:flex; justify-content:space-between; align-items:center; color:#fff; padding:7px 12px; border-radius:8px 8px 0 0; margin-top:16px; font-size:14px;}
+  .rvPSec span{background:rgba(255,255,255,.25); border-radius:9px; padding:0 10px; font-weight:800;}
+  .rvPSec.g{background:#3f4c22;} .rvPSec.b{background:#2c548f;} .rvPSec.r{background:#a8432f;}
+  .rvPT{width:100%; border-collapse:collapse; font-size:12px;}
+  .rvPT th{background:#efeadb; color:#2f3519; padding:6px 4px; font-weight:800; border-bottom:2px solid #d8d0b6;}
+  .rvPT td{padding:5px 4px; text-align:center; border-bottom:1px solid #ece6d2;}
+  .rvPT tbody tr:nth-child(even) td{background:#faf8f1;}
+  .rvPT td.nm{text-align:right;} .rvPT td.nm small{display:block; color:#888; font-size:10px;} .rvPT td.rs{font-size:10.5px; color:#777; max-width:150px;}
+  .rvPT tr.tot td{background:#3f4c22 !important; color:#fff; font-weight:800;} .rvPT.b tr.tot td{background:#2c548f !important;}
+  .rvPT .dd{display:inline-block; border-radius:8px; padding:1px 8px; background:#f3efe3; font-weight:800;} .rvPT .dd.warm{background:#fbf1d8; color:#8a6512;} .rvPT .dd.hot{background:#f8e3df; color:#a8432f;} .rvPT .dd.never{background:#ece6f6; color:#6a4c9c;}
+  .rvPFoot{position:absolute; bottom:18px; left:36px; right:36px; text-align:center; font-size:10.5px; color:#999; border-top:1px solid #e6e0c8; padding-top:6px;}
   .rvTbl{width:100%; border-collapse:collapse; font-size:12.5px; background:#fff; border-radius:12px; overflow:hidden;}
   .rvTbl th{background:#3f4c22; color:#fff; padding:7px 5px; font-weight:700; font-size:12px;}
   .rvTbl td{padding:7px 5px; border-bottom:1px solid #eee7d3; text-align:center;} .rvTbl td:first-child{text-align:right;}
@@ -8664,7 +8711,8 @@
     const by = {};
     const get = function(code, name){
       const k = code || name || '?';
-      return by[k] = by[k] || { code: code || '', name: name || code || '', visits: 0, orders: 0, qty: 0, paid: 0, payN: 0, last: '', lastSort: '', noOrder: 0, reasons: {} };
+      return by[k] = by[k] || { code: code || '', name: name || code || '', visits: 0, orders: 0, qty: 0, paid: 0, payN: 0, last: '', lastSort: '', noOrder: 0, reasons: {},
+        remoteOrders: 0, remoteQty: 0, remotePaid: 0, methods: {} };
     };
     (V.visits || []).forEach(function(v){
       const c = get(v.code, v.name);
@@ -8675,52 +8723,83 @@
     });
     (O.docs || []).forEach(function(d){
       if(d.type === 'مرتجع') return;
-      const c = get(d.customerCode, d.customerName);
-      c.orders++; c.qty += Number(d.qty) || 0;
+      const c = get(d.customerCode, d.customerName), q = Number(d.qty) || 0;
+      c.orders++; c.qty += q;
+      if(d.source === 'تليفون'){ c.remoteOrders++; c.remoteQty += q; }
     });
     (P.payments || []).forEach(function(p){
-      const c = get(p.customerCode, p.customerName);
-      c.paid += Number(p.amount) || 0; c.payN++;
+      const c = get(p.customerCode, p.customerName), a = Number(p.amount) || 0;
+      c.paid += a; c.payN++;
+      if(p.remote){ c.remotePaid += a; if(p.method) c.methods[p.method] = 1; }
     });
-    const rows = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.visits - a.visits || b.orders - a.orders || b.paid - a.paid; });
+    const all = Object.keys(by).map(function(k){ return by[k]; });
+    // اتزاروا = ليهم زيارة فعلًا في المدة • من غير زيارة = اتعاملوا بس (تحويل/إنستاباي/طلبية بالتليفون)
+    const rows = all.filter(function(r){ return r.visits > 0; }).sort(function(a, b){ return b.visits - a.visits || b.orders - a.orders || b.paid - a.paid; });
+    const remote = all.filter(function(r){ return !r.visits; }).sort(function(a, b){ return b.paid - a.paid || b.qty - a.qty; });
     const seen = {};
     rows.forEach(function(r){ if(r.code) seen[r.code] = 1; });
-    const unv = U && U.list ? U.list.filter(function(x){ return !seen[x.code] && (x.daysSince == null || x.daysSince > meta.D); }) : null;
+    const remoteBy = {};
+    remote.forEach(function(r){ if(r.code) remoteBy[r.code] = r; });
+    const unv = U && U.list ? U.list.filter(function(x){ return !seen[x.code] && (x.daysSince == null || x.daysSince > meta.D); })
+      .map(function(x){ return Object.assign({}, x, { dealt: remoteBy[x.code] || null }); }) : null;
     const capped = (V.total > (V.visits || []).length) || (O.total > (O.docs || []).length);
+    const sum = function(list, k){ return list.reduce(function(t, r){ return t + r[k]; }, 0); };
     return {
-      meta: meta, rows: rows, unv: unv, capped: capped, custTotal: U ? U.total : null,
+      meta: meta, rows: rows, remote: remote, unv: unv, capped: capped, custTotal: U ? U.total : null,
       tot: {
-        visits: (V.visits || []).length, visitsTotal: V.total || (V.visits || []).length,
-        custVisited: rows.filter(function(r){ return r.visits; }).length,
-        orders: rows.reduce(function(t, r){ return t + r.orders; }, 0), qty: rows.reduce(function(t, r){ return t + r.qty; }, 0),
-        paid: rows.reduce(function(t, r){ return t + r.paid; }, 0),
+        visitsTotal: V.total || (V.visits || []).length, custVisited: rows.length,
+        orders: sum(all, 'orders'), qty: sum(all, 'qty'), paid: sum(all, 'paid'),
+        visitOrders: sum(rows, 'orders'), visitQty: sum(rows, 'qty'), visitPaid: sum(rows, 'paid'),
+        remoteN: remote.length, remoteOrders: sum(remote, 'orders'), remoteQty: sum(remote, 'qty'), remotePaid: sum(remote, 'paid'),
+        noOrder: sum(rows, 'noOrder'),
       },
     };
   }
   function rvPeriodTxt_(m){ return m.from === m.to ? ymdToDmy_(m.from) : 'من ' + ymdToDmy_(m.from) + ' إلى ' + ymdToDmy_(m.to); }
+  function rvReasons_(r){ return Object.keys(r.reasons).map(function(k){ return k + (r.reasons[k] > 1 ? ' ×' + r.reasons[k] : ''); }).join('، '); }
+  function rvDaysCls_(d){ return d == null ? 'never' : d > 30 ? 'hot' : d > 14 ? 'warm' : ''; }
   function rvRender_(){
     const d = rv_.data, t = d.tot, e = escapeHtml;
-    let h = '<div class="note" style="margin-bottom:8px;"><b>' + e(d.meta.rep) + '</b> • ' + rvPeriodTxt_(d.meta) + '</div>';
-    h += '<div class="tiles">' +
-      '<div class="tile"><b>' + t.visitsTotal + '</b><span>زيارة</span></div>' +
-      '<div class="tile"><b>' + t.custVisited + '</b><span>عميل اتزار</span></div>' +
-      '<div class="tile green"><b>' + t.orders + '</b><span>طلبية</span></div>' +
-      '<div class="tile"><b>' + fmt(t.qty) + '</b><span>قطعة</span></div>' +
-      '<div class="tile gold"><b>' + fmt(t.paid) + '</b><span>تحصيل (ج)</span></div>' +
-      '<div class="tile red"><b>' + (d.unv ? d.unv.length : '—') + '</b><span>ماتزاروش</span></div></div>';
+    const conv = t.visitsTotal ? Math.round((t.visitsTotal - t.noOrder) * 100 / t.visitsTotal) : 0;
+    let h = '<div class="rvHero"><div><small>تقرير زيارات</small><b>' + e(d.meta.rep) + '</b><span>' + rvPeriodTxt_(d.meta) + '</span></div><img src="' + LOGO_W_ + '" alt=""></div>';
+    const K = function(cls, ic, val, lbl, sub){ return '<div class="rvK ' + cls + '"><i>' + ic + '</i><b>' + val + '</b><span>' + lbl + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>'; };
+    h += '<div class="rvKpis">' +
+      K('k1', '👣', t.visitsTotal, 'زيارة', 'لـ ' + t.custVisited + ' عميل') +
+      K('k2', '🧾', t.orders, 'طلبية', fmt(t.qty) + ' قطعة') +
+      K('k3', '💵', fmt(t.paid), 'تحصيل (ج)', t.remotePaid ? fmt(t.remotePaid) + ' من غير زيارة' : '') +
+      K('k4', '🎯', conv + '%', 'زيارات فيها شغل', t.noOrder ? t.noOrder + ' من غير طلب' : '') +
+      K('k5', '📞', t.remoteN, 'من غير زيارة', t.remoteN ? 'تحويل / تليفون' : '') +
+      K('k6', '⛔', d.unv ? d.unv.length : '—', 'ماتزاروش', d.custTotal ? 'من ' + d.custTotal + ' عميل' : '') + '</div>';
     if(d.capped) h += '<div class="note" style="color:var(--gold-d); margin:8px 0;">⚠️ المدة طويلة والسيرفر رجّع جزء من الزيارات أو الطلبيات بس — اختار مدة أقصر عشان الأرقام تبقى كاملة.</div>';
-    if(d.meta.to < ymd_(bizToday_())) h += '<div class="note" style="margin:6px 0;">ملحوظة: «ماتزاروش» محسوبة من ' + ymdToDmy_(d.meta.from) + ' لحد النهارده.</div>';
     h += '<div class="rvBtns"><button type="button" class="aGo" style="margin:0;" onclick="rvExcel_()">📥 Excel</button><button type="button" class="aGo" style="margin:0; background:#b9861a;" onclick="rvPdf_()">📄 PDF</button></div>';
-    h += '<div class="sectionLabel" style="margin:12px 0 6px;">العملاء اللي اتزاروا / اتعاملوا (' + d.rows.length + ')</div>';
-    h += d.rows.length ? '<table class="rvTbl"><thead><tr><th>العميل</th><th>زيارات</th><th>طلبيات</th><th>قطع</th><th>تحصيل</th></tr></thead><tbody>' + d.rows.map(function(r){
-      return '<tr><td><b>' + e(r.name) + '</b><small>' + e([r.code, r.last ? 'آخر زيارة ' + r.last : '📞 من غير زيارة'].filter(Boolean).join(' • ')) + '</small></td>' +
-        '<td>' + r.visits + '</td><td>' + r.orders + '</td><td>' + fmt(r.qty) + '</td><td>' + (r.paid ? fmt(r.paid) : '—') + '</td></tr>';
-    }).join('') + '</tbody></table>' : '<div class="empty">مفيش زيارات في المدة دي</div>';
-    h += '<div class="sectionLabel" style="margin:14px 0 6px;">العملاء اللي ماتزاروش' + (d.unv ? ' (' + d.unv.length + (d.custTotal ? ' من ' + d.custTotal : '') + ')' : '') + '</div>';
+    // اتزاروا
+    h += '<div class="rvSec g"><b>👣 العملاء اللي اتزاروا</b><span>' + d.rows.length + '</span></div>';
+    h += d.rows.length ? d.rows.map(function(r){
+      return '<div class="rvCard"><div class="rvCT"><b>' + e(r.name) + '</b><span class="oCode">' + e(r.code) + '</span></div>' +
+        '<div class="rvChips"><span class="c v">👣 ' + r.visits + ' زيارة</span>' +
+        (r.orders ? '<span class="c o">🧾 ' + r.orders + ' طلبية • ' + fmt(r.qty) + ' قطعة</span>' : '<span class="c n">من غير طلبية</span>') +
+        (r.paid ? '<span class="c p">💵 ' + fmt(r.paid) + ' ج</span>' : '') + '</div>' +
+        '<div class="rvSub">آخر زيارة ' + e(r.last || '—') + (r.noOrder ? ' • ✋ ' + e(rvReasons_(r) || (r.noOrder + ' من غير طلب')) : '') + '</div></div>';
+    }).join('') : '<div class="empty">مفيش زيارات في المدة دي</div>';
+    // من غير زيارة
+    if(d.remote.length){
+      h += '<div class="rvSec b"><b>📞 اتعاملوا من غير زيارة</b><span>' + d.remote.length + '</span></div>' +
+        '<div class="note" style="margin:-2px 0 8px;">بعتوا فلوس (إنستاباي / تحويل) أو طلبوا بالتليفون — المندوب مازارهمش في المدة دي.</div>';
+      h += d.remote.map(function(r){
+        return '<div class="rvCard b"><div class="rvCT"><b>' + e(r.name) + '</b><span class="oCode">' + e(r.code) + '</span></div><div class="rvChips">' +
+          (r.paid ? '<span class="c p">💵 ' + fmt(r.paid) + ' ج' + (Object.keys(r.methods).length ? ' • ' + e(Object.keys(r.methods).join('، ')) : '') + '</span>' : '') +
+          (r.orders ? '<span class="c o">🧾 ' + r.orders + ' طلبية • ' + fmt(r.qty) + ' قطعة</span>' : '') + '</div></div>';
+      }).join('');
+    }
+    // ماتزاروش
+    h += '<div class="rvSec r"><b>⛔ العملاء اللي ماتزاروش</b><span>' + (d.unv ? d.unv.length : '—') + '</span></div>';
+    if(d.meta.to < ymd_(bizToday_())) h += '<div class="note" style="margin:-2px 0 8px;">محسوبة من ' + ymdToDmy_(d.meta.from) + ' لحد النهارده.</div>';
     if(!d.unv) h += '<div class="empty">ماقدرتش أجيب قايمة العملاء دلوقتي</div>';
-    else h += d.unv.length ? '<table class="rvTbl"><thead><tr><th>العميل</th><th>آخر زيارة</th><th>من كام يوم</th></tr></thead><tbody>' + d.unv.map(function(x){
-      return '<tr class="z"><td><b>' + e(x.name) + '</b><small>' + e([x.code, x.area].filter(Boolean).join(' • ')) + '</small></td><td>' + e(x.lastVisit || 'عمره ما اتزار') + '</td><td>' + (x.daysSince == null ? '—' : x.daysSince) + '</td></tr>';
-    }).join('') + '</tbody></table>' : '<div class="empty">كل العملاء اتزاروا ✔</div>';
+    else h += d.unv.length ? d.unv.map(function(x){
+      return '<div class="rvRow"><div><b>' + e(x.name) + '</b><small>' + e([x.code, x.area, x.lastVisit ? 'آخر زيارة ' + x.lastVisit : 'عمره ما اتزار'].filter(Boolean).join(' • ')) +
+        (x.dealt ? ' • <span style="color:#2c548f">📞 اتعامل من غير زيارة</span>' : '') + '</small></div>' +
+        '<span class="rvDays ' + rvDaysCls_(x.daysSince) + '">' + (x.daysSince == null ? 'جديد' : x.daysSince + ' يوم') + '</span></div>';
+    }).join('') : '<div class="empty">كل العملاء اتزاروا ✔</div>';
     document.getElementById('rvOut').innerHTML = h;
   }
   function rvFileName_(ext){ const m = rv_.data.meta; return 'زيارات-' + m.rep.replace(/\s+/g, '-') + '-' + m.from + (m.to !== m.from ? '_' + m.to : '') + '.' + ext; }
@@ -8730,45 +8809,98 @@
     try{
       await ensureExcelJsLoaded_();
       const wb = new ExcelJS.Workbook();
-      const head = function(ws, cols){
-        ws.columns = cols.map(function(c){ return { header: c[0], width: c[1] }; });
-        ws.getRow(1).height = 22;
-        ws.getRow(1).eachCell(function(c){ c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = xlFill_(XL_NAVY_); c.alignment = { horizontal: 'center', vertical: 'middle' }; });
+      const OLIVE = 'FF3F4C22', ZEBRA = 'FFF6F3E8', LINE = { style: 'thin', color: { argb: 'FFE0D9C2' } };
+      const border = { top: LINE, bottom: LINE, left: LINE, right: LINE };
+      const sheet = function(name, title, cols, rows, fill, totals){
+        const ws = wb.addWorksheet(name, { views: [{ rightToLeft: true, state: 'frozen', ySplit: 3 }] });
+        ws.columns = cols.map(function(c){ return { width: c[1] }; });
+        ws.mergeCells(1, 1, 1, cols.length);
+        const t = ws.getCell(1, 1);
+        t.value = title; t.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } }; t.fill = xlFill_(fill || OLIVE); t.alignment = { horizontal: 'center', vertical: 'middle' };
+        ws.getRow(1).height = 28;
+        ws.mergeCells(2, 1, 2, cols.length);
+        const s2 = ws.getCell(2, 1);
+        s2.value = d.meta.rep + ' • ' + rvPeriodTxt_(d.meta); s2.font = { bold: true, color: { argb: 'FF6B6F55' } }; s2.alignment = { horizontal: 'center' };
+        const hr = ws.getRow(3);
+        cols.forEach(function(c, i){ const cell = hr.getCell(i + 1); cell.value = c[0]; cell.font = { bold: true, color: { argb: 'FF2F3519' } }; cell.fill = xlFill_('FFE9E4CF'); cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; cell.border = border; });
+        hr.height = 22;
+        rows.forEach(function(r, i){
+          const row = ws.addRow(r);
+          row.eachCell({ includeEmpty: true }, function(c, ci){ c.border = border; c.alignment = { horizontal: ci <= 2 ? 'right' : 'center', vertical: 'middle', wrapText: true }; if(i % 2) c.fill = xlFill_(ZEBRA); });
+        });
+        if(totals){
+          const row = ws.addRow(totals);
+          row.eachCell({ includeEmpty: true }, function(c){ c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = xlFill_(fill || OLIVE); c.border = border; c.alignment = { horizontal: 'center' }; });
+        }
+        cols.forEach(function(c, i){ if(c[2]) ws.getColumn(i + 1).numFmt = c[2]; });
+        return ws;
       };
-      const s1 = wb.addWorksheet('ملخص', { views: [{ rightToLeft: true }] });
-      head(s1, [['البند', 26], ['القيمة', 22]]);
-      [['المندوب', d.meta.rep], ['المدة', rvPeriodTxt_(d.meta)], ['عدد الزيارات', d.tot.visitsTotal], ['عملاء اتزاروا', d.tot.custVisited],
-        ['الطلبيات', d.tot.orders], ['القطع', d.tot.qty], ['التحصيل (ج)', d.tot.paid], ['عملاء ماتزاروش', d.unv ? d.unv.length : '—']].forEach(function(r){ s1.addRow(r); });
-      const s2 = wb.addWorksheet('حسب العميل', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
-      head(s2, [['كود العميل', 13], ['اسم العميل', 32], ['عدد الزيارات', 12], ['زيارات من غير طلب', 16], ['عدد الطلبيات', 12], ['القطع', 10], ['التحصيل (ج)', 13], ['آخر زيارة', 13], ['أسباب عدم الطلب', 30]]);
-      d.rows.forEach(function(r){ s2.addRow([r.code, r.name, r.visits, r.noOrder, r.orders, r.qty, r.paid, r.last, Object.keys(r.reasons).map(function(k){ return k + ' (' + r.reasons[k] + ')'; }).join('، ')]); });
-      const s3 = wb.addWorksheet('ماتزاروش', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
-      head(s3, [['كود العميل', 13], ['اسم العميل', 32], ['المنطقة', 18], ['آخر زيارة', 14], ['من كام يوم', 11], ['التليفون', 15]]);
-      (d.unv || []).forEach(function(x){ s3.addRow([x.code, x.name, x.area || '', x.lastVisit || 'عمره ما اتزار', x.daysSince == null ? '' : x.daysSince, x.phone || '']); });
+      const t = d.tot;
+      sheet('ملخص', 'ملخص تقرير الزيارات', [['البند', 30], ['القيمة', 24]], [
+        ['عدد الزيارات', t.visitsTotal], ['عملاء اتزاروا', t.custVisited], ['زيارات من غير طلب', t.noOrder],
+        ['الطلبيات (كلها)', t.orders], ['القطع (كلها)', t.qty], ['التحصيل كله (ج)', t.paid],
+        ['طلبيات وتحصيل من الزيارات', t.visitOrders + ' طلبية • ' + t.visitPaid + ' ج'],
+        ['عملاء اتعاملوا من غير زيارة', t.remoteN], ['تحصيل من غير زيارة (ج)', t.remotePaid],
+        ['عملاء ماتزاروش', d.unv ? d.unv.length : '—']]);
+      sheet('اتزاروا', 'العملاء اللي اتزاروا', [['كود العميل', 13], ['اسم العميل', 32], ['الزيارات', 10], ['من غير طلب', 11], ['الطلبيات', 10], ['القطع', 10, '#,##0'], ['التحصيل (ج)', 13, '#,##0'], ['آخر زيارة', 13], ['أسباب عدم الطلب', 30]],
+        d.rows.map(function(r){ return [r.code, r.name, r.visits, r.noOrder, r.orders, r.qty, r.paid, r.last, rvReasons_(r)]; }), null,
+        ['', 'الإجمالي', t.visitsTotal, t.noOrder, t.visitOrders, t.visitQty, t.visitPaid, '', '']);
+      sheet('من غير زيارة', 'اتعاملوا من غير زيارة (تحويل / تليفون)', [['كود العميل', 13], ['اسم العميل', 32], ['التحصيل (ج)', 13, '#,##0'], ['طريقة الدفع', 20], ['طلبيات بالتليفون', 14], ['القطع', 10, '#,##0']],
+        d.remote.map(function(r){ return [r.code, r.name, r.paid, Object.keys(r.methods).join('، '), r.orders, r.qty]; }), 'FF2C548F',
+        ['', 'الإجمالي', t.remotePaid, '', t.remoteOrders, t.remoteQty]);
+      sheet('ماتزاروش', 'العملاء اللي ماتزاروش', [['كود العميل', 13], ['اسم العميل', 32], ['المنطقة', 18], ['آخر زيارة', 14], ['من كام يوم', 11], ['اتعامل من غير زيارة', 18], ['التليفون', 15]],
+        (d.unv || []).map(function(x){ return [x.code, x.name, x.area || '', x.lastVisit || 'عمره ما اتزار', x.daysSince == null ? '' : x.daysSince, x.dealt ? 'أيوه' : '', x.phone || '']; }), 'FFA8432F');
       const buf = await wb.xlsx.writeBuffer();
       showLoading(false);
       await shareOrDownload_(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), rvFileName_('xlsx'), 'share');
     }catch(err){ showLoading(false); showMsg('ماقدرتش أعمل الملف: ' + ((err && err.message) || err), 'error'); }
   }
-  // صفحات A4: جدول العملاء ثم ماتزاروش — كل صفحة ~26 سطر
+  // صفحات A4 بتصميم التقرير: رأس ملون + أرقام + جداول بالألوان
   function rvPdfPages_(){
-    const d = rv_.data, e = escapeHtml, pages = [];
-    const top = '<div class="lpHead"><div><img class="lpLogo" src="' + LOGO_D_ + '" alt="TOUCH"><small>المناديب الخارجيين</small></div><div class="lpT">تقرير زيارات ' + e(d.meta.rep) + '</div>' +
-      '<div class="lpMeta">' + rvPeriodTxt_(d.meta) + '</div></div>';
-    const sum = '<div class="lpNote" style="margin:0 0 8px;">' + d.tot.visitsTotal + ' زيارة • ' + d.tot.custVisited + ' عميل اتزار • ' + d.tot.orders + ' طلبية • ' + fmt(d.tot.qty) + ' قطعة • تحصيل ' + fmt(d.tot.paid) + ' ج' + (d.unv ? ' • ' + d.unv.length + ' عميل ماتزاروش' : '') + '</div>';
-    const chunk = function(arr, n){ const o = []; for(let i = 0; i < arr.length; i += n) o.push(arr.slice(i, i + n)); return o.length ? o : [[]]; };
-    chunk(d.rows, 26).forEach(function(part, k){
-      pages.push('<div class="lpPage">' + top + (k === 0 ? sum : '') + '<div style="font-weight:800; margin:6px 0;">العملاء اللي اتزاروا' + (k ? ' — تكملة' : '') + '</div>' +
-        '<table class="lpTbl"><thead><tr><th>#</th><th>العميل</th><th>زيارات</th><th>طلبيات</th><th>قطع</th><th>تحصيل</th><th>آخر زيارة</th></tr></thead><tbody>' +
-        part.map(function(r, i){ return '<tr><td>' + (k * 26 + i + 1) + '</td><td><b>' + e(r.name) + '</b> <small>' + e(r.code) + '</small></td><td>' + r.visits + '</td><td>' + r.orders + '</td><td>' + fmt(r.qty) + '</td><td>' + (r.paid ? fmt(r.paid) : '—') + '</td><td>' + e(r.last || '—') + '</td></tr>'; }).join('') +
-        '</tbody></table></div>');
+    const d = rv_.data, t = d.tot, e = escapeHtml, pages = [];
+    const conv = t.visitsTotal ? Math.round((t.visitsTotal - t.noOrder) * 100 / t.visitsTotal) : 0;
+    const band = '<div class="rvPBand"><div><small>تقرير زيارات مندوب</small><b>' + e(d.meta.rep) + '</b><span>' + rvPeriodTxt_(d.meta) + '</span></div><img src="' + LOGO_W_ + '" alt=""></div>';
+    const mini = '<div class="rvPMini"><img src="' + LOGO_D_ + '" alt=""><span>' + e(d.meta.rep) + ' • ' + rvPeriodTxt_(d.meta) + '</span></div>';
+    const K = function(cls, val, lbl, sub){ return '<div class="rvPK ' + cls + '"><b>' + val + '</b><span>' + lbl + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>'; };
+    const kpis = '<div class="rvPKs">' + K('k1', t.visitsTotal, 'زيارة', t.custVisited + ' عميل') + K('k2', t.orders, 'طلبية', fmt(t.qty) + ' قطعة') +
+      K('k3', fmt(t.paid), 'تحصيل (ج)', t.remotePaid ? fmt(t.remotePaid) + ' من غير زيارة' : '') + K('k4', conv + '%', 'زيارات فيها شغل', t.noOrder + ' من غير طلب') +
+      K('k5', t.remoteN, 'من غير زيارة', 'تحويل / تليفون') + K('k6', d.unv ? d.unv.length : '—', 'ماتزاروش', d.custTotal ? 'من ' + d.custTotal : '') + '</div>';
+    // بلوكات بالترتيب، وبنملّي الصفحة لحد عدد سطور تقريبي
+    const blocks = [];
+    const sec = function(cls, title, n, head){ return { sec: '<div class="rvPSec ' + cls + '"><b>' + title + '</b><span>' + n + '</span></div>', head: head, cls: cls }; };
+    const S1 = sec('g', '👣 العملاء اللي اتزاروا', d.rows.length, '<tr><th>#</th><th>العميل</th><th>زيارات</th><th>طلبيات</th><th>قطع</th><th>تحصيل</th><th>آخر زيارة</th><th>ملاحظات</th></tr>');
+    d.rows.forEach(function(r, i){ blocks.push({ s: S1, tr: '<tr><td>' + (i + 1) + '</td><td class="nm"><b>' + e(r.name) + '</b><small>' + e(r.code) + '</small></td><td>' + r.visits + '</td><td>' + (r.orders || '—') + '</td><td>' + (r.qty ? fmt(r.qty) : '—') + '</td><td>' + (r.paid ? fmt(r.paid) : '—') + '</td><td>' + e(r.last || '—') + '</td><td class="rs">' + e(rvReasons_(r)) + '</td></tr>' }); });
+    if(d.rows.length) blocks.push({ s: S1, tr: '<tr class="tot"><td></td><td class="nm">الإجمالي</td><td>' + t.visitsTotal + '</td><td>' + t.visitOrders + '</td><td>' + fmt(t.visitQty) + '</td><td>' + fmt(t.visitPaid) + '</td><td></td><td></td></tr>' });
+    if(d.remote.length){
+      const S2 = sec('b', '📞 اتعاملوا من غير زيارة (تحويل / تليفون)', d.remote.length, '<tr><th>#</th><th>العميل</th><th>تحصيل</th><th>طريقة الدفع</th><th>طلبيات</th><th>قطع</th></tr>');
+      d.remote.forEach(function(r, i){ blocks.push({ s: S2, tr: '<tr><td>' + (i + 1) + '</td><td class="nm"><b>' + e(r.name) + '</b><small>' + e(r.code) + '</small></td><td>' + (r.paid ? fmt(r.paid) : '—') + '</td><td>' + e(Object.keys(r.methods).join('، ') || '—') + '</td><td>' + (r.orders || '—') + '</td><td>' + (r.qty ? fmt(r.qty) : '—') + '</td></tr>' }); });
+      blocks.push({ s: S2, tr: '<tr class="tot"><td></td><td class="nm">الإجمالي</td><td>' + fmt(t.remotePaid) + '</td><td></td><td>' + t.remoteOrders + '</td><td>' + fmt(t.remoteQty) + '</td></tr>' });
+    }
+    if(d.unv && d.unv.length){
+      const S3 = sec('r', '⛔ العملاء اللي ماتزاروش', d.unv.length, '<tr><th>#</th><th>العميل</th><th>المنطقة</th><th>آخر زيارة</th><th>من كام يوم</th></tr>');
+      d.unv.forEach(function(x, i){ blocks.push({ s: S3, tr: '<tr><td>' + (i + 1) + '</td><td class="nm"><b>' + e(x.name) + '</b><small>' + e(x.code) + (x.dealt ? ' • 📞 اتعامل من غير زيارة' : '') + '</small></td><td>' + e(x.area || '') + '</td><td>' + e(x.lastVisit || 'عمره ما اتزار') + '</td><td><span class="dd ' + rvDaysCls_(x.daysSince) + '">' + (x.daysSince == null ? 'جديد' : x.daysSince) + '</span></td></tr>' }); });
+    }
+    // تقسيم الصفحات: الأولى فيها الرأس والأرقام (~17 سطر)، والباقي ~27 سطر
+    const foot = '<div class="rvPFoot">TOUCH EL ZENOUKI • اتعمل ' + ymdToDmy_(ymd_(new Date())) + '</div>';
+    let head = '', body = '', used = 0, cap = 0, curSec = null, lastSec = null;
+    const close = function(){ if(head){ pages.push(head + body + (curSec ? '</tbody></table>' : '') + '</div>' + foot + '</div>'); } };
+    const open = function(first){
+      close();
+      head = '<div class="lpPage rvPg">' + (first ? band : mini) + '<div class="rvPIn">' + (first ? kpis : '');
+      body = ''; used = 0; cap = first ? 22 : 28; lastSec = curSec; curSec = null;
+    };
+    open(true);
+    blocks.forEach(function(b){
+      if(used + (curSec !== b.s ? 3 : 1) > cap) open(false);
+      if(curSec !== b.s){
+        if(curSec) body += '</tbody></table>';
+        body += (b.s === lastSec ? b.s.sec.replace('</b>', ' — تكملة</b>') : b.s.sec) + '<table class="rvPT ' + b.s.cls + '"><thead>' + b.s.head + '</thead><tbody>';
+        curSec = b.s; used += 3;
+      }
+      body += b.tr; used += 1;
     });
-    if(d.unv && d.unv.length) chunk(d.unv, 30).forEach(function(part, k){
-      pages.push('<div class="lpPage">' + top + '<div style="font-weight:800; margin:6px 0; color:#a8432f;">العملاء اللي ماتزاروش (' + d.unv.length + ')' + (k ? ' — تكملة' : '') + '</div>' +
-        '<table class="lpTbl"><thead><tr><th>#</th><th>العميل</th><th>المنطقة</th><th>آخر زيارة</th><th>من كام يوم</th></tr></thead><tbody>' +
-        part.map(function(x, i){ return '<tr><td>' + (k * 30 + i + 1) + '</td><td><b>' + e(x.name) + '</b> <small>' + e(x.code) + '</small></td><td>' + e(x.area || '') + '</td><td>' + e(x.lastVisit || 'عمره ما اتزار') + '</td><td>' + (x.daysSince == null ? '—' : x.daysSince) + '</td></tr>'; }).join('') +
-        '</tbody></table></div>');
-    });
+    if(!blocks.length) body += '<div class="rvPSec g"><b>مفيش زيارات في المدة دي</b><span>0</span></div>';
+    close();
     return pages;
   }
   async function rvPdf_(){
@@ -8786,10 +8918,10 @@
       for(let p = 0; p < pages.length; p++){
         stage.innerHTML = pages[p];
         const el = stage.firstChild;
-        el.style.padding = '30px 36px'; el.style.background = '#fff';
+        el.style.padding = '0'; el.style.background = '#fff';
         const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, windowWidth: 794 });
         const sliceH = Math.floor(canvas.width * 297 / 210);
-        for(let y = 0; y < canvas.height; y += sliceH){
+        for(let y = 0; y < canvas.height - 4; y += sliceH){ // -4: فرق تقريب بسيط مايعملش صفحة فاضية
           const h = Math.min(sliceH, canvas.height - y), c = document.createElement('canvas');
           c.width = canvas.width; c.height = sliceH;
           const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
