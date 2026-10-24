@@ -7254,13 +7254,46 @@
     if(logo){ const lw = 200, lh = lw * logo.height / logo.width; g.drawImage(logo, doorLeft ? 24 : 1024 - 24 - lw, 40, lw, lh); }
     return cv;
   }
+  // خانة تاجر شكل كراتين متستفة بلونه، والرقم في دايرة
   function ld3dLabel_(THREE, txt, color){
-    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 256;
     const g = cv.getContext('2d');
-    g.fillStyle = color; g.fillRect(0, 0, 128, 128);
-    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 6; g.strokeRect(3, 3, 122, 122);
-    g.fillStyle = '#fff'; g.font = 'bold 72px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(txt), 64, 68);
-    const t = new THREE.CanvasTexture(cv); return t;
+    g.fillStyle = color; g.fillRect(0, 0, 256, 256);
+    // كراتين: خطوط اللزق والفواصل
+    g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 4;
+    for(let i = 0; i <= 256; i += 64){ g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 256); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(256, i); g.stroke(); }
+    g.fillStyle = 'rgba(255,255,255,.18)';
+    for(let x = 0; x < 256; x += 64) for(let y = 0; y < 256; y += 64) g.fillRect(x + 26, y + 2, 12, 60);
+    g.fillStyle = 'rgba(255,255,255,.92)'; g.beginPath(); g.arc(128, 128, 62, 0, Math.PI * 2); g.fill();
+    g.fillStyle = color; g.font = 'bold 84px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(txt), 128, 134);
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t;
+  }
+  // لوحة JUMBO على باب الكابينة
+  function ld3dBadge_(THREE, kind){
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
+    const g = cv.getContext('2d');
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 256, 128);
+    g.fillStyle = '#1d4f9c'; g.fillRect(6, 6, 244, 54);
+    g.fillStyle = '#fff'; g.font = 'bold 40px Arial'; g.textAlign = 'center'; g.fillText('JUMBO', 128, 48);
+    g.fillStyle = '#1b1b1b'; g.font = 'bold 50px Arial'; g.fillText(kind === 3 ? '8000' : '7000', 150, 112);
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; return t;
+  }
+  // شريط أحمر وأبيض (حماية جنب الشاسيه زي العربية الحقيقية)
+  function ld3dStripe_(THREE){
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 32;
+    const g = cv.getContext('2d');
+    for(let x = 0; x < 256; x += 32){ g.fillStyle = (x / 32) % 2 ? '#ffffff' : '#d23b2b'; g.fillRect(x, 0, 32, 32); }
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; t.wrapS = THREE.RepeatWrapping; t.repeat.set(4, 1); return t;
+  }
+  // باب خشب ورا
+  function ld3dWood_(THREE){
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 256;
+    const g = cv.getContext('2d');
+    g.fillStyle = '#a87a4a'; g.fillRect(0, 0, 256, 256);
+    for(let y = 0; y < 256; y += 32){ g.fillStyle = y % 64 ? '#9b6f42' : '#b0824f'; g.fillRect(0, y, 256, 30); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(0, y + 30, 256, 2); }
+    g.fillStyle = '#5d5f62'; g.fillRect(124, 0, 8, 256); // نص الباب
+    g.fillStyle = '#c9cdd1'; [60, 196].forEach(function(x){ g.fillRect(x, 20, 6, 216); });
+    const t = new THREE.CanvasTexture(cv); t.encoding = THREE.sRGBEncoding; return t;
   }
   async function ld3dOpen_(){
     const c = ld_.t3dLast; if(!c) return;
@@ -7272,7 +7305,7 @@
     ov.innerHTML = '<div class="t3Top"><b>🧊 ' + escapeHtml(c.vname || 'العربية') + '<small>' + (pct != null ? 'امتلاء ' + pct + '% • ' : '') + (bays.length ? bays.length + ' تاجر — الرقم = ترتيب التسليم' : 'اسحب بصباعك عشان تلفها') + '</small></b><button type="button" class="t3X" onclick="ld3dClose_()">✕</button></div>' +
       '<div style="position:relative; flex:1; display:flex;"><canvas id="t3c"></canvas><div class="t3Hint" id="t3h">جاري التحميل...</div></div>' +
       (bays.length ? '<div class="t3Leg">' + bays.slice().reverse().map(function(b){ return '<span><i style="background:' + b.color + '">' + b.seq + '</i>' + escapeHtml(b.name) + '</span>'; }).join('') + '</div>' : '') +
-      '<div class="t3Bar"><button type="button" id="t3see" class="on" onclick="ld3dSee_()">👁 البضاعة جوه</button><button type="button" onclick="ld3dSpin_()">🔄 لف لوحدها</button><button type="button" onclick="ld3dReset_()">↺ من الجنب</button></div>';
+      '<div class="t3Bar"><button type="button" id="t3see" onclick="ld3dSee_()">👁 البضاعة جوه</button><button type="button" onclick="ld3dSpin_()">🔄 لف لوحدها</button><button type="button" onclick="ld3dReset_()">↺ من الجنب</button></div>';
     document.body.appendChild(ov);
     try{
       await loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
@@ -7289,83 +7322,169 @@
     const cv = document.getElementById('t3c');
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
-    const cam = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8468, 0.95));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(4, 8, 6); scene.add(sun);
+    // انعكاسات واقعية: بيئة سما فاتحة وأرض رملي
+    const envCv = document.createElement('canvas'); envCv.width = 16; envCv.height = 256;
+    const eg = envCv.getContext('2d'), grad = eg.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#dfeaf5'); grad.addColorStop(0.48, '#ffffff'); grad.addColorStop(0.52, '#b9b29a'); grad.addColorStop(1, '#6f6a58');
+    eg.fillStyle = grad; eg.fillRect(0, 0, 16, 256);
+    const envTex = new THREE.CanvasTexture(envCv); envTex.mapping = THREE.EquirectangularReflectionMapping; envTex.encoding = THREE.sRGBEncoding;
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromEquirectangular(envTex).texture;
+    const cam = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8468, 0.45));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(5, 9, 6);
+    sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024); sun.shadow.camera.left = -6; sun.shadow.camera.right = 6; sun.shadow.camera.top = 6; sun.shadow.camera.bottom = -6; sun.shadow.bias = -0.0005;
+    scene.add(sun);
+    const fill = new THREE.DirectionalLight(0xfff4e0, 0.5); fill.position.set(-6, 4, -5); scene.add(fill);
     const truck = new THREE.Group(); scene.add(truck);
-    const M = function(color, o){ return new THREE.MeshLambertMaterial(Object.assign({ color: color }, o || {})); };
-    const box = function(w, h, d, mat, x, y, z){ const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); truck.add(m); return m; };
-    // المقاسات (متر تقريبًا): الطول على محور x — الكابينة ناحية +x
-    const S = [{ L: 2.2, W: 1.6, H: 0.55, open: true, low: true }, { L: 3.4, W: 1.85, H: 1.6, open: true }, { L: 4.3, W: 2.0, H: 2.1 }, { L: 5.3, W: 2.1, H: 2.2 }][kind == null ? 2 : kind];
-    const L = S.L, W = S.W, H = S.H, base = 0.95, cabL = 1.55, cabH = 1.75;
-    const x0 = -L / 2 - cabL / 2, x1 = x0 + L; // الصندوق من x0 (الباب) لـ x1 (الصدر)
-    // الشاسيه والكاوتش
-    box(L + cabL + 0.2, 0.18, W * 0.75, M(0x2b2b2b), x0 + (L + cabL) / 2, base - 0.12, 0);
-    const wheel = function(x, z){
-      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.3, 28), M(0x1b1b1b)); m.rotation.x = Math.PI / 2; m.position.set(x, 0.42, z); truck.add(m);
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.32, 20), M(0x8d949a)); hub.rotation.x = Math.PI / 2; hub.position.set(x, 0.42, z); truck.add(hub);
+    const PBR = function(color, rough, metal, o){ return new THREE.MeshStandardMaterial(Object.assign({ color: color, roughness: rough == null ? 0.55 : rough, metalness: metal || 0 }, o || {})); };
+    const paint = PBR(0xf5f6f7, 0.32, 0.15), black = PBR(0x1c1c1c, 0.6, 0.2), chrome = PBR(0xd9dde0, 0.18, 1), alu = PBR(0xbfc5ca, 0.35, 0.85),
+      glass = PBR(0x1a2630, 0.06, 0.9, { envMapIntensity: 1.4, side: THREE.DoubleSide }), rubber = PBR(0x151515, 0.85, 0), darkPanel = PBR(0x0e0b09, 0.5, 0, { envMapIntensity: 0.2 });
+    const add = function(geo, mat, x, y, z, rx, ry, rz){
+      const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); if(rx) m.rotation.x = rx; if(ry) m.rotation.y = ry; if(rz) m.rotation.z = rz;
+      m.castShadow = true; m.receiveShadow = true; truck.add(m); return m;
     };
-    const rearX = x0 + L * (kind >= 3 ? 0.3 : 0.25);
-    [W / 2 - 0.1, -W / 2 + 0.1].forEach(function(z){
-      wheel(x1 + cabL * 0.55, z); wheel(rearX, z);
-      if(kind >= 3) wheel(rearX - 0.95, z);
+    const box = function(w, h, d, mat, x, y, z){ return add(new THREE.BoxGeometry(w, h, d), mat, x, y, z); };
+    // بروفايل جانبي مبطّن الحواف (للكابينة واللوتون)
+    const extrude = function(pts, depth, mat, z, bevel){
+      const sh = new THREE.Shape(); sh.moveTo(pts[0][0], pts[0][1]); for(let i = 1; i < pts.length; i++) sh.lineTo(pts[i][0], pts[i][1]);
+      const b = bevel == null ? 0.05 : bevel;
+      const geo = new THREE.ExtrudeGeometry(sh, { depth: depth - b * 2, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 4, curveSegments: 8 });
+      return add(geo, mat, 0, 0, z - depth / 2 + b);
+    };
+    // المقاسات (متر تقريبًا) — x = الطول (الكابينة ناحية +x) • y = لفوق • z = العرض
+    const S = [{ L: 2.2, W: 1.6, H: 0.55, open: true, low: true }, { L: 3.4, W: 1.85, H: 1.6, open: true }, { L: 4.3, W: 2.0, H: 2.15 }, { L: 5.3, W: 2.1, H: 2.25 }][kind == null ? 2 : kind];
+    const L = S.L, W = S.W, H = S.H, base = 0.98, cabL = 1.65, cabH = 1.85;
+    const x0 = -(L + cabL) / 2, x1 = x0 + L; // الصندوق من x0 (الباب) لـ x1 (الصدر) — الكابينة من x1 لـ x1+cabL
+    // ---- الشاسيه ----
+    [W * 0.32, -W * 0.32].forEach(function(z){ box(L + cabL - 0.2, 0.2, 0.12, black, x0 + (L + cabL) / 2 - 0.05, base - 0.16, z); });
+    box(0.1, 0.12, W * 0.7, black, x0 + 0.05, base - 0.2, 0);
+    // حماية الجنب أحمر وأبيض + تانك السولار
+    const stripe = PBR(0xffffff, 0.5, 0, { map: ld3dStripe_(THREE) });
+    const rearX = x0 + L * (kind >= 3 ? 0.32 : 0.26), frontX = x1 + cabL * 0.5;
+    [W / 2 - 0.06, -W / 2 + 0.06].forEach(function(z){ box(Math.max(0.4, frontX - rearX - 1.25), 0.07, 0.03, stripe, (rearX + frontX) / 2, base - 0.42, z); });
+    add(new THREE.CylinderGeometry(0.2, 0.2, 0.7, 24), alu, x1 - 0.55, base - 0.38, W / 2 - 0.3, 0, 0, Math.PI / 2);
+    // ---- الكاوتش (كاوتش + جنط فضي) ----
+    const tireGeo = (function(){
+      const r = 0.43, w = 0.28, pts = [];
+      for(let i = 0; i <= 16; i++){ const a = -Math.PI / 2 + Math.PI * i / 16; pts.push(new THREE.Vector2(r - 0.1 + Math.cos(a) * 0.1, Math.sin(a) * w / 2)); }
+      pts.unshift(new THREE.Vector2(0.24, -w / 2)); pts.push(new THREE.Vector2(0.24, w / 2));
+      return new THREE.LatheGeometry(pts, 40);
+    })();
+    const wheel = function(x, z, dual){
+      const g = new THREE.Group(); g.position.set(x, 0.43, z); truck.add(g);
+      const t = new THREE.Mesh(tireGeo, rubber); t.rotation.x = Math.PI / 2; t.castShadow = true; g.add(t);
+      const side = z > 0 ? 1 : -1;
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.04, 32), chrome); rim.rotation.x = Math.PI / 2; rim.position.z = side * 0.125; g.add(rim);
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 0.08, 20), alu); hub.rotation.x = Math.PI / 2; hub.position.z = side * 0.15; g.add(hub);
+      for(let i = 0; i < 6; i++){ const a = i * Math.PI / 3; const n = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.05, 8), black); n.rotation.x = Math.PI / 2; n.position.set(Math.cos(a) * 0.15, Math.sin(a) * 0.15, side * 0.15); g.add(n); }
+      if(dual){ const t2 = new THREE.Mesh(tireGeo, rubber); t2.rotation.x = Math.PI / 2; t2.position.z = -side * 0.29; g.add(t2); }
+    };
+    [W / 2 - 0.16, -W / 2 + 0.16].forEach(function(z){
+      wheel(frontX, z, false); wheel(rearX, z, kind >= 1);
+      if(kind >= 3) wheel(rearX - 0.98, z, true);
     });
-    // الكابينة
-    const cx = x1 + cabL / 2;
-    box(cabL, cabH * 0.62, W, M(0xf4f5f6), cx, base + cabH * 0.31, 0);
-    box(cabL * 0.62, cabH * 0.38, W * 0.98, M(0xf4f5f6), cx + cabL * 0.19, base + cabH * 0.62 + cabH * 0.19, 0);
-    box(0.04, cabH * 0.3, W * 0.86, M(0x22313b), cx + cabL / 2 + 0.01, base + cabH * 0.7, 0); // الإزاز قدام
-    [W / 2 + 0.005, -W / 2 - 0.005].forEach(function(z){ box(cabL * 0.42, cabH * 0.26, 0.02, M(0x2d3e4a), cx + cabL * 0.2, base + cabH * 0.7, z); });
-    box(0.06, 0.16, W * 0.9, M(0xd8dcdf), cx + cabL / 2 + 0.03, base + 0.12, 0); // الصدام
-    // البضاعة: خانة لكل تاجر من الصدر للباب
+    // رفارف سودا فوق الكاوتش الورانية + طين
+    [W / 2 - 0.02, -W / 2 + 0.02].forEach(function(z){
+      add(new THREE.TorusGeometry(0.5, 0.035, 8, 24, Math.PI), black, rearX, 0.45, z);
+      box(0.02, 0.32, 0.36, rubber, rearX - 0.62, 0.32, z - Math.sign(z) * 0.12);
+    });
+    // ---- الكابينة (شكل إيسوزو: إزاز مايل وحواف مدورة) ----
+    const cx = x1 + 0.04;
+    const prof = [[0, 0], [cabL, 0], [cabL, 0.55], [cabL - 0.04, 1.05], [cabL - 0.36, cabH], [0.08, cabH + 0.02], [0, cabH - 0.06]];
+    const cab = extrude(prof.map(function(p){ return [p[0] + cx, p[1] + base - 0.05]; }), W, paint, 0, 0.07);
+    // إزاز قدام مايل
+    const wsH = Math.hypot(0.32, cabH - 1.05) - 0.12, wsAng = Math.atan2(0.32, cabH - 1.05);
+    const ws = add(new THREE.PlaneGeometry(W * 0.86, wsH), glass, cx + cabL - 0.2 + 0.08, base - 0.05 + (1.05 + cabH) / 2, 0, 0, Math.PI / 2, 0);
+    ws.rotateX(-wsAng); // ميل الإزاز لورا
+    // شبابيك الجنب + خطوط الباب + JUMBO + مرايات
+    const badge = PBR(0xffffff, 0.4, 0, { map: ld3dBadge_(THREE, kind) });
+    [1, -1].forEach(function(sd){
+      const z = sd * (W / 2 + 0.005);
+      const win = new THREE.Shape(); win.moveTo(0.25, 1.12); win.lineTo(cabL - 0.42, 1.12); win.lineTo(cabL - 0.62, cabH - 0.12); win.lineTo(0.3, cabH - 0.12); win.lineTo(0.25, 1.12);
+      add(new THREE.ShapeGeometry(win), glass, cx, base - 0.05, z);
+      box(0.012, 1.05, 0.012, black, cx + 0.22, base + 0.5, z); box(0.012, 1.0, 0.012, black, cx + cabL - 0.3, base + 0.5, z);
+      const bd = add(new THREE.PlaneGeometry(0.42, 0.21), badge, cx + 0.62, base + 0.62, z + sd * 0.002); if(sd < 0) bd.rotation.y = Math.PI;
+      box(0.16, 0.025, 0.025, black, cx + 0.7, base + 0.82, z + sd * 0.02); // مقبض
+      // المراية
+      add(new THREE.CylinderGeometry(0.015, 0.015, 0.34, 8), black, cx + cabL - 0.28, base + 1.15, z + sd * 0.16, Math.PI / 2);
+      box(0.06, 0.34, 0.16, black, cx + cabL - 0.28, base + 1.2, z + sd * 0.33);
+      // سلم الكابينة
+      box(0.4, 0.04, 0.16, alu, cx + 0.62, base - 0.22, z - sd * 0.02);
+    });
+    // وش العربية: شبكة + كشافات + صدام + لوحة
+    const fx = cx + cabL + 0.035;
+    box(0.04, 0.32, W * 0.6, black, fx, base + 0.32, 0);
+    for(let i = 0; i < 4; i++) box(0.045, 0.02, W * 0.58, chrome, fx + 0.005, base + 0.2 + i * 0.08, 0);
+    [W / 2 - 0.22, -W / 2 + 0.22].forEach(function(z){
+      box(0.05, 0.16, 0.3, PBR(0xeef5ff, 0.05, 0.3, { emissive: 0x9fb7d1, emissiveIntensity: 0.25 }), fx, base + 0.36, z);
+      box(0.05, 0.06, 0.12, PBR(0xff9d2a, 0.3, 0, { emissive: 0xff7a00, emissiveIntensity: 0.3 }), fx, base + 0.2, z);
+    });
+    box(0.14, 0.2, W * 1.01, PBR(0xd2d6d9, 0.4, 0.4), fx + 0.02, base - 0.05, 0);
+    box(0.02, 0.12, 0.45, PBR(0xffffff, 0.4, 0, { map: (function(){ const c2 = document.createElement('canvas'); c2.width = 256; c2.height = 64; const g2 = c2.getContext('2d'); g2.fillStyle = '#fff'; g2.fillRect(0, 0, 256, 64); g2.strokeStyle = '#1d4f9c'; g2.lineWidth = 6; g2.strokeRect(3, 3, 250, 58); g2.fillStyle = '#111'; g2.font = 'bold 36px Arial'; g2.textAlign = 'center'; g2.fillText('ط ر  7858', 128, 46); const t2 = new THREE.CanvasTexture(c2); t2.encoding = THREE.sRGBEncoding; return t2; })() }), fx + 0.1, base - 0.05, 0);
+    // ---- البضاعة: خانة لكل تاجر من الصدر للباب ----
     const loadG = new THREE.Group(); truck.add(loadG);
-    const usable = L - 0.08, fillW = usable * (pct == null ? 1 : Math.min(100, Math.max(pct, 8)) / 100);
+    const usable = L - 0.1, fillW = usable * (pct == null ? 1 : Math.min(100, Math.max(pct, 8)) / 100);
     const tot = bays.reduce(function(t, b){ return t + b.share; }, 0) || 1;
-    const lh = (S.open ? H * 0.82 : H * 0.88);
-    let xx = x1 - 0.04;
-    (bays.length ? bays : (pct ? [{ share: 1, color: '#56672f', seq: '' }] : [])).forEach(function(b){
+    const lh = S.open ? H * 0.82 : H * 0.86;
+    let xx = x1 - 0.06;
+    (bays.length ? bays : (pct ? [{ share: 1, color: '#8a6a45', seq: '' }] : [])).forEach(function(b){
       const w = fillW * b.share / tot;
-      const lab = b.seq !== '' ? ld3dLabel_(THREE, b.seq, b.color) : null;
-      const mat = lab ? new THREE.MeshLambertMaterial({ map: lab }) : M(new THREE.Color(b.color));
-      const m = new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.05, w - 0.04), lh, W - 0.14), mat);
-      m.position.set(xx - w / 2, base + 0.06 + lh / 2, 0); loadG.add(m);
+      const mat = b.seq !== '' ? PBR(0xffffff, 0.8, 0, { map: ld3dLabel_(THREE, b.seq, b.color) }) : PBR(new THREE.Color(b.color), 0.8, 0);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.05, w - 0.05), lh, W - 0.16), mat);
+      m.position.set(xx - w / 2, base + 0.08 + lh / 2, 0); m.castShadow = true; m.receiveShadow = true; loadG.add(m);
       xx -= w;
     });
-    // الصندوق
+    // ---- الصندوق ----
     const walls = [];
     if(S.open){
-      // تلت/دبابة: أرضية + جوانب حديد/قفص
-      box(L, 0.08, W, M(0x6b6f55), x0 + L / 2, base, 0);
-      const rail = M(0x9aa3aa);
-      const sideH = S.low ? 0.35 : H;
+      box(L, 0.08, W, PBR(0x6b5a44, 0.8, 0), x0 + L / 2, base, 0); // أرضية خشب
+      const rail = PBR(0x9aa3aa, 0.4, 0.8);
+      const sideH = S.low ? 0.38 : H;
       [W / 2, -W / 2].forEach(function(z){
-        box(L, 0.06, 0.06, rail, x0 + L / 2, base + sideH, z); box(L, 0.06, 0.06, rail, x0 + L / 2, base + sideH / 2, z);
-        for(let x = x0; x <= x1 + 0.01; x += L / (S.low ? 4 : 7)) box(0.06, sideH, 0.06, rail, x, base + sideH / 2, z);
+        box(L, 0.05, 0.05, rail, x0 + L / 2, base + sideH, z); box(L, 0.04, 0.04, rail, x0 + L / 2, base + sideH * 0.5, z);
+        box(L, sideH * (S.low ? 1 : 0.32), 0.03, PBR(0x8f979d, 0.45, 0.7), x0 + L / 2, base + sideH * (S.low ? 0.5 : 0.16), z);
+        for(let x = x0; x <= x1 + 0.01; x += L / (S.low ? 4 : 7)) box(0.05, sideH, 0.05, rail, x, base + sideH / 2, z);
       });
-      [x0, x1].forEach(function(x){ box(0.06, sideH, W, M(0x9aa3aa, { transparent: true, opacity: 0.45 }), x, base + sideH / 2, 0); });
+      box(0.04, sideH, W, PBR(0x8f979d, 0.45, 0.7), x0, base + sideH / 2, 0);
+      box(0.06, sideH + 0.3, W, rail, x1, base + (sideH + 0.3) / 2, 0); // حماية الكابينة
     } else {
-      const loader = function(cvs){ const t = new THREE.CanvasTexture(cvs); t.anisotropy = 4; return t; };
-      const sideA = new THREE.MeshLambertMaterial({ map: loader(ld3dSide_(logo, ad, true)), transparent: true });
-      const sideB = new THREE.MeshLambertMaterial({ map: loader(ld3dSide_(logo, ad, false)), transparent: true });
-      const door = M(0xa87a4a, { transparent: true }), top = M(0xf0f1f2, { transparent: true }), dark = M(0x2b211c, { transparent: true });
+      const mk = function(cvs){ const t = new THREE.CanvasTexture(cvs); t.anisotropy = 8; t.encoding = THREE.sRGBEncoding; return t; };
+      const sideA = PBR(0xffffff, 0.42, 0.05, { map: mk(ld3dSide_(logo, ad, true)), transparent: true });
+      const sideB = PBR(0xffffff, 0.42, 0.05, { map: mk(ld3dSide_(logo, ad, false)), transparent: true });
+      const door = PBR(0xffffff, 0.7, 0, { map: ld3dWood_(THREE), transparent: true }), top = PBR(0xeef0f1, 0.5, 0.2, { transparent: true }), front = PBR(0x0e0b09, 0.45, 0.1, { transparent: true });
       // ترتيب الأوجه: +x, -x, +y, -y, +z, -z
-      const cargo = new THREE.Mesh(new THREE.BoxGeometry(L, H, W), [dark, door, top, M(0x3a3a3a), sideA, sideB]);
-      cargo.position.set(x0 + L / 2, base + H / 2 + 0.02, 0); truck.add(cargo);
-      [sideA, sideB, door, top, dark].forEach(function(m){ walls.push(m); });
-      // اللوتون فوق الكابينة
-      box(cabL * 0.75, H - cabH * 0.95 + 0.25, W, M(0x2b211c), x1 + cabL * 0.36, base + cabH + (H - cabH) / 2 + 0.12, 0);
+      const cargo = new THREE.Mesh(new THREE.BoxGeometry(L, H, W), [front, door, top, PBR(0x3a3a3a), sideA, sideB]);
+      cargo.position.set(x0 + L / 2, base + H / 2 + 0.03, 0); cargo.castShadow = true; cargo.receiveShadow = true; truck.add(cargo);
+      [sideA, sideB, door, top, front].forEach(function(m){ walls.push(m); });
+      // إطار ألومنيوم على الحواف
+      const t = 0.045, cyc = base + H / 2 + 0.03;
+      [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(function(q){
+        box(t, H + t, t, alu, x0 + L / 2 + q[0] * L / 2, cyc, q[1] * W / 2);
+        box(L + t, t, t, alu, x0 + L / 2, cyc + q[0] * H / 2, q[1] * W / 2);
+      });
+      [1, -1].forEach(function(q){ box(t, t, W + t, alu, x0 + L / 2 + q * L / 2, cyc + H / 2, 0); box(t, t, W + t, alu, x0 + L / 2 + q * L / 2, cyc - H / 2, 0); });
+      // اللوتون فوق الكابينة (مدور من قدام)
+      const lt = base + cabH + 0.03, lH = (base + H + 0.03) - lt;
+      extrude([[x1, lt], [x1 + cabL * 0.62, lt], [x1 + cabL * 0.78, lt + lH * 0.5], [x1 + cabL * 0.74, lt + lH], [x1, lt + lH]], W, darkPanel, 0, 0.06);
+      // كشافات حمرا ورا
+      [W / 2 - 0.15, -W / 2 + 0.15].forEach(function(z){ box(0.04, 0.1, 0.22, PBR(0xc0281e, 0.3, 0, { emissive: 0x7a0000, emissiveIntensity: 0.4 }), x0 - 0.03, base - 0.15, z); });
     }
-    // ظل على الأرض
-    const sh = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({ color: 0x2f3519, transparent: true, opacity: 0.16 }));
-    sh.rotation.x = -Math.PI / 2; sh.scale.set((L + cabL) * 0.62, W * 0.9, 1); sh.position.set(x0 + (L + cabL) / 2, 0.01, 0); truck.add(sh);
-    truck.position.x = -(x0 + (L + cabL) / 2);
-    // اللف بالصباع
-    const st = { yaw: -0.6, pitch: 0.28, spin: true, see: true, drag: null, walls: walls, dist: (L + cabL) * 2.5 + 3 };
-    const setSee = function(){ walls.forEach(function(m){ m.opacity = st.see ? 0.22 : 1; m.depthWrite = !st.see; m.needsUpdate = true; }); };
+    // ---- الأرض والظل ----
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ opacity: 0.28 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshBasicMaterial({ color: 0x2f3519, transparent: true, opacity: 0.1 }));
+    disc.rotation.x = -Math.PI / 2; disc.scale.set((L + cabL) * 0.7, W * 1.1, 1); disc.position.y = 0.005; scene.add(disc);
+    // ---- اللف بالصباع ----
+    const st = { yaw: 0.75, pitch: 0.22, spin: true, see: false, drag: null, walls: walls, dist: (L + cabL) * 2.05 + 2.6 };
+    const setSee = function(){ walls.forEach(function(m){ m.opacity = st.see ? 0.2 : 1; m.depthWrite = !st.see; m.needsUpdate = true; }); };
     setSee();
     cv.addEventListener('pointerdown', function(e){ st.drag = { x: e.clientX, y: e.clientY, yaw: st.yaw, pitch: st.pitch }; st.spin = false; cv.setPointerCapture(e.pointerId); });
-    cv.addEventListener('pointermove', function(e){ if(!st.drag) return; st.yaw = st.drag.yaw + (e.clientX - st.drag.x) * 0.01; st.pitch = Math.max(-0.1, Math.min(1.2, st.drag.pitch + (e.clientY - st.drag.y) * 0.006)); });
+    cv.addEventListener('pointermove', function(e){ if(!st.drag) return; st.yaw = st.drag.yaw + (e.clientX - st.drag.x) * 0.01; st.pitch = Math.max(0.02, Math.min(1.2, st.drag.pitch + (e.clientY - st.drag.y) * 0.006)); });
     cv.addEventListener('pointerup', function(){ st.drag = null; });
     cv.addEventListener('pointercancel', function(){ st.drag = null; });
     cv.addEventListener('wheel', function(e){ st.dist = Math.max(4, Math.min(30, st.dist + e.deltaY * 0.01)); e.preventDefault(); }, { passive: false });
@@ -7373,17 +7492,17 @@
     size(); window.addEventListener('resize', size);
     let raf = 0;
     const loop = function(){
-      if(st.spin) st.yaw += 0.006;
+      if(st.spin) st.yaw += 0.005;
       const r = st.dist;
-      cam.position.set(Math.sin(st.yaw) * Math.cos(st.pitch) * r, 1.2 + Math.sin(st.pitch) * r, Math.cos(st.yaw) * Math.cos(st.pitch) * r);
-      cam.lookAt(0, 1.2, 0);
+      cam.position.set(Math.sin(st.yaw) * Math.cos(st.pitch) * r, 1.1 + Math.sin(st.pitch) * r, Math.cos(st.yaw) * Math.cos(st.pitch) * r);
+      cam.lookAt(0, 1.15, 0);
       renderer.render(scene, cam);
       raf = requestAnimationFrame(loop);
     };
     loop();
-    t3_ = { st: st, setSee: setSee, stop: function(){ cancelAnimationFrame(raf); window.removeEventListener('resize', size); renderer.dispose(); } };
+    t3_ = { st: st, setSee: setSee, stop: function(){ cancelAnimationFrame(raf); window.removeEventListener('resize', size); pmrem.dispose(); renderer.dispose(); } };
   }
-  function ld3dSee_(){ if(!t3_) return; t3_.st.see = !t3_.st.see; t3_.setSee(); const b = document.getElementById('t3see'); if(b){ b.classList.toggle('on', t3_.st.see); b.textContent = t3_.st.see ? '👁 البضاعة جوه' : '🖼 الإعلان'; } }
+  function ld3dSee_(){ if(!t3_) return; t3_.st.see = !t3_.st.see; t3_.setSee(); const b = document.getElementById('t3see'); if(b){ b.classList.toggle('on', t3_.st.see); b.textContent = t3_.st.see ? '🖼 الإعلان' : '👁 البضاعة جوه'; } }
   function ld3dSpin_(){ if(t3_) t3_.st.spin = !t3_.st.spin; }
   function ld3dReset_(){ if(t3_){ t3_.st.yaw = 0; t3_.st.pitch = 0.12; t3_.st.spin = false; } }
   function ld3dClose_(){ if(t3_){ t3_.stop(); t3_ = null; } const o = document.getElementById('t3d'); if(o) o.remove(); }
