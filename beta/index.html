@@ -1097,6 +1097,19 @@
   .rvTbl td{padding:7px 5px; border-bottom:1px solid #eee7d3; text-align:center;} .rvTbl td:first-child{text-align:right;}
   .rvTbl td small{display:block; color:var(--omut); font-size:11px;} .rvTbl tr.z td{color:var(--omut);}
   .rvBtns{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;}
+  .t3dBtn{display:block; width:100%; margin-top:10px; padding:10px; border-radius:12px; border:1.5px dashed #56672f; background:#f5f3ea; color:#3f4c22; font-family:inherit; font-size:14px; font-weight:800; cursor:pointer;}
+  #t3d{position:fixed; inset:0; z-index:100001; background:radial-gradient(circle at 50% 35%, #fbfaf4 0%, #e7e2cf 70%, #d8d1b8 100%); display:flex; flex-direction:column;}
+  #t3d .t3Top{display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top) + 12px) 14px 10px; background:#3f4c22; color:#fff;}
+  #t3d .t3Top b{flex:1; font-size:16px;} #t3d .t3Top small{display:block; font-size:11.5px; opacity:.8; font-weight:600;}
+  #t3d .t3X{width:38px; height:38px; border-radius:50%; border:0; background:rgba(255,255,255,.16); color:#fff; font-size:18px;}
+  #t3d canvas{flex:1; width:100%; touch-action:none; display:block;}
+  #t3d .t3Bar{display:flex; gap:8px; padding:10px 14px calc(env(safe-area-inset-bottom) + 12px); flex-wrap:wrap; justify-content:center;}
+  #t3d .t3Bar button{border:0; border-radius:12px; padding:9px 14px; font-family:inherit; font-weight:800; font-size:13.5px; background:#fff; color:#3f4c22; box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  #t3d .t3Bar button.on{background:#3f4c22; color:#fff;}
+  #t3d .t3Leg{display:flex; flex-wrap:wrap; gap:6px; justify-content:center; padding:0 12px 4px;}
+  #t3d .t3Leg span{font-size:11.5px; font-weight:700; background:#fff; border-radius:9px; padding:3px 8px; display:flex; align-items:center; gap:5px;}
+  #t3d .t3Leg i{width:16px; height:16px; border-radius:4px; color:#fff; font-style:normal; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center;}
+  #t3d .t3Hint{position:absolute; left:0; right:0; top:50%; text-align:center; color:#7d7f62; font-weight:700; font-size:13px; pointer-events:none;}
   .fleetBox{background:#fff; border:1px solid #ebe5cf; border-radius:13px; padding:10px; margin-bottom:10px;}
   .fleetBox > b{display:block; color:var(--o3); font-size:14.5px; margin-bottom:6px;}
   .fleetRow{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13.5px; font-weight:700;}
@@ -5620,6 +5633,7 @@
     const items = ldSelItems_(), fills = ldFill_(items);
     let h = '<div class="sectionLabel" style="margin:0 0 8px;">نوع العربية</div><div class="lVehs">' + fills.map(function(f){ return ldBar_(f, f.v.id === ld_.vehicle); }).join('') + '</div>';
     const selV = (ld_.veh || []).find(function(v){ return v.id === ld_.vehicle; });
+    ld_.t3dMode = 'route';
     if(selV) h += ldTruckBlock_(items, selV.id, selV.name);
     h += ldBayHtml_(ldRouteBayStops_(), ld_.vehicle);
     h += '<div class="sectionLabel" style="margin:14px 0 8px;">الترتيب (' + ld_.stops.length + ' تاجر)</div>';
@@ -6407,6 +6421,7 @@
       const order = ['requested', 'approved', 'loaded', 'done'], k = order.indexOf(L.status);
       return '<span class="' + (k >= i ? 'on' : '') + '">' + s[1] + '</span>';
     }).join('') + '</div>';
+    ld_.t3dMode = 'detail';
     h += ldTruckBlock_(d.items.map(function(i){ return { code: i.code, name: i.name, qty: Number(i.qty) }; }), L.vehicle_id, L.vehicle);
     if(L.notes) h += '<div class="note" style="margin:8px 0;">📝 ' + escapeHtml(L.notes) + '</div>';
     if(L.driver || L.plate) h += '<div class="note" style="margin:8px 0;">🚚 السواق: <b>' + escapeHtml(L.driver || '—') + '</b> • العربية: <b>' + escapeHtml(L.plate || '—') + '</b></div>';
@@ -7212,6 +7227,166 @@
         return '<tr><td><b>' + (k + 1) + '</b>' + (k === 0 ? ' (الصدر)' : k === load.length - 1 ? ' (الباب)' : '') + '</td><td>' + e(x.s.name || '') + '</td><td>' + x.seq + '</td><td>' + fmt(pcs) + '</td><td></td></tr>';
       }).join('') + '</tbody></table>';
   }
+  // ================== 🧊 العربية 3D (بيتا — شكليات بس) ==================
+  // نفس العربية بالإعلان واللوجو وخانات التجار بترتيب التحميل — تتلف بالصباع. three.js بيتحمل أول مرة بس.
+  var t3_ = null;
+  function ld3dBays_(){
+    const c = ld_.t3dLast || {};
+    let stops = [];
+    if(c.mode === 'detail' && ld_.cur) stops = ld_.cur.stops.slice().sort(function(a, b){ return a.seq - b.seq; }).map(function(s){ return { name: s.customer_name || s.customer_code, lines: s.lines }; });
+    else if(ld_.stops && ld_.stops.length) stops = ldRouteBayStops_();
+    const rows = stops.map(function(s, i){ return { seq: i + 1, name: s.name, share: ldStopShare_(s.lines, c.vid) || 1, color: BAY_COLORS_[i % BAY_COLORS_.length] }; });
+    return rows.reverse(); // الأول في القايمة = الصدر (جنب الكابينة)
+  }
+  function ld3dImg_(src){ return new Promise(function(res){ const im = new Image(); im.onload = function(){ res(im); }; im.onerror = function(){ res(null); }; im.src = src; }); }
+  // جنب الصندوق بالإعلان: doorLeft = الباب ناحية الشمال في الصورة
+  function ld3dSide_(logo, ad, doorLeft){
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 512;
+    const g = cv.getContext('2d');
+    g.fillStyle = '#e4e9ec'; g.fillRect(0, 0, 1024, 512);
+    if(ad){ const h = 512, w = ad.width * h / ad.height; g.drawImage(ad, doorLeft ? 1024 - w : 0, 0, w, h); }
+    const dw = 270;
+    g.save();
+    if(!doorLeft){ g.translate(1024, 0); g.scale(-1, 1); }
+    g.fillStyle = '#2b211c'; g.beginPath(); g.moveTo(0, 0); g.lineTo(dw, 0); g.quadraticCurveTo(dw - 90, 256, dw - 30, 512); g.lineTo(0, 512); g.closePath(); g.fill();
+    g.strokeStyle = '#7cc242'; g.lineWidth = 16; g.beginPath(); g.moveTo(dw + 8, 0); g.quadraticCurveTo(dw - 82, 256, dw - 22, 512); g.stroke();
+    g.restore();
+    if(logo){ const lw = 200, lh = lw * logo.height / logo.width; g.drawImage(logo, doorLeft ? 24 : 1024 - 24 - lw, 40, lw, lh); }
+    return cv;
+  }
+  function ld3dLabel_(THREE, txt, color){
+    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+    const g = cv.getContext('2d');
+    g.fillStyle = color; g.fillRect(0, 0, 128, 128);
+    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 6; g.strokeRect(3, 3, 122, 122);
+    g.fillStyle = '#fff'; g.font = 'bold 72px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(txt), 64, 68);
+    const t = new THREE.CanvasTexture(cv); return t;
+  }
+  async function ld3dOpen_(){
+    const c = ld_.t3dLast; if(!c) return;
+    const ov = document.createElement('div'); ov.id = 't3d';
+    const kind = ldVehKind_(c.vid, c.vname);
+    const f = ldFillSegs_(c.items || [], c.vid);
+    const pct = f ? f.pct : null;
+    const bays = ld3dBays_();
+    ov.innerHTML = '<div class="t3Top"><b>🧊 ' + escapeHtml(c.vname || 'العربية') + '<small>' + (pct != null ? 'امتلاء ' + pct + '% • ' : '') + (bays.length ? bays.length + ' تاجر — الرقم = ترتيب التسليم' : 'اسحب بصباعك عشان تلفها') + '</small></b><button type="button" class="t3X" onclick="ld3dClose_()">✕</button></div>' +
+      '<div style="position:relative; flex:1; display:flex;"><canvas id="t3c"></canvas><div class="t3Hint" id="t3h">جاري التحميل...</div></div>' +
+      (bays.length ? '<div class="t3Leg">' + bays.slice().reverse().map(function(b){ return '<span><i style="background:' + b.color + '">' + b.seq + '</i>' + escapeHtml(b.name) + '</span>'; }).join('') + '</div>' : '') +
+      '<div class="t3Bar"><button type="button" id="t3see" class="on" onclick="ld3dSee_()">👁 البضاعة جوه</button><button type="button" onclick="ld3dSpin_()">🔄 لف لوحدها</button><button type="button" onclick="ld3dReset_()">↺ من الجنب</button></div>';
+    document.body.appendChild(ov);
+    try{
+      await loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+      const imgs = await Promise.all([ld3dImg_(LOGO_W_), ld3dImg_(TRUCK_AD_)]);
+      if(!document.getElementById('t3d')) return;
+      ld3dBuild_(kind, pct, bays, imgs[0], imgs[1]);
+      document.getElementById('t3h').hidden = true;
+    }catch(e){
+      const h = document.getElementById('t3h'); if(h) h.textContent = 'ماقدرتش أفتح الـ 3D: ' + e.message;
+    }
+  }
+  function ld3dBuild_(kind, pct, bays, logo, ad){
+    const THREE = window.THREE;
+    const cv = document.getElementById('t3c');
+    const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8468, 0.95));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(4, 8, 6); scene.add(sun);
+    const truck = new THREE.Group(); scene.add(truck);
+    const M = function(color, o){ return new THREE.MeshLambertMaterial(Object.assign({ color: color }, o || {})); };
+    const box = function(w, h, d, mat, x, y, z){ const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); truck.add(m); return m; };
+    // المقاسات (متر تقريبًا): الطول على محور x — الكابينة ناحية +x
+    const S = [{ L: 2.2, W: 1.6, H: 0.55, open: true, low: true }, { L: 3.4, W: 1.85, H: 1.6, open: true }, { L: 4.3, W: 2.0, H: 2.1 }, { L: 5.3, W: 2.1, H: 2.2 }][kind == null ? 2 : kind];
+    const L = S.L, W = S.W, H = S.H, base = 0.95, cabL = 1.55, cabH = 1.75;
+    const x0 = -L / 2 - cabL / 2, x1 = x0 + L; // الصندوق من x0 (الباب) لـ x1 (الصدر)
+    // الشاسيه والكاوتش
+    box(L + cabL + 0.2, 0.18, W * 0.75, M(0x2b2b2b), x0 + (L + cabL) / 2, base - 0.12, 0);
+    const wheel = function(x, z){
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.3, 28), M(0x1b1b1b)); m.rotation.x = Math.PI / 2; m.position.set(x, 0.42, z); truck.add(m);
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.32, 20), M(0x8d949a)); hub.rotation.x = Math.PI / 2; hub.position.set(x, 0.42, z); truck.add(hub);
+    };
+    const rearX = x0 + L * (kind >= 3 ? 0.3 : 0.25);
+    [W / 2 - 0.1, -W / 2 + 0.1].forEach(function(z){
+      wheel(x1 + cabL * 0.55, z); wheel(rearX, z);
+      if(kind >= 3) wheel(rearX - 0.95, z);
+    });
+    // الكابينة
+    const cx = x1 + cabL / 2;
+    box(cabL, cabH * 0.62, W, M(0xf4f5f6), cx, base + cabH * 0.31, 0);
+    box(cabL * 0.62, cabH * 0.38, W * 0.98, M(0xf4f5f6), cx + cabL * 0.19, base + cabH * 0.62 + cabH * 0.19, 0);
+    box(0.04, cabH * 0.3, W * 0.86, M(0x22313b), cx + cabL / 2 + 0.01, base + cabH * 0.7, 0); // الإزاز قدام
+    [W / 2 + 0.005, -W / 2 - 0.005].forEach(function(z){ box(cabL * 0.42, cabH * 0.26, 0.02, M(0x2d3e4a), cx + cabL * 0.2, base + cabH * 0.7, z); });
+    box(0.06, 0.16, W * 0.9, M(0xd8dcdf), cx + cabL / 2 + 0.03, base + 0.12, 0); // الصدام
+    // البضاعة: خانة لكل تاجر من الصدر للباب
+    const loadG = new THREE.Group(); truck.add(loadG);
+    const usable = L - 0.08, fillW = usable * (pct == null ? 1 : Math.min(100, Math.max(pct, 8)) / 100);
+    const tot = bays.reduce(function(t, b){ return t + b.share; }, 0) || 1;
+    const lh = (S.open ? H * 0.82 : H * 0.88);
+    let xx = x1 - 0.04;
+    (bays.length ? bays : (pct ? [{ share: 1, color: '#56672f', seq: '' }] : [])).forEach(function(b){
+      const w = fillW * b.share / tot;
+      const lab = b.seq !== '' ? ld3dLabel_(THREE, b.seq, b.color) : null;
+      const mat = lab ? new THREE.MeshLambertMaterial({ map: lab }) : M(new THREE.Color(b.color));
+      const m = new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.05, w - 0.04), lh, W - 0.14), mat);
+      m.position.set(xx - w / 2, base + 0.06 + lh / 2, 0); loadG.add(m);
+      xx -= w;
+    });
+    // الصندوق
+    const walls = [];
+    if(S.open){
+      // تلت/دبابة: أرضية + جوانب حديد/قفص
+      box(L, 0.08, W, M(0x6b6f55), x0 + L / 2, base, 0);
+      const rail = M(0x9aa3aa);
+      const sideH = S.low ? 0.35 : H;
+      [W / 2, -W / 2].forEach(function(z){
+        box(L, 0.06, 0.06, rail, x0 + L / 2, base + sideH, z); box(L, 0.06, 0.06, rail, x0 + L / 2, base + sideH / 2, z);
+        for(let x = x0; x <= x1 + 0.01; x += L / (S.low ? 4 : 7)) box(0.06, sideH, 0.06, rail, x, base + sideH / 2, z);
+      });
+      [x0, x1].forEach(function(x){ box(0.06, sideH, W, M(0x9aa3aa, { transparent: true, opacity: 0.45 }), x, base + sideH / 2, 0); });
+    } else {
+      const loader = function(cvs){ const t = new THREE.CanvasTexture(cvs); t.anisotropy = 4; return t; };
+      const sideA = new THREE.MeshLambertMaterial({ map: loader(ld3dSide_(logo, ad, true)), transparent: true });
+      const sideB = new THREE.MeshLambertMaterial({ map: loader(ld3dSide_(logo, ad, false)), transparent: true });
+      const door = M(0xa87a4a, { transparent: true }), top = M(0xf0f1f2, { transparent: true }), dark = M(0x2b211c, { transparent: true });
+      // ترتيب الأوجه: +x, -x, +y, -y, +z, -z
+      const cargo = new THREE.Mesh(new THREE.BoxGeometry(L, H, W), [dark, door, top, M(0x3a3a3a), sideA, sideB]);
+      cargo.position.set(x0 + L / 2, base + H / 2 + 0.02, 0); truck.add(cargo);
+      [sideA, sideB, door, top, dark].forEach(function(m){ walls.push(m); });
+      // اللوتون فوق الكابينة
+      box(cabL * 0.75, H - cabH * 0.95 + 0.25, W, M(0x2b211c), x1 + cabL * 0.36, base + cabH + (H - cabH) / 2 + 0.12, 0);
+    }
+    // ظل على الأرض
+    const sh = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({ color: 0x2f3519, transparent: true, opacity: 0.16 }));
+    sh.rotation.x = -Math.PI / 2; sh.scale.set((L + cabL) * 0.62, W * 0.9, 1); sh.position.set(x0 + (L + cabL) / 2, 0.01, 0); truck.add(sh);
+    truck.position.x = -(x0 + (L + cabL) / 2);
+    // اللف بالصباع
+    const st = { yaw: -0.6, pitch: 0.28, spin: true, see: true, drag: null, walls: walls, dist: (L + cabL) * 2.5 + 3 };
+    const setSee = function(){ walls.forEach(function(m){ m.opacity = st.see ? 0.22 : 1; m.depthWrite = !st.see; m.needsUpdate = true; }); };
+    setSee();
+    cv.addEventListener('pointerdown', function(e){ st.drag = { x: e.clientX, y: e.clientY, yaw: st.yaw, pitch: st.pitch }; st.spin = false; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener('pointermove', function(e){ if(!st.drag) return; st.yaw = st.drag.yaw + (e.clientX - st.drag.x) * 0.01; st.pitch = Math.max(-0.1, Math.min(1.2, st.drag.pitch + (e.clientY - st.drag.y) * 0.006)); });
+    cv.addEventListener('pointerup', function(){ st.drag = null; });
+    cv.addEventListener('pointercancel', function(){ st.drag = null; });
+    cv.addEventListener('wheel', function(e){ st.dist = Math.max(4, Math.min(30, st.dist + e.deltaY * 0.01)); e.preventDefault(); }, { passive: false });
+    const size = function(){ const w = cv.clientWidth, h = cv.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / Math.max(1, h); cam.updateProjectionMatrix(); };
+    size(); window.addEventListener('resize', size);
+    let raf = 0;
+    const loop = function(){
+      if(st.spin) st.yaw += 0.006;
+      const r = st.dist;
+      cam.position.set(Math.sin(st.yaw) * Math.cos(st.pitch) * r, 1.2 + Math.sin(st.pitch) * r, Math.cos(st.yaw) * Math.cos(st.pitch) * r);
+      cam.lookAt(0, 1.2, 0);
+      renderer.render(scene, cam);
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+    t3_ = { st: st, setSee: setSee, stop: function(){ cancelAnimationFrame(raf); window.removeEventListener('resize', size); renderer.dispose(); } };
+  }
+  function ld3dSee_(){ if(!t3_) return; t3_.st.see = !t3_.st.see; t3_.setSee(); const b = document.getElementById('t3see'); if(b){ b.classList.toggle('on', t3_.st.see); b.textContent = t3_.st.see ? '👁 البضاعة جوه' : '🖼 الإعلان'; } }
+  function ld3dSpin_(){ if(t3_) t3_.st.spin = !t3_.st.spin; }
+  function ld3dReset_(){ if(t3_){ t3_.st.yaw = 0; t3_.st.pitch = 0.12; t3_.st.spin = false; } }
+  function ld3dClose_(){ if(t3_){ t3_.stop(); t3_ = null; } const o = document.getElementById('t3d'); if(o) o.remove(); }
   function ldTruckBlock_(items, vid, vname){
     const f = vid != null && items && items.length ? ldFillSegs_(items, vid) : null;
     const kind = ldVehKind_(vid, vname);
@@ -7227,6 +7402,10 @@
       }).join('') + '</div>';
     } else if(vid != null){
       h += '<div class="truckMsg">سعات العربية دي لسه مادخلتش — ادخل ⚙️ السعات</div>';
+    }
+    if(vid != null){
+      ld_.t3dLast = { items: items, vid: vid, vname: vname, mode: ld_.t3dMode || 'route' };
+      h += '<button type="button" class="t3dBtn" onclick="ld3dOpen_()">🧊 شوف العربية 3D — لفّها بصباعك</button>';
     }
     return h + '</div>';
   }
