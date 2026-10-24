@@ -1045,6 +1045,11 @@
   .tIc.t1{background:#e3f0e6; color:#2b7a4f;} .tIc.t2{background:#e3eaf6; color:#2c548f;} .tIc.t3{background:#fbf1d8; color:#a8781a;}
   .tIc.t4{background:#f8e3df; color:#a8432f;} .tIc.t5{background:#ece6f6; color:#6a4c9c;} .tIc.t6{background:#eef0e3; color:#56672f;}
   .toolBtn.out{color:#a8432f;}
+  .rvTbl{width:100%; border-collapse:collapse; font-size:12.5px; background:#fff; border-radius:12px; overflow:hidden;}
+  .rvTbl th{background:#3f4c22; color:#fff; padding:7px 5px; font-weight:700; font-size:12px;}
+  .rvTbl td{padding:7px 5px; border-bottom:1px solid #eee7d3; text-align:center;} .rvTbl td:first-child{text-align:right;}
+  .rvTbl td small{display:block; color:var(--omut); font-size:11px;} .rvTbl tr.z td{color:var(--omut);}
+  .rvBtns{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0;}
   .fleetBox{background:#fff; border:1px solid #ebe5cf; border-radius:13px; padding:10px; margin-bottom:10px;}
   .fleetBox > b{display:block; color:var(--o3); font-size:14.5px; margin-bottom:6px;}
   .fleetRow{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13.5px; font-weight:700;}
@@ -1515,6 +1520,7 @@
       </div>
       <div class="sectionLabel" style="margin-top:16px;">كل الأدوات</div>
       <div class="toolGrid">
+        <button type="button" class="toolBtn" onclick="openRepVisits_()"><span class="tIc t1"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg></span>تقرير مندوب</button>
         <button type="button" class="toolBtn" onclick="openScreen('map')"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 9 4 15 7 21 4 21 17 15 20 9 17 3 20 3 7"/><line x1="9" y1="4" x2="9" y2="17"/><line x1="15" y1="7" x2="15" y2="20"/></svg></span>خريطة مندوب</button>
         <button type="button" class="toolBtn" onclick="openScreen('unvisited')"><span class="tIc t4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>ماتزاروش</button>
         <button type="button" class="toolBtn" onclick="openPerf_()"><span class="tIc t1"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></span>بيع وتحصيل</button>
@@ -1665,6 +1671,7 @@
     </div>
     <div id="rRepWrap"><label>المندوب</label><select id="rRep"></select></div>
     <button class="primary" onclick="loadReport_()">عرض التقرير</button>
+    <button type="button" class="bigAction" style="margin-top:10px;" onclick="openRepVisits_()">📥 تقرير زيارات مندوب (بالعميل) — Excel / PDF</button>
     <div id="reportOut" style="margin-top:16px;"></div>
   </div>
 
@@ -8603,6 +8610,199 @@
     showDone_(res, false);
     document.getElementById('doneTitle').textContent = '🎓 زيارة تجريبية — ماتبعتتش (تدريب)';
     document.getElementById('doneOrderBtns').hidden = true;
+  }
+
+  // ================== 📥 تقرير زيارات مندوب حسب المدة (بيتا) ==================
+  // لكل عميل: عدد الزيارات + الطلبيات والقطع + التحصيل + آخر زيارة، وكمان العملاء اللي ماتزاروش في المدة.
+  // بيتجمع من نفس تقارير السيرفر الموجودة (الزيارات/الطلبيات/التحصيل/ماتزاروش) — مفيش أي تعديل في السيرفر.
+  var rv_ = { data: null };
+  function openRepVisits_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📥 تقرير زيارات مندوب', 'العملاء اللي زارهم والطلبيات والتحصيل واللي ماتزاروش');
+    const isAdm = state.isAdmin;
+    ldBody_().innerHTML = '<div class="filters" id="rvPresets"></div>' +
+      '<div class="rangeRow"><div><label>من</label><input type="date" id="rvFrom"></div><div><label>إلى</label><input type="date" id="rvTo"></div></div>' +
+      (isAdm ? '<label>المندوب</label><select id="rvRep"><option value="">اختار المندوب</option></select>' : '') +
+      '<button type="button" class="primary" onclick="rvLoad_()">عرض التقرير</button><div id="rvOut" style="margin-top:12px;"></div>';
+    renderPresets_('rvPresets', 'rvFrom', 'rvTo', 'month', null);
+    if(isAdm){
+      const fill = function(){
+        const sel = document.getElementById('rvRep'); if(!sel) return;
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">اختار المندوب</option>' + (state.repOptions || []).filter(function(n){ return !isWhName_(n); }).map(function(n){
+          return '<option' + (n === cur ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('');
+      };
+      fill();
+      if(!(state.repOptions || []).length) callApi('bootstrapHome', [state.auth]).then(function(d){ setRepOptions_(d.repOptions); fill(); }).catch(function(){});
+    }
+  }
+  function rvDaysAgo_(ymd){
+    const t = bizToday_(), today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+    const p = String(ymd).split('-');
+    return Math.round((today - new Date(+p[0], +p[1] - 1, +p[2])) / 86400000);
+  }
+  function rvLoad_(){
+    const from = document.getElementById('rvFrom').value, to = document.getElementById('rvTo').value;
+    const rep = state.isAdmin ? document.getElementById('rvRep').value : (state.user && state.user.name);
+    if(!rep) return showMsg('اختار المندوب الأول', 'error');
+    if(!from || !to || from > to) return showMsg('اختار المدة صح (من قبل إلى)', 'error');
+    const out = document.getElementById('rvOut');
+    out.innerHTML = '<div class="aiStatus">جاري تجميع التقرير...</div>';
+    const D = Math.max(0, rvDaysAgo_(from));
+    Promise.all([
+      callApi('getReportList', [state.auth, from, to, rep, 'visits']),
+      callApi('getReportList', [state.auth, from, to, rep, 'orders']),
+      callApi('getReportList', [state.auth, from, to, rep, 'payments']),
+      callApi('getUnvisited', [state.auth, D + 1, rep]).catch(function(){ return null; }),
+    ]).then(function(x){
+      rv_.data = rvBuild_(x[0], x[1], x[2], x[3], { from: from, to: to, rep: rep, D: D });
+      rvRender_();
+    }).catch(function(e){ out.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function rvBuild_(V, O, P, U, meta){
+    V = V || {}; O = O || {}; P = P || {};
+    const by = {};
+    const get = function(code, name){
+      const k = code || name || '?';
+      return by[k] = by[k] || { code: code || '', name: name || code || '', visits: 0, orders: 0, qty: 0, paid: 0, payN: 0, last: '', lastSort: '', noOrder: 0, reasons: {} };
+    };
+    (V.visits || []).forEach(function(v){
+      const c = get(v.code, v.name);
+      c.visits++;
+      const sortKey = String(v.date).split('/').reverse().join('-') + ' ' + (v.time || '');
+      if(sortKey > c.lastSort){ c.lastSort = sortKey; c.last = v.date; }
+      if(!v.orderId && !v.returnId && !v.amount){ c.noOrder++; if(v.reason) c.reasons[v.reason] = (c.reasons[v.reason] || 0) + 1; }
+    });
+    (O.docs || []).forEach(function(d){
+      if(d.type === 'مرتجع') return;
+      const c = get(d.customerCode, d.customerName);
+      c.orders++; c.qty += Number(d.qty) || 0;
+    });
+    (P.payments || []).forEach(function(p){
+      const c = get(p.customerCode, p.customerName);
+      c.paid += Number(p.amount) || 0; c.payN++;
+    });
+    const rows = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.visits - a.visits || b.orders - a.orders || b.paid - a.paid; });
+    const seen = {};
+    rows.forEach(function(r){ if(r.code) seen[r.code] = 1; });
+    const unv = U && U.list ? U.list.filter(function(x){ return !seen[x.code] && (x.daysSince == null || x.daysSince > meta.D); }) : null;
+    const capped = (V.total > (V.visits || []).length) || (O.total > (O.docs || []).length);
+    return {
+      meta: meta, rows: rows, unv: unv, capped: capped, custTotal: U ? U.total : null,
+      tot: {
+        visits: (V.visits || []).length, visitsTotal: V.total || (V.visits || []).length,
+        custVisited: rows.filter(function(r){ return r.visits; }).length,
+        orders: rows.reduce(function(t, r){ return t + r.orders; }, 0), qty: rows.reduce(function(t, r){ return t + r.qty; }, 0),
+        paid: rows.reduce(function(t, r){ return t + r.paid; }, 0),
+      },
+    };
+  }
+  function rvPeriodTxt_(m){ return m.from === m.to ? ymdToDmy_(m.from) : 'من ' + ymdToDmy_(m.from) + ' إلى ' + ymdToDmy_(m.to); }
+  function rvRender_(){
+    const d = rv_.data, t = d.tot, e = escapeHtml;
+    let h = '<div class="note" style="margin-bottom:8px;"><b>' + e(d.meta.rep) + '</b> • ' + rvPeriodTxt_(d.meta) + '</div>';
+    h += '<div class="tiles">' +
+      '<div class="tile"><b>' + t.visitsTotal + '</b><span>زيارة</span></div>' +
+      '<div class="tile"><b>' + t.custVisited + '</b><span>عميل اتزار</span></div>' +
+      '<div class="tile green"><b>' + t.orders + '</b><span>طلبية</span></div>' +
+      '<div class="tile"><b>' + fmt(t.qty) + '</b><span>قطعة</span></div>' +
+      '<div class="tile gold"><b>' + fmt(t.paid) + '</b><span>تحصيل (ج)</span></div>' +
+      '<div class="tile red"><b>' + (d.unv ? d.unv.length : '—') + '</b><span>ماتزاروش</span></div></div>';
+    if(d.capped) h += '<div class="note" style="color:var(--gold-d); margin:8px 0;">⚠️ المدة طويلة والسيرفر رجّع جزء من الزيارات أو الطلبيات بس — اختار مدة أقصر عشان الأرقام تبقى كاملة.</div>';
+    if(d.meta.to < ymd_(bizToday_())) h += '<div class="note" style="margin:6px 0;">ملحوظة: «ماتزاروش» محسوبة من ' + ymdToDmy_(d.meta.from) + ' لحد النهارده.</div>';
+    h += '<div class="rvBtns"><button type="button" class="aGo" style="margin:0;" onclick="rvExcel_()">📥 Excel</button><button type="button" class="aGo" style="margin:0; background:#b9861a;" onclick="rvPdf_()">📄 PDF</button></div>';
+    h += '<div class="sectionLabel" style="margin:12px 0 6px;">العملاء اللي اتزاروا / اتعاملوا (' + d.rows.length + ')</div>';
+    h += d.rows.length ? '<table class="rvTbl"><thead><tr><th>العميل</th><th>زيارات</th><th>طلبيات</th><th>قطع</th><th>تحصيل</th></tr></thead><tbody>' + d.rows.map(function(r){
+      return '<tr><td><b>' + e(r.name) + '</b><small>' + e([r.code, r.last ? 'آخر زيارة ' + r.last : '📞 من غير زيارة'].filter(Boolean).join(' • ')) + '</small></td>' +
+        '<td>' + r.visits + '</td><td>' + r.orders + '</td><td>' + fmt(r.qty) + '</td><td>' + (r.paid ? fmt(r.paid) : '—') + '</td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty">مفيش زيارات في المدة دي</div>';
+    h += '<div class="sectionLabel" style="margin:14px 0 6px;">العملاء اللي ماتزاروش' + (d.unv ? ' (' + d.unv.length + (d.custTotal ? ' من ' + d.custTotal : '') + ')' : '') + '</div>';
+    if(!d.unv) h += '<div class="empty">ماقدرتش أجيب قايمة العملاء دلوقتي</div>';
+    else h += d.unv.length ? '<table class="rvTbl"><thead><tr><th>العميل</th><th>آخر زيارة</th><th>من كام يوم</th></tr></thead><tbody>' + d.unv.map(function(x){
+      return '<tr class="z"><td><b>' + e(x.name) + '</b><small>' + e([x.code, x.area].filter(Boolean).join(' • ')) + '</small></td><td>' + e(x.lastVisit || 'عمره ما اتزار') + '</td><td>' + (x.daysSince == null ? '—' : x.daysSince) + '</td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty">كل العملاء اتزاروا ✔</div>';
+    document.getElementById('rvOut').innerHTML = h;
+  }
+  function rvFileName_(ext){ const m = rv_.data.meta; return 'زيارات-' + m.rep.replace(/\s+/g, '-') + '-' + m.from + (m.to !== m.from ? '_' + m.to : '') + '.' + ext; }
+  async function rvExcel_(){
+    const d = rv_.data; if(!d) return;
+    showLoading(true);
+    try{
+      await ensureExcelJsLoaded_();
+      const wb = new ExcelJS.Workbook();
+      const head = function(ws, cols){
+        ws.columns = cols.map(function(c){ return { header: c[0], width: c[1] }; });
+        ws.getRow(1).height = 22;
+        ws.getRow(1).eachCell(function(c){ c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = xlFill_(XL_NAVY_); c.alignment = { horizontal: 'center', vertical: 'middle' }; });
+      };
+      const s1 = wb.addWorksheet('ملخص', { views: [{ rightToLeft: true }] });
+      head(s1, [['البند', 26], ['القيمة', 22]]);
+      [['المندوب', d.meta.rep], ['المدة', rvPeriodTxt_(d.meta)], ['عدد الزيارات', d.tot.visitsTotal], ['عملاء اتزاروا', d.tot.custVisited],
+        ['الطلبيات', d.tot.orders], ['القطع', d.tot.qty], ['التحصيل (ج)', d.tot.paid], ['عملاء ماتزاروش', d.unv ? d.unv.length : '—']].forEach(function(r){ s1.addRow(r); });
+      const s2 = wb.addWorksheet('حسب العميل', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
+      head(s2, [['كود العميل', 13], ['اسم العميل', 32], ['عدد الزيارات', 12], ['زيارات من غير طلب', 16], ['عدد الطلبيات', 12], ['القطع', 10], ['التحصيل (ج)', 13], ['آخر زيارة', 13], ['أسباب عدم الطلب', 30]]);
+      d.rows.forEach(function(r){ s2.addRow([r.code, r.name, r.visits, r.noOrder, r.orders, r.qty, r.paid, r.last, Object.keys(r.reasons).map(function(k){ return k + ' (' + r.reasons[k] + ')'; }).join('، ')]); });
+      const s3 = wb.addWorksheet('ماتزاروش', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
+      head(s3, [['كود العميل', 13], ['اسم العميل', 32], ['المنطقة', 18], ['آخر زيارة', 14], ['من كام يوم', 11], ['التليفون', 15]]);
+      (d.unv || []).forEach(function(x){ s3.addRow([x.code, x.name, x.area || '', x.lastVisit || 'عمره ما اتزار', x.daysSince == null ? '' : x.daysSince, x.phone || '']); });
+      const buf = await wb.xlsx.writeBuffer();
+      showLoading(false);
+      await shareOrDownload_(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), rvFileName_('xlsx'), 'share');
+    }catch(err){ showLoading(false); showMsg('ماقدرتش أعمل الملف: ' + ((err && err.message) || err), 'error'); }
+  }
+  // صفحات A4: جدول العملاء ثم ماتزاروش — كل صفحة ~26 سطر
+  function rvPdfPages_(){
+    const d = rv_.data, e = escapeHtml, pages = [];
+    const top = '<div class="lpHead"><div><img class="lpLogo" src="' + LOGO_D_ + '" alt="TOUCH"><small>المناديب الخارجيين</small></div><div class="lpT">تقرير زيارات ' + e(d.meta.rep) + '</div>' +
+      '<div class="lpMeta">' + rvPeriodTxt_(d.meta) + '</div></div>';
+    const sum = '<div class="lpNote" style="margin:0 0 8px;">' + d.tot.visitsTotal + ' زيارة • ' + d.tot.custVisited + ' عميل اتزار • ' + d.tot.orders + ' طلبية • ' + fmt(d.tot.qty) + ' قطعة • تحصيل ' + fmt(d.tot.paid) + ' ج' + (d.unv ? ' • ' + d.unv.length + ' عميل ماتزاروش' : '') + '</div>';
+    const chunk = function(arr, n){ const o = []; for(let i = 0; i < arr.length; i += n) o.push(arr.slice(i, i + n)); return o.length ? o : [[]]; };
+    chunk(d.rows, 26).forEach(function(part, k){
+      pages.push('<div class="lpPage">' + top + (k === 0 ? sum : '') + '<div style="font-weight:800; margin:6px 0;">العملاء اللي اتزاروا' + (k ? ' — تكملة' : '') + '</div>' +
+        '<table class="lpTbl"><thead><tr><th>#</th><th>العميل</th><th>زيارات</th><th>طلبيات</th><th>قطع</th><th>تحصيل</th><th>آخر زيارة</th></tr></thead><tbody>' +
+        part.map(function(r, i){ return '<tr><td>' + (k * 26 + i + 1) + '</td><td><b>' + e(r.name) + '</b> <small>' + e(r.code) + '</small></td><td>' + r.visits + '</td><td>' + r.orders + '</td><td>' + fmt(r.qty) + '</td><td>' + (r.paid ? fmt(r.paid) : '—') + '</td><td>' + e(r.last || '—') + '</td></tr>'; }).join('') +
+        '</tbody></table></div>');
+    });
+    if(d.unv && d.unv.length) chunk(d.unv, 30).forEach(function(part, k){
+      pages.push('<div class="lpPage">' + top + '<div style="font-weight:800; margin:6px 0; color:#a8432f;">العملاء اللي ماتزاروش (' + d.unv.length + ')' + (k ? ' — تكملة' : '') + '</div>' +
+        '<table class="lpTbl"><thead><tr><th>#</th><th>العميل</th><th>المنطقة</th><th>آخر زيارة</th><th>من كام يوم</th></tr></thead><tbody>' +
+        part.map(function(x, i){ return '<tr><td>' + (k * 30 + i + 1) + '</td><td><b>' + e(x.name) + '</b> <small>' + e(x.code) + '</small></td><td>' + e(x.area || '') + '</td><td>' + e(x.lastVisit || 'عمره ما اتزار') + '</td><td>' + (x.daysSince == null ? '—' : x.daysSince) + '</td></tr>'; }).join('') +
+        '</tbody></table></div>');
+    });
+    return pages;
+  }
+  async function rvPdf_(){
+    const d = rv_.data; if(!d) return;
+    showLoading(true);
+    const stage = document.createElement('div');
+    stage.className = 'lpWrap';
+    stage.style.cssText = 'position:fixed; left:-12000px; top:0; width:794px; background:#fff; z-index:-1; pointer-events:none;';
+    document.body.appendChild(stage);
+    try{
+      await Promise.all([ensureJsPdfLoaded_(), ensureHtml2CanvasLoaded_()]);
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+      const pages = rvPdfPages_();
+      for(let p = 0; p < pages.length; p++){
+        stage.innerHTML = pages[p];
+        const el = stage.firstChild;
+        el.style.padding = '30px 36px'; el.style.background = '#fff';
+        const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, windowWidth: 794 });
+        const sliceH = Math.floor(canvas.width * 297 / 210);
+        for(let y = 0; y < canvas.height; y += sliceH){
+          const h = Math.min(sliceH, canvas.height - y), c = document.createElement('canvas');
+          c.width = canvas.width; c.height = sliceH;
+          const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+          g.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+          if(p || y) pdf.addPage();
+          pdf.addImage(c.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297);
+        }
+      }
+      const blob = pdf.output('blob');
+      showLoading(false);
+      await shareOrDownload_(blob, rvFileName_('pdf'), 'share');
+    }catch(err){ showLoading(false); showMsg('ماقدرتش أعمل الـ PDF: ' + ((err && err.message) || err), 'error'); }
+    finally{ stage.remove(); }
   }
 
   // ================== تجار ماتزاروش ==================
