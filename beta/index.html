@@ -5102,7 +5102,7 @@
     setTitle_(state.isAdmin ? 'حوافظ المناديب' : 'حافظتي', 'التحصيل والإكراميات والمصروفات');
     setView('viewWallet');
     document.getElementById('wRepWrap').hidden = !state.isAdmin;
-    if(state.isAdmin) fillRepSelect_('wRep', 'كل المناديب');
+    if(state.isAdmin){ fillRepSelect_('wRep', 'كل المناديب'); walletAddSelf_(); }
     flushExpQueue_();
     loadWallet_();
     // تجهيز المعاينة من دلوقتي عشان تفتح على طول: مكتبات الـ PDF + التوقيعات
@@ -5111,6 +5111,17 @@
       if(state.user) fetchSignature_(state.user.name).catch(function(){});
     }, 300);
   }
+  // بيتا: المدير اللي بيسجّل تحصيل لعملائه — حافظته مش في قايمة المناديب، فبنضيفها أول اختيار
+  function walletAddSelf_(){
+    const sel = document.getElementById('wRep'), me = state.user && state.user.name;
+    if(!sel || !me) return;
+    const has = Array.prototype.some.call(sel.options, function(o){ return o.value === me; });
+    if(!has){
+      const o = document.createElement('option'); o.value = me; o.textContent = '👔 حافظتي أنا (' + me + ')';
+      sel.insertBefore(o, sel.options[1] || null);
+    }
+  }
+  function walletOpenSelf_(){ walletAddSelf_(); document.getElementById('wRep').value = state.user.name; loadWallet_(); }
   function walletRep_(){ return state.isAdmin ? document.getElementById('wRep').value : ''; }
   function loadWallet_(){
     const rep = walletRep_();
@@ -5127,7 +5138,9 @@
   }
   function wTile_(val, lbl, cls){ return '<div class="tile' + (cls ? ' ' + cls : '') + '"><b>' + val + '</b><span>' + lbl + '</span></div>'; }
   function renderWalletOverview_(r){
-    let h = '<div class="dayHead">💼 الحوافظ المفتوحة (لسه ماتقفلتش)</div>';
+    const me = state.user && state.user.name;
+    let h = me ? '<button type="button" class="bigAction" style="margin:0 0 10px;" onclick="walletOpenSelf_()">👔 حافظتي أنا — التحصيل اللي سجّلته لعملائي</button>' : '';
+    h += '<div class="dayHead">💼 الحوافظ المفتوحة (لسه ماتقفلتش)</div>';
     h += r.open.length ? r.open.map(function(o){
       return '<div class="listRow tapRow" data-rep="' + escapeHtml(o.rep) + '"><div class="lMain"><div class="lName">' + escapeHtml(o.rep) + '</div>' +
         '<div class="lSub">تحصيل ' + fmt(o.collected) + ' ج (نقدي ' + fmt(o.cash) + ') • مصروفات ' + fmt(o.expenses) + ' • ' + o.payCount + ' تحصيل • ' + o.expCount + ' مصروف</div></div>' +
