@@ -1451,6 +1451,16 @@
   .pfRepRow .ovBar{margin:3px 0;} .pfRepRow .ovBar i.s{background:#56672f;} .pfRepRow .ovBar i.c{background:#d9a21b;}
   .pfRepRow b{color:var(--o3); direction:ltr; font-size:13.5px; min-width:78px; text-align:left;}
   .pfRep small{color:var(--omut); font-size:11.5px;}
+  .csOpen{width:100%; margin:0 0 10px;}
+  .csTabs{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;}
+  .csTabs button{height:38px; border-radius:12px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:800; font-size:14px; cursor:pointer;}
+  .csTabs button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
+  .csBars .pfPair i{width:62%;}
+  .csBars .pfCol b{font-size:8.5px; color:var(--o3); font-weight:800; direction:ltr; white-space:nowrap; min-height:11px;}
+  .csRow{display:grid; grid-template-columns:1fr auto; gap:2px 10px; align-items:center; background:#fff; border:1px solid var(--oline); border-radius:12px; padding:9px 12px; margin-bottom:6px;}
+  .csRow b{color:var(--o3); font-size:14px;} .csRow .amt{font-family:var(--fTitle); font-size:16px; color:var(--o3); direction:ltr; text-align:left;}
+  .csRow small{grid-column:1 / -1; color:var(--omut); font-size:11.5px;}
+  .csRow.zero{opacity:.55;}
 </style>
 </head>
 <body>
@@ -8585,12 +8595,123 @@
   }
   function invPick_(i){ const r = invSrch_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
   function admCustInv_(i){ const r = adm_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
+
+  // ================== 📊 مبيعات التاجر شهري / سنوي (بيتا) ==================
+  // من نفس فلو فواتير التاجر على جهاز الشركة (sum=1): مبيعات كل شهر من فواتير السيستم (+ 2025)، والمرتجعات لوحدها.
+  // نفس التحقق: المندوب بيشوف عملاءه بس. آخر نسخة بتتحفظ على الموبايل لو الجهاز مش متاح.
+  var cs_ = { code: '', name: '', months: null, at: 0, stale: false, view: 'm', yr: '' };
+  const CS_CACHE_ = 'tf_cs:';
+  function csFetch_(code){
+    const ctrl = window.AbortController ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 20000) : null;
+    return invPost_({ acct: code, sum: '1' }, ctrl ? ctrl.signal : undefined)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d || d.ok !== true || !Array.isArray(d.months)){ const e = new Error((d && d.error) || 'جهاز الشركة لسه مش جاهز للتقرير ده'); e.denied = true; throw e; }
+        try{ localStorage.setItem(CS_CACHE_ + code, JSON.stringify({ t: Date.now(), m: d.months })); }catch(e){}
+        return { months: d.months, at: Date.now(), stale: false };
+      })
+      .catch(function(err){
+        let c = null;
+        try{ c = JSON.parse(localStorage.getItem(CS_CACHE_ + code) || 'null'); }catch(e){}
+        if(c && !err.denied) return { months: c.m, at: c.t, stale: true };
+        throw err;
+      })
+      .finally(function(){ if(timer) clearTimeout(timer); });
+  }
+  function openCustSales_(){
+    const c = invCur_;
+    if(!c) return;
+    cs_.code = c.code; cs_.name = c.name; cs_.view = 'm'; cs_.yr = ''; cs_.months = null;
+    dlEnter_('📊 مبيعات ' + c.name, 'من سيستم الشركة — شهري وسنوي');
+    let cached = null;
+    try{ cached = JSON.parse(localStorage.getItem(CS_CACHE_ + c.code) || 'null'); }catch(e){}
+    if(cached){ cs_.months = cached.m; cs_.at = cached.t; cs_.stale = true; csRender_(); }
+    else ldBody_().innerHTML = '<div class="aiStatus">جاري جلب المبيعات من الشركة...</div>';
+    const code = c.code;
+    csFetch_(code).then(function(r){
+      if(cs_.code !== code || document.getElementById('dlOverlay').hidden) return;
+      cs_.months = r.months; cs_.at = r.at; cs_.stale = r.stale; csRender_();
+    }).catch(function(err){
+      if(cs_.code !== code) return;
+      if(cs_.months) toast_('⚠️ جهاز الشركة مش متاح — ظاهر آخر نسخة');
+      else ldBody_().innerHTML = '<div class="aiStatus err">' + escapeHtml(err.denied ? err.message : 'جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية') + '</div>';
+    });
+  }
+  function csShort_(n){ n = Math.round(n || 0); return n >= 1e6 ? (Math.round(n / 1e5) / 10) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : (n ? String(n) : ''); }
+  function csSum_(rows){ return rows.reduce(function(t, r){ t.sales += r.sales; t.ret += r.ret; t.n += r.n; return t; }, { sales: 0, ret: 0, n: 0 }); }
+  function csRender_(){
+    const all = (cs_.months || []).slice().sort(function(a, b){ return a.ym < b.ym ? -1 : 1; });
+    const by = {}; all.forEach(function(r){ by[r.ym] = r; });
+    const nowYm = pfNowYm_(), nowYr = nowYm.slice(0, 4), nowM = nowYm.slice(5);
+    const years = Object.keys(all.reduce(function(o, r){ o[r.ym.slice(0, 4)] = 1; return o; }, {})).sort();
+    if(years.indexOf(nowYr) === -1) years.push(nowYr);
+    if(!cs_.yr || years.indexOf(cs_.yr) === -1) cs_.yr = years[years.length - 1];
+    let h = '';
+    if(cs_.stale && cs_.at) h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">⚠️ آخر نسخة اتحفظت على الموبايل (' +
+      new Date(cs_.at).toLocaleString('ar-EG', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) + ')</div>';
+    h += '<div class="csTabs"><button type="button" class="' + (cs_.view === 'm' ? 'on' : '') + '" onclick="cs_.view=\'m\'; csRender_()">شهري</button>' +
+      '<button type="button" class="' + (cs_.view === 'y' ? 'on' : '') + '" onclick="cs_.view=\'y\'; csRender_()">سنوي</button></div>';
+    if(!all.length){ ldBody_().innerHTML = h + '<div class="empty">مفيش مبيعات للتاجر ده في السيستم</div>'; return; }
+    const bars = function(ser, onTap){
+      const mx = ser.reduce(function(m, s){ return Math.max(m, s.v); }, 0) || 1;
+      return '<div class="pfChart"><div class="pfBars csBars">' + ser.map(function(s){
+        return '<button type="button" class="pfCol' + (s.on ? ' on' : '') + '"' + (onTap ? ' onclick="' + onTap(s) + '"' : '') + '>' +
+          '<b>' + csShort_(s.v) + '</b><div class="pfPair"><i class="s" style="height:' + Math.round(s.v * 100 / mx) + '%"></i></div><small>' + s.label + '</small></button>';
+      }).join('') + '</div></div>';
+    };
+    if(cs_.view === 'm'){
+      const yr = cs_.yr, prevYr = String(Number(yr) - 1);
+      h += '<div class="pfMonths">' + years.slice().reverse().map(function(y){
+        return '<button type="button" class="' + (y === yr ? 'on' : '') + '" onclick="cs_.yr=\'' + y + '\'; csRender_()">' + y + '</button>';
+      }).join('') + '</div>';
+      const mm = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+      const cur = csSum_(mm.map(function(m){ return by[yr + '-' + m]; }).filter(Boolean));
+      // السنة الحالية لسه ماخلصتش: بنقارن بنفس الشهور من السنة اللي فاتت
+      const upTo = yr === nowYr ? nowM : '12';
+      const prev = csSum_(mm.filter(function(m){ return m <= upTo; }).map(function(m){ return by[prevYr + '-' + m]; }).filter(Boolean));
+      const d = prev.sales > 0 ? Math.round((cur.sales - prev.sales) * 100 / prev.sales) : null;
+      h += '<div class="pfHero"><span>مبيعات ' + yr + (yr === nowYr ? ' لحد دلوقتي' : '') + '</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' +
+        (d != null ? '<i class="pfD ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>' : '') + '</div>';
+      h += '<div class="pfYtd">' + cur.n + ' فاتورة' + (cur.ret ? ' • مرتجعات <b>' + fmt(cur.ret) + '</b>' : '') +
+        (d != null ? ' • ' + (yr === nowYr ? 'مقارنة بنفس الفترة من ' : 'مقارنة بـ ') + prevYr + ' (' + fmt(prev.sales) + ')' : '') + '</div>';
+      h += bars(mm.map(function(m){ const r = by[yr + '-' + m]; return { v: r ? r.sales : 0, label: pfYmLabel_(yr + '-' + m, true), on: yr + '-' + m === nowYm }; }));
+      h += '<div class="sectionLabel" style="margin:12px 0 8px;">الشهور — ' + yr + '</div>';
+      h += mm.slice().reverse().filter(function(m){ return yr + '-' + m <= nowYm; }).map(function(m){
+        const r = by[yr + '-' + m] || { sales: 0, ret: 0, n: 0 }, p = by[prevYr + '-' + m];
+        const dd = p && p.sales > 0 && r.sales > 0 ? Math.round((r.sales - p.sales) * 100 / p.sales) : null;
+        return '<div class="csRow' + (r.sales ? '' : ' zero') + '"><b>' + pfYmLabel_(yr + '-' + m) + '</b><span class="amt">' + (r.sales ? fmt(r.sales) : '—') + '</span>' +
+          '<small>' + (r.n ? r.n + ' فاتورة' : 'مفيش شراء') + (r.ret ? ' • مرتجع ' + fmt(r.ret) : '') +
+          (dd != null ? ' • <i class="pfD ' + (dd >= 0 ? 'up' : 'dn') + '">' + (dd >= 0 ? '▲' : '▼') + ' ' + Math.abs(dd) + '%</i> عن ' + prevYr : '') + '</small></div>';
+      }).join('');
+    } else {
+      const ys = years.map(function(y){ const t = csSum_(all.filter(function(r){ return r.ym.slice(0, 4) === y; })); t.y = y; return t; });
+      const cur = ys[ys.length - 1], prevYr = String(Number(nowYr) - 1);
+      const prevSame = csSum_(all.filter(function(r){ return r.ym.slice(0, 4) === prevYr && r.ym.slice(5) <= nowM; }));
+      const d = prevSame.sales > 0 ? Math.round((cur.sales - prevSame.sales) * 100 / prevSame.sales) : null;
+      h += '<div class="pfHero"><span>مبيعات ' + nowYr + ' لحد دلوقتي</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' +
+        (d != null ? '<i class="pfD ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>' : '') + '</div>';
+      if(d != null) h += '<div class="pfYtd">نفس الفترة من ' + prevYr + ': <b>' + fmt(prevSame.sales) + '</b></div>';
+      h += bars(ys.map(function(t){ return { v: t.sales, label: t.y, on: t.y === nowYr, y: t.y }; }), function(s){ return 'cs_.yr=\'' + s.y + '\'; cs_.view=\'m\'; csRender_()'; });
+      h += '<div class="sectionLabel" style="margin:12px 0 8px;">السنين — دوس على سنة تشوف شهورها</div>';
+      h += ys.slice().reverse().map(function(t){
+        const months = all.filter(function(r){ return r.ym.slice(0, 4) === t.y && r.sales > 0; }).length;
+        return '<div class="csRow' + (t.sales ? '' : ' zero') + '" style="cursor:pointer;" onclick="cs_.yr=\'' + t.y + '\'; cs_.view=\'m\'; csRender_()"><b>' + t.y + (t.y === nowYr ? ' (لحد دلوقتي)' : '') + '</b><span class="amt">' + (t.sales ? fmt(t.sales) : '—') + '</span>' +
+          '<small>' + t.n + ' فاتورة • اشترى في ' + months + ' شهر' + (months ? ' • متوسط الشهر ' + fmt(Math.round(t.sales / months)) : '') + (t.ret ? ' • مرتجع ' + fmt(t.ret) : '') + '</small></div>';
+      }).join('');
+    }
+    h += '<div class="note" style="margin-top:10px;">من فواتير السيستم على جهاز الشركة (قيمة الأصناف بعد الخصم). المرتجعات محسوبة لوحدها ومش مطروحة من المبيعات.</div>';
+    ldBody_().innerHTML = h;
+    const on = ldBody_().querySelector('.pfMonths .on'); if(on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
   function invHtml_(d, at, stale){
     let h = '';
     if(stale) h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">⚠️ دي آخر نسخة اتحفظت على الموبايل' +
       (at ? ' (' + new Date(at).toLocaleString('ar-EG', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) + ')' : '') + ' — جهاز الشركة مش متاح دلوقتي</div>';
-    if(!d.invoices || !d.invoices.length) return h + '<div class="empty">مفيش فواتير للتاجر ده في آخر 12 شهر</div>';
+    const csBtn = '<button type="button" class="ghost csOpen" onclick="openCustSales_()">📊 مبيعاته شهري / سنوي</button>';
+    if(!d.invoices || !d.invoices.length) return h + '<div class="empty">مفيش فواتير للتاجر ده في آخر 12 شهر</div>' + csBtn;
     h += dlSum_([d.invoices.length + ' فاتورة', 'آخر شراء ' + ymdToDmy_(d.lastDate), fmt(d.total12m) + ' ج']);
+    h += csBtn;
     h += '<div class="invPdfBox" data-inv=""><button type="button" class="finalize" onclick="invPdf_(this.parentNode)">📄 آخر فاتورة PDF</button></div>';
     h += d.invoices.map(function(inv){
       return '<details class="docCard"><summary><div class="dTop"><b>' + escapeHtml(inv.inv) + '</b></div>' +
