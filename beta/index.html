@@ -1580,6 +1580,7 @@
       </div>
       <div class="sectionLabel" style="margin-top:16px;">كل الأدوات</div>
       <div class="toolGrid">
+        <button type="button" class="toolBtn" onclick="openMyCust_()"><span class="tIc t6"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/><path d="M12 14.5l-1.2 2.5L12 20l1.2-3z"/></svg></span>عملائي (طلبية/تحصيل)</button>
         <button type="button" class="toolBtn" onclick="openRepVisits_()"><span class="tIc t1"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg></span>تقرير مندوب</button>
         <button type="button" class="toolBtn" onclick="openScreen('map')"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 9 4 15 7 21 4 21 17 15 20 9 17 3 20 3 7"/><line x1="9" y1="4" x2="9" y2="17"/><line x1="15" y1="7" x2="15" y2="20"/></svg></span>خريطة مندوب</button>
         <button type="button" class="toolBtn" onclick="openScreen('unvisited')"><span class="tIc t4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>ماتزاروش</button>
@@ -1616,6 +1617,7 @@
   <!-- ============ كل تجاري (بحث) ============ -->
   <div id="viewCustomers" hidden>
     <div class="searchBox"><input type="search" id="custSearch" placeholder="🔎 دوّر باسم التاجر أو الكود أو التليفون..." oninput="renderCustomersSoon_()"></div>
+    <div class="note" id="mgrCustNote" hidden style="margin:0 0 10px;">👔 دي عملاءك كمدير — اختار العميل وسجّل له طلبية أو مرتجع أو تحصيل. العميل الجديد هيتسجل على اسمك.</div>
     <button class="bigAction newCust" style="margin:0 0 14px;" onclick="openScreen('newcust')">＋ العميل مش موجود؟ ضيفه كعميل جديد</button>
     <div id="custList"></div>
   </div>
@@ -3223,7 +3225,7 @@
         localCacheSet_('rep', d);
         if(state.demo) tourInjectDemo_();
         if(state.screen === null && !state.isAdmin) renderRepHome_();
-        if(state.screen === 'customers') renderCustomers_();
+        if(state.screen === 'customers' || state.screen === 'phone') renderCustomers_();
         return d;
       })
       .catch(function(err){ if(!state.rep) onError(err); });
@@ -3369,8 +3371,15 @@
   }
 
   // ---------- كل تجاري ----------
+  // بيتا: المدير يسجّل لعملائه بنفسه (طلبية/مرتجع/تحصيل من غير زيارة) — نفس شاشات المندوب
+  function openMyCust_(){
+    if(state.rep && Date.now() - (state.repLoadedAt || 0) > 120000) loadRepData_(); // لو لسه مااتحملتش، شاشة التجار بتحمّلها
+    try{ flushQueue_(false); }catch(e){}
+    openScreen('phone');
+  }
   function openCustomers_(phone){
     state.phoneMode = !!phone;
+    const mn = document.getElementById('mgrCustNote'); if(mn) mn.hidden = !state.isAdmin;
     setTitle_(phone ? '📞 من غير زيارة' : 'تجاري', phone ? 'اختار التاجر' : 'اختار التاجر اللي هتزوره');
     setView('viewCustomers');
     const cs = document.getElementById('custSearch'); if(cs) cs.value = '';
@@ -3461,7 +3470,7 @@
         const ncClose = document.getElementById('ncClose').value;
         if(ncClose) ctSave_(r.customer.code, { t: ncClose }, true);
         showMsg(r.existed ? 'العميل ده متسجل بالفعل — كمّل الزيارة' : 'اتضاف العميل ✔', 'success');
-        openVisit_(r.customer.code, 'home');
+        openVisit_(r.customer.code, 'home', !!state.isAdmin);
       })
       .catch(function(err){
         ncSaving_ = false;
