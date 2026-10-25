@@ -1461,6 +1461,13 @@
   .csRow b{color:var(--o3); font-size:14px;} .csRow .amt{font-family:var(--fTitle); font-size:16px; color:var(--o3); direction:ltr; text-align:left;}
   .csRow small{grid-column:1 / -1; color:var(--omut); font-size:11.5px;}
   .csRow.zero{opacity:.55;}
+  .csaChips{margin-bottom:2px;} .csaChips button{height:32px; font-size:12.5px; padding:0 12px;}
+  .csaRow{display:grid; grid-template-columns:28px 1fr auto; gap:2px 8px; align-items:center; width:100%; text-align:right; background:#fff; border:1px solid var(--oline); border-radius:12px; padding:9px 10px; margin-bottom:6px; font-family:inherit; cursor:pointer;}
+  .csaRow .rk{grid-row:1 / span 2; font-weight:800; color:var(--omut); font-size:13px; text-align:center;}
+  .csaRow b{color:var(--o3); font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .csaRow .amt{font-family:var(--fTitle); font-size:16px; color:var(--o3); direction:ltr; text-align:left;}
+  .csaRow small{color:var(--omut); font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .csaRow .pfD{justify-self:end;}
 </style>
 </head>
 <body>
@@ -1590,6 +1597,7 @@
       </div>
       <div class="sectionLabel" style="margin-top:16px;">كل الأدوات</div>
       <div class="toolGrid">
+        <button type="button" class="toolBtn" onclick="openCustSalesAll_()"><span class="tIc t5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>مبيعات العملاء</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
         <button type="button" class="toolBtn" onclick="openMyWallet_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2M3 10h18"/></svg></span>حافظتي</button>
         <button type="button" class="toolBtn" onclick="openMyCust_()"><span class="tIc t6"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/><path d="M12 14.5l-1.2 2.5L12 20l1.2-3z"/></svg></span>عملائي (طلبية/تحصيل)</button>
@@ -8595,6 +8603,86 @@
   }
   function invPick_(i){ const r = invSrch_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
   function admCustInv_(i){ const r = adm_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
+
+  // ================== 🏆 مبيعات العملاء — للمدير (بيتا) ==================
+  // من جهاز الشركة (field-reports, kind=custsales): كل عميل وأرقامه في كل فترة + نفس الفترة اللي قبلها. للمدير بس.
+  var csa_ = { rows: null, at: null, per: 'ytd', rep: '', sort: 'top', q: '', lim: 100, view: [] };
+  const CSA_PER_ = {
+    ytd: { t: 'السنة دي', cur: 'ytd', prev: 'lytd', vs: 'نفس الفترة من السنة اللي فاتت' },
+    m12: { t: 'آخر 12 شهر', cur: 'm12', prev: 'p12', vs: 'الـ 12 شهر اللي قبلهم' },
+    m3: { t: 'آخر 3 شهور', cur: 'm3', prev: 'p3', vs: 'الـ 3 شهور اللي قبلهم' },
+    ly: { t: 'السنة اللي فاتت', cur: 'ly', prev: null, vs: '' }
+  };
+  const CSA_SORT_ = { top: 'الأكتر شراء', down: 'الأكتر نزول 📉', stop: 'وقفوا شراء ⛔', up: 'الأكتر زيادة 📈' };
+  function openCustSalesAll_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('🏆 مبيعات العملاء', 'من سيستم الشركة');
+    if(!csa_.rows){ try{ const c = JSON.parse(localStorage.getItem('tf_csa') || 'null'); if(c){ csa_.rows = c.rows; csa_.at = c.at; } }catch(e){} }
+    if(csa_.rows) csaRender_();
+    localReport_('custsales').then(function(r){
+      csa_.rows = r.rows || []; csa_.at = r.at;
+      try{ localStorage.setItem('tf_csa', JSON.stringify({ rows: csa_.rows, at: csa_.at })); }catch(e){}
+      if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) csaRender_();
+    }).catch(function(e){ if(!csa_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  function csaDelta_(cur, prev){
+    if(!prev) return cur ? '<i class="pfD up">جديد</i>' : '';
+    const d = Math.round((cur - prev) * 100 / prev);
+    return '<i class="pfD ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>';
+  }
+  function csaSet_(k, v){ csa_[k] = v; csa_.lim = 100; if(k === 'per' && v === 'ly') csa_.sort = 'top'; csaRender_(); }
+  function csaRender_(){
+    const P = CSA_PER_[csa_.per], rows = csa_.rows || [];
+    document.getElementById('dlSub').textContent = 'من سيستم الشركة' + (csa_.at ? ' • اتحسب ' + ovAgo_(csa_.at) : '');
+    const chips = function(obj, key){
+      return '<div class="pfMonths csaChips">' + Object.keys(obj).map(function(k){
+        return '<button type="button" class="' + (csa_[key] === k ? 'on' : '') + '" onclick="csaSet_(\'' + key + '\', \'' + k + '\')">' + (obj[k].t || obj[k]) + '</button>';
+      }).join('') + '</div>';
+    };
+    const repTot = {};
+    rows.forEach(function(r){ const k = r.r || 'من غير مندوب'; repTot[k] = (repTot[k] || 0) + (r[P.cur] || 0); });
+    const reps = { '': 'كل المناديب' };
+    Object.keys(repTot).sort(function(a, b){ return repTot[b] - repTot[a]; }).forEach(function(k){ reps[k] = k; });
+    if(csa_.rep && !reps[csa_.rep]) csa_.rep = '';
+    const sorts = {}; Object.keys(CSA_SORT_).forEach(function(k){ if(P.prev || k === 'top') sorts[k] = CSA_SORT_[k]; });
+    let h = chips(CSA_PER_, 'per') + chips(reps, 'rep') + chips(sorts, 'sort');
+    h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
+    h += '<div id="csaList"></div>';
+    h += '<div class="note" style="margin-top:10px;">من فواتير السيستم على جهاز الشركة (data sales + 2025). دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
+    ldBody_().innerHTML = h;
+    csaList_();
+    ldBody_().querySelectorAll('.csaChips .on').forEach(function(b){ b.scrollIntoView({ inline: 'center', block: 'nearest' }); });
+  }
+  function csaList_(){
+    const box = document.getElementById('csaList'); if(!box) return;
+    const P = CSA_PER_[csa_.per], q = normAr_(normalizeDigits(csa_.q || '')).trim();
+    let list = (csa_.rows || []).filter(function(r){
+      if(csa_.rep && (r.r || 'من غير مندوب') !== csa_.rep) return false;
+      if(q && normAr_(r.n || '').indexOf(q) === -1 && String(r.c).indexOf(q) === -1) return false;
+      return true;
+    });
+    const cur = function(r){ return r[P.cur] || 0; }, prev = function(r){ return P.prev ? (r[P.prev] || 0) : 0; };
+    const tc = list.reduce(function(t, r){ return t + cur(r); }, 0), tp = list.reduce(function(t, r){ return t + prev(r); }, 0);
+    const buying = list.filter(function(r){ return cur(r) > 0; }).length;
+    if(csa_.sort === 'down') list = list.filter(function(r){ return prev(r) > cur(r); }).sort(function(a, b){ return (cur(a) - prev(a)) - (cur(b) - prev(b)); });
+    else if(csa_.sort === 'up') list = list.filter(function(r){ return cur(r) > prev(r); }).sort(function(a, b){ return (cur(b) - prev(b)) - (cur(a) - prev(a)); });
+    else if(csa_.sort === 'stop') list = list.filter(function(r){ return prev(r) > 0 && !cur(r); }).sort(function(a, b){ return prev(b) - prev(a); });
+    else list = list.filter(function(r){ return cur(r) > 0; }).sort(function(a, b){ return cur(b) - cur(a); });
+    let h = '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + P.t + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '') + '</span><b>' + fmt(tc) + ' <small>ج</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
+    h += '<div class="pfYtd">' + buying + ' عميل اشترى' + (P.prev ? ' • ' + P.vs + ': <b>' + fmt(tp) + '</b>' : '') + '</div>';
+    csa_.view = list;
+    h += list.length ? list.slice(0, csa_.lim).map(function(r, i){
+      const diff = cur(r) - prev(r);
+      return '<button type="button" class="csaRow" onclick="csaOpen_(' + i + ')"><span class="rk">' + (i + 1) + '</span><b>' + escapeHtml(r.n || r.c) + '</b>' +
+        '<span class="amt">' + (csa_.sort === 'stop' ? fmt(prev(r)) : fmt(cur(r))) + '</span>' +
+        '<small>' + escapeHtml(r.c) + (r.r && !csa_.rep ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
+        (csa_.sort === 'down' || csa_.sort === 'up' ? ' • <span dir="ltr">' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff)) + '</span>' : '') + (csa_.sort === 'stop' ? ' • كان بيشتري' : '') + '</small>' +
+        (P.prev && csa_.sort !== 'stop' ? csaDelta_(cur(r), prev(r)) : '<span></span>') + '</button>';
+    }).join('') : '<div class="empty">مفيش عملاء هنا</div>';
+    if(list.length > csa_.lim) h += '<button type="button" class="ghost" style="width:100%;" onclick="csa_.lim+=100; csaList_()">اعرض كمان (' + (list.length - csa_.lim) + ')</button>';
+    box.innerHTML = h;
+  }
+  function csaOpen_(i){ const r = csa_.view[i]; if(r) openCustInvoicesFor_(r.c, r.n || r.c, false); }
 
   // ================== 📊 مبيعات التاجر شهري / سنوي (بيتا) ==================
   // من نفس فلو فواتير التاجر على جهاز الشركة (sum=1): مبيعات كل شهر من فواتير السيستم (+ 2025)، والمرتجعات لوحدها.
