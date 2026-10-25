@@ -8481,7 +8481,7 @@
   function fetchInvoices_(code){
     if(invInflight_[code]) return invInflight_[code];
     const ctrl = window.AbortController ? new AbortController() : null;
-    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 8000) : null;
+    const timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 15000) : null;
     const p = invPost_({ acct: code }, ctrl ? ctrl.signal : undefined)
       .then(function(r){ return r.json(); })
       .then(function(d){
