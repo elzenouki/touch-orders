@@ -1580,6 +1580,7 @@
       </div>
       <div class="sectionLabel" style="margin-top:16px;">كل الأدوات</div>
       <div class="toolGrid">
+        <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
         <button type="button" class="toolBtn" onclick="openMyWallet_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2M3 10h18"/></svg></span>حافظتي</button>
         <button type="button" class="toolBtn" onclick="openMyCust_()"><span class="tIc t6"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/><path d="M12 14.5l-1.2 2.5L12 20l1.2-3z"/></svg></span>عملائي (طلبية/تحصيل)</button>
         <button type="button" class="toolBtn" onclick="openRepVisits_()"><span class="tIc t1"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg></span>تقرير مندوب</button>
@@ -7776,7 +7777,7 @@
       if(t === 'cust') return '<div class="aRow" onclick="admCustEdit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.name || '') + '</b><span class="chip">' + escapeHtml(r.code) + '</span></div>' +
         '<div class="aSub">' + [r.rep, r.area, r.phone, r.system_code ? 'كود السيستم ' + r.system_code : '', r.visits + ' زيارة', r.last_visit ? 'آخر زيارة ' + admDay_(r.last_visit) : ''].filter(Boolean).map(escapeHtml).join(' • ') + '</div>' +
         ctInfoHtml_(r.code) +
-        admBtns_(i, [['⏰ القفل والأجازة', 'admCustClose_'], ['✏️ تعديل', 'admCustEdit_'], ['🔀 دمج في عميل تاني', 'admCustMerge_'], ['🗑 مسح', 'admCustDel_', 'del']]) + '</div>';
+        admBtns_(i, [['📄 الفواتير', 'admCustInv_'], ['⏰ القفل والأجازة', 'admCustClose_'], ['✏️ تعديل', 'admCustEdit_'], ['🔀 دمج في عميل تاني', 'admCustMerge_'], ['🗑 مسح', 'admCustDel_', 'del']]) + '</div>';
       if(t === 'visit') return '<div class="aRow" onclick="admVisit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.customer_name || r.customer_code || '') + '</b><span class="chip">' + admDay_(r.day) + ' ' + admTime_(r.at) + '</span></div>' +
         '<div class="aSub">' + [r.rep, r.result, r.order_lines ? r.order_lines + ' صنف طلبية' : '', r.return_lines ? r.return_lines + ' صنف مرتجع' : '', +r.paid ? 'تحصيل ' + fmt(r.paid) : '', r.reason, r.notes].filter(Boolean).map(escapeHtml).join(' • ') +
         (r.exported ? ' <span class="aWarn">اتصدّر للسيستم</span>' : '') + '</div>' + admBtns_(i, [['🔍 التفاصيل', 'admVisit_'], ['🗑 مسح الزيارة كلها', 'admVisitDel_', 'del']]) + '</div>';
@@ -8472,13 +8473,19 @@
     invInflight_[code] = p;
     return p;
   }
+  // العميل اللي فواتيره مفتوحة دلوقتي (من الزيارة أو من بحث المدير)
+  var invCur_ = null;
   function openCustInvoices_(){
     const v = state.visit;
     if(!v) return;
-    const c = v.cust;
-    dl_.stack = [];
-    dlBackBtn_();
-    dlOpen_('📄 فواتير ' + c.name, 'من سيستم الشركة — آخر 12 شهر');
+    openCustInvoicesFor_(v.cust.code, v.cust.name, true);
+  }
+  function openCustInvoicesFor_(code, name, fresh){
+    const c = { code: code, name: name || code };
+    invCur_ = c;
+    if(fresh !== false){ dl_.stack = []; dlBackBtn_(); }
+    if(fresh === false) dlEnter_('📄 فواتير ' + c.name, 'من سيستم الشركة — آخر 12 شهر');
+    else dlOpen_('📄 فواتير ' + c.name, 'من سيستم الشركة — آخر 12 شهر');
     const body = document.getElementById('dlBody');
     const cached = invCacheGet_(c.code);
     body.innerHTML = cached ? invHtml_(cached.v, cached.t, true) : '<div class="aiStatus">جاري جلب الفواتير من الشركة...</div>';
@@ -8492,8 +8499,9 @@
   // PDF الفاتورة بنفس شكل ورك فلو "اصدار الفواتير" — بيتعمل على جهاز الشركة (n8n + Gotenberg)
   var invPdfCache_ = {};
   function invPdf_(box){
-    const v = state.visit;
-    if(!v) return;
+    const cu = invCur_ || (state.visit && state.visit.cust);
+    if(!cu) return;
+    const v = { cust: cu };
     const inv = box.getAttribute('data-inv') || '';
     const key = v.cust.code + '|' + inv;
     const done = function(blob){
@@ -8524,6 +8532,34 @@
       })
       .finally(function(){ if(timer) clearTimeout(timer); });
   }
+  // ---------- 📄 فواتير العملاء للمدير: دوّر على أي عميل وشوف فواتيره ----------
+  var invSrch_ = { seq: 0, rows: [] };
+  function openInvSearch_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📄 فواتير العملاء', 'دوّر على أي عميل بالاسم أو الكود');
+    ldBody_().innerHTML = '<input type="search" id="invQ" placeholder="🔎 اسم العميل أو الكود أو التليفون..." oninput="invSearchSoon_()" style="margin-bottom:10px;">' +
+      '<div id="invRes"><div class="empty">اكتب حرفين على الأقل</div></div>';
+    setTimeout(function(){ const q = document.getElementById('invQ'); if(q) q.focus(); }, 150);
+  }
+  var invSrchT_ = null;
+  function invSearchSoon_(){ clearTimeout(invSrchT_); invSrchT_ = setTimeout(invSearch_, 350); }
+  function invSearch_(){
+    const q = (document.getElementById('invQ') || {}).value || '';
+    const box = document.getElementById('invRes'); if(!box) return;
+    if(q.trim().length < 2){ box.innerHTML = '<div class="empty">اكتب حرفين على الأقل</div>'; return; }
+    const my = ++invSrch_.seq;
+    box.innerHTML = '<div class="aiStatus">بدوّر...</div>';
+    admCall_('cust_list', { q: normalizeDigits(q.trim()) }).then(function(rows){
+      if(my !== invSrch_.seq) return;
+      invSrch_.rows = rows || [];
+      box.innerHTML = invSrch_.rows.length ? invSrch_.rows.slice(0, 60).map(function(r, i){
+        return '<div class="aRow" onclick="invPick_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.name || '') + '</b><span class="chip">' + escapeHtml(r.code) + '</span></div>' +
+          '<div class="aSub">' + [r.rep, r.area, r.phone].filter(Boolean).map(escapeHtml).join(' • ') + '</div></div>';
+      }).join('') : '<div class="empty">مفيش عميل بالاسم ده</div>';
+    }).catch(function(e){ if(my === invSrch_.seq) box.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function invPick_(i){ const r = invSrch_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
+  function admCustInv_(i){ const r = adm_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
   function invHtml_(d, at, stale){
     let h = '';
     if(stale) h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">⚠️ دي آخر نسخة اتحفظت على الموبايل' +
