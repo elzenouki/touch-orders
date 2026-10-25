@@ -5487,19 +5487,48 @@
     return ldApi_('vehicles').then(function(r){ ld_.veh = r.vehicles || []; ld_.caps = r.caps || []; return ld_.veh; });
   }
   // نسبة امتلاء كل عربية: مجموع (الكمية ÷ اللي العربية تشيله من الصنف). الصنف اللي مالوش رقم = متوسط الأصناف (تقديري)
-  function ldFill_(items){
-    const capMap = {}, perV = {};
+  // ================== 📦 السعة بالحجم والوزن (بيتا) ==================
+  // مقاسات القطعة (م³) ووزنها (كجم) من ملف الأصناف — بكود الصنف اللي بيبدأ بـ 4، أو بالاسم لو الكود مش في الاسم.
+  // الصنف اللي له سعة متسجلة بالإيد في العربية بنستخدمها (مجرّبة)، وغير كده بنحسب من الحجم، وآخر حل متوسط السعات.
+  const ITEM_DIMS_ = {"code":{"40695":[0.08079,7.22],"40510":[0.0837,4.95],"40540":[0.00183,0.763],"40525":[0.02046,1.85],"40501":[0.02226,2.571],"40550":[0.02226,2.408],"40573":[0.03104,2.87],"40805":[0.10587,8.5],"40513":[0.0101,1.23],"40552":[0.00396,1.294],"40521":[0.00396,1.23],"40401":[0.00806,1.62],"40420":[0.00753,0.75],"40306":[0.00845,0.936],"40319":[0.00786,0.933],"40323":[0.0075,0.785],"40326":[0.01206,0.936],"40558":[0.02718,4.115],"40206":[0.01419,2.036],"40208":[0.02657,2.879],"40207":[0.01837,2.345],"40535":[0.01123,1.888],"40565":[0.01751,2.245],"40617":[0.13514,10.5],"40616":[0.12202,9.698],"40907":[0.00802,2.389],"41109":[0.01103,1.444]},"name":{"مقلايههوائيههيلثيبلس8لتر2400":[0.08079,7.22],"كيتشنماشينكينج1000":[0.0837,4.95],"هاندبلندرسماش800":[0.00183,0.763],"هاندبلندرسماشبلس800":[0.02046,1.85],"خلاطباورمطحنتينفلتر1000":[0.02226,2.571],"خلاطانسباير400مطحنتين":[0.02226,2.408],"خلاطتربومطحنتينفلتر400بيج":[0.02226,2.571],"خلاطانسباير600مطحنتين":[0.02226,2.408],"خلاطبرفكتبلس600كبهلحمهمطحنه":[0.03104,2.87],"خلاطتربومطحنتينفلتر800":[0.02226,2.571],"مكنسهتوربينبلس260021لترشفطوطرد":[0.10587,8.5],"عصارهبرتقال5012لتراتجاهين":[0.0101,1.23],"مضرببيض400":[0.00396,1.294],"مضرببيض150":[0.00396,1.23],"عجانبريميماستانلس5لتر1200":[0.09994,8.305],"عجانهسبيداستانلس600":[0.02314,2.93],"عجانبريميمبلاس":[0.09994,0],"مضرببيضبعجانسبيداستانلس4لتر600":[0.05494,2.93],"مضرببيض600":[0.00396,1.35],"مضرببيض300":[0.00396,1.258],"مكواهجافه1000":[0.00806,2.223],"مكواهجراندبخار2600":[0.00806,1.62],"مكواهجافهفاست1600":[0.00753,0.75],"مكواهبخارستورمبنفسجي2200":[0.0061,1.29],"مكواهجراندماكسسيراميك2600":[0.00983,1.67],"غلايهكلاسيك17لتر2200":[0.00845,0.936],"غلايهستاراستانلس18لتر1800":[0.00786,0.933],"غلايهجوكراستانلس15لتر1500":[0.0075,0.785],"غلايهزجاجامريلد18لتر1800":[0.01206,0.936],"مفرمهجوليا2000":[0.02718,4.115],"مفرمهاستانلساكستريم":[0.02718,5.325],"مفرمهاستانلساكستريمبلس2500":[0.02718,5.902],"شفاطاتجاهينبشبكه20سم":[0.01419,2.036],"شفاطاتجاهينبشبكه30سم":[0.02657,2.879],"شفاطاتجاهينبشبكه25سم":[0.01837,2.345],"كبهلحمه15لتر7002اسلحهبقشارهثوم":[0.01123,1.888],"كبهلحمهزجاج700قشارهثومسرعتين":[0.01751,2.245],"كبهلحمهمعدن15لترقشاره3سلاح":[0.01591,2.092],"كبهلحمه2لتر3اسلحهقشاره":[0.01856,2.246],"كبهلحمه2لترقشارهاستانلس":[0.01751,2.245],"شوايهروستر":[0.02309,2.418],"فرن45لترجامبو":[0.13514,10.5],"فرن36لترجامبو":[0.12202,9.698],"فرن50لترجامبو":[0.1583,10.5],"مروحهاستاند18بوصهروكيت":[0.04662,7.283],"مروحهاستاند18بوصهروكيتتايمر":[0.04662,7.29],"مروحهاستاند18بوصهروكيتريموت":[0.04662,7.31],"سخانكهربائيمسطح1500":[0.00802,2.389],"دفايهستايلمروحه2000":[0.01103,1.444],"دفايهمعدنبرستيج2000":[0.06101,3.898],"فالكونمروحهسقف56بوصه3ريشه":[0.00426,3.52],"فالكونبرومروحهسقف56بوصه3ريشهاضاءهليد":[0.00426,3.58],"مروحهبوكس14":[0.04022,3.014],"مروحهبوكس16":[0.05361,3.607]}};
+  // صندوق كل عربية من جوه (متر) وأقصى حمولة (كجم) — 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000
+  const VEH_SPEC_ = [{ L: 2.2, W: 1.6, H: 1.2, kg: 1500 }, { L: 3.4, W: 1.85, H: 1.8, kg: 3000 }, { L: 4.3, W: 2.0, H: 2.1, kg: 3500 }, { L: 5.3, W: 2.1, H: 2.25, kg: 4500 }];
+  const LD_USABLE_ = 0.8, LD_CARTON_ = 1.1; // 80% من الصندوق بيتملى فعلًا • الكرتونة أكبر من القطعة بحوالي 10%
+  function ldNormName_(s){
+    return String(s || '').replace(/4\d{4}[A-Za-z]?\s*$/, '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+      .replace(/تاتش|الزنوكي|واط|وات/g, '').replace(/[^0-9a-zء-ي]+/g, '');
+  }
+  function ldDims_(it){
+    const c = String(it.code || '').trim();
+    return ITEM_DIMS_.code[c] || ITEM_DIMS_.name[ldNormName_(it.name)] || null;
+  }
+  function ldHasCap_(){ return ld_.caps.length > 0 || Object.keys(ITEM_DIMS_.code).length > 0; }
+  function ldVehSpec_(v){ const s = VEH_SPEC_[ldVehKind_(v.id, v.name)] || VEH_SPEC_[2]; return { vol: s.L * s.W * s.H * LD_USABLE_, kg: s.kg }; }
+  // سعات كل عربية + متوسطها (لأصناف ماليهاش مقاسات ولا سعة)
+  function ldCapIndex_(){
+    const capMap = {}, perV = {}, median = {};
     ld_.caps.forEach(function(c){ (capMap[c.c] = capMap[c.c] || {})[c.v] = Number(c.q); (perV[c.v] = perV[c.v] || []).push(Number(c.q)); });
-    const median = {};
     Object.keys(perV).forEach(function(v){ const a = perV[v].slice().sort(function(x, y){ return x - y; }); median[v] = a[Math.floor(a.length / 2)]; });
+    return { capMap: capMap, median: median };
+  }
+  // نصيب الصنف من العربية (كسر من 1) + وزنه — known=false لو مفيش أي طريقة نعرف بيها
+  function ldItemFrac_(it, v, idx, spec){
+    const q = Number(it.qty) || 0, dm = ldDims_(it), cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
+    const kg = dm && dm[1] ? q * dm[1] : 0;
+    if(cap) return { f: q / cap, kg: kg, known: true, est: false };
+    if(dm && dm[0]) return { f: q * dm[0] * LD_CARTON_ / spec.vol, kg: kg, known: true, est: false };
+    if(idx.median[v.id]) return { f: q / idx.median[v.id], kg: kg, known: true, est: true };
+    return { f: 0, kg: kg, known: false, est: true };
+  }
+  function ldFill_(items){
+    const idx = ldCapIndex_();
     return (ld_.veh || []).filter(function(v){ return v.active !== false; }).map(function(v){
-      if(!median[v.id]) return { v: v, pct: null, est: 0 };
-      let f = 0, est = 0;
-      items.forEach(function(it){
-        const cap = capMap[it.code] && capMap[it.code][v.id];
-        if(cap) f += it.qty / cap; else { f += it.qty / median[v.id]; est++; }
-      });
-      return { v: v, pct: Math.round(f * 100), est: est };
+      const spec = ldVehSpec_(v);
+      let f = 0, kg = 0, est = 0, known = 0;
+      items.forEach(function(it){ const r = ldItemFrac_(it, v, idx, spec); f += r.f; kg += r.kg; if(r.est) est++; if(r.known) known++; });
+      if(!known) return { v: v, pct: null, est: 0 };
+      const wf = kg / spec.kg; // الوزن ممكن يكون هو اللي يملّي العربية (أفران/مكانس)
+      return { v: v, pct: Math.round(Math.max(f, wf) * 100), est: est, kg: Math.round(kg), byWeight: wf > f, volPct: Math.round(f * 100), kgPct: Math.round(wf * 100) };
     });
   }
   // لو الطلبيات أكبر من أكبر عربية: محتاجة كام عربية؟ بنملّي أكبر عربية على الآخر،
@@ -6074,7 +6103,7 @@
     const wd = ldWd_(), allStops = ldStopsFromDocs_(ld_.pending);
     ld_.planOff = allStops.filter(function(s){ return ctIsOff_(s.customer_code, wd); });
     const stops = allStops.filter(function(s){ return !ctIsOff_(s.customer_code, wd); });
-    const hasCaps = ld_.caps.length > 0;
+    const hasCaps = ldHasCap_();
     const fits = function(list){
       const wk = list.filter(ldWeekStop_).length;
       if(wk && wk < list.length) return false; // عربية مندوب الأسبوع مابتتخلطش
@@ -6155,7 +6184,7 @@
   }
   function ldRenderPlan_(){
     let h = '';
-    if(!ld_.caps.length) h += '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">⚠️ سعات العربيات لسه مادخلتش — التقسيم بالقرب بس (' + LD_STOPS_MAX_ + ' تاجر بالكتير في الرحلة) ومن غير اقتراح عربية.</div>';
+    if(!ldHasCap_()) h += '<div class="note" style="margin-bottom:10px; color:var(--gold-d);">⚠️ سعات العربيات لسه مادخلتش — التقسيم بالقرب بس (' + LD_STOPS_MAX_ + ' تاجر بالكتير في الرحلة) ومن غير اقتراح عربية.</div>';
     const noLocCount = ld_.plan.reduce(function(t, r){ return t + r.stops.filter(function(s){ return s.lat == null; }).length; }, 0);
     if(noLocCount) h += '<div class="note" style="margin-bottom:10px;">📍 ' + noLocCount + ' تاجر مالهمش لوكيشن — اتجمعوا حسب المنطقة. ثبّت مواقعهم في الزيارة الجاية عشان التقسيم يبقى أدق.</div>';
     h += ldDepBox_('ldRePlan_()');
@@ -6209,7 +6238,7 @@
   }
   function ldAllocFleet_(plan){
     plan.forEach(function(r){ r.assign = null; r.wait = false; r.pack = null; });
-    if(!ldFleetOn_() || !ld_.caps.length) return;
+    if(!ldFleetOn_() || !ldHasCap_()) return;
     const f = ldFleet_(), left = {};
     (ld_.veh || []).forEach(function(v){ if(v.active !== false) left[v.id] = +f[v.id] || 0; });
     plan.forEach(function(r){
@@ -6241,7 +6270,7 @@
   }
   function ldFleetBox_(){
     const vs = (ld_.veh || []).filter(function(v){ return v.active !== false; });
-    if(!vs.length || !ld_.caps.length) return '';
+    if(!vs.length || !ldHasCap_()) return '';
     const f = ldFleet_() || {}, can = ldCanSetWh_(), on = ldFleetOn_();
     let h = '<div class="fleetBox"><b>🚚 العربيات المتاحة' + (on ? '' : ' — لسه ماتحددتش') + '</b>';
     if(!on && !can) return h + '<div class="note">المدير يحدد عنده كام عربية من كل نوع، والاقتراح يوزّع الرحلات عليها.</div></div>';
@@ -7039,27 +7068,29 @@
   }
   // نصيب كل صنف من امتلاء عربية معيّنة — للألوان جوه الصندوق
   function ldFillSegs_(items, vid){
-    const capMap = {}, perV = [];
-    ld_.caps.forEach(function(c){ if(c.v !== vid) return; capMap[c.c] = Number(c.q); perV.push(Number(c.q)); });
-    if(!perV.length) return null;
-    perV.sort(function(a, b){ return a - b; });
-    const median = perV[Math.floor(perV.length / 2)];
+    const v = (ld_.veh || []).find(function(x){ return x.id === vid; });
+    if(!v) return null;
+    const idx = ldCapIndex_(), spec = ldVehSpec_(v);
     const by = {};
-    let est = 0;
+    let est = 0, known = 0, kgT = 0;
     items.forEach(function(it){
-      const k = it.code || it.name, cap = capMap[it.code];
-      if(!cap) est++;
+      const k = it.code || it.name, r = ldItemFrac_(it, v, idx, spec);
+      if(r.est) est++; if(r.known) known++; kgT += r.kg;
       const x = by[k] = by[k] || { name: it.name || it.code, pct: 0, qty: 0 };
-      x.pct += Number(it.qty) / (cap || median) * 100;
+      x.pct += r.f * 100;
       x.qty += Number(it.qty);
     });
+    if(!known) return null;
     const segs = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a, b){ return b.pct - a.pct; });
     const top = segs.slice(0, 4);
     const rest = segs.slice(4);
     if(rest.length) top.push({ name: 'باقي الأصناف (' + rest.length + ')', pct: rest.reduce(function(t, s){ return t + s.pct; }, 0), qty: rest.reduce(function(t, s){ return t + s.qty; }, 0) });
-    const pct = Math.round(segs.reduce(function(t, s){ return t + s.pct; }, 0));
+    const volPct = segs.reduce(function(t, s){ return t + s.pct; }, 0), kgPct = kgT / spec.kg * 100;
+    const pct = Math.round(Math.max(volPct, kgPct));
+    // لو الوزن هو اللي مالي العربية، الألوان بتتكبر بنفس النسبة عشان الرسمة تطابق الرقم
+    if(kgPct > volPct && volPct > 0) top.forEach(function(s){ s.pct = s.pct * kgPct / volPct; });
     top.forEach(function(s, i){ s.color = LD_SEG_COLORS_[i]; });
-    return { pct: pct, segs: top, est: est };
+    return { pct: pct, segs: top, est: est, kg: Math.round(kgT), byWeight: kgPct > volPct, maxKg: spec.kg };
   }
   // pct: نسبة الامتلاء، segs: [{pct, color}] من تحت لفوق، kind: 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000، small: رسم صغير للكروت
   // كل العربيات مترسومة بنفس المقياس (الوش ناحية اليمين زي صورة الجامبو) — فالدبابة بتبان أصغر من الجامبو فعلاً
@@ -7215,17 +7246,10 @@
   const BAY_COLORS_ = ['#56672f', '#d9a21b', '#2c548f', '#a8432f', '#7a5c99', '#2b7a77', '#b5652a', '#5d6d7e'];
   // حجم بضاعة التاجر في العربية دي (بالسعات) — ولو مفيش سعات بعدد القطع
   function ldStopShare_(lines, vid){
-    let cap = {}, med = 0;
-    if(vid != null){
-      const perV = [];
-      ld_.caps.forEach(function(c){ if(c.v === vid){ cap[c.c] = Number(c.q); perV.push(Number(c.q)); } });
-      perV.sort(function(a, b){ return a - b; });
-      med = perV.length ? perV[Math.floor(perV.length / 2)] : 0;
-    }
-    return lines.reduce(function(t, l){
-      const q = Number(l.qty) || 0, c = cap[l.code] || med;
-      return t + (c ? q / c * 100 : q);
-    }, 0);
+    const v = vid != null && (ld_.veh || []).find(function(x){ return x.id === vid; });
+    if(!v) return lines.reduce(function(t, l){ return t + (Number(l.qty) || 0); }, 0);
+    const idx = ldCapIndex_(), spec = ldVehSpec_(v);
+    return lines.reduce(function(t, l){ const r = ldItemFrac_(l, v, idx, spec); return t + (r.known ? r.f * 100 : (Number(l.qty) || 0) * 0.1); }, 0);
   }
   // stops بترتيب التسليم: [{ name, lines: [{code, qty}] }]
   function ldBayHtml_(stops, vid){
@@ -7548,7 +7572,8 @@
     if(f){
       h += '<div class="truckMsg">' + (pct > 100 ? '⚠️ الحمولة أكبر من العربية بـ ' + (pct - 100) + '% — شيل طلبية أو اختار عربية أكبر'
         : pct > 90 ? 'العربية تقريبًا مليانة — فاضل ' + (100 - pct) + '%' : 'فاضل ' + (100 - pct) + '% في العربية') +
-        (f.est ? ' <small>(' + f.est + ' صنف مالوش سعة — اتحسب بالتقريب)</small>' : '') + '</div>';
+        (f.est ? ' <small>(' + f.est + ' صنف مالوش مقاسات — اتحسب بالتقريب)</small>' : '') +
+        (f.kg ? '<br><small>⚖️ الوزن تقريبًا ' + f.kg.toLocaleString('en') + ' كجم من ' + f.maxKg.toLocaleString('en') + (f.byWeight ? ' — الوزن هو اللي مالي العربية' : '') + '</small>' : '') + '</div>';
       h += '<div class="truckLegend">' + f.segs.map(function(s){
         return '<span><i style="background:' + s.color + '"></i>' + escapeHtml(s.name) + ' <b>' + Math.round(s.pct) + '%</b></span>';
       }).join('') + '</div>';
