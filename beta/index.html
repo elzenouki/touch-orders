@@ -8648,7 +8648,7 @@
     let h = chips(CSA_PER_, 'per') + chips(reps, 'rep') + chips(sorts, 'sort');
     h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
     h += '<div id="csaList"></div>';
-    h += '<div class="note" style="margin-top:10px;">من فواتير السيستم على جهاز الشركة (data sales + 2025). دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
+    h += '<div class="note" style="margin-top:10px;">من يومية المبيعات على جهاز الشركة — صافي بعد خصم المرتجعات. دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
     ldBody_().innerHTML = h;
     csaList_();
     ldBody_().querySelectorAll('.csaChips .on').forEach(function(b){ b.scrollIntoView({ inline: 'center', block: 'nearest' }); });
@@ -8666,7 +8666,7 @@
     const buying = list.filter(function(r){ return cur(r) > 0; }).length;
     if(csa_.sort === 'down') list = list.filter(function(r){ return prev(r) > cur(r); }).sort(function(a, b){ return (cur(a) - prev(a)) - (cur(b) - prev(b)); });
     else if(csa_.sort === 'up') list = list.filter(function(r){ return cur(r) > prev(r); }).sort(function(a, b){ return (cur(b) - prev(b)) - (cur(a) - prev(a)); });
-    else if(csa_.sort === 'stop') list = list.filter(function(r){ return prev(r) > 0 && !cur(r); }).sort(function(a, b){ return prev(b) - prev(a); });
+    else if(csa_.sort === 'stop') list = list.filter(function(r){ return prev(r) > 0 && cur(r) <= 0; }).sort(function(a, b){ return prev(b) - prev(a); });
     else list = list.filter(function(r){ return cur(r) > 0; }).sort(function(a, b){ return cur(b) - cur(a); });
     let h = '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + P.t + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '') + '</span><b>' + fmt(tc) + ' <small>ج</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
     h += '<div class="pfYtd">' + buying + ' عميل اشترى' + (P.prev ? ' • ' + P.vs + ': <b>' + fmt(tp) + '</b>' : '') + '</div>';
@@ -8726,7 +8726,7 @@
       else ldBody_().innerHTML = '<div class="aiStatus err">' + escapeHtml(err.denied ? err.message : 'جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية') + '</div>';
     });
   }
-  function csShort_(n){ n = Math.round(n || 0); return n >= 1e6 ? (Math.round(n / 1e5) / 10) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : (n ? String(n) : ''); }
+  function csShort_(n){ n = Math.round(n || 0); if(n < 0) return '−' + csShort_(-n); return n >= 1e6 ? (Math.round(n / 1e5) / 10) + 'M' : n >= 1e3 ? Math.round(n / 1e3) + 'K' : (n ? String(n) : ''); }
   function csSum_(rows){ return rows.reduce(function(t, r){ t.sales += r.sales; t.ret += r.ret; t.n += r.n; return t; }, { sales: 0, ret: 0, n: 0 }); }
   function csRender_(){
     const all = (cs_.months || []).slice().sort(function(a, b){ return a.ym < b.ym ? -1 : 1; });
@@ -8745,7 +8745,7 @@
       const mx = ser.reduce(function(m, s){ return Math.max(m, s.v); }, 0) || 1;
       return '<div class="pfChart"><div class="pfBars csBars">' + ser.map(function(s){
         return '<button type="button" class="pfCol' + (s.on ? ' on' : '') + '"' + (onTap ? ' onclick="' + onTap(s) + '"' : '') + '>' +
-          '<b>' + csShort_(s.v) + '</b><div class="pfPair"><i class="s" style="height:' + Math.round(s.v * 100 / mx) + '%"></i></div><small>' + s.label + '</small></button>';
+          '<b>' + csShort_(s.v) + '</b><div class="pfPair"><i class="s" style="height:' + Math.max(0, Math.round(s.v * 100 / mx)) + '%"></i></div><small>' + s.label + '</small></button>';
       }).join('') + '</div></div>';
     };
     if(cs_.view === 'm'){
@@ -8788,7 +8788,7 @@
           '<small>' + t.n + ' فاتورة • اشترى في ' + months + ' شهر' + (months ? ' • متوسط الشهر ' + fmt(Math.round(t.sales / months)) : '') + (t.ret ? ' • مرتجع ' + fmt(t.ret) : '') + '</small></div>';
       }).join('');
     }
-    h += '<div class="note" style="margin-top:10px;">من فواتير السيستم على جهاز الشركة (قيمة الأصناف بعد الخصم). المرتجعات محسوبة لوحدها ومش مطروحة من المبيعات.</div>';
+    h += '<div class="note" style="margin-top:10px;">من يومية المبيعات على جهاز الشركة (و2025 من فواتير السيستم). المبيعات صافي بعد خصم المرتجعات — نفس أرقام «بيع وتحصيل المناديب».</div>';
     ldBody_().innerHTML = h;
     const on = ldBody_().querySelector('.pfMonths .on'); if(on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
   }
