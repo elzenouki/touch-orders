@@ -1491,6 +1491,21 @@
   body.homeList #repHome > .routeHead{order:4;} body.homeList #repHome > #routeList{order:5; margin-bottom:12px;}
   body.homeList #repHome > .bigGrid{order:6;} body.homeList #repHome > .miniRow{order:7;} body.homeList #repHome > .logoutLink{order:8;}
   body.whRole .homeStyle{display:none;}
+  /* بيتا: شكل ج — كروت «مهام النهارده» فوق القايمة */
+  #taskFeed{margin:4px 0 12px;}
+  body.homeTasks #repStats{display:none !important;}
+  .tkHead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 2px 10px;}
+  .tkHead b{font-family:var(--fTitle); font-size:19px; color:var(--o3);} .tkHead span{display:block; font-size:12px; color:var(--omut);}
+  .tkRing{width:58px; height:58px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;}
+  .tkRing i{width:44px; height:44px; border-radius:50%; background:var(--cream,#f3efe2); display:flex; align-items:center; justify-content:center; font-style:normal; font-weight:800; font-size:13px; color:var(--o3);}
+  .task{background:#fff; border:1px solid var(--oline); border-right:5px solid var(--mus); border-radius:18px; padding:12px; margin-bottom:9px;}
+  .task.r{border-right-color:#a8432f;} .task.g{border-right-color:#2b7a4f;} .task.b{border-right-color:#2c548f;} .task.p{border-right-color:#6a4c9c;}
+  .task .tt{display:flex; justify-content:space-between; align-items:center; gap:8px;} .task .tt b{font-size:15px; color:var(--o3);}
+  .task small{display:block; font-size:12px; color:var(--omut); margin:3px 0 9px; line-height:1.6;}
+  .task .ac{display:flex; gap:6px;} .task .ac button{flex:1; height:38px; border-radius:11px; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; border:1.5px solid var(--o2); background:#fff; color:var(--o2);}
+  .task .ac button.p{background:var(--o1); border-color:var(--o1); color:#fbf8ee;}
+  .tkPill{font-size:11px; font-weight:800; border-radius:9px; padding:2px 8px; background:#fbe8e4; color:#a8432f; white-space:nowrap;} .tkPill.g{background:#dff3e6; color:#2b7a4f;} .tkPill.y{background:#fbf1d6; color:#8a6218;}
+  .tkMore{font-family:var(--fTitle); font-size:15px; color:var(--o3); margin:14px 2px 8px;}
   .homeStyle{display:flex; align-items:center; justify-content:center; gap:6px; margin:16px 0 4px; font-size:12px; color:var(--omut); font-weight:700;}
   .homeStyle button{height:30px; padding:0 12px; border-radius:15px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:700; font-size:12px; cursor:pointer;}
   .homeStyle button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
@@ -1600,6 +1615,9 @@
       <div class="tcBar"><i id="tcBarFill"></i></div>
     </div>
 
+    <!-- بيتا: شكل ج — مهام النهارده -->
+    <div id="taskFeed" hidden></div>
+
     <!-- المندوب -->
     <div id="repHome" hidden>
       <div id="queueBar" class="queueBar" hidden><span id="queueText"></span><button onclick="flushQueue_(true)">ابعت دلوقتي</button></div>
@@ -1661,7 +1679,7 @@
         <button type="button" class="toolBtn out" onclick="handleLogout()"><span class="tIc t4 out"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><polyline points="15 8 19 12 15 16"/><line x1="19" y1="12" x2="9" y2="12"/></svg></span>خروج</button>
       </div>
     </div>
-    <div class="homeStyle">🎨 شكل الرئيسية: <button type="button" id="hsCards" onclick="setHomeStyle_('cards')">كروت</button><button type="button" id="hsList" onclick="setHomeStyle_('list')">قايمة</button></div>
+    <div class="homeStyle">🎨 شكل الرئيسية: <button type="button" id="hsCards" onclick="setHomeStyle_('cards')">كروت</button><button type="button" id="hsList" onclick="setHomeStyle_('list')">قايمة</button><button type="button" id="hsTasks" onclick="setHomeStyle_('tasks')">مهام</button></div>
     <!-- أمين المخزن -->
     <div id="whHome" hidden>
       <div class="whHero">
@@ -2998,6 +3016,7 @@
     document.getElementById('gpsChip').hidden = state.isAdmin;
     document.getElementById('homeHi').textContent = state.isAdmin ? (state.isOwner ? 'صاحب الحساب' : 'مشرف') : 'أهلاً بيك';
     localCacheSet_('home', { user: user, isAdmin: state.isAdmin });
+    renderTasks_();
   }
 
   function goHome(){
@@ -3433,6 +3452,7 @@
     }
     box.innerHTML = html;
     bindCustCards_(box, 'home');
+    renderTasks_();
     tourMaybeOffer_();
   }
 
@@ -7787,6 +7807,7 @@
     ldApi_('whoami').then(function(r){
       ld_.role = r.role;
       const b = document.getElementById('ldBadge'); if(b){ b.textContent = r.waiting || ''; b.hidden = !r.waiting; }
+      renderTasks_();
       const hs = document.getElementById('ldHeroSub'); if(hs) hs.textContent = r.waiting ? r.waiting + ' مستنية' + (r.role === 'warehouse' ? ' تتحمّل' : ' موافقتك') : 'موافقة العربيات والتسليم';
       const wh = document.getElementById('whBox');
       if(wh){ wh.hidden = r.role !== 'warehouse'; document.getElementById('whCount').textContent = r.waiting ? r.waiting + ' تحميلة مستنية' : 'مفيش تحميلات مستنية'; }
@@ -8662,10 +8683,67 @@
   function invPick_(i){ const r = invSrch_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
   // شكل الرئيسية (بيتا): كروت (أ) أو قايمة (ب) — بيتفتكر على الموبايل
   function setHomeStyle_(v){
-    document.body.classList.toggle('homeList', v === 'list');
-    const c = document.getElementById('hsCards'), l = document.getElementById('hsList');
-    if(c) c.classList.toggle('on', v !== 'list'); if(l) l.classList.toggle('on', v === 'list');
+    if(['cards', 'list', 'tasks'].indexOf(v) === -1) v = 'list';
+    document.body.classList.toggle('homeList', v !== 'cards');
+    document.body.classList.toggle('homeTasks', v === 'tasks');
+    ['cards', 'list', 'tasks'].forEach(function(k){ const b = document.getElementById('hs' + k.charAt(0).toUpperCase() + k.slice(1)); if(b) b.classList.toggle('on', v === k); });
+    state.homeStyle = v;
     try{ localStorage.setItem('tf_home_style', v); }catch(e){}
+    renderTasks_();
+  }
+  // ================== شكل ج: مهام النهارده ==================
+  // كروت «اعمل إيه دلوقتي» من البيانات اللي موجودة أصلًا على الموبايل (خط السير، التحميلات، آخر تقارير اتحفظت)
+  function tkCache_(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
+  function tkCard_(cls, title, sub, pill, acts){
+    return '<div class="task ' + cls + '"><div class="tt"><b>' + title + '</b>' + (pill ? '<span class="tkPill ' + (pill[1] || '') + '">' + pill[0] + '</span>' : '') + '</div>' +
+      (sub ? '<small>' + sub + '</small>' : '') + '<div class="ac">' + acts.map(function(a){ return '<button type="button" class="' + (a[2] || '') + '" onclick="' + a[1] + '">' + a[0] + '</button>'; }).join('') + '</div></div>';
+  }
+  function tkRing_(pct){ return '<div class="tkRing" style="background:conic-gradient(var(--o2) 0 ' + pct + '%, #e9e3cf ' + pct + '% 100%)"><i>' + pct + '%</i></div>'; }
+  function renderTasks_(){
+    const box = document.getElementById('taskFeed'); if(!box) return;
+    if(state.homeStyle !== 'tasks' || !state.user || (typeof isWh_ === 'function' && isWh_())){ box.hidden = true; return; }
+    const em = (state.auth && state.auth.email) || '', cards = [];
+    const ov = tkCache_('tf_ov_' + em), pf = tkCache_('tf_pf_' + em);
+    const ovSum = ov && ov.rows ? ov.rows.reduce(function(t, r){ return t + (Number(r.amount) || 0); }, 0) : 0;
+    const ym = pfNowYm_();
+    const mon = pf && pf.rows ? pf.rows.filter(function(r){ return r.ym === ym; }).reduce(function(t, r){ t.s += Number(r.sales) || 0; t.c += (Number(r.cash) || 0) + (Number(r.cheque) || 0); return t; }, { s: 0, c: 0 }) : null;
+    let head = '';
+    if(state.isAdmin){
+      const lb = document.getElementById('ldBadge'), waiting = lb && !lb.hidden ? Number(lb.textContent) || 0 : 0;
+      if(waiting) cards.push(tkCard_('', '🚚 ' + waiting + ' تحميلات مستنية موافقتك', 'راجع العربيات والترتيب وابعت للمخزن', ['محتاج قرار', 'y'], [['راجع ووافق', 'openLoadsAdmin_()', 'p']]));
+      const csa = tkCache_('tf_csa');
+      if(csa && csa.rows){
+        const drops = csa.rows.filter(function(r){ return (r.lytd || 0) > 0 && (r.ytd || 0) < r.lytd * 0.7; })
+          .sort(function(a, b){ return (b.lytd - b.ytd) - (a.lytd - a.ytd); }).slice(0, 3);
+        if(drops.length) cards.push(tkCard_('r', '📉 ' + drops.length + ' عملاء كبار قلّلوا شراهم', drops.map(function(r){ return escapeHtml(r.n || r.c) + ' ▼' + Math.round((1 - r.ytd / r.lytd) * 100) + '%'; }).join(' • ') + ' — مقارنة بنفس الفترة السنة اللي فاتت', ['تنبيه'], [['مبيعات العملاء', 'openCustSalesAll_()', 'p']]));
+      }
+      if(ovSum) cards.push(tkCard_('r', '💰 المتأخرات ' + fmt(Math.round(ovSum)), 'عند ' + ov.rows.length + ' عميل — اتابع مع المناديب', null, [['المتأخرات', 'openOverdues_()']]));
+      if(mon && (mon.s || mon.c)) cards.push(tkCard_('g', '📈 الشهر ده: بيع ' + fmt(Math.round(mon.s)), 'تحصيل ' + fmt(Math.round(mon.c)) + (mon.s ? ' • ' + Math.round(mon.c * 100 / mon.s) + '% من البيع' : ''), null, [['البيع والتحصيل', 'openPerf_()']]));
+      cards.push(tkCard_('b', '🚫 العملاء اللي ماتزاروش', 'شوف مين محتاج زيارة من كل مندوب', null, [['شوف القايمة', "openScreen('unvisited')"], ['المناديب دلوقتي', "openScreen('live')"]]));
+      head = '<div class="tkHead"><div><b>عندك ' + cards.length + ' حاجات النهارده</b><span>' + new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }) + '</span></div></div>';
+    } else {
+      const d = state.rep;
+      if(d){
+        const wd = bizToday_().getDay(), tv = todayVisits_(), st = visitStatusMap_(tv);
+        const planned = d.customers.filter(function(c){ return (c.days || []).indexOf(wd) !== -1; });
+        const todo = planned.filter(function(c){ return !st[c.code]; }), done = planned.length - todo.length;
+        // الأول: اللي هيقفل بدري
+        todo.sort(function(a, b){ return (ctGet_(a.code) || '99') < (ctGet_(b.code) || '99') ? -1 : 1; });
+        const pct = planned.length ? Math.round(done * 100 / planned.length) : 0;
+        head = '<div class="tkHead"><div><b>' + (planned.length ? done + ' من ' + planned.length + ' زيارات' : 'يلا بينا 💪') + '</b><span>' + (todo.length ? 'فاضل ' + todo.length + ' عميل النهارده' : planned.length ? 'خلّصت خط النهارده 👏' : 'مفيش خط سير النهارده') + '</span></div>' + tkRing_(pct) + '</div>';
+        todo.slice(0, 2).forEach(function(c, i){
+          const t = ctGet_(c.code), code = String(c.code).replace(/'/g, '');
+          cards.push(tkCard_(i ? 'b' : 'r', (t ? '⏰ ' : '🏪 ') + escapeHtml(c.name) + (t ? ' بيقفل ' + t : ''), [c.area, c.phone].filter(Boolean).map(escapeHtml).join(' • ') || 'من خط سير النهارده', [i ? 'بعد كده' : 'الأول', i ? 'y' : ''],
+            [['ابدأ الزيارة', "openVisit_('" + code + "', 'home', false)", 'p']].concat(c.lat != null ? [['📍 الطريق', "window.open(mapDirUrl_(" + Number(c.lat) + ',' + Number(c.lng) + "), '_blank')"]] : [])));
+        });
+      }
+      const coll = document.getElementById('stCollected');
+      if(coll && coll.textContent && coll.textContent !== '0') cards.push(tkCard_('g', '👛 حصّلت النهارده ' + coll.textContent, 'سلّمهم للخزنة قبل آخر اليوم', null, [['حافظتي', "openScreen('wallet')"]]));
+      if(ovSum) cards.push(tkCard_('r', '💰 متأخراتك ' + fmt(Math.round(ovSum)), 'عند ' + ov.rows.length + ' عميل — فكّرهم في الزيارة', null, [['متأخراتي', 'openOverdues_()']]));
+      if(mon && mon.s) cards.push(tkCard_('p', '📈 بيعك الشهر ده ' + fmt(Math.round(mon.s)), 'حصّلت ' + fmt(Math.round(mon.c)), null, [['بيعي وتحصيلي', 'openPerf_()']]));
+    }
+    box.innerHTML = head + cards.join('') + '<div class="tkMore">كل الحاجات</div>';
+    box.hidden = false;
   }
   document.addEventListener('DOMContentLoaded', function(){ let v = 'list'; try{ v = localStorage.getItem('tf_home_style') || 'list'; }catch(e){} setHomeStyle_(v); });
   function toggleTools_(force){
