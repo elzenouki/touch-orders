@@ -6857,7 +6857,16 @@
   }
   // ================== 📈 البيع والتحصيل (من السيستم) ==================
   // بيتحسب على جهاز الشركة من يومية المبيعات + النقدي + الشيكات (نفس "الموقف") — ورك فلو "تقارير التطبيق — من الجهاز"
-  var pf_ = { rows: null, synced: null, ym: '', rep: '' };
+  var pf_ = { rows: null, synced: null, ym: '', rep: '', sec: '' };
+  // الأقسام من «مجموعة العملاء» في السيستم (الجهاز بيبعت sec مع كل صف)
+  const SEC_LIST_ = { '': 'كل الأقسام', 'جملة': 'الجملة', 'قطاعي': 'القطاعي', 'ماركت': 'الماركت', 'خاص': 'خاص', 'أخرى': 'أخرى' };
+  function secChips_(cur, rows, field, onPick){
+    const has = {}; rows.forEach(function(r){ if(r[field]) has[r[field]] = 1; });
+    if(!Object.keys(has).length) return '';
+    return '<div class="pfMonths csaChips">' + Object.keys(SEC_LIST_).filter(function(k){ return !k || has[k]; }).map(function(k){
+      return '<button type="button" class="' + (cur === k ? 'on' : '') + '" onclick="' + onPick + '(\'' + k + '\')">' + SEC_LIST_[k] + '</button>';
+    }).join('') + '</div>';
+  }
   const PF_MONTHS_ = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   function pfYmLabel_(ym, short){ const p = ym.split('-'); const m = PF_MONTHS_[Number(p[1]) - 1] || ym; return short ? m.slice(0, 3) : m + ' ' + p[0]; }
   function pfNowYm_(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
@@ -6886,6 +6895,7 @@
       if(!document.getElementById('dlOverlay').hidden) pfRender_();
     }).catch(function(e){ if(!pf_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
   }
+  function pfSec_(k){ pf_.sec = k; pfRender_(); }
   function pfSum_(rows){
     const t = { sales: 0, cash: 0, cheque: 0 };
     rows.forEach(function(r){ t.sales += Number(r.sales) || 0; t.cash += Number(r.cash) || 0; t.cheque += Number(r.cheque) || 0; });
@@ -6899,7 +6909,8 @@
     return '<i class="pfD ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>';
   }
   function pfRender_(){
-    const all = pf_.rows || [];
+    const all0 = pf_.rows || [];
+    const all = pf_.sec ? all0.filter(function(r){ return (r.sec || 'أخرى') === pf_.sec; }) : all0;
     const repRows = pf_.rep ? all.filter(function(r){ return r.rep === pf_.rep; }) : all;
     const yms = {};
     all.forEach(function(r){ yms[r.ym] = 1; });
@@ -6910,12 +6921,12 @@
     const prev = pfSum_(repRows.filter(function(r){ return r.ym === pfPrevYm_(pf_.ym); }));
     const yr = pf_.ym.slice(0, 4);
     const ytd = pfSum_(repRows.filter(function(r){ return r.ym.slice(0, 4) === yr && r.ym <= pf_.ym; }));
-    const repName = pf_.rep ? (all.find(function(r){ return r.rep === pf_.rep; }) || {}) : null;
+    const repName = pf_.rep ? (all0.find(function(r){ return r.rep === pf_.rep; }) || {}) : null;
     document.getElementById('dlTitle').textContent = '📈 ' + (pf_.rep ? (repName.app || pf_.rep) : state.isAdmin ? 'بيع وتحصيل المناديب' : 'بيعي وتحصيلي');
     document.getElementById('dlSub').textContent = 'من جهاز الشركة' + (pf_.synced ? ' • اتحسب ' + ovAgo_(pf_.synced) : '');
     let h = '';
     if(state.isAdmin && pf_.rep) h += '<button type="button" class="rLink" style="margin-bottom:8px;" onclick="pf_.rep=\'\'; pfRender_()">← كل المناديب</button>';
-    if(!state.isAdmin && !all.length){
+    if(!state.isAdmin && !all0.length){
       ldBody_().innerHTML = '<div class="empty">مفيش أرقام ليك في السيستم لسه.<br><small>لو اسمك في السيستم مكتوب بشكل مختلف، كلّم المسؤول يربطه بحسابك.</small></div>';
       return;
     }
@@ -6923,8 +6934,9 @@
     h += '<div class="pfMonths">' + months.slice().reverse().map(function(ym){
       return '<button type="button" class="' + (ym === pf_.ym ? 'on' : '') + '" onclick="pf_.ym=\'' + ym + '\'; pfRender_()">' + pfYmLabel_(ym) + '</button>';
     }).join('') + '</div>';
+    h += secChips_(pf_.sec, all0, 'sec', 'pfSec_');
     // الأرقام
-    h += '<div class="pfHero"><span>المبيعات — ' + pfYmLabel_(pf_.ym) + '</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' + pfDelta_(cur.sales, prev.sales) + '</div>';
+    h += '<div class="pfHero"><span>المبيعات — ' + pfYmLabel_(pf_.ym) + (pf_.sec ? ' — ' + SEC_LIST_[pf_.sec] : '') + '</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' + pfDelta_(cur.sales, prev.sales) + '</div>';
     h += '<div class="pfTiles">' +
       '<div><span>💵 تحصيل نقدي</span><b>' + fmt(cur.cash) + '</b></div>' +
       '<div><span>🏦 تحصيل شيكات</span><b>' + fmt(cur.cheque) + '</b></div>' +
@@ -8606,7 +8618,7 @@
 
   // ================== 🏆 مبيعات العملاء — للمدير (بيتا) ==================
   // من جهاز الشركة (field-reports, kind=custsales): كل عميل وأرقامه في كل فترة + نفس الفترة اللي قبلها. للمدير بس.
-  var csa_ = { rows: null, at: null, per: 'ytd', rep: '', sort: 'top', q: '', lim: 100, view: [] };
+  var csa_ = { rows: null, at: null, per: 'ytd', rep: '', sort: 'top', q: '', lim: 100, view: [], sec: '' };
   const CSA_PER_ = {
     ytd: { t: 'السنة دي', cur: 'ytd', prev: 'lytd', vs: 'نفس الفترة من السنة اللي فاتت' },
     m12: { t: 'آخر 12 شهر', cur: 'm12', prev: 'p12', vs: 'الـ 12 شهر اللي قبلهم' },
@@ -8630,6 +8642,7 @@
     const d = Math.round((cur - prev) * 100 / prev);
     return '<i class="pfD ' + (d >= 0 ? 'up' : 'dn') + '">' + (d >= 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>';
   }
+  function csaSec_(k){ csaSet_('sec', k); }
   function csaSet_(k, v){ csa_[k] = v; csa_.lim = 100; if(k === 'per' && v === 'ly') csa_.sort = 'top'; csaRender_(); }
   function csaRender_(){
     const P = CSA_PER_[csa_.per], rows = csa_.rows || [];
@@ -8640,12 +8653,12 @@
       }).join('') + '</div>';
     };
     const repTot = {};
-    rows.forEach(function(r){ const k = r.r || 'من غير مندوب'; repTot[k] = (repTot[k] || 0) + (r[P.cur] || 0); });
+    rows.filter(function(r){ return !csa_.sec || (r.s || 'أخرى') === csa_.sec; }).forEach(function(r){ const k = r.r || 'من غير مندوب'; repTot[k] = (repTot[k] || 0) + (r[P.cur] || 0); });
     const reps = { '': 'كل المناديب' };
     Object.keys(repTot).sort(function(a, b){ return repTot[b] - repTot[a]; }).forEach(function(k){ reps[k] = k; });
     if(csa_.rep && !reps[csa_.rep]) csa_.rep = '';
     const sorts = {}; Object.keys(CSA_SORT_).forEach(function(k){ if(P.prev || k === 'top') sorts[k] = CSA_SORT_[k]; });
-    let h = chips(CSA_PER_, 'per') + chips(reps, 'rep') + chips(sorts, 'sort');
+    let h = chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + chips(reps, 'rep') + chips(sorts, 'sort');
     h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
     h += '<div id="csaList"></div>';
     h += '<div class="note" style="margin-top:10px;">من يومية المبيعات على جهاز الشركة — صافي بعد خصم المرتجعات. دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
@@ -8658,6 +8671,7 @@
     const P = CSA_PER_[csa_.per], q = normAr_(normalizeDigits(csa_.q || '')).trim();
     let list = (csa_.rows || []).filter(function(r){
       if(csa_.rep && (r.r || 'من غير مندوب') !== csa_.rep) return false;
+      if(csa_.sec && (r.s || 'أخرى') !== csa_.sec) return false;
       if(q && normAr_(r.n || '').indexOf(q) === -1 && String(r.c).indexOf(q) === -1) return false;
       return true;
     });
@@ -8668,7 +8682,7 @@
     else if(csa_.sort === 'up') list = list.filter(function(r){ return cur(r) > prev(r); }).sort(function(a, b){ return (cur(b) - prev(b)) - (cur(a) - prev(a)); });
     else if(csa_.sort === 'stop') list = list.filter(function(r){ return prev(r) > 0 && cur(r) <= 0; }).sort(function(a, b){ return prev(b) - prev(a); });
     else list = list.filter(function(r){ return cur(r) > 0; }).sort(function(a, b){ return cur(b) - cur(a); });
-    let h = '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + P.t + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '') + '</span><b>' + fmt(tc) + ' <small>ج</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
+    let h = '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + P.t + (csa_.sec ? ' — ' + SEC_LIST_[csa_.sec] : '') + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '') + '</span><b>' + fmt(tc) + ' <small>ج</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
     h += '<div class="pfYtd">' + buying + ' عميل اشترى' + (P.prev ? ' • ' + P.vs + ': <b>' + fmt(tp) + '</b>' : '') + '</div>';
     csa_.view = list;
     h += list.length ? list.slice(0, csa_.lim).map(function(r, i){
