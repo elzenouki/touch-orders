@@ -1467,6 +1467,33 @@
   .bt.plain{background:#fff; color:var(--o3); border:1px solid var(--oline); box-shadow:none;} .bt.plain .btIc{background:#eef0e3; color:var(--o2);} .bt.plain small{color:var(--omut);}
   .btArr{margin-right:auto; font-size:22px; color:var(--omut); transition:transform .2s;} .btArr.open{transform:rotate(180deg);}
   .miniRow{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:-2px 0 14px;}
+  /* بيتا: شكل ب — نفس الأزرار بس كقايمة مرتبة (body.homeList) */
+  body.homeList .bigGrid{display:flex; flex-direction:column; gap:0; background:#fff; border:1px solid var(--oline); border-radius:18px; overflow:hidden; box-shadow:0 2px 8px rgba(47,53,25,.05);}
+  body.homeList .bt{min-height:0; flex-direction:row; align-items:center; gap:12px; border-radius:0; padding:11px 12px; box-shadow:none; background:#fff !important; color:var(--o3) !important; border-bottom:1px solid #f0ead6;}
+  body.homeList .bt:last-child{border-bottom:none;}
+  body.homeList .bt:active{transform:none; background:#faf6ea !important;}
+  body.homeList .bt::after{content:'‹'; margin-right:auto; font-size:22px; color:#b5b19a; line-height:1;}
+  body.homeList .bt.wide::after{content:none;}
+  body.homeList .btIc{width:40px; height:40px; border-radius:12px; flex:none;} body.homeList .btIc .ico{width:22px; height:22px;}
+  body.homeList .bt.g1 .btIc{background:#fbf1d8; color:#a8781a;} body.homeList .bt.g2 .btIc{background:#e3f0e6; color:#2b7a4f;}
+  body.homeList .bt.g3 .btIc{background:#e3eaf6; color:#2c548f;} body.homeList .bt.g4 .btIc{background:#f8e3df; color:#a8432f;}
+  body.homeList .bt.g5 .btIc{background:#ece6f6; color:#6a4c9c;} body.homeList .bt.g6 .btIc{background:#e3f0e6; color:#2b7a4f;}
+  body.homeList .btTx b{font-family:'Alexandria',sans-serif; font-size:15px; font-weight:700;} body.homeList .btTx small{color:var(--omut); opacity:1; font-size:11.5px;}
+  body.homeList .btCnt{position:static; order:3; margin-right:auto; background:#a8432f !important; color:#fff !important; font-size:12px;}
+  body.homeList .btCnt + .btIc + .btTx{order:1;} body.homeList .btCnt ~ .btIc{order:0;}
+  body.homeList .bt:has(.btCnt)::after{order:4; margin-right:6px;}
+  body.homeList .bt.plain{border:none;}
+  body.homeList .toolGrid{display:flex; flex-direction:column; gap:0; background:#fff; border:1px solid var(--oline); border-radius:18px; overflow:hidden; margin-top:8px;}
+  body.homeList .toolGrid[hidden]{display:none;}
+  body.homeList .toolBtn{flex-direction:row; justify-content:flex-start; gap:12px; padding:9px 12px; border:none; border-bottom:1px solid #f0ead6; border-radius:0; font-size:14px; text-align:right;}
+  body.homeList .toolBtn:last-child{border-bottom:none;}
+  body.homeList #repHome:not([hidden]){display:flex; flex-direction:column;}
+  body.homeList #repHome > .routeHead{order:4;} body.homeList #repHome > #routeList{order:5; margin-bottom:12px;}
+  body.homeList #repHome > .bigGrid{order:6;} body.homeList #repHome > .miniRow{order:7;} body.homeList #repHome > .logoutLink{order:8;}
+  body.whRole .homeStyle{display:none;}
+  .homeStyle{display:flex; align-items:center; justify-content:center; gap:6px; margin:16px 0 4px; font-size:12px; color:var(--omut); font-weight:700;}
+  .homeStyle button{height:30px; padding:0 12px; border-radius:15px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:700; font-size:12px; cursor:pointer;}
+  .homeStyle button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
   .miniRow button{height:42px; border-radius:12px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;}
   .csOpen{width:100%; margin:0 0 10px;}
   .csTabs{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px;}
@@ -1634,6 +1661,7 @@
         <button type="button" class="toolBtn out" onclick="handleLogout()"><span class="tIc t4 out"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><polyline points="15 8 19 12 15 16"/><line x1="19" y1="12" x2="9" y2="12"/></svg></span>خروج</button>
       </div>
     </div>
+    <div class="homeStyle">🎨 شكل الرئيسية: <button type="button" id="hsCards" onclick="setHomeStyle_('cards')">كروت</button><button type="button" id="hsList" onclick="setHomeStyle_('list')">قايمة</button></div>
     <!-- أمين المخزن -->
     <div id="whHome" hidden>
       <div class="whHero">
@@ -8632,6 +8660,14 @@
     }).catch(function(e){ if(my === invSrch_.seq) box.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
   }
   function invPick_(i){ const r = invSrch_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
+  // شكل الرئيسية (بيتا): كروت (أ) أو قايمة (ب) — بيتفتكر على الموبايل
+  function setHomeStyle_(v){
+    document.body.classList.toggle('homeList', v === 'list');
+    const c = document.getElementById('hsCards'), l = document.getElementById('hsList');
+    if(c) c.classList.toggle('on', v !== 'list'); if(l) l.classList.toggle('on', v === 'list');
+    try{ localStorage.setItem('tf_home_style', v); }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', function(){ let v = 'list'; try{ v = localStorage.getItem('tf_home_style') || 'list'; }catch(e){} setHomeStyle_(v); });
   function toggleTools_(force){
     const g = document.getElementById('toolGrid'); if(!g) return;
     const open = force != null ? force : g.hidden;
