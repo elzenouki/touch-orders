@@ -6968,6 +6968,8 @@
     const isWhR = ld_.role === 'warehouse';
     let h = '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
       '<b>اكتب رقم بس لو الصنف ده بيتحمّل غير كده</b> (استثناء) — ساعتها رقمك هو اللي بيتحسب.</div>';
+    const old = ld_.caps.filter(function(c){ return CARTON_.code[c.c] && c.q !== '' && c.q != null; });
+    if(old.length) h += '<button type="button" class="aGo wide" style="margin-bottom:10px;" onclick="ldCapsReset_()">📦 احسب كل الأصناف بالمقاس (امسح ' + old.length + ' رقم قديم مكتوب بالإيد)</button>';
     if(!isWhR) h += '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
       return '<div class="lVRow"><input data-lvid="' + v.id + '" data-k="name" value="' + escapeHtml(v.name) + '"><input data-lvid="' + v.id + '" data-k="sort" type="number" value="' + v.sort + '" title="الترتيب">' +
         '<label class="lSw"><input type="checkbox" data-lvid="' + v.id + '" data-k="active"' + (v.active !== false ? ' checked' : '') + '> شغّالة</label></div>';
@@ -7018,6 +7020,21 @@
     showLoading(true);
     ldApi_('caps_save', { caps: caps }).then(function(n){ showLoading(false); toast_('✔ اتسجّل ' + n + ' رقم'); ld_.veh = null; return ldVehicles_().then(ldRenderSettings_); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+  }
+  // يمسح الأرقام اللي اتكتبت بالإيد قبل كده للأصناف اللي ليها مقاس كرتونة — فتتحسب كلها بالمقاس
+  function ldCapsReset_(){
+    const old = ld_.caps.filter(function(c){ return CARTON_.code[c.c] && c.q !== '' && c.q != null; });
+    if(!old.length) return;
+    if(!confirm('هيتمسح ' + old.length + ' رقم مكتوب بالإيد، والأصناف دي هتتحسب بمقاس الكرتونة. تكمّل؟')) return;
+    showLoading(true);
+    ldApi_('caps_save', { caps: old.map(function(c){ return { c: c.c, n: c.n || '', v: Number(c.v), q: '' }; }) }).then(function(){
+      ld_.veh = null; return ldVehicles_();
+    }).then(function(){
+      showLoading(false);
+      const left = ld_.caps.filter(function(c){ return CARTON_.code[c.c] && c.q !== '' && c.q != null; }).length;
+      if(left) showMsg('فاضل ' + left + ' رقم ماتمسحش — قولّي', 'error'); else toast_('✔ كل الأصناف بقت بتتحسب بالمقاس');
+      ldRenderSettings_();
+    }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
   function ldSaveCaps_(){
     const caps = Array.prototype.filter.call(ldBody_().querySelectorAll('.lCap input[data-c]'), function(i){ return i.value !== '' || i.dataset.had; })
