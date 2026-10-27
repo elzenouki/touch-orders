@@ -8840,8 +8840,14 @@
   // ================== 🏦 الشيكات (بيتا) ==================
   // من جهاز الشركة (field-reports, kind=cheques): كل شيك وحالته من ملف «تحليلي شيكات العملاء»، والمندوب من يومية المبيعات.
   // المندوب بيشوف شيكات عملاءه بس — المدير الكل.
-  var chq_ = { rows: null, at: null, tab: 'pending', rep: '', per: 90, q: '' };
-  const CHQ_TABS_ = { pending: 'تحت التحصيل', done: 'اتحصلت', bounced: 'مرتدة' };
+  var chq_ = { rows: null, at: null, tab: 'done', rep: '', mon: '', q: '' };
+  const CHQ_TABS_ = { done: 'اتحصلت', bank: 'تحت التحصيل', safe: 'في الخزنة', bounced: 'مرتدة' };
+  // كل شيك في تبويب واحد: اتحصل / في البنك تحت التحصيل / لسه في الخزنة / مرتد
+  function chqTab_(r){ return r.cat === 'pending' ? (r.where === 'bank' ? 'bank' : 'safe') : r.cat; }
+  function chqOpen_(t){ return t === 'bank' || t === 'safe'; }
+  // الشهر: المحصل والمرتد بتاريخ الحركة، واللي لسه بتاريخ الاستحقاق
+  function chqMon_(r){ const d = chqOpen_(chqTab_(r)) ? r.due : (r.moved || r.due); return d ? String(d).slice(0, 7) : ''; }
+  function chqMonName_(m){ return PF_MONTHS_[Number(m.slice(5, 7)) - 1] + ' ' + m.slice(0, 4); }
   function chqKey_(){ return 'tf_chq_' + ((state.auth && state.auth.email) || ''); }
   function openCheques_(){
     dl_.stack = []; dlBackBtn_();
@@ -8855,16 +8861,21 @@
     }).catch(function(e){ if(!chq_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
   }
   function chqDays_(iso){ if(!iso) return null; const d = new Date(iso + 'T00:00:00'), t = new Date(); t.setHours(0, 0, 0, 0); return Math.round((d - t) / 864e5); }
-  function chqSet_(k, v){ chq_[k] = v; chqRender_(); }
+  function chqSet_(k, v){ chq_[k] = v; if(k === 'tab') chq_.mon = ''; chqRender_(); }
   function chqRender_(){
     const all = chq_.rows || [];
     document.getElementById('dlSub').textContent = 'من سيستم الشركة' + (chq_.at ? ' • اتحسب ' + ovAgo_(chq_.at) : '');
-    const inPer = function(r){ if(chq_.tab === 'pending') return true; const d = chqDays_(r.moved || r.due); return d == null || d >= -chq_.per; };
-    const tabRows = all.filter(function(r){ return r.cat === chq_.tab && inPer(r); });
+    if(!CHQ_TABS_[chq_.tab]) chq_.tab = 'done';
+    const inTab = all.filter(function(r){ return chqTab_(r) === chq_.tab; });
+    const mons = {}; inTab.forEach(function(r){ const m = chqMon_(r); if(m) mons[m] = (mons[m] || 0) + 1; });
+    if(chq_.mon && !mons[chq_.mon]) chq_.mon = '';
+    const tabRows = inTab.filter(function(r){ return !chq_.mon || chqMon_(r) === chq_.mon; });
     const chips = function(obj, key, cnt){ return '<div class="pfMonths csaChips">' + Object.keys(obj).map(function(k){
-      return '<button type="button" class="' + (chq_[key] == k ? 'on' : '') + '" onclick="chqSet_(\'' + key + '\', ' + (typeof obj[k] === 'string' && key === 'per' ? k : '\'' + k + '\'') + ')">' + obj[k] + (cnt ? ' (' + cnt(k) + ')' : '') + '</button>'; }).join('') + '</div>'; };
-    let h = chips(CHQ_TABS_, 'tab', function(k){ return all.filter(function(r){ return r.cat === k; }).length; });
-    if(chq_.tab !== 'pending') h += chips({ 30: 'آخر 30 يوم', 90: 'آخر 3 شهور', 365: 'آخر سنة' }, 'per');
+      return '<button type="button" class="' + (chq_[key] == k ? 'on' : '') + '" onclick="chqSet_(\'' + key + '\', \'' + k.replace(/'/g, '') + '\')">' + obj[k] + (cnt ? ' (' + cnt(k) + ')' : '') + '</button>'; }).join('') + '</div>'; };
+    let h = chips(CHQ_TABS_, 'tab', function(k){ return all.filter(function(r){ return chqTab_(r) === k; }).length; });
+    const monChips = { '': 'كل الشهور' }; Object.keys(mons).sort().reverse().forEach(function(m){ monChips[m] = chqMonName_(m); });
+    h += '<div class="sectionLabel" style="margin:6px 0 4px;">' + (chqOpen_(chq_.tab) ? 'شهر الاستحقاق' : chq_.tab === 'done' ? 'شهر التحصيل' : 'شهر الارتداد') + '</div>';
+    h += chips(monChips, 'mon', function(k){ return k ? mons[k] : inTab.length; });
     if(state.isAdmin){
       const repTot = {}; tabRows.forEach(function(r){ const k = r.rep || 'من غير مندوب'; repTot[k] = (repTot[k] || 0) + (Number(r.amt) || 0); });
       const reps = { '': 'كل المناديب' }; Object.keys(repTot).sort(function(a, b){ return repTot[b] - repTot[a]; }).forEach(function(k){ reps[k] = k; });
@@ -8873,36 +8884,36 @@
     }
     h += '<input type="search" placeholder="🔎 اسم العميل أو رقم الشيك..." value="' + escapeHtml(chq_.q) + '" oninput="this.setAttribute(\'value\', this.value); chq_.q=this.value; chqList_()" style="margin:4px 0 10px;">';
     h += '<div id="chqList"></div>';
-    h += '<div class="note" style="margin-top:10px;">من ملف «تحليلي شيكات العملاء» على جهاز الشركة. «تحت التحصيل» = لسه في الخزنة أو في البنك. التواريخ زي ما هي في السيستم.</div>';
+    h += '<div class="note" style="margin-top:10px;">من ملف «تحليلي شيكات العملاء» على جهاز الشركة. «تحت التحصيل» = اتودع البنك ولسه ماتحصلش، و«في الخزنة» = لسه ماتودعش. المحصل من ملف «الشيكات المحصلة».</div>';
     ldBody_().innerHTML = h;
     chqList_();
   }
   function chqList_(){
     const box = document.getElementById('chqList'); if(!box) return;
     const q = normAr_(normalizeDigits(chq_.q || '')).trim();
-    const inPer = function(r){ if(chq_.tab === 'pending') return true; const d = chqDays_(r.moved || r.due); return d == null || d >= -chq_.per; };
+    const open = chqOpen_(chq_.tab);
     let list = (chq_.rows || []).filter(function(r){
-      if(r.cat !== chq_.tab || !inPer(r)) return false;
+      if(chqTab_(r) !== chq_.tab || (chq_.mon && chqMon_(r) !== chq_.mon)) return false;
       if(chq_.rep && (r.rep || 'من غير مندوب') !== chq_.rep) return false;
       if(q && normAr_(r.name || '').indexOf(q) === -1 && String(r.no).indexOf(q) === -1 && String(r.code).indexOf(q) === -1) return false;
       return true;
     });
-    list.sort(chq_.tab === 'pending' ? function(a, b){ return (a.due || '9') < (b.due || '9') ? -1 : 1; } : function(a, b){ return (b.moved || '') < (a.moved || '') ? -1 : 1; });
+    list.sort(open ? function(a, b){ return (a.due || '9') < (b.due || '9') ? -1 : 1; } : function(a, b){ return (b.moved || '') < (a.moved || '') ? -1 : 1; });
     const sum = function(rs){ return rs.reduce(function(t, r){ return t + (Number(r.amt) || 0); }, 0); };
-    const late = chq_.tab === 'pending' ? list.filter(function(r){ const d = chqDays_(r.due); return d != null && d < 0; }) : [];
-    const soon = chq_.tab === 'pending' ? list.filter(function(r){ const d = chqDays_(r.due); return d != null && d >= 0 && d <= 7; }) : [];
-    let h = '<div class="pfHero" style="margin-bottom:8px;"><span>' + CHQ_TABS_[chq_.tab] + (chq_.rep ? ' — ' + escapeHtml(chq_.rep) : '') + '</span><b>' + fmt(Math.round(sum(list))) + ' <small>ج</small></b></div>';
+    const late = open ? list.filter(function(r){ const d = chqDays_(r.due); return d != null && d < 0; }) : [];
+    const soon = open ? list.filter(function(r){ const d = chqDays_(r.due); return d != null && d >= 0 && d <= 7; }) : [];
+    let h = '<div class="pfHero" style="margin-bottom:8px;"><span>' + CHQ_TABS_[chq_.tab] + (chq_.mon ? ' — ' + chqMonName_(chq_.mon) : '') + (chq_.rep ? ' — ' + escapeHtml(chq_.rep) : '') + '</span><b>' + fmt(Math.round(sum(list))) + ' <small>ج</small></b></div>';
     h += '<div class="pfYtd">' + list.length + ' شيك' + (late.length ? ' • <span class="chqLate">' + late.length + ' فات معادهم (' + fmt(Math.round(sum(late))) + ')</span>' : '') + (soon.length ? ' • <span class="chqSoon">' + soon.length + ' معادهم خلال أسبوع</span>' : '') + '</div>';
     // المدير من غير فلتر: ملخص كل مندوب الأول
     if(state.isAdmin && !chq_.rep && !q){
-      const by = {}; list.forEach(function(r){ const k = r.rep || 'من غير مندوب'; const x = by[k] = by[k] || { n: 0, s: 0, late: 0 }; x.n++; x.s += Number(r.amt) || 0; const d = chqDays_(r.due); if(chq_.tab === 'pending' && d != null && d < 0) x.late++; });
+      const by = {}; list.forEach(function(r){ const k = r.rep || 'من غير مندوب'; const x = by[k] = by[k] || { n: 0, s: 0, late: 0 }; x.n++; x.s += Number(r.amt) || 0; const d = chqDays_(r.due); if(open && d != null && d < 0) x.late++; });
       const ks = Object.keys(by).sort(function(a, b){ return by[b].s - by[a].s; });
       if(ks.length > 1) h += ks.map(function(k){ const x = by[k]; return '<button type="button" class="pfRep" onclick="chqSet_(\'rep\', \'' + k.replace(/'/g, '') + '\')"><div class="pfRepTop"><b>' + escapeHtml(k) + '</b><span class="amt" style="font-family:var(--fTitle); direction:ltr;">' + fmt(Math.round(x.s)) + '</span></div><small>' + x.n + ' شيك' + (x.late ? ' • <span class="chqLate">' + x.late + ' فات معادهم</span>' : '') + '</small></button>'; }).join('') + '<div class="sectionLabel" style="margin:12px 0 8px;">كل الشيكات</div>';
     }
     h += list.length ? list.slice(0, 300).map(function(r){
-      const d = chqDays_(r.due), isLate = chq_.tab === 'pending' && d != null && d < 0;
+      const d = chqDays_(r.due), isLate = open && d != null && d < 0;
       const st = r.cat === 'done' ? '<span class="chqSt done">اتحصل</span>' : r.cat === 'bounced' ? '<span class="chqSt bounced">مرتد</span>' : r.where === 'bank' ? '<span class="chqSt bank">في البنك</span>' : '<span class="chqSt safe">في الخزنة</span>';
-      const when = chq_.tab === 'pending'
+      const when = open
         ? (d == null ? '' : d < 0 ? '<span class="chqLate">فات معاده من ' + (-d) + ' يوم</span>' : d === 0 ? '<span class="chqSoon">معاده النهارده</span>' : d <= 7 ? '<span class="chqSoon">باقي ' + d + ' يوم</span>' : 'باقي ' + d + ' يوم')
         : (r.moved ? (r.cat === 'done' ? 'اتحصل ' : 'اترد ') + ymdToDmy_(r.moved) : '');
       return '<div class="chqRow' + (isLate ? ' late' : '') + '"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + st + '</b><span class="amt">' + fmt(Math.round(Number(r.amt) || 0)) + '</span></div>' +
