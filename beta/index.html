@@ -1165,7 +1165,7 @@
   .lCapWrap{overflow-x:auto; margin:10px 0; border:1px solid #ebe5cf; border-radius:12px; background:#fff;}
   .lCap{border-collapse:collapse; width:100%; font-size:13px;} .lCap th{background:#f6f2e4; color:var(--o3); padding:8px 6px; white-space:nowrap; font-size:12.5px;}
   .lCap td{border-top:1px solid #f0ead6; padding:6px;} .lCap td b{display:block; color:var(--o3);} .lCap td small{color:var(--omut);}
-  .lCap input{width:64px; height:34px; border:1px solid var(--oline); border-radius:9px; text-align:center;}
+  .lCap input{width:76px; height:34px; border:1px solid var(--oline); border-radius:9px; text-align:center; font-size:14px; padding:0 4px;} .lCap input::placeholder{color:#c4b99c; font-weight:400;} .lCap input.exc{border-color:#d9a43a; background:#fff7e6; font-weight:800;}
   /* طباعة إذن الصرف وكشف التوزيع */
   .lpWrap{font-family:'Alexandria',sans-serif; color:#1d2210; direction:rtl;}
   .lpPage{padding:10mm 12mm; page-break-after:always; break-after:page;}
@@ -5594,6 +5594,22 @@
   // مقاسات القطعة (م³) ووزنها (كجم) من ملف الأصناف — بكود الصنف اللي بيبدأ بـ 4، أو بالاسم لو الكود مش في الاسم.
   // الصنف اللي له سعة متسجلة بالإيد في العربية بنستخدمها (مجرّبة)، وغير كده بنحسب من الحجم، وآخر حل متوسط السعات.
   const ITEM_DIMS_ = {"code":{"40695":[0.08079,7.22],"40510":[0.0837,4.95],"40540":[0.00183,0.763],"40525":[0.02046,1.85],"40501":[0.02226,2.571],"40550":[0.02226,2.408],"40573":[0.03104,2.87],"40805":[0.10587,8.5],"40513":[0.0101,1.23],"40552":[0.00396,1.294],"40521":[0.00396,1.23],"40401":[0.00806,1.62],"40420":[0.00753,0.75],"40306":[0.00845,0.936],"40319":[0.00786,0.933],"40323":[0.0075,0.785],"40326":[0.01206,0.936],"40558":[0.02718,4.115],"40206":[0.01419,2.036],"40208":[0.02657,2.879],"40207":[0.01837,2.345],"40535":[0.01123,1.888],"40565":[0.01751,2.245],"40617":[0.13514,10.5],"40616":[0.12202,9.698],"40907":[0.00802,2.389],"41109":[0.01103,1.444]},"name":{"مقلايههوائيههيلثيبلس8لتر2400":[0.08079,7.22],"كيتشنماشينكينج1000":[0.0837,4.95],"هاندبلندرسماش800":[0.00183,0.763],"هاندبلندرسماشبلس800":[0.02046,1.85],"خلاطباورمطحنتينفلتر1000":[0.02226,2.571],"خلاطانسباير400مطحنتين":[0.02226,2.408],"خلاطتربومطحنتينفلتر400بيج":[0.02226,2.571],"خلاطانسباير600مطحنتين":[0.02226,2.408],"خلاطبرفكتبلس600كبهلحمهمطحنه":[0.03104,2.87],"خلاطتربومطحنتينفلتر800":[0.02226,2.571],"مكنسهتوربينبلس260021لترشفطوطرد":[0.10587,8.5],"عصارهبرتقال5012لتراتجاهين":[0.0101,1.23],"مضرببيض400":[0.00396,1.294],"مضرببيض150":[0.00396,1.23],"عجانبريميماستانلس5لتر1200":[0.09994,8.305],"عجانهسبيداستانلس600":[0.02314,2.93],"عجانبريميمبلاس":[0.09994,0],"مضرببيضبعجانسبيداستانلس4لتر600":[0.05494,2.93],"مضرببيض600":[0.00396,1.35],"مضرببيض300":[0.00396,1.258],"مكواهجافه1000":[0.00806,2.223],"مكواهجراندبخار2600":[0.00806,1.62],"مكواهجافهفاست1600":[0.00753,0.75],"مكواهبخارستورمبنفسجي2200":[0.0061,1.29],"مكواهجراندماكسسيراميك2600":[0.00983,1.67],"غلايهكلاسيك17لتر2200":[0.00845,0.936],"غلايهستاراستانلس18لتر1800":[0.00786,0.933],"غلايهجوكراستانلس15لتر1500":[0.0075,0.785],"غلايهزجاجامريلد18لتر1800":[0.01206,0.936],"مفرمهجوليا2000":[0.02718,4.115],"مفرمهاستانلساكستريم":[0.02718,5.325],"مفرمهاستانلساكستريمبلس2500":[0.02718,5.902],"شفاطاتجاهينبشبكه20سم":[0.01419,2.036],"شفاطاتجاهينبشبكه30سم":[0.02657,2.879],"شفاطاتجاهينبشبكه25سم":[0.01837,2.345],"كبهلحمه15لتر7002اسلحهبقشارهثوم":[0.01123,1.888],"كبهلحمهزجاج700قشارهثومسرعتين":[0.01751,2.245],"كبهلحمهمعدن15لترقشاره3سلاح":[0.01591,2.092],"كبهلحمه2لتر3اسلحهقشاره":[0.01856,2.246],"كبهلحمه2لترقشارهاستانلس":[0.01751,2.245],"شوايهروستر":[0.02309,2.418],"فرن45لترجامبو":[0.13514,10.5],"فرن36لترجامبو":[0.12202,9.698],"فرن50لترجامبو":[0.1583,10.5],"مروحهاستاند18بوصهروكيت":[0.04662,7.283],"مروحهاستاند18بوصهروكيتتايمر":[0.04662,7.29],"مروحهاستاند18بوصهروكيتريموت":[0.04662,7.31],"سخانكهربائيمسطح1500":[0.00802,2.389],"دفايهستايلمروحه2000":[0.01103,1.444],"دفايهمعدنبرستيج2000":[0.06101,3.898],"فالكونمروحهسقف56بوصه3ريشه":[0.00426,3.52],"فالكونبرومروحهسقف56بوصه3ريشهاضاءهليد":[0.00426,3.58],"مروحهبوكس14":[0.04022,3.014],"مروحهبوكس16":[0.05361,3.607]}};
+  // مقاس الكرتونة (سم: طول × عرض × ارتفاع) من جدول المخزن — ده الأساس في حساب السعة.
+  // السعة اللي بتتكتب بالإيد في «سعات العربيات» استثناء بيغلب على الكرتونة للصنف ده بس.
+  const CARTON_ = { code: {"40326":[25.5,21.5,22],"40323":[18.5,18.5,21.5],"40306":[21.8,17.3,22.5],"40319":[19,18.3,22.6],"40565":[34.7,25.2,19.9],"40531":[23.6,19.5,22.6],"40562":[33.5,20.5,25.5],"40544":[32,19.3,25.3],"40515":[23,19.3,25.3],"40535":[32,19.2,25.5],"40551":[33.5,20.6,25.7],"40570":[28,21,25],"40401":[32,15,16.9],"40420":[13.9,11.2,27],"40405":[13.5,12.5,27.5],"40201":[49.5,19,57],"40202":[52,17,45.5],"40206":[31,14.2,31.5],"40207":[34,14.8,35],"40208":[40.5,16,40],"40121":[56,15,55],"40120":[56,15,55],"40119":[56,15,55.5],"40550":[42,20,26.5],"40501":[42,20,26.5],"40502":[42,20,26.5],"40573":[34.2,32.5,27.3],"40905":[13,37,48],"41109":[22,17,29.5],"41111":[59,23.5,44],"40619":[67.3,50.8,40.5],"40616":[58.5,51.5,40.5],"40617":[64,51.5,41],"40618":[64,58.5,41],"40630":[41,58.5,66],"40568":[23.2,21.7,24.9],"40525":[35,25,23.2],"40540":[37.3,7,7],"40510":[50,45,37.2],"40567":[63.5,43,36.6],"40558":[50.4,21.4,25.2],"40559":[50.4,21.4,25.2],"40560":[50.4,21.4,33],"40566":[46.7,40.7,43.4],"40509":[36.8,26.2,24],"40521":[21.5,11.5,16],"40552":[21.5,11.5,16],"40520":[21.5,11.5,16],"40907":[27.5,11,26.5]}, name: { 'غلاية وينسم': [19, 19, 23] } };
+  const CARTON_NAME_ = {}; Object.keys(CARTON_.name).forEach(function(n){ CARTON_NAME_[ldNormName_(n)] = CARTON_.name[n]; });
+  const CARTON_NAMES_ = {"40326":"غلاية زجاج 800 وات","40323":"غلاية جوكر","40306":"غلاية تاتش","40319":"غلاية استار","40565":"كبة لحمة زجاج","40531":"كبة لحمة زجاج","40562":"كبة لحمة 2 ل 3 شفرة","40544":"كبة لحمة تاتش","40515":"كبة لحمة 1.5 ل 2 شفرة","40535":"كبة لحمة 2 شفرة 1.5 ل 700 وات","40551":"كبة لحمة 2 ل 3 شفرة","40570":"كبة لحمة 2 ل 3 شفرة","40401":"مكواة جراند","40420":"مكواة فاست","40405":"مكواة جافة","40201":"مروحة بوكس 16 بوصة","40202":"مروحة بوكس 14 بوصة","40206":"شفاط كوايت 30 سم","40207":"شفاط كوايت 25 سم","40208":"شفاط كوايت","40121":"مروحة روكيت ريموت","40120":"مروحة روكيت تايمر","40119":"مروحة روكيت","40550":"خلاط انسباير","40501":"خلاط باور","40502":"خلاط تربو","40573":"خلاط بريفيكت بلس","40905":"شواية","41109":"دفاية","41111":"دفاية","40619":"فرن 48 لتر","40616":"فرن 36 لتر","40617":"فرن 45 لتر","40618":"فرن 50 لتر","40630":"فرن 50 لتر","40568":"سماش برو","40525":"خلاط اسماش بلاس","40540":"خلاط يدوي اسماش","40510":"محضر طعام","40567":"مفرمة","40558":"مفرمة","40559":"مفرمة","40560":"مفرمة","40566":"عجان بريميم","40509":"عجان اسبيد","40521":"مضرب بيض","40552":"مضرب بيض","40520":"مضرب بيض","40907":"سخان مسطح"};
+  function ldItemName_(c){ return CARTON_NAMES_[c] || ''; }
+  function ldCarton_(it){ return CARTON_.code[String(it.code || '').trim()] || CARTON_NAME_[ldNormName_(it.name)] || null; }
+  function ldCartonVol_(it){ const c = ldCarton_(it); return c ? c[0] * c[1] * c[2] / 1e6 : 0; }
+  // العربية تشيل كام كرتونة من الصنف ده لوحده (بالحجم والوزن)
+  function ldCartonFit_(it, v){
+    const vol = ldCartonVol_(it); if(!vol) return 0;
+    const spec = ldVehSpec_(v), dm = ldDims_(it);
+    let n = Math.floor(spec.vol / vol);
+    if(dm && dm[1]) n = Math.min(n, Math.floor(spec.kg / dm[1]));
+    return n;
+  }
   // صندوق كل عربية من جوه (متر) وأقصى حمولة (كجم) — 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000
   const VEH_SPEC_ = [{ L: 2.2, W: 1.6, H: 1.2, kg: 1500 }, { L: 3.4, W: 1.85, H: 1.8, kg: 3000 }, { L: 4.3, W: 2.0, H: 2.1, kg: 3500 }, { L: 5.3, W: 2.1, H: 2.25, kg: 4500 }];
   const LD_USABLE_ = 0.8, LD_CARTON_ = 1.1; // 80% من الصندوق بيتملى فعلًا • الكرتونة أكبر من القطعة بحوالي 10%
@@ -5605,7 +5621,7 @@
     const c = String(it.code || '').trim();
     return ITEM_DIMS_.code[c] || ITEM_DIMS_.name[ldNormName_(it.name)] || null;
   }
-  function ldHasCap_(){ return ld_.caps.length > 0 || Object.keys(ITEM_DIMS_.code).length > 0; }
+  function ldHasCap_(){ return ld_.caps.length > 0 || Object.keys(ITEM_DIMS_.code).length > 0 || Object.keys(CARTON_.code).length > 0; }
   function ldVehSpec_(v){ const s = VEH_SPEC_[ldVehKind_(v.id, v.name)] || VEH_SPEC_[2]; return { vol: s.L * s.W * s.H * LD_USABLE_, kg: s.kg }; }
   // سعات كل عربية + متوسطها (لأصناف ماليهاش مقاسات ولا سعة)
   function ldCapIndex_(){
@@ -5619,6 +5635,8 @@
     const q = Number(it.qty) || 0, dm = ldDims_(it), cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
     const kg = dm && dm[1] ? q * dm[1] : 0;
     if(cap) return { f: q / cap, kg: kg, known: true, est: false };
+    const cv = ldCartonVol_(it);
+    if(cv) return { f: q * cv / spec.vol, kg: kg, known: true, est: false };
     if(dm && dm[0]) return { f: q * dm[0] * LD_CARTON_ / spec.vol, kg: kg, known: true, est: false };
     if(idx.median[v.id]) return { f: q / idx.median[v.id], kg: kg, known: true, est: true };
     return { f: 0, kg: kg, known: false, est: true };
@@ -6946,8 +6964,10 @@
     const V = ld_.veh;
     const rows = {};
     ld_.caps.forEach(function(c){ const r = rows[c.c] = rows[c.c] || { c: c.c, n: c.n || '', q: {} }; r.q[c.v] = c.q; if(c.n) r.n = c.n; });
+    Object.keys(CARTON_.code).forEach(function(c){ rows[c] = rows[c] || { c: c, n: ldItemName_(c), q: {} }; });
     const isWhR = ld_.role === 'warehouse';
-    let h = isWhR ? '<div class="note" style="margin-bottom:8px;">اكتب العربية تشيل كام قطعة من الصنف ده <b>لوحده</b> لو اتحمّلت بيه كلها. السيستم بيستخدم الأرقام دي يحسب امتلاء العربية ويقترح نوعها.</div>' : '';
+    let h = '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
+      '<b>اكتب رقم بس لو الصنف ده بيتحمّل غير كده</b> (استثناء) — ساعتها رقمك هو اللي بيتحسب.</div>';
     if(!isWhR) h += '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
       return '<div class="lVRow"><input data-lvid="' + v.id + '" data-k="name" value="' + escapeHtml(v.name) + '"><input data-lvid="' + v.id + '" data-k="sort" type="number" value="' + v.sort + '" title="الترتيب">' +
         '<label class="lSw"><input type="checkbox" data-lvid="' + v.id + '" data-k="active"' + (v.active !== false ? ' checked' : '') + '> شغّالة</label></div>';
@@ -6962,11 +6982,13 @@
     h += '<div class="lCapWrap"><table class="lCap"><thead><tr><th>الصنف</th>' + V.map(function(v){ return '<th>' + escapeHtml(v.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       (keys.length ? keys.map(function(k){
         const r = rows[k];
-        return '<tr data-k="' + escapeHtml(normAr_(r.c + ' ' + (r.n || ''))) + '"><td><b>' + escapeHtml(r.n || r.c) + '</b><small>' + escapeHtml(r.c) + '</small></td>' + V.map(function(v){
-          return '<td><input type="number" min="0" data-c="' + escapeHtml(r.c) + '" data-n="' + escapeHtml(r.n) + '" data-v="' + v.id + '" value="' + (r.q[v.id] != null ? r.q[v.id] : '') + '"></td>';
+        const ct = CARTON_.code[r.c], it = { code: r.c, name: r.n };
+        return '<tr data-k="' + escapeHtml(normAr_(r.c + ' ' + (r.n || ''))) + '"><td><b>' + escapeHtml(r.n || r.c) + '</b><small>' + escapeHtml(r.c) + (ct ? ' • كرتونة <span dir="ltr">' + ct.join('×') + '</span>' : ' • مالوش مقاس كرتونة') + '</small></td>' + V.map(function(v){
+          const fit = ldCartonFit_(it, v), has = r.q[v.id] != null && r.q[v.id] !== '';
+          return '<td><input type="number" min="0" class="' + (has ? 'exc' : '') + '" data-c="' + escapeHtml(r.c) + '" data-n="' + escapeHtml(r.n) + '" data-v="' + v.id + '" data-had="' + (has ? 1 : '') + '" placeholder="' + (fit || '') + '" value="' + (has ? r.q[v.id] : '') + '"></td>';
         }).join('') + '</tr>';
       }).join('') : '<tr><td colspan="' + (V.length + 1) + '" class="empty">لسه مفيش سعات — الصقها من Excel فوق</td></tr>') + '</tbody></table></div>' +
-      (keys.length ? '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">حفظ التعديلات</button>' : '');
+      (keys.length ? '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">حفظ الاستثناءات</button>' : '');
     ldBody_().innerHTML = h;
   }
   function ldSaveVehicles_(){
@@ -6998,7 +7020,8 @@
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
   }
   function ldSaveCaps_(){
-    const caps = Array.prototype.map.call(ldBody_().querySelectorAll('.lCap input[data-c]'), function(i){ return { c: i.dataset.c, n: i.dataset.n, v: Number(i.dataset.v), q: i.value }; });
+    const caps = Array.prototype.filter.call(ldBody_().querySelectorAll('.lCap input[data-c]'), function(i){ return i.value !== '' || i.dataset.had; })
+      .map(function(i){ return { c: i.dataset.c, n: i.dataset.n, v: Number(i.dataset.v), q: i.value }; });
     showLoading(true);
     ldApi_('caps_save', { caps: caps }).then(function(){ showLoading(false); toast_('✔ اتحفظ'); ld_.veh = null; return ldVehicles_().then(ldRenderSettings_); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
