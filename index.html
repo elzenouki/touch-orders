@@ -1523,7 +1523,7 @@
   .chqSt{display:inline-block; font-size:11px; font-weight:800; border-radius:9px; padding:1px 8px; margin-inline-start:4px;}
   .chqSt.safe{background:#fbf1d6; color:#8a6218;} .chqSt.bank{background:#e3eaf6; color:#2c548f;} .chqSt.done{background:#dff3e6; color:#2b7a4f;} .chqSt.bounced{background:#fbe8e4; color:#a8432f;}
   .chqLate{color:#a8432f; font-weight:800;} .chqSoon{color:#8a6218; font-weight:800;}
-  .homeStyle{display:flex; align-items:center; justify-content:center; gap:6px; margin:16px 0 4px; font-size:12px; color:var(--omut); font-weight:700;}
+  .homeStyle{display:none !important; align-items:center; justify-content:center; gap:6px; margin:16px 0 4px; font-size:12px; color:var(--omut); font-weight:700;}
   .homeStyle button{height:30px; padding:0 12px; border-radius:15px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:700; font-size:12px; cursor:pointer;}
   .homeStyle button.on{background:var(--o1); color:#fbf8ee; border-color:var(--o1);}
   .miniRow button{height:42px; border-radius:12px; border:1px solid var(--oline); background:#fff; color:var(--o3); font-family:inherit; font-weight:700; font-size:12.5px; cursor:pointer;}
@@ -8997,7 +8997,8 @@
     box.innerHTML = head + cards.join('') + '<div class="tkMore">كل الحاجات</div>';
     box.hidden = false;
   }
-  document.addEventListener('DOMContentLoaded', function(){ let v = 'list'; try{ v = localStorage.getItem('tf_home_style') || 'list'; }catch(e){} setHomeStyle_(v); });
+  // الشكل النهائي للرئيسية: القايمة لكل الناس (الكروت والمهام اتشالوا من الاختيار)
+  document.addEventListener('DOMContentLoaded', function(){ setHomeStyle_('list'); });
   function toggleTools_(force){
     const g = document.getElementById('toolGrid'); if(!g) return;
     const open = force != null ? force : g.hidden;
