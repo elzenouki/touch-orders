@@ -6964,6 +6964,8 @@
     dlEnter_(ld_.role === 'warehouse' ? '⚙️ سعات العربيات' : '⚙️ العربيات والسعات', 'العربية تشيل كام قطعة من كل صنف لوحده');
     ld_.veh = null;
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    // الطلبيات اللي لسه ماخرجتش — عشان نعرف الأصناف اللي بتتحمّل ومالهاش مقاس كرتونة
+    ldApi_('pending', { all: true }).then(function(x){ ld_.capPending = x || []; if(document.getElementById('ldNoDims')) ldNoDimsRender_(); }).catch(function(){});
     ldVehicles_().then(ldRenderSettings_).catch(ldErr_);
   }
   function ldRenderSettings_(){
@@ -6974,6 +6976,7 @@
     const isWhR = ld_.role === 'warehouse';
     let h = '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
       '<b>اكتب رقم بس لو الصنف ده بيتحمّل غير كده</b> (استثناء) — ساعتها رقمك هو اللي بيتحسب.</div>';
+    h += '<div id="ldNoDims"></div>';
     const old = ld_.caps.filter(function(c){ return CARTON_.code[c.c] && c.q !== '' && c.q != null; });
     if(old.length) h += '<button type="button" class="aGo wide" style="margin-bottom:10px;" onclick="ldCapsReset_()">📦 احسب كل الأصناف بالمقاس (امسح ' + old.length + ' رقم قديم مكتوب بالإيد)</button>';
     if(!isWhR) h += '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
@@ -6998,6 +7001,33 @@
       }).join('') : '<tr><td colspan="' + (V.length + 1) + '" class="empty">لسه مفيش سعات — الصقها من Excel فوق</td></tr>') + '</tbody></table></div>' +
       (keys.length ? '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">حفظ الاستثناءات</button>' : '');
     ldBody_().innerHTML = h;
+    ldNoDimsRender_();
+  }
+  // الأصناف اللي في الطلبيات ومالهاش مقاس كرتونة (مرتبة بالكمية) — عشان نكمّل مقاساتها
+  function ldNoDimsList_(){
+    const m = {};
+    (ld_.capPending || []).forEach(function(d){ (d.lines || []).forEach(function(l){
+      const it = { code: String(l.code || '').trim(), name: l.name || '' };
+      if(ldCarton_(it)) return;
+      const k = it.code || it.name; if(!k) return;
+      const x = m[k] = m[k] || { code: it.code, name: it.name, qty: 0, docs: 0, old: !!ldDims_(it), man: ld_.caps.some(function(c){ return c.c === it.code && c.q !== '' && c.q != null; }) };
+      x.qty += Number(l.qty) || 0; x.docs++;
+    }); });
+    return Object.keys(m).map(function(k){ return m[k]; }).sort(function(a, b){ return b.qty - a.qty; });
+  }
+  function ldNoDimsRender_(){
+    const box = document.getElementById('ldNoDims'); if(!box) return;
+    if(!ld_.capPending){ box.innerHTML = '<div class="note" style="margin-bottom:10px;">جاري البحث عن الأصناف اللي مالهاش مقاس...</div>'; return; }
+    const L = ldNoDimsList_();
+    if(!L.length){ box.innerHTML = '<div class="note" style="margin-bottom:10px;">✅ كل الأصناف اللي في الطلبيات دلوقتي ليها مقاس كرتونة</div>'; return; }
+    box.innerHTML = '<details class="splitD" style="margin-bottom:10px;" open><summary>⚠️ ' + L.length + ' صنف في الطلبيات مالوش مقاس كرتونة — بيتحسب تقريبي</summary>' +
+      '<div class="note" style="margin:6px 0;">ابعت مقاس كرتونة كل صنف (طول × عرض × ارتفاع بالسنتي) عشان الحساب يبقى مظبوط. «تقريبي» = عنده مقاس قطعة قديم، «رقم يدوي» = مكتوب له سعة بالإيد.</div>' +
+      L.map(function(x){ return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(x.name || x.code) + '</b><span class="amt">' + fmt(x.qty) + ' قطعة</span></div><small>كود ' + escapeHtml(x.code || '—') + ' • في ' + x.docs + ' طلبية' + (x.man ? ' • رقم يدوي' : x.old ? ' • تقريبي من مقاس القطعة' : ' • <span class="chqLate">مالوش أي مقاس</span>') + '</small></div>'; }).join('') +
+      '<button type="button" class="aGo wide" onclick="ldNoDimsCopy_()">📋 انسخ القايمة</button></details>';
+  }
+  function ldNoDimsCopy_(){
+    const t = 'أصناف محتاجة مقاس كرتونة (طول × عرض × ارتفاع):\n' + ldNoDimsList_().map(function(x){ return (x.code || '—') + ' — ' + (x.name || '') + ' : '; }).join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast_('✔ اتنسخت — ابعتها واكتب المقاسات'); }, function(){ prompt('انسخ:', t); });
   }
   function ldSaveVehicles_(){
     const m = {};
