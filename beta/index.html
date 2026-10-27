@@ -5604,8 +5604,8 @@
   function ldCarton_(it){ return CARTON_.code[String(it.code || '').trim()] || CARTON_NAME_[ldNormName_(it.name)] || null; }
   function ldCartonVol_(it){ const c = ldCarton_(it); return c ? c[0] * c[1] * c[2] / 1e6 : 0; }
   // العربية تشيل كام كرتونة من الصنف ده لوحده (بالحجم والوزن)
-  function ldCartonFit_(it, v){
-    const vol = ldCartonVol_(it); if(!vol) return 0;
+  function ldCartonFit_(it, v, cm){
+    const c = cm || ldCarton_(it), vol = c ? c[0] * c[1] * c[2] / 1e6 : 0; if(!vol) return 0;
     const spec = ldVehSpec_(v), dm = ldDims_(it);
     let n = Math.floor(spec.vol / vol);
     if(dm && dm[1]) n = Math.min(n, Math.floor(spec.kg / dm[1]));
@@ -6976,6 +6976,8 @@
     const isWhR = ld_.role === 'warehouse';
     let h = '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
       '<b>اكتب رقم بس لو الصنف ده بيتحمّل غير كده</b> (استثناء) — ساعتها رقمك هو اللي بيتحسب.</div>';
+    h += '<button type="button" class="aGo wide" onclick="ldCapsExcel_()">📥 نزّل Excel المقاسات والأعداد</button>' +
+      '<button type="button" class="aGo wide" style="margin:8px 0 10px;" onclick="this.nextElementSibling.click()">📤 ارفع Excel بعد التعديل</button><input type="file" accept=".xlsx" hidden onchange="ldCapsImport_(this)">';
     h += '<div id="ldNoDims"></div>';
     const old = ld_.caps.filter(function(c){ return CARTON_.code[c.c] && c.q !== '' && c.q != null; });
     if(old.length) h += '<button type="button" class="aGo wide" style="margin-bottom:10px;" onclick="ldCapsReset_()">📦 احسب كل الأصناف بالمقاس (امسح ' + old.length + ' رقم قديم مكتوب بالإيد)</button>';
@@ -7024,6 +7026,98 @@
       '<div class="note" style="margin:6px 0;">ابعت مقاس كرتونة كل صنف (طول × عرض × ارتفاع بالسنتي) عشان الحساب يبقى مظبوط. «تقريبي» = عنده مقاس قطعة قديم، «رقم يدوي» = مكتوب له سعة بالإيد.</div>' +
       L.map(function(x){ return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(x.name || x.code) + '</b><span class="amt">' + fmt(x.qty) + ' قطعة</span></div><small>كود ' + escapeHtml(x.code || '—') + ' • في ' + x.docs + ' طلبية' + (x.man ? ' • رقم يدوي' : x.old ? ' • تقريبي من مقاس القطعة' : ' • <span class="chqLate">مالوش أي مقاس</span>') + '</small></div>'; }).join('') +
       '<button type="button" class="aGo wide" onclick="ldNoDimsCopy_()">📋 انسخ القايمة</button></details>';
+  }
+  // ---------- Excel المقاسات: ينزل للمخزن يعدّل فيه ويرجع يترفع ----------
+  // كل صنف: مقاس الكرتونة + العربية تشيل كام (رقمك اليدوي لو موجود، وإلا المحسوب من الكرتونة)
+  function ldCapRows_(){
+    const V = (ld_.veh || []).filter(function(v){ return v.active !== false; });
+    const man = {}; ld_.caps.forEach(function(c){ if(c.q !== '' && c.q != null) (man[c.c] = man[c.c] || {})[c.v] = Number(c.q); });
+    const rows = {};
+    Object.keys(CARTON_.code).forEach(function(c){ rows[c] = { code: c, name: ldItemName_(c) }; });
+    ld_.caps.forEach(function(c){ rows[c.c] = rows[c.c] || { code: c.c, name: c.n || '' }; if(c.n && !rows[c.c].name) rows[c.c].name = c.n; });
+    ldNoDimsList_().forEach(function(x){ if(x.code) rows[x.code] = rows[x.code] || { code: x.code, name: x.name }; });
+    return { V: V, rows: Object.keys(rows).sort().map(function(k){
+      const r = rows[k], it = { code: r.code, name: r.name }, ct = ldCarton_(it);
+      r.dims = ct || null;
+      r.q = V.map(function(v){ const m = man[r.code] && man[r.code][v.id]; return m != null ? { n: m, man: true } : { n: ldCartonFit_(it, v) || '', man: false }; });
+      return r;
+    }) };
+  }
+  async function ldCapsExcel_(){
+    showLoading(true);
+    try{
+      await ensureExcelJsLoaded_();
+      const D = ldCapRows_(), wb = new ExcelJS.Workbook(), ws = wb.addWorksheet('المقاسات', { views: [{ rightToLeft: true, state: 'frozen', ySplit: 1 }] });
+      ws.columns = [{ header: 'كود الصنف', width: 12 }, { header: 'اسم الصنف', width: 34 }, { header: 'طول', width: 8 }, { header: 'عرض', width: 8 }, { header: 'ارتفاع', width: 8 }]
+        .concat(D.V.map(function(v){ return { header: v.name, width: 12 }; }));
+      ws.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3F4C22' } };
+      D.rows.forEach(function(r){
+        const row = ws.addRow([r.code, r.name, r.dims ? r.dims[0] : '', r.dims ? r.dims[1] : '', r.dims ? r.dims[2] : ''].concat(r.q.map(function(x){ return x.n; })));
+        r.q.forEach(function(x, i){ if(x.man) row.getCell(6 + i).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF2CC' } }; });
+        if(!r.dims) row.getCell(3).fill = row.getCell(4).fill = row.getCell(5).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFBE3DD' } };
+      });
+      const n = wb.addWorksheet('شرح', { views: [{ rightToLeft: true }] });
+      n.getColumn(1).width = 90;
+      ['المقاسات بالسنتي لكرتونة القطعة الواحدة (طول × عرض × ارتفاع).',
+       'أعمدة العربيات = العربية تشيل كام قطعة من الصنف ده لوحده.',
+       'الخانة الصفرا = رقم مكتوب بالإيد (استثناء). الخانة الحمرا = الصنف مالوش مقاس — اكتبه.',
+       'لو غيّرت المقاس بس: الأعداد هتتحسب من المقاس الجديد.',
+       'لو غيّرت عدد في عربية: الرقم ده هيتسجل استثناء. لو مسحته: يرجع يتحسب من المقاس.',
+       'متغيرش أسامي الأعمدة ولا الأكواد. وبعد التعديل ارفع الملف من «⚙️ سعات العربيات».'].forEach(function(t){ n.addRow([t]); });
+      const buf = await wb.xlsx.writeBuffer();
+      showLoading(false);
+      await shareOrDownload_(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), 'مقاسات الأصناف والعربيات - ' + safeDateForFile(new Date().toISOString().slice(0, 10)) + '.xlsx', 'share');
+    }catch(err){ showLoading(false); showMsg('ماقدرتش أعمل الملف: ' + ((err && err.message) || err), 'error'); }
+  }
+  async function ldCapsImport_(inp){
+    const f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
+    showLoading(true);
+    try{
+      await ensureExcelJsLoaded_();
+      const wb = new ExcelJS.Workbook(); await wb.xlsx.load(await f.arrayBuffer());
+      const ws = wb.getWorksheet('المقاسات') || wb.worksheets[0];
+      const val = function(c){ let x = c && c.value; if(x && typeof x === 'object') x = x.result != null ? x.result : (x.text != null ? x.text : (x.richText ? x.richText.map(function(t){ return t.text; }).join('') : '')); return x == null ? '' : String(x).trim(); };
+      const num = function(x){ x = normalizeDigits(String(x || '')).replace(/[^\d.]/g, ''); return x === '' ? null : Number(x); };
+      const hdr = {}; ws.getRow(1).eachCell(function(c, i){ hdr[normAr_(val(c))] = i; });
+      const col = function(name){ return hdr[normAr_(name)]; };
+      if(!col('كود الصنف')) throw new Error('مش لاقي عمود «كود الصنف» — استخدم الملف اللي نزل من التطبيق');
+      const V = (ld_.veh || []).filter(function(v){ return v.active !== false && col(v.name); });
+      if(!V.length) throw new Error('مش لاقي أعمدة العربيات في الملف');
+      const cur = ldCapRows_(), curBy = {}; cur.rows.forEach(function(r){ curBy[r.code] = r; });
+      const curIdx = {}; cur.V.forEach(function(v, i){ curIdx[v.id] = i; });
+      const had = {}; ld_.caps.forEach(function(c){ if(c.q !== '' && c.q != null) had[c.c + '|' + c.v] = Number(c.q); });
+      const out = [], newDims = []; let set = 0, clr = 0;
+      for(let r = 2; r <= ws.rowCount; r++){
+        const row = ws.getRow(r), code = val(row.getCell(col('كود الصنف'))).replace(/\.0+$/, '');
+        if(!/^\d+$/.test(code)) continue;
+        const name = col('اسم الصنف') ? val(row.getCell(col('اسم الصنف'))) : '';
+        const L = num(val(row.getCell(col('طول') || 0))), W = num(val(row.getCell(col('عرض') || 0))), H = num(val(row.getCell(col('ارتفاع') || 0)));
+        const it = { code: code, name: name }, old = ldCarton_(it);
+        const dimsNew = L && W && H ? [L, W, H] : null;
+        const dimsChanged = !!dimsNew && (!old || old.join() !== dimsNew.join());
+        if(dimsChanged) newDims.push(code);
+        const c0 = curBy[code];
+        V.forEach(function(v){
+          const q = num(val(row.getCell(col(v.name))));
+          const fitOld = ldCartonFit_(it, v), fitNew = dimsNew ? ldCartonFit_(it, v, dimsNew) : fitOld;
+          const exported = c0 && c0.q[curIdx[v.id]] ? Number(c0.q[curIdx[v.id]].n) || null : null;
+          // العدد مااتغيرش والمقاس اتغير ← ناخد المحسوب من المقاس الجديد
+          let target = q == null || (dimsChanged && q === exported) ? fitNew : q;
+          const need = target && target !== fitOld ? target : null; // من غير مقاس قديم: أي عدد = استثناء
+          const prev = had[code + '|' + v.id];
+          if(need != null && need !== prev){ out.push({ c: code, n: name, v: v.id, q: need }); set++; }
+          else if(need == null && prev != null){ out.push({ c: code, n: name, v: v.id, q: '' }); clr++; }
+        });
+      }
+      showLoading(false);
+      if(!out.length) return toast_('✔ مفيش تغيير في الملف');
+      if(!confirm('هيتسجل ' + set + ' رقم' + (clr ? ' ويتمسح ' + clr + ' رقم قديم' : '') + (newDims.length ? '\n(' + newDims.length + ' صنف مقاسه اتغير — أعداده اتحسبت من المقاس الجديد)' : '') + '\nتكمّل؟')) return;
+      showLoading(true);
+      await ldApi_('caps_save', { caps: out });
+      ld_.veh = null; await ldVehicles_();
+      showLoading(false); toast_('✔ اتحفظ من الملف'); ldRenderSettings_();
+    }catch(err){ showLoading(false); showMsg((err && err.message) || String(err), 'error'); }
   }
   function ldNoDimsCopy_(){
     const t = 'أصناف محتاجة مقاس كرتونة (طول × عرض × ارتفاع):\n' + ldNoDimsList_().map(function(x){ return (x.code || '—') + ' — ' + (x.name || '') + ' : '; }).join('\n');
