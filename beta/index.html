@@ -5611,7 +5611,10 @@
     return n;
   }
   // صندوق كل عربية من جوه (متر) وأقصى حمولة (كجم) — 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000
-  const VEH_SPEC_ = [{ L: 2.2, W: 1.6, H: 1.2, kg: 1500 }, { L: 3.4, W: 1.85, H: 1.8, kg: 3000 }, { L: 4.3, W: 2.0, H: 2.1, kg: 3500 }, { L: 5.3, W: 2.1, H: 2.25, kg: 4500 }];
+  // oven50 = العربية بتشيل كام فرن 50 لتر (كرتونة 64×58.5×41) فعليًا من المخزن — ده اللي بيحدد الحجم المفيد للعربية.
+  // L/W/H بس للرسم (3D وترتيب الصندوق).
+  const VEH_SPEC_ = [{ L: 2.2, W: 1.6, H: 1.2, kg: 1500, oven50: 35 }, { L: 3.4, W: 1.85, H: 1.8, kg: 3000, oven50: 55 }, { L: 4.3, W: 2.0, H: 2.1, kg: 3500, oven50: 115 }, { L: 5.3, W: 2.1, H: 2.25, kg: 4500, oven50: 140 }];
+  const OVEN50_VOL_ = 0.64 * 0.585 * 0.41;
   const LD_USABLE_ = 0.8, LD_CARTON_ = 1.1; // 80% من الصندوق بيتملى فعلًا • الكرتونة أكبر من القطعة بحوالي 10%
   function ldNormName_(s){
     return String(s || '').replace(/4\d{4}[A-Za-z]?\s*$/, '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
@@ -5622,7 +5625,7 @@
     return ITEM_DIMS_.code[c] || ITEM_DIMS_.name[ldNormName_(it.name)] || null;
   }
   function ldHasCap_(){ return ld_.caps.length > 0 || Object.keys(ITEM_DIMS_.code).length > 0 || Object.keys(CARTON_.code).length > 0; }
-  function ldVehSpec_(v){ const s = VEH_SPEC_[ldVehKind_(v.id, v.name)] || VEH_SPEC_[2]; return { vol: s.L * s.W * s.H * LD_USABLE_, kg: s.kg }; }
+  function ldVehSpec_(v){ const s = VEH_SPEC_[ldVehKind_(v.id, v.name)] || VEH_SPEC_[2]; return { vol: s.oven50 ? s.oven50 * OVEN50_VOL_ * 1.0001 : s.L * s.W * s.H * LD_USABLE_, kg: s.kg }; }
   // سعات كل عربية + متوسطها (لأصناف ماليهاش مقاسات ولا سعة)
   function ldCapIndex_(){
     const capMap = {}, perV = {}, median = {};
