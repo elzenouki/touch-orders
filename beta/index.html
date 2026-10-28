@@ -9691,10 +9691,23 @@
         '<div><div class="sl">أمين الخزينة</div><div class="sg"></div><div class="sn">&nbsp;</div></div></div>' +
       '<div class="pwFoot"><b>' + label + '</b>' + (pages > 1 ? '<span class="pg">صفحة ' + pg + ' من ' + pages + '</span>' : '') + '<span>F-SA-8.6-07-01</span></div></div>';
   }
+  // كود السيستم (رقم الحساب) بدل كود التطبيق للعملاء المربوطين (زي الكينج N261025-… ← 51001) — من جهاز الشركة، وآخر نسخة متخزنة لو مش متاح
+  async function sysCodes_(){
+    const key = 'tf_sys_' + ((state.auth && state.auth.email) || '');
+    let cached = {}; try{ cached = JSON.parse(localStorage.getItem(key) || '{}') || {}; }catch(e){}
+    try{
+      const r = await Promise.race([localReport_('syscodes'), new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, 8000); })]);
+      const m = (r && r.map) || {};
+      try{ localStorage.setItem(key, JSON.stringify(m)); }catch(e){}
+      return m;
+    }catch(e){ return cached; }
+  }
   async function walletDoc_(w){
     // اسم المندوب: من الحافظة، ولو مش راجع من السيرفر ناخده من المندوب المختار / اللي داخل
     const repName = String(w.rep || (state.isAdmin ? (wal_.rep || '') : (state.user && state.user.name) || '')).trim();
     w = Object.assign({}, w, { rep: repName });
+    const sys = await sysCodes_();
+    w.payments = (w.payments || []).map(function(p){ const c = sys[String(p.customerCode || '')]; return c ? Object.assign({}, p, { customerCode: c }) : p; });
     let sigs = { rep: '', mgr: '', mgrName: '' };
     try{ sigs = await walletSignatures_(repName); }catch(e){}
     const R = WALLET_ROWS_PAGE_;
