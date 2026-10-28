@@ -1554,6 +1554,12 @@
   .caMark{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:75%; opacity:.07; pointer-events:none;}
   .caT{width:100%; border-collapse:collapse; margin-top:6px; font-size:13px;} .caT th, .caT td{border:1px solid #333; padding:4px 6px; text-align:center;} .caT th{background:#eee;} .caT td.nm{text-align:right;}
   .caImg{flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:6px;} .caImg img{max-width:100%; max-height:100%; object-fit:contain;}
+  /* بيتا: رئيسية المدير متقسمة أقسام — كل الأزرار ظاهرة من غير «كل الأدوات» */
+  .admSecT{font-family:'Alexandria',sans-serif; font-weight:800; font-size:13.5px; color:var(--omut); margin:16px 6px 6px;}
+  .admSec{display:flex; flex-direction:column; background:#fff; border:1px solid var(--oline); border-radius:18px; overflow:hidden; box-shadow:0 2px 8px rgba(47,53,25,.05);}
+  .admSec > .bt, .admSec > .toolBtn{border-bottom:1px solid #f0ead6 !important;} .admSec > :last-child{border-bottom:none !important;}
+  .admSec .toolBtn::after{content:'‹'; margin-right:auto; font-size:22px; color:#b5b19a; line-height:1;}
+  .admSec .toolBtn.out::after{content:none;}
   /* بيتا: تقرير الشيكات */
   .chqRow{background:#fff; border:1px solid var(--oline); border-radius:12px; padding:10px 12px; margin-bottom:6px;}
   .chqRow.late{border-color:#e7b6aa; background:#fff8f6;}
@@ -9421,6 +9427,34 @@
       await printWalletDoc_({ html: html, title: 'فتح حساب ' + (r.name || r.code) });
     }catch(e){ showLoading(false); showMsg((e && e.message) || String(e), 'error'); }
   }
+  // ================== 🗂 رئيسية المدير: أقسام (بيتا) ==================
+  // بننقل نفس الأزرار (بنفس الوظايف والعدّادات) لأقسام مرتبة — أي زرار مش متوزّع بيروح في «الإدارة» عشان مايضيعش
+  const ADM_SECS_ = [
+    ['📌 النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('live')", "openScreen('report')"]],
+    ['💰 البيع والفلوس', ["openPerf_()", "openOverdues_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()"]],
+    ['👥 العملاء', ["openCustSalesAll_()", "openInvSearch_()", "openScreen('unvisited')", "openMyCust_()"]],
+    ['🧭 المناديب', ["openRepVisits_()", "openScreen('map')", "openOrdersAccess_()"]],
+    ['📦 البضاعة', ["openStock_()", "openScreen('items')", "openScreen('export')"]],
+    ['⚙️ الإدارة', ["openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
+  ];
+  function admLayout_(){
+    const home = document.getElementById('adminHome'), grid = home && home.querySelector('.bigGrid'), tools = document.getElementById('toolGrid');
+    if(!grid || home.querySelector('.admSec')) return;
+    const all = Array.prototype.slice.call(grid.querySelectorAll('.bt')).concat(tools ? Array.prototype.slice.call(tools.querySelectorAll('.toolBtn')) : [])
+      .filter(function(b){ return b.id !== 'toolsToggle'; });
+    const used = [], wrap = document.createElement('div');
+    ADM_SECS_.forEach(function(sec, i){
+      const box = document.createElement('div'); box.className = 'admSec';
+      sec[1].forEach(function(oc){ all.forEach(function(b){ if(used.indexOf(b) === -1 && b.getAttribute('onclick') === oc){ used.push(b); box.appendChild(b); } }); });
+      if(i === ADM_SECS_.length - 1) all.forEach(function(b){ if(used.indexOf(b) === -1){ used.push(b); box.insertBefore(b, box.lastChild); } });
+      if(!box.children.length) return;
+      const t = document.createElement('div'); t.className = 'admSecT'; t.textContent = sec[0];
+      wrap.appendChild(t); wrap.appendChild(box);
+    });
+    grid.parentNode.insertBefore(wrap, grid);
+    grid.hidden = true; grid.style.display = 'none'; if(tools){ tools.hidden = true; tools.style.display = 'none'; }
+  }
+  document.addEventListener('DOMContentLoaded', admLayout_);
   // ================== 📦 المخزون (بيتا) ==================
   // من جدول المخزون على جهاز الشركة. المدير بيشوف العدد — المندوب بيشوف متاح/غير متاح بس (200 قطعة فما تحت = غير متاح)،
   // والجهاز هو اللي بيشيل الأرقام قبل ما تتبعت للمندوب.
