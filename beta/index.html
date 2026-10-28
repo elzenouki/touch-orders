@@ -1554,19 +1554,21 @@
   .caMark{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:75%; opacity:.07; pointer-events:none;}
   .caT{width:100%; border-collapse:collapse; margin-top:6px; font-size:13px;} .caT th, .caT td{border:1px solid #333; padding:4px 6px; text-align:center;} .caT th{background:#eee;} .caT td.nm{text-align:right;}
   .caImg{flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:6px;} .caImg img{max-width:100%; max-height:100%; object-fit:contain;}
-  /* بيتا: رئيسية المدير متقسمة أقسام — كل الأزرار ظاهرة من غير «كل الأدوات» */
-  .admSecT{font-family:'Alexandria',sans-serif; font-weight:800; font-size:13.5px; color:var(--omut); margin:16px 6px 6px;}
-  /* كل قسم = أزرار مربعة (3 في الصف): أيقونة فوق واسم تحت، والعدّاد في الركن */
-  .admSec{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
-  body.homeList .admSec > .bt, body.homeList .admSec > .toolBtn{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:7px; min-height:96px; padding:12px 4px 10px;
-    background:#fff !important; border:1px solid #e6dfc6 !important; border-radius:16px; box-shadow:0 2px 6px rgba(47,53,25,.05); font-size:12.5px; font-weight:800; line-height:1.3; text-align:center; color:var(--o3) !important;}
-  body.homeList .admSec > .bt::after, body.homeList .admSec > .toolBtn::after{content:none;}
-  body.homeList .admSec > .bt:active, body.homeList .admSec > .toolBtn:active{transform:scale(.96); background:#faf6ea !important;}
-  body.homeList .admSec .btTx{display:flex; flex-direction:column; align-items:center;} body.homeList .admSec .btTx b{font-size:12.5px; font-family:inherit; font-weight:800;} body.homeList .admSec .btTx small{display:none;}
-  body.homeList .admSec .btIc, body.homeList .admSec .tIc{width:44px; height:44px; border-radius:14px; order:0;}
-  body.homeList .admSec .btCnt{position:absolute; top:6px; left:6px; margin:0; order:0; min-width:22px;}
-  body.homeList .admSec .bt:has(.btCnt)::after{content:none;}
-  body.homeList .admSec > .toolBtn.out{grid-column:1 / -1; min-height:0; flex-direction:row; justify-content:center; padding:10px;} body.homeList .admSec > .toolBtn.out .tIc{width:34px; height:34px;}
+  /* بيتا: رئيسية المدير بتابات تحت (زي تطبيقات البنوك) — كل تاب فيه أدواته كقايمة */
+  #adminHome.admTabbed{padding-bottom:86px;}
+  .admPane{display:flex; flex-direction:column; background:#fff; border:1px solid var(--oline); border-radius:18px; overflow:hidden; box-shadow:0 2px 8px rgba(47,53,25,.05);}
+  .admPane[hidden]{display:none;}
+  .admPane > .bt, .admPane > .toolBtn{border-bottom:1px solid #f0ead6 !important;} .admPane > :last-child{border-bottom:none !important;}
+  body.homeList .admPane > .toolBtn{padding:11px 12px; font-size:15px;} body.homeList .admPane .tIc{width:40px; height:40px;}
+  .admPane .toolBtn::after{content:'‹'; margin-right:auto; font-size:22px; color:#b5b19a; line-height:1;} .admPane .toolBtn.out::after{content:none;}
+  .admPaneT{font-family:'Alexandria',sans-serif; font-weight:800; font-size:13.5px; color:var(--omut); margin:12px 6px 6px;}
+  .admTabs{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; height:calc(66px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom);
+    background:#fff; border-top:1px solid var(--oline); display:flex; z-index:60; box-shadow:0 -4px 16px rgba(47,53,25,.07);}
+  .admTabs button{flex:1; border:0; background:none; font-family:inherit; font-size:11.5px; font-weight:800; color:var(--omut); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; position:relative; cursor:pointer;}
+  .admTabs button .e{font-size:22px; line-height:1;} .admTabs button.on{color:var(--o1);}
+  .admTabs button.on::before{content:''; position:absolute; top:0; width:38px; height:3px; border-radius:0 0 3px 3px; background:var(--o1);}
+  .admTabs .tb{position:absolute; top:5px; left:calc(50% - 24px); background:#a8432f; color:#fff; border-radius:10px; font-size:11px; min-width:19px; height:19px; line-height:19px; padding:0 5px;}
+  .admTabs .tb[hidden]{display:none;}
   /* بيتا: تقرير الشيكات */
   .chqRow{background:#fff; border:1px solid var(--oline); border-radius:12px; padding:10px 12px; margin-bottom:6px;}
   .chqRow.late{border-color:#e7b6aa; background:#fff8f6;}
@@ -9434,32 +9436,50 @@
       await printWalletDoc_({ html: html, title: 'فتح حساب ' + (r.name || r.code) });
     }catch(e){ showLoading(false); showMsg((e && e.message) || String(e), 'error'); }
   }
-  // ================== 🗂 رئيسية المدير: أقسام (بيتا) ==================
-  // بننقل نفس الأزرار (بنفس الوظايف والعدّادات) لأقسام مرتبة — أي زرار مش متوزّع بيروح في «الإدارة» عشان مايضيعش
-  const ADM_SECS_ = [
-    ['📌 النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('live')"]],
-    ['💰 البيع والفلوس', ["openPerf_()", "openOverdues_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
-    ['👥 العملاء', ["openCustSalesAll_()", "openInvSearch_()", "openScreen('unvisited')"]],
-    ['🧭 المناديب', ["openScreen('report')", "openRepVisits_()", "openScreen('map')", "openOrdersAccess_()"]],
-    ['📦 البضاعة', ["openStock_()", "openScreen('items')", "openScreen('export')"]],
-    ['⚙️ الإدارة', ["openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
+  // ================== 🗂 رئيسية المدير: تابات تحت (بيتا) ==================
+  // بننقل نفس الأزرار (بنفس الوظايف والعدّادات) لـ 5 تابات — أي زرار مش متوزّع بيروح في «المزيد» عشان مايضيعش
+  const ADM_TABS2_ = [
+    ['today', '🏠', 'النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('report')"]],
+    ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
+    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openInvSearch_()", "openScreen('unvisited')"]],
+    ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openScreen('map')", "openOrdersAccess_()"]],
+    ['more', '☰', 'المزيد', ["openStock_()", "openScreen('items')", "openScreen('export')", "openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
   ];
   function admLayout_(){
     const home = document.getElementById('adminHome'), grid = home && home.querySelector('.bigGrid'), tools = document.getElementById('toolGrid');
-    if(!grid || home.querySelector('.admSec')) return;
+    if(!grid || home.querySelector('.admPane')) return;
     const all = Array.prototype.slice.call(grid.querySelectorAll('.bt')).concat(tools ? Array.prototype.slice.call(tools.querySelectorAll('.toolBtn')) : [])
       .filter(function(b){ return b.id !== 'toolsToggle'; });
-    const used = [], wrap = document.createElement('div');
-    ADM_SECS_.forEach(function(sec, i){
-      const box = document.createElement('div'); box.className = 'admSec';
-      sec[1].forEach(function(oc){ all.forEach(function(b){ if(used.indexOf(b) === -1 && b.getAttribute('onclick') === oc){ used.push(b); box.appendChild(b); } }); });
-      if(i === ADM_SECS_.length - 1) all.forEach(function(b){ if(used.indexOf(b) === -1){ used.push(b); box.insertBefore(b, box.lastChild); } });
-      if(!box.children.length) return;
-      const t = document.createElement('div'); t.className = 'admSecT'; t.textContent = sec[0];
-      wrap.appendChild(t); wrap.appendChild(box);
+    const used = [], wrap = document.createElement('div'), bar = document.createElement('div');
+    bar.className = 'admTabs'; bar.id = 'admTabs';
+    ADM_TABS2_.forEach(function(t, i){
+      const pane = document.createElement('div'); pane.className = 'admPane'; pane.dataset.tab = t[0];
+      t[3].forEach(function(oc){ all.forEach(function(b){ if(used.indexOf(b) === -1 && b.getAttribute('onclick') === oc){ used.push(b); pane.appendChild(b); } }); });
+      if(i === ADM_TABS2_.length - 1) all.forEach(function(b){ if(used.indexOf(b) === -1){ used.push(b); pane.insertBefore(b, pane.lastChild); } });
+      const ttl = document.createElement('div'); ttl.className = 'admPaneT'; ttl.dataset.tab = t[0]; ttl.textContent = t[1] + ' ' + t[2];
+      wrap.appendChild(ttl); wrap.appendChild(pane);
+      bar.insertAdjacentHTML('beforeend', '<button type="button" data-tab="' + t[0] + '" onclick="admTab2_(\'' + t[0] + '\')"><span class="e">' + t[1] + '</span>' + t[2] + '<span class="tb" hidden></span></button>');
     });
     grid.parentNode.insertBefore(wrap, grid);
+    home.appendChild(bar); home.classList.add('admTabbed');
     grid.hidden = true; grid.style.display = 'none'; if(tools){ tools.hidden = true; tools.style.display = 'none'; }
+    let cur = 'today'; try{ cur = localStorage.getItem('tf_adm_tab') || 'today'; }catch(e){}
+    admTab2_(ADM_TABS2_.some(function(t){ return t[0] === cur; }) ? cur : 'today');
+    // عدّاد كل تاب = مجموع العدّادات اللي جوه أزراره (بيتحدث لوحده لما أي عدّاد يتغير)
+    if(window.MutationObserver) new MutationObserver(admTabBadges_).observe(wrap, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['hidden'] });
+    admTabBadges_();
+  }
+  function admTab2_(t){
+    document.querySelectorAll('#adminHome .admPane, #adminHome .admPaneT').forEach(function(p){ p.hidden = p.dataset.tab !== t; });
+    document.querySelectorAll('#admTabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab === t); });
+    try{ localStorage.setItem('tf_adm_tab', t); }catch(e){}
+    window.scrollTo(0, 0);
+  }
+  function admTabBadges_(){
+    document.querySelectorAll('#admTabs button').forEach(function(b){
+      let n = 0; document.querySelectorAll('#adminHome .admPane[data-tab="' + b.dataset.tab + '"] .btCnt').forEach(function(c){ if(!c.hidden) n += Number(c.textContent) || 0; });
+      const tb = b.querySelector('.tb'); tb.textContent = n || ''; tb.hidden = !n;
+    });
   }
   document.addEventListener('DOMContentLoaded', admLayout_);
   // ================== 📦 المخزون (بيتا) ==================
