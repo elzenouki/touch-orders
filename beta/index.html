@@ -9233,16 +9233,16 @@
   }
   function openCustAccList_(){
     dl_.stack = []; dlBackBtn_();
-    dlOpen_('🆕 عميل جديد', 'سجّل عميل جديد، أو كمّل حساب عميل اتسجل');
-    ncMarkSeen_();
+    dlOpen_('🆕 عميل جديد', 'العملاء اللي اتفتح حسابهم من التطبيق');
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
-    Promise.all([admCall_('cust_list', { q: '' }), caApi_('acc_codes').catch(function(){ return null; })]).then(function(x){
-      ca_.list = x[0] || []; if(x[1]) ca_.done = x[1].codes || []; caListRender_();
+    const seen0 = ncSeen_();
+    Promise.all([admCall_('cust_list', { q: '' }).catch(function(){ return []; }), caApi_('opened')]).then(function(x){
+      ca_.list = x[0] || []; ca_.opened = (x[1] && x[1].rows) || []; ca_.seen0 = seen0; caListRender_(); ncMarkSeen_();
     }).catch(ldErr_);
   }
   function caListRender_(){
     ldBody_().innerHTML = '<button type="button" class="aGo wide" onclick="caNewCust_()">＋ عميل جديد — سجّله وافتح حسابه</button>' +
-      '<div class="sectionLabel" style="margin:16px 0 6px;">عملاء جداد مستنيين تكمّل حسابهم</div>' +
+      '<div class="sectionLabel" style="margin:16px 0 6px;">العملاء اللي اتفتحلهم حساب (الأحدث فوق)</div>' +
       '<input type="search" placeholder="🔎 دوّر على أي عميل بالاسم أو الكود أو الموبايل..." value="' + escapeHtml(ca_.q) + '" oninput="this.setAttribute(\'value\', this.value); ca_.q=this.value; caList_()" style="margin:0 0 10px;"><div id="caList"></div>';
     caList_();
   }
@@ -9250,8 +9250,19 @@
     const box = document.getElementById('caList'); if(!box) return;
     const q = normAr_(normalizeDigits(ca_.q || '')).trim();
     const isNew = ncPending_;
-    // من غير بحث: العملاء الجداد بس (اتسجلوا من التطبيق ولسه مالهمش كود سيستم) — والبحث بيدوّر في الكل
-    const L = (ca_.list || []).filter(function(r){ return q ? (normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1) : isNew(r); })
+    // من غير بحث: العملاء اللي اتفتحلهم حساب بس (ليهم مستندات أو استمارة على جهاز الشركة) — والبحث بيدوّر في كل العملاء
+    const byCode = {}; (ca_.list || []).forEach(function(r){ byCode[String(r.code)] = r; });
+    if(!q){
+      const O = ca_.opened || [], seen = ca_.seen0 || [];
+      box.innerHTML = O.length ? O.map(function(o){
+        const r = byCode[o.code] || {}, nm = r.name || o.name || o.code, fresh = seen.indexOf(o.code) === -1;
+        return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(nm) + '</b>' + (fresh ? '<span class="chqSt safe" style="margin:0;">🆕 جديد</span>' : '') + '</div>' +
+          '<small>' + escapeHtml([o.code, r.rep || o.rep, r.area, r.phone].filter(Boolean).join(' • ')) + '<br>📎 ' + o.docs + ' مستند • ' + (o.form ? '✅ الاستمارة متملية' : '⚠️ الاستمارة لسه') + ' • ' + ymdToDmy_(String(o.at || '').slice(0, 10)) + '</small>' +
+          '<div class="aBtns" style="margin-top:6px;"><button type="button" class="ok" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\', true)">🖨 تحميل الملف</button><button type="button" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\')">✏️ افتح وكمّل</button></div></div>';
+      }).join('') : '<div class="empty">لسه مفيش عملاء اتفتحلهم حساب من التطبيق</div>';
+      return;
+    }
+    const L = (ca_.list || []).filter(function(r){ return normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1; })
       .sort(function(a, b){ return (isNew(b) - isNew(a)) || String(b.code).localeCompare(String(a.code)); }).slice(0, 150);
     box.innerHTML = L.length ? L.map(function(r){
       return '<button type="button" class="chqRow" style="width:100%; text-align:right; font-family:inherit; cursor:pointer;" onclick="caOpenCode_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\')"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b>' + (isNew(r) ? '<span class="chqSt safe" style="margin:0;">جديد</span>' : '') + '</div>' +
@@ -9275,17 +9286,13 @@
   function ncCheck_(force){
     if(!state.isAdmin || !state.auth || (!force && Date.now() - ncLastCheck_ < 300000)) return;
     ncLastCheck_ = Date.now();
-    Promise.all([admCall_('cust_list', { q: '' }), caApi_('acc_codes').catch(function(){ return null; })]).then(function(x){
-      ca_.list = x[0] || []; if(x[1]) ca_.done = x[1].codes || [];
-      ncBadgeRender_();
-    }).catch(function(){});
+    caApi_('opened').then(function(x){ ca_.opened = (x && x.rows) || []; ncBadgeRender_(); }).catch(function(){});
   }
   function ncSeen_(){ try{ return JSON.parse(localStorage.getItem('tf_nc_seen') || '[]'); }catch(e){ return []; } }
   function ncBadgeRender_(){
-    const P = (ca_.list || []).filter(ncPending_), seen = ncSeen_();
-    const b = document.getElementById('ncBadge'); if(b){ b.textContent = P.length || ''; b.hidden = !P.length; }
-    const sub = document.getElementById('ncHeroSub'); if(sub) sub.textContent = P.length ? P.length + ' مستنيين تكمّل حسابهم' : 'فتح الحساب والمستندات';
-    const fresh = P.filter(function(r){ return seen.indexOf(String(r.code)) === -1; });
+    const seen = ncSeen_(), fresh = (ca_.opened || []).filter(function(o){ return seen.indexOf(o.code) === -1; });
+    const b = document.getElementById('ncBadge'); if(b){ b.textContent = fresh.length || ''; b.hidden = !fresh.length; }
+    const sub = document.getElementById('ncHeroSub'); if(sub) sub.textContent = fresh.length ? fresh.length + ' عميل جديد اتفتح' : 'فتح الحساب والمستندات';
     const al = document.getElementById('ncAlert');
     if(al){
       al.hidden = !fresh.length;
@@ -9293,18 +9300,23 @@
     }
   }
   function ncMarkSeen_(){
-    const seen = ncSeen_(); (ca_.list || []).filter(ncPending_).forEach(function(r){ if(seen.indexOf(String(r.code)) === -1) seen.push(String(r.code)); });
+    const seen = ncSeen_(); (ca_.opened || []).forEach(function(o){ if(seen.indexOf(o.code) === -1) seen.push(o.code); });
     try{ localStorage.setItem('tf_nc_seen', JSON.stringify(seen.slice(-500))); }catch(e){}
-    const al = document.getElementById('ncAlert'); if(al) al.hidden = true;
+    ncBadgeRender_();
   }
   function caNewCust_(){ dlClose_(); openNewCust_(true); }
-  function caOpenCode_(code){ const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }); if(r) caOpenRow_(r); }
-  function caOpenRow_(r){
+  function caOpenCode_(code, print){
+    const o = (ca_.opened || []).find(function(x){ return x.code === code; }) || {};
+    const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }) || { code: code, name: o.name || code, rep: o.rep || '' };
+    caOpenRow_(r, print);
+  }
+  function caOpenRow_(r, print){
     ca_.cur = r; ca_.data = {}; ca_.docs = [];
     dlEnter_('📝 فتح حساب', r.name || r.code);
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     Promise.all([caApi_('acc_get', { code: r.code }), caApi_('doc_list', { code: r.code })]).then(function(x){
       ca_.data = (x[0] && x[0].data) || {}; ca_.at = x[0] && x[0].at; ca_.docs = (x[1] && x[1].rows) || []; caRender_();
+      if(print) caPrint_();
     }).catch(ldErr_);
   }
   const CA_FIELDS_ = [['customer_name', 'اسم العميل'], ['company', 'اسم الشركة'], ['company_address', 'عنوان الشركة'], ['class', 'تصنيف العميل', 'caClass'],
@@ -9340,7 +9352,7 @@
     const d = caForm_();
     showLoading(true);
     return caApi_('acc_save', { code: ca_.cur.code, data: JSON.stringify(d) }).then(function(){ showLoading(false); ca_.data = d; ca_.at = new Date().toISOString(); toast_('✔ اتحفظت الاستمارة');
-      ca_.done = (ca_.done || []).concat([String(ca_.cur.code)]); ncBadgeRender_(); })
+    })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); throw e; });
   }
   function caDocAdd_(inp){
