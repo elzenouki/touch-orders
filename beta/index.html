@@ -1306,6 +1306,7 @@
   .pwT td.nm{white-space:normal; padding:0 3px;}
   .pwT td.nm .nmx{max-height:21px; overflow:hidden; line-height:10.5px; font-size:8.5px; unicode-bidi:plaintext; word-break:break-word;}
   .pwT td.nm .nmx.one{line-height:18px; font-size:10px;}
+  .pwT td.nm .nmx.three{line-height:7px; font-size:6.8px;} .pwT td.nm .nmx b{font-weight:900;}
   .pwT td.cd{direction:ltr; white-space:nowrap; overflow:hidden; font-weight:800; color:#3f4c22; font-size:9.5px;}
   .pwT tr.tot td.cont{text-align:center; font-weight:900; color:#8a640a;}
   .pwFoot .pg{font-size:8.5px; font-weight:900; color:#2f3519;}
@@ -1514,6 +1515,16 @@
   .splitL td:last-child{text-align:left; font-weight:800; direction:ltr; white-space:nowrap; width:60px;}
   .splitL small{display:block; font-size:10.5px; color:var(--omut); direction:ltr; text-align:right;}
   .splitD{margin-top:6px;} .splitD summary{cursor:pointer; font-size:13px; font-weight:700; color:var(--o2);}
+  /* بيتا: أكتر من شيك في الزيارة + صورة كل شيك */
+  .vChq{border:1px solid var(--oline); border-radius:12px; padding:10px; margin:8px 0; background:#fffdf7;}
+  .vChqTop{display:flex; justify-content:space-between; align-items:center; font-weight:800; color:var(--o3); margin-bottom:6px;}
+  .vChqTop button{border:0; background:none; color:#a8432f; font-weight:800; font-family:inherit; cursor:pointer;}
+  .vChqG{display:grid; grid-template-columns:1fr 1fr; gap:6px;} .vChqG label{margin:2px 0 0; font-size:12px;}
+  .vChqPh{display:flex; align-items:center; gap:10px; margin-top:8px;}
+  .vChqPh button{flex:1; height:42px; border-radius:10px; border:1.5px dashed #c9a24a; background:#fff8e6; font-family:inherit; font-weight:800; color:#8a6218; cursor:pointer;}
+  .vChqPh button.done{border-style:solid; border-color:#2b7a4f; background:#e8f5ec; color:#2b7a4f;}
+  .vChqPh img{width:64px; height:42px; object-fit:cover; border-radius:8px; border:1px solid var(--oline);}
+  .fcImg{max-width:100%; border-radius:10px; border:1px solid var(--oline); margin-top:8px;}
   /* بيتا: تقرير الشيكات */
   .chqRow{background:#fff; border:1px solid var(--oline); border-radius:12px; padding:10px 12px; margin-bottom:6px;}
   .chqRow.late{border-color:#e7b6aa; background:#fff8f6;}
@@ -1797,7 +1808,10 @@
       <input type="text" id="payAmount" class="ltrNum payAmount" inputmode="decimal" dir="ltr" placeholder="0">
       <label>طريقة الدفع</label>
       <div class="reasonGrid" id="payMethods"></div>
-      <div id="chequeWrap" hidden><label>تاريخ الشيك (الاستحقاق)</label><input type="date" id="chequeDate"></div>
+      <div id="chequeWrap" hidden><div id="vChqList"></div>
+        <button type="button" class="ghost wide" style="margin-top:4px;" onclick="vChqAdd_()">＋ شيك تاني</button>
+        <datalist id="bankList"><option>البنك الأهلي</option><option>بنك مصر</option><option>بنك القاهرة</option><option>CIB التجاري الدولي</option><option>QNB الأهلي</option><option>بيت التمويل الكويتي KFH</option><option>بنك الكويت الوطني NBK</option><option>بنك الإسكندرية</option><option>البنك الزراعي</option><option>بنك فيصل</option><option>بنك أبوظبي الأول</option><option>بنك قناة السويس</option></datalist>
+        <div class="note" style="margin-top:6px;">كل شيك لوحده: المبلغ والتاريخ والرقم والبنك، و<b>صورة الشيك إجباري</b>. المبلغ فوق بيتجمع لوحده.</div></div>
     </div>
     <div class="card secCard" id="noOrderBox" hidden>
       <div class="secTitle">ليه مافيش طلبية؟</div>
@@ -3623,7 +3637,7 @@
         document.getElementById('vSub').insertAdjacentHTML('beforeend', '<br>📄 آخر فاتورة في السيستم: <b>' + ymdToDmy_(r.data.lastDate) + '</b>' + (r.fresh ? '' : ' <span style="color:var(--gold-d)">(نسخة قديمة)</span>'));
       }).catch(function(){});
     }
-    ['visitNotes', 'pickSearch', 'retSearch', 'payAmount', 'chequeDate'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['visitNotes', 'pickSearch', 'retSearch', 'payAmount'].forEach(function(id){ document.getElementById(id).value = ''; });
     const rr = (state.rep && state.rep.returnReasons) || [];
     document.getElementById('retReason').innerHTML = '<option value="">اختار السبب...</option>' +
       rr.map(function(r){ return '<option>' + escapeHtml(r) + '</option>'; }).join('');
@@ -3747,7 +3761,122 @@
     box.querySelectorAll('button').forEach(function(b){
       b.onclick = function(){ state.visit.payMethod = b.dataset.m; renderPayMethods_(); };
     });
-    document.getElementById('chequeWrap').hidden = state.visit.payMethod !== 'شيك';
+    const isChq = state.visit.payMethod === 'شيك';
+    document.getElementById('chequeWrap').hidden = !isChq;
+    const pa = document.getElementById('payAmount');
+    pa.readOnly = isChq;
+    if(isChq){ if(!state.visit.cheques || !state.visit.cheques.length) state.visit.cheques = [vChqNew_()]; vChqRender_(); }
+  }
+  // ---------- أكتر من شيك في نفس الزيارة + صورة كل شيك (بيتا) ----------
+  // الشيكات بتتجمع في تحصيل واحد في الحافظة (المبلغ = مجموعهم). تفاصيل كل شيك وصورته بتروح لجهاز الشركة (مش Supabase).
+  function vChqNew_(){ return { amt: '', due: '', no: '', bank: '', img: '' }; }
+  function vChqAdd_(){ state.visit.cheques.push(vChqNew_()); vChqRender_(); }
+  function vChqDel_(i){ state.visit.cheques.splice(i, 1); if(!state.visit.cheques.length) state.visit.cheques.push(vChqNew_()); vChqRender_(); }
+  function vChqSet_(i, k, el){ state.visit.cheques[i][k] = el.value; if(k === 'amt') vChqSum_(); }
+  function vChqSum_(){
+    const t = (state.visit.cheques || []).reduce(function(s, c){ return s + (Number(normalizeDigits(c.amt || '').replace(/[^\d.]/g, '')) || 0); }, 0);
+    document.getElementById('payAmount').value = t ? String(t) : '';
+  }
+  function vChqRender_(){
+    const L = state.visit.cheques, n = L.length;
+    document.getElementById('vChqList').innerHTML = L.map(function(c, i){
+      const v = function(k){ return escapeHtml(c[k] || ''); };
+      return '<div class="vChq"><div class="vChqTop"><span>🏦 شيك ' + (n > 1 ? (i + 1) : '') + '</span>' + (n > 1 ? '<button type="button" onclick="vChqDel_(' + i + ')">✖ شيله</button>' : '') + '</div>' +
+        '<div class="vChqG"><div><label>المبلغ</label><input type="text" inputmode="decimal" dir="ltr" class="ltrNum" value="' + v('amt') + '" oninput="vChqSet_(' + i + ', \'amt\', this)" placeholder="0"></div>' +
+        '<div><label>تاريخ الاستحقاق</label><input type="date" value="' + v('due') + '" onchange="vChqSet_(' + i + ', \'due\', this)"></div>' +
+        '<div><label>رقم الشيك</label><input type="text" inputmode="numeric" dir="ltr" value="' + v('no') + '" oninput="vChqSet_(' + i + ', \'no\', this)"></div>' +
+        '<div><label>البنك</label><input type="text" list="bankList" value="' + v('bank') + '" oninput="vChqSet_(' + i + ', \'bank\', this)"></div></div>' +
+        '<div class="vChqPh"><button type="button" class="' + (c.img ? 'done' : '') + '" onclick="this.nextElementSibling.click()">' + (c.img ? '✔ اتصوّر — صوّر تاني' : '📷 صوّر الشيك (إجباري)') + '</button>' +
+        '<input type="file" accept="image/*" capture="environment" hidden onchange="vChqPhoto_(' + i + ', this)">' + (c.img ? '<img src="' + c.img + '" alt="">' : '') + '</div></div>';
+    }).join('');
+    vChqSum_();
+  }
+  // الصورة بتتصغّر (أطول ضلع 1400 بكسل، JPEG) قبل ما تتحفظ — حوالي 150 كيلو
+  function vChqPhoto_(i, inp){
+    const f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
+    const url = URL.createObjectURL(f), im = new Image();
+    im.onload = function(){
+      const k = Math.min(1, 1400 / Math.max(im.width, im.height)), cv = document.createElement('canvas');
+      cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k);
+      cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      state.visit.cheques[i].img = cv.toDataURL('image/jpeg', 0.6);
+      vChqRender_();
+    };
+    im.onerror = function(){ URL.revokeObjectURL(url); showMsg('ماقدرتش أقرا الصورة — صوّر تاني', 'error'); };
+    im.src = url;
+  }
+  // طابور رفع الشيكات: بيتحفظ على الموبايل لحد ما يوصل لجهاز الشركة (حتى لو مفيش نت أو الجهاز مقفول)
+  // بيروح لنفس فلو «تقارير التطبيق» (kind=fchq) — ده المسار المتاح على النت من جهاز الشركة
+  const FCHQ_URL_ = function(){ return INVOICES_URL.replace(/\/webhook\/[^\/]+$/, '/webhook/field-reports'); };
+  let fchqMem_ = null, fchqBusy_ = false;
+  function fchqQ_(){ if(fchqMem_) return fchqMem_; try{ fchqMem_ = JSON.parse(localStorage.getItem('tf_chq_up') || '[]'); }catch(e){ fchqMem_ = []; } return fchqMem_; }
+  function fchqSave_(){ try{ localStorage.setItem('tf_chq_up', JSON.stringify(fchqQ_())); }catch(e){} }
+  function fchqEnqueue_(v){
+    if(v.payMethod !== 'شيك' || !v.cheques) return;
+    const who = state.user ? state.user.name : '', q = fchqQ_();
+    v.cheques.forEach(function(c, i){
+      q.push({ uid: v.reqId + '_' + i, req: v.reqId, code: v.cust.code, name: v.cust.name, rep: who, no: c.no, bank: c.bank,
+        amt: Number(normalizeDigits(c.amt || '').replace(/[^\d.]/g, '')) || 0, due: c.due, img: c.img, at: new Date().toISOString() });
+    });
+    fchqSave_(); fchqFlush_();
+  }
+  async function fchqFlush_(){
+    if(fchqBusy_ || !state.auth) return;
+    const q = fchqQ_(); if(!q.length) return;
+    fchqBusy_ = true;
+    try{
+      while(q.length){
+        const x = q[0], b = new URLSearchParams();
+        b.set('e', state.auth.email || ''); b.set('p', state.auth.pin || ''); b.set('kind', 'fchq'); b.set('act', 'add');
+        Object.keys(x).forEach(function(k){ b.set(k, x[k] == null ? '' : String(x[k])); });
+        const r = await fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' }).then(function(r){ return r.json(); });
+        if(!r || r.ok !== true) break;
+        q.shift(); fchqSave_();
+      }
+    }catch(e){}finally{ fchqBusy_ = false; }
+  }
+  window.addEventListener('online', function(){ fchqFlush_(); });
+  setInterval(function(){ if(fchqQ_().length) fchqFlush_(); }, 120000);
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(fchqFlush_, 8000); });
+  // شاشة «📷 شيكات المناديب»: الشيكات اللي اتسجلت من التطبيق بصورها (من جهاز الشركة) — المدير الكل والمندوب بتاعه
+  var fc_ = { rows: null, q: '' };
+  function fchqApi_(act, extra){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'fchq'); b.set('act', act);
+    Object.keys(extra || {}).forEach(function(k){ b.set(k, extra[k]); });
+    return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); });
+  }
+  function openFieldChq_(){
+    dlEnter_('📷 شيكات المناديب بالصور', 'اللي اتسجلت من التطبيق');
+    const pend = fchqQ_().length;
+    ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    fchqApi_('list').then(function(r){ fc_.rows = r.rows || []; fcRender_(pend); }).catch(ldErr_);
+  }
+  function fcRender_(pend){
+    let h = pend ? '<div class="queueBar" style="margin-bottom:10px;"><span>⏳ ' + pend + ' شيك على الموبايل ده لسه بيترفع — هيتبعت لوحده</span></div>' : '';
+    h += '<input type="search" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(fc_.q) + '" oninput="this.setAttribute(\'value\', this.value); fc_.q=this.value; fcList_()" style="margin:0 0 10px;"><div id="fcList"></div>';
+    ldBody_().innerHTML = h; fcList_();
+  }
+  function fcList_(){
+    const box = document.getElementById('fcList'); if(!box) return;
+    const q = normAr_(normalizeDigits(fc_.q || '')).trim();
+    const L = (fc_.rows || []).filter(function(r){ return !q || normAr_(r.name || '').indexOf(q) !== -1 || String(r.no || '').indexOf(q) !== -1 || String(r.code || '').indexOf(q) !== -1; });
+    box.innerHTML = L.length ? L.map(function(r){
+      return '<button type="button" class="chqRow" style="width:100%; text-align:right; font-family:inherit; cursor:pointer;" onclick="fcPhoto_(' + Number(r.id) + ')"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b><span class="amt">' + fmt(Math.round(Number(r.amt) || 0)) + '</span></div>' +
+        '<small>شيك ' + escapeHtml(r.no || '') + ' • ' + escapeHtml(r.bank || '') + (r.due ? ' • استحقاق ' + ymdToDmy_(r.due) : '') + (state.isAdmin && r.rep ? ' • ' + escapeHtml(r.rep) : '') + ' • اتسجل ' + ymdToDmy_(String(r.at || '').slice(0, 10)) + ' • 📷 الصورة</small></button>';
+    }).join('') : '<div class="empty">لسه مفيش شيكات متسجلة من التطبيق</div>';
+  }
+  function fcPhoto_(id){
+    const r = (fc_.rows || []).find(function(x){ return Number(x.id) === id; }) || {};
+    dlEnter_('📷 شيك ' + (r.no || ''), r.name || '');
+    ldBody_().innerHTML = '<div class="aiStatus">جاري تحميل الصورة...</div>';
+    fchqApi_('photo', { id: id }).then(function(x){
+      ldBody_().innerHTML = '<div class="note"><b>' + escapeHtml(r.name || '') + '</b> — ' + fmt(Math.round(Number(r.amt) || 0)) + ' ج<br>شيك ' + escapeHtml(r.no || '') + ' • ' + escapeHtml(r.bank || '') + (r.due ? ' • استحقاق ' + ymdToDmy_(r.due) : '') + (r.rep ? ' • ' + escapeHtml(r.rep) : '') + '</div>' +
+        (x.img && x.img.indexOf('data:image/') === 0 ? '<img class="fcImg" src="' + x.img + '" alt="">' : '<div class="empty">مفيش صورة</div>');
+    }).catch(ldErr_);
   }
 
   // ---------- اختيار الصنف (بحث سريع) ----------
@@ -4316,9 +4445,20 @@
       const amount = Number(normalizeDigits(document.getElementById('payAmount').value || '').replace(/[^\d.]/g, ''));
       if(!(amount > 0)){ showMsg('اكتب مبلغ التحصيل', 'error'); document.getElementById('payAmount').focus(); return; }
       if(!v.payMethod){ showMsg('اختار طريقة الدفع', 'error'); return; }
-      const cd = document.getElementById('chequeDate').value;
-      if(v.payMethod === 'شيك' && !cd){ showMsg('اكتب تاريخ الشيك', 'error'); return; }
-      payment = { amount: amount, method: v.payMethod, chequeDate: v.payMethod === 'شيك' ? cd : '' };
+      let cd = '';
+      if(v.payMethod === 'شيك'){
+        const L = v.cheques || [];
+        for(let i = 0; i < L.length; i++){
+          const c = L[i], nm = L.length > 1 ? 'الشيك رقم ' + (i + 1) : 'الشيك';
+          if(!(Number(normalizeDigits(c.amt || '').replace(/[^\d.]/g, '')) > 0)){ showMsg('اكتب مبلغ ' + nm, 'error'); return; }
+          if(!c.due){ showMsg('اكتب تاريخ استحقاق ' + nm, 'error'); return; }
+          if(!String(c.no || '').trim()){ showMsg('اكتب رقم ' + nm, 'error'); return; }
+          if(!String(c.bank || '').trim()){ showMsg('اكتب بنك ' + nm, 'error'); return; }
+          if(!c.img){ showMsg('صوّر ' + nm + ' — الصورة إجباري', 'error'); document.getElementById('chequeWrap').scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+        }
+        cd = L.map(function(c){ return c.due; }).sort()[0];
+      }
+      payment = { amount: amount, method: v.payMethod, chequeDate: cd };
     }
     if(m.none && !v.reason){ showMsg('اختار سبب عدم الطلب', 'error'); return; }
     const notesTxt = document.getElementById('visitNotes').value.trim().replace(/\s+/g, ' ');
@@ -4333,7 +4473,7 @@
     const lines = [];
     if(m.order) lines.push('🧾 طلبية: ' + v.lines.length + ' صنف — ' + fmt(v.lines.reduce(function(s, l){ return s + l.qty; }, 0)) + ' قطعة');
     if(m.ret) lines.push('<span style="color:var(--red)">↩ مرتجع: ' + v.rets.length + ' صنف — -' + fmt(v.rets.reduce(function(s, l){ return s + l.qty; }, 0)) + ' قطعة</span>');
-    if(payment) lines.push('💵 تحصيل: ' + fmt(payment.amount) + ' جنيه (' + escapeHtml(payment.method) + ')');
+    if(payment) lines.push('💵 تحصيل: ' + fmt(payment.amount) + ' جنيه (' + escapeHtml(payment.method) + (payment.method === 'شيك' && v.cheques.length > 1 ? ' — ' + v.cheques.length + ' شيكات' : '') + ')');
     if(!v.phone && v.shelf && v.shelf.length) lines.push('📊 عد الرف: ' + v.shelf.length + ' صنف');
     if(lines.length){
       const ok = await confirmModal_((v.phone ? '📞 تأكيد (من غير زيارة) لـ <b>' : 'تأكيد زيارة <b>') + escapeHtml(v.cust.name) + '</b>:<br>' + lines.join('<br>'), '✔ تأكيد', 'رجوع');
@@ -4378,10 +4518,12 @@
         showLoading(false);
         // بيانات غلط (تاجر/صنف مش موجود...) → نوريه الغلط. أي مشكلة تانية (نت، زحمة، سيرفر) → نحفظها ونبعتها بعدين
         if(err && err.code === 'REJECTED') throw err;
+        if(payment) fchqEnqueue_(v);
         queueVisit_(v, payload, err && !err.isNetwork ? err.message : '');
         return;
       }
       showLoading(false);
+      if(payment) fchqEnqueue_(v);
       afterVisitSaved_(res);
     }catch(err){
       onError(err);
@@ -9102,6 +9244,7 @@
       if(chq_.rep && !reps[chq_.rep]) chq_.rep = '';
       h += chips(reps, 'rep');
     }
+    h += '<button type="button" class="ghost wide" style="margin:4px 0 6px;" onclick="openFieldChq_()">📷 شيكات المناديب بالصور (من التطبيق)</button>';
     h += '<input type="search" placeholder="🔎 اسم العميل أو رقم الشيك..." value="' + escapeHtml(chq_.q) + '" oninput="this.setAttribute(\'value\', this.value); chq_.q=this.value; chqList_()" style="margin:4px 0 10px;">';
     h += '<div id="chqList"></div>';
     h += '<div class="note" style="margin-top:10px;">من ملف «تحليلي شيكات العملاء» على جهاز الشركة. «تحت التحصيل» = اتودع البنك ولسه ماتحصلش، و«في الخزنة» = لسه ماتودعش. المحصل من ملف «الشيكات المحصلة».</div>';
@@ -9491,7 +9634,8 @@
     return { rep: r[0], mgr: r[1], mgrName: r[1] ? mgr : '' };
   }
   // الاسم: سطر واحد لو قصير، ولو طويل ينزل سطرين بخط أصغر بدل ما يتقص (القص بيبوّظ الحروف في الطباعة)
-  function walletNm_(html, len){ return '<div class="nmx' + (len <= 30 ? ' one' : '') + '">' + html + '</div>'; }
+  // ولو طويل أوي (أكتر من سطرين) بيبقى 3 سطور بخط أصغر — عشان ملاحظات المصروف (زي قيمة الفاتورة) ماتتقصش
+  function walletNm_(html, len){ return '<div class="nmx' + (len <= 30 ? ' one' : len > 56 ? ' three' : '') + '">' + html + '</div>'; }
   function walletCopyHtml_(w, label, sigs, chunk, pg, pages){
     const t = w.totals;
     // التحويلات (إنستاباي / بنك / محفظة) بتتكتب في خانة النقدي — الشيكات بس في خانة الشيكات
@@ -9511,8 +9655,9 @@
       }
       let eout = '<td></td><td class="sep"></td>';
       if(e){
-        eout = '<td class="n">' + fmt(e.amount) + '</td><td class="nm sep">' + walletNm_(escapeHtml(e.kind + (e.customerName ? ' ' + e.customerName : '')) +
-          (e.notes ? ' <small>(' + escapeHtml(e.notes) + ')</small>' : ''), String(e.kind || '').length + String(e.customerName || '').length + String(e.notes || '').length + 4) + '</td>';
+        eout = '<td class="n">' + fmt(e.amount) + '</td><td class="nm sep">' + walletNm_(escapeHtml(e.kind || '') +
+          (e.notes ? ' <b>(' + escapeHtml(e.notes) + ')</b>' : '') + (e.customerName ? ' <small>' + escapeHtml(e.customerName) + '</small>' : ''),
+          String(e.kind || '').length + String(e.customerName || '').length + String(e.notes || '').length + 4) + '</td>';
       }
       rows += '<tr>' + pin + eout + '<td></td></tr>';
     }
