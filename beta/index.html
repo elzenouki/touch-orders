@@ -1658,6 +1658,7 @@
         <button type="button" onclick="openScreen('myorders')">🕘 سجل زياراتي</button>
         <button type="button" onclick="openScreen('report')">📊 أرقامي</button>
         <button type="button" data-chq onclick="openCheques_()">🏦 شيكاتي</button>
+        <button type="button" onclick="openStock_()" style="grid-column:1 / -1;">📦 المخزون — متاح ولا لأ</button>
       </div>
       <div class="routeHead" id="routeAnchor">
         <div class="sectionLabel" id="routeTitle">خط سير النهارده</div>
@@ -1680,6 +1681,7 @@
         <button type="button" class="bt wide plain" id="toolsToggle" onclick="toggleTools_()"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="btTx"><b>كل الأدوات</b><small>الفواتير، الحوافظ، الإدارة، التصدير…</small></span><span class="btArr" id="toolsArr">⌄</span></button>
       </div>
       <div class="toolGrid" id="toolGrid" hidden>
+        <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
         <button type="button" class="toolBtn" onclick="openMyWallet_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2M3 10h18"/></svg></span>حافظتي</button>
@@ -9008,6 +9010,52 @@
   document.addEventListener('DOMContentLoaded', function(){ try{ if(localStorage.getItem('tf_tools_open')) toggleTools_(true); }catch(e){} });
   function admCustInv_(i){ const r = adm_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
 
+  // ================== 📦 المخزون (بيتا) ==================
+  // من جدول المخزون على جهاز الشركة. المدير بيشوف العدد — المندوب بيشوف متاح/غير متاح بس (200 قطعة فما تحت = غير متاح)،
+  // والجهاز هو اللي بيشيل الأرقام قبل ما تتبعت للمندوب.
+  var stk_ = { rows: null, at: null, limit: 200, f: '', q: '' };
+  function stkKey_(){ return 'tf_stock_' + ((state.auth && state.auth.email) || ''); }
+  function openStock_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📦 المخزون', 'من سيستم الشركة');
+    if(!stk_.rows){ try{ const c = JSON.parse(localStorage.getItem(stkKey_()) || 'null'); if(c){ stk_.rows = c.rows; stk_.at = c.at; } }catch(e){} }
+    if(stk_.rows) stkRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    localReport_('stock').then(function(r){
+      stk_.rows = r.rows || []; stk_.at = r.synced_at; stk_.limit = r.limit || 200;
+      try{ localStorage.setItem(stkKey_(), JSON.stringify({ rows: stk_.rows, at: stk_.at })); }catch(e){}
+      if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) stkRender_();
+    }).catch(function(e){ if(!stk_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  function stkSet_(k, v){ stk_[k] = v; stkRender_(); }
+  function stkRender_(){
+    const all = stk_.rows || [];
+    const old = stk_.at ? Math.floor((Date.now() - new Date(stk_.at)) / 864e5) : null;
+    document.getElementById('dlSub').textContent = 'من سيستم الشركة' + (stk_.at ? ' • آخر تحديث ' + ymdToDmy_(String(stk_.at).slice(0, 10)) : '');
+    const nOk = all.filter(function(r){ return r.ok; }).length;
+    const F = { '': 'الكل (' + all.length + ')', ok: '✅ متاح (' + nOk + ')', no: '❌ غير متاح (' + (all.length - nOk) + ')' };
+    let h = '';
+    if(old != null && old >= 3) h += '<div class="note" style="margin-bottom:8px; color:#a8432f; font-weight:800;">⚠️ المخزون ده من ' + old + ' يوم — ممكن يكون اتغير</div>';
+    h += '<div class="pfMonths csaChips">' + Object.keys(F).map(function(k){ return '<button type="button" class="' + (stk_.f === k ? 'on' : '') + '" onclick="stkSet_(\'f\', \'' + k + '\')">' + F[k] + '</button>'; }).join('') + '</div>';
+    h += '<input type="search" placeholder="🔎 اسم الصنف أو الكود..." value="' + escapeHtml(stk_.q) + '" oninput="this.setAttribute(\'value\', this.value); stk_.q=this.value; stkList_()" style="margin:4px 0 10px;">';
+    h += '<div id="stkList"></div>';
+    h += '<div class="note" style="margin-top:10px;">' + (state.isAdmin ? 'المندوب بيشوف «متاح» أو «غير متاح» بس من غير الأرقام. ' : '') + 'الصنف اللي فاضل منه ' + stk_.limit + ' قطعة أو أقل بيظهر «غير متاح».</div>';
+    ldBody_().innerHTML = h;
+    stkList_();
+  }
+  function stkList_(){
+    const box = document.getElementById('stkList'); if(!box) return;
+    const q = normAr_(normalizeDigits(stk_.q || '')).trim();
+    const list = (stk_.rows || []).filter(function(r){
+      if(stk_.f === 'ok' && !r.ok) return false;
+      if(stk_.f === 'no' && r.ok) return false;
+      return !q || normAr_(r.name || '').indexOf(q) !== -1 || String(r.code).indexOf(q) !== -1;
+    }).sort(function(a, b){ return (b.ok - a.ok) || (state.isAdmin ? (b.qty || 0) - (a.qty || 0) : String(a.name).localeCompare(String(b.name), 'ar')); });
+    box.innerHTML = list.length ? list.map(function(r){
+      return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b>' +
+        (state.isAdmin && r.qty != null ? '<span class="amt" style="color:' + (r.ok ? 'var(--o3)' : '#a8432f') + '">' + fmt(r.qty) + '</span>' : '') + '</div>' +
+        '<small>كود ' + escapeHtml(r.code) + ' • ' + (r.ok ? '<span class="chqSt done" style="margin:0;">✅ متاح</span>' : '<span class="chqSt bounced" style="margin:0;">❌ غير متاح</span>') + '</small></div>';
+    }).join('') : '<div class="empty">مفيش أصناف هنا</div>';
+  }
   // ================== 🏦 الشيكات (بيتا) ==================
   // من جهاز الشركة (field-reports, kind=cheques): كل شيك وحالته من ملف «تحليلي شيكات العملاء»، والمندوب من يومية المبيعات.
   // المندوب بيشوف شيكات عملاءه بس — المدير الكل.
