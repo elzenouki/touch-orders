@@ -1658,6 +1658,8 @@
         <button type="button" onclick="openScreen('myorders')">🕘 سجل زياراتي</button>
         <button type="button" onclick="openScreen('report')">📊 أرقامي</button>
         <button type="button" data-chq onclick="openCheques_()">🏦 شيكاتي</button>
+        <button type="button" onclick="openCustSalesAll_()">🏆 مبيعات عملائي</button>
+        <button type="button" onclick="openStock_()">📦 المخزون</button>
       </div>
       <div class="routeHead" id="routeAnchor">
         <div class="sectionLabel" id="routeTitle">خط سير النهارده</div>
@@ -1680,6 +1682,7 @@
         <button type="button" class="bt wide plain" id="toolsToggle" onclick="toggleTools_()"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="btTx"><b>كل الأدوات</b><small>الفواتير، الحوافظ، الإدارة، التصدير…</small></span><span class="btArr" id="toolsArr">⌄</span></button>
       </div>
       <div class="toolGrid" id="toolGrid" hidden>
+        <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
         <button type="button" class="toolBtn" onclick="openMyWallet_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2M3 10h18"/></svg></span>حافظتي</button>
@@ -2854,7 +2857,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.29.0';
+  const APP_VERSION_ = 'v1.30.0';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -8963,7 +8966,7 @@
     if(state.isAdmin){
       const lb = document.getElementById('ldBadge'), waiting = lb && !lb.hidden ? Number(lb.textContent) || 0 : 0;
       if(waiting) cards.push(tkCard_('', '🚚 ' + waiting + ' تحميلات مستنية موافقتك', 'راجع العربيات والترتيب وابعت للمخزن', ['محتاج قرار', 'y'], [['راجع ووافق', 'openLoadsAdmin_()', 'p']]));
-      const csa = tkCache_('tf_csa');
+      const csa = tkCache_('tf_csa_' + ((state.auth && state.auth.email) || ''));
       if(csa && csa.rows){
         const drops = csa.rows.filter(function(r){ return (r.lytd || 0) > 0 && (r.ytd || 0) < r.lytd * 0.7; })
           .sort(function(a, b){ return (b.lytd - b.ytd) - (a.lytd - a.ytd); }).slice(0, 3);
@@ -9008,6 +9011,52 @@
   document.addEventListener('DOMContentLoaded', function(){ try{ if(localStorage.getItem('tf_tools_open')) toggleTools_(true); }catch(e){} });
   function admCustInv_(i){ const r = adm_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
 
+  // ================== 📦 المخزون (بيتا) ==================
+  // من جدول المخزون على جهاز الشركة. المدير بيشوف العدد — المندوب بيشوف متاح/غير متاح بس (200 قطعة فما تحت = غير متاح)،
+  // والجهاز هو اللي بيشيل الأرقام قبل ما تتبعت للمندوب.
+  var stk_ = { rows: null, at: null, limit: 200, f: '', q: '' };
+  function stkKey_(){ return 'tf_stock_' + ((state.auth && state.auth.email) || ''); }
+  function openStock_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📦 المخزون', 'من سيستم الشركة');
+    if(!stk_.rows){ try{ const c = JSON.parse(localStorage.getItem(stkKey_()) || 'null'); if(c){ stk_.rows = c.rows; stk_.at = c.at; } }catch(e){} }
+    if(stk_.rows) stkRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    localReport_('stock').then(function(r){
+      stk_.rows = r.rows || []; stk_.at = r.synced_at; stk_.limit = r.limit || 200;
+      try{ localStorage.setItem(stkKey_(), JSON.stringify({ rows: stk_.rows, at: stk_.at })); }catch(e){}
+      if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) stkRender_();
+    }).catch(function(e){ if(!stk_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  function stkSet_(k, v){ stk_[k] = v; stkRender_(); }
+  function stkRender_(){
+    const all = stk_.rows || [];
+    const old = stk_.at ? Math.floor((Date.now() - new Date(stk_.at)) / 864e5) : null;
+    document.getElementById('dlSub').textContent = 'من سيستم الشركة' + (stk_.at ? ' • آخر تحديث ' + ymdToDmy_(String(stk_.at).slice(0, 10)) : '');
+    const nOk = all.filter(function(r){ return r.ok; }).length;
+    const F = { '': 'الكل (' + all.length + ')', ok: '✅ متاح (' + nOk + ')', no: '❌ غير متاح (' + (all.length - nOk) + ')' };
+    let h = '';
+    if(old != null && old >= 3) h += '<div class="note" style="margin-bottom:8px; color:#a8432f; font-weight:800;">⚠️ المخزون ده من ' + old + ' يوم — ممكن يكون اتغير</div>';
+    h += '<div class="pfMonths csaChips">' + Object.keys(F).map(function(k){ return '<button type="button" class="' + (stk_.f === k ? 'on' : '') + '" onclick="stkSet_(\'f\', \'' + k + '\')">' + F[k] + '</button>'; }).join('') + '</div>';
+    h += '<input type="search" placeholder="🔎 اسم الصنف أو الكود..." value="' + escapeHtml(stk_.q) + '" oninput="this.setAttribute(\'value\', this.value); stk_.q=this.value; stkList_()" style="margin:4px 0 10px;">';
+    h += '<div id="stkList"></div>';
+    h += '<div class="note" style="margin-top:10px;">' + (state.isAdmin ? 'المندوب بيشوف «متاح» أو «غير متاح» بس من غير الأرقام. ' : '') + 'الصنف اللي فاضل منه ' + stk_.limit + ' قطعة أو أقل بيظهر «غير متاح».</div>';
+    ldBody_().innerHTML = h;
+    stkList_();
+  }
+  function stkList_(){
+    const box = document.getElementById('stkList'); if(!box) return;
+    const q = normAr_(normalizeDigits(stk_.q || '')).trim();
+    const list = (stk_.rows || []).filter(function(r){
+      if(stk_.f === 'ok' && !r.ok) return false;
+      if(stk_.f === 'no' && r.ok) return false;
+      return !q || normAr_(r.name || '').indexOf(q) !== -1 || String(r.code).indexOf(q) !== -1;
+    }).sort(function(a, b){ return (b.ok - a.ok) || (state.isAdmin ? (b.qty || 0) - (a.qty || 0) : String(a.name).localeCompare(String(b.name), 'ar')); });
+    box.innerHTML = list.length ? list.map(function(r){
+      return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b>' +
+        (state.isAdmin && r.qty != null ? '<span class="amt" style="color:' + (r.ok ? 'var(--o3)' : '#a8432f') + '">' + fmt(r.qty) + '</span>' : '') + '</div>' +
+        '<small>كود ' + escapeHtml(r.code) + ' • ' + (r.ok ? '<span class="chqSt done" style="margin:0;">✅ متاح</span>' : '<span class="chqSt bounced" style="margin:0;">❌ غير متاح</span>') + '</small></div>';
+    }).join('') : '<div class="empty">مفيش أصناف هنا</div>';
+  }
   // ================== 🏦 الشيكات (بيتا) ==================
   // من جهاز الشركة (field-reports, kind=cheques): كل شيك وحالته من ملف «تحليلي شيكات العملاء»، والمندوب من يومية المبيعات.
   // المندوب بيشوف شيكات عملاءه بس — المدير الكل.
@@ -9094,7 +9143,8 @@
   }
 
   // ================== 🏆 مبيعات العملاء — للمدير (بيتا) ==================
-  // من جهاز الشركة (field-reports, kind=custsales): كل عميل وأرقامه في كل فترة + نفس الفترة اللي قبلها. للمدير بس.
+  // من جهاز الشركة (field-reports, kind=custsales): كل عميل وأرقامه في كل فترة + نفس الفترة اللي قبلها.
+  // المدير بياخد كل العملاء، والمندوب بياخد عملاءه بس (الجهاز هو اللي بيفلتر).
   var csa_ = { rows: null, at: null, per: 'ytd', rep: '', sort: 'top', q: '', lim: 100, view: [], sec: '' };
   const CSA_PER_ = {
     ytd: { t: 'السنة دي', cur: 'ytd', prev: 'lytd', vs: 'نفس الفترة من السنة اللي فاتت' },
@@ -9105,12 +9155,15 @@
   const CSA_SORT_ = { top: 'الأكتر شراء', down: 'الأكتر نزول 📉', stop: 'وقفوا شراء ⛔', up: 'الأكتر زيادة 📈' };
   function openCustSalesAll_(){
     dl_.stack = []; dlBackBtn_();
-    dlOpen_('🏆 مبيعات العملاء', 'من سيستم الشركة');
-    if(!csa_.rows){ try{ const c = JSON.parse(localStorage.getItem('tf_csa') || 'null'); if(c){ csa_.rows = c.rows; csa_.at = c.at; } }catch(e){} }
+    dlOpen_(state.isAdmin ? '🏆 مبيعات العملاء' : '🏆 مبيعات عملائي', 'من سيستم الشركة');
+    const key = 'tf_csa_' + ((state.auth && state.auth.email) || '');
+    if(csa_.who !== key){ csa_.rows = null; csa_.rep = ''; csa_.who = key; }
+    if(!csa_.rows){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c){ csa_.rows = c.rows; csa_.at = c.at; } }catch(e){} }
+    if(!csa_.rows) ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     if(csa_.rows) csaRender_();
     localReport_('custsales').then(function(r){
       csa_.rows = r.rows || []; csa_.at = r.at;
-      try{ localStorage.setItem('tf_csa', JSON.stringify({ rows: csa_.rows, at: csa_.at })); }catch(e){}
+      try{ localStorage.setItem(key, JSON.stringify({ rows: csa_.rows, at: csa_.at })); }catch(e){}
       if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) csaRender_();
     }).catch(function(e){ if(!csa_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
   }
@@ -9135,7 +9188,7 @@
     Object.keys(repTot).sort(function(a, b){ return repTot[b] - repTot[a]; }).forEach(function(k){ reps[k] = k; });
     if(csa_.rep && !reps[csa_.rep]) csa_.rep = '';
     const sorts = {}; Object.keys(CSA_SORT_).forEach(function(k){ if(P.prev || k === 'top') sorts[k] = CSA_SORT_[k]; });
-    let h = chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + chips(reps, 'rep') + chips(sorts, 'sort');
+    let h = chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + (state.isAdmin ? chips(reps, 'rep') : '') + chips(sorts, 'sort');
     h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
     h += '<div id="csaList"></div>';
     h += '<div class="note" style="margin-top:10px;">من يومية المبيعات على جهاز الشركة — صافي بعد خصم المرتجعات. دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
@@ -9166,7 +9219,7 @@
       const diff = cur(r) - prev(r);
       return '<button type="button" class="csaRow" onclick="csaOpen_(' + i + ')"><span class="rk">' + (i + 1) + '</span><b>' + escapeHtml(r.n || r.c) + '</b>' +
         '<span class="amt">' + (csa_.sort === 'stop' ? fmt(prev(r)) : fmt(cur(r))) + '</span>' +
-        '<small>' + escapeHtml(r.c) + (r.r && !csa_.rep ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
+        '<small>' + escapeHtml(r.c) + (r.r && !csa_.rep && state.isAdmin ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
         (csa_.sort === 'down' || csa_.sort === 'up' ? ' • <span dir="ltr">' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff)) + '</span>' : '') + (csa_.sort === 'stop' ? ' • كان بيشتري' : '') + '</small>' +
         (P.prev && csa_.sort !== 'stop' ? csaDelta_(cur(r), prev(r)) : '<span></span>') + '</button>';
     }).join('') : '<div class="empty">مفيش عملاء هنا</div>';
