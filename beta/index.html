@@ -1658,7 +1658,8 @@
         <button type="button" onclick="openScreen('myorders')">🕘 سجل زياراتي</button>
         <button type="button" onclick="openScreen('report')">📊 أرقامي</button>
         <button type="button" data-chq onclick="openCheques_()">🏦 شيكاتي</button>
-        <button type="button" onclick="openStock_()" style="grid-column:1 / -1;">📦 المخزون — متاح ولا لأ</button>
+        <button type="button" onclick="openCustSalesAll_()">🏆 مبيعات عملائي</button>
+        <button type="button" onclick="openStock_()">📦 المخزون</button>
       </div>
       <div class="routeHead" id="routeAnchor">
         <div class="sectionLabel" id="routeTitle">خط سير النهارده</div>
@@ -8965,7 +8966,7 @@
     if(state.isAdmin){
       const lb = document.getElementById('ldBadge'), waiting = lb && !lb.hidden ? Number(lb.textContent) || 0 : 0;
       if(waiting) cards.push(tkCard_('', '🚚 ' + waiting + ' تحميلات مستنية موافقتك', 'راجع العربيات والترتيب وابعت للمخزن', ['محتاج قرار', 'y'], [['راجع ووافق', 'openLoadsAdmin_()', 'p']]));
-      const csa = tkCache_('tf_csa');
+      const csa = tkCache_('tf_csa_' + ((state.auth && state.auth.email) || ''));
       if(csa && csa.rows){
         const drops = csa.rows.filter(function(r){ return (r.lytd || 0) > 0 && (r.ytd || 0) < r.lytd * 0.7; })
           .sort(function(a, b){ return (b.lytd - b.ytd) - (a.lytd - a.ytd); }).slice(0, 3);
@@ -9142,7 +9143,8 @@
   }
 
   // ================== 🏆 مبيعات العملاء — للمدير (بيتا) ==================
-  // من جهاز الشركة (field-reports, kind=custsales): كل عميل وأرقامه في كل فترة + نفس الفترة اللي قبلها. للمدير بس.
+  // من جهاز الشركة (field-reports, kind=custsales): كل عميل وأرقامه في كل فترة + نفس الفترة اللي قبلها.
+  // المدير بياخد كل العملاء، والمندوب بياخد عملاءه بس (الجهاز هو اللي بيفلتر).
   var csa_ = { rows: null, at: null, per: 'ytd', rep: '', sort: 'top', q: '', lim: 100, view: [], sec: '' };
   const CSA_PER_ = {
     ytd: { t: 'السنة دي', cur: 'ytd', prev: 'lytd', vs: 'نفس الفترة من السنة اللي فاتت' },
@@ -9153,12 +9155,15 @@
   const CSA_SORT_ = { top: 'الأكتر شراء', down: 'الأكتر نزول 📉', stop: 'وقفوا شراء ⛔', up: 'الأكتر زيادة 📈' };
   function openCustSalesAll_(){
     dl_.stack = []; dlBackBtn_();
-    dlOpen_('🏆 مبيعات العملاء', 'من سيستم الشركة');
-    if(!csa_.rows){ try{ const c = JSON.parse(localStorage.getItem('tf_csa') || 'null'); if(c){ csa_.rows = c.rows; csa_.at = c.at; } }catch(e){} }
+    dlOpen_(state.isAdmin ? '🏆 مبيعات العملاء' : '🏆 مبيعات عملائي', 'من سيستم الشركة');
+    const key = 'tf_csa_' + ((state.auth && state.auth.email) || '');
+    if(csa_.who !== key){ csa_.rows = null; csa_.rep = ''; csa_.who = key; }
+    if(!csa_.rows){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c){ csa_.rows = c.rows; csa_.at = c.at; } }catch(e){} }
+    if(!csa_.rows) ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     if(csa_.rows) csaRender_();
     localReport_('custsales').then(function(r){
       csa_.rows = r.rows || []; csa_.at = r.at;
-      try{ localStorage.setItem('tf_csa', JSON.stringify({ rows: csa_.rows, at: csa_.at })); }catch(e){}
+      try{ localStorage.setItem(key, JSON.stringify({ rows: csa_.rows, at: csa_.at })); }catch(e){}
       if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) csaRender_();
     }).catch(function(e){ if(!csa_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
   }
@@ -9183,7 +9188,7 @@
     Object.keys(repTot).sort(function(a, b){ return repTot[b] - repTot[a]; }).forEach(function(k){ reps[k] = k; });
     if(csa_.rep && !reps[csa_.rep]) csa_.rep = '';
     const sorts = {}; Object.keys(CSA_SORT_).forEach(function(k){ if(P.prev || k === 'top') sorts[k] = CSA_SORT_[k]; });
-    let h = chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + chips(reps, 'rep') + chips(sorts, 'sort');
+    let h = chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + (state.isAdmin ? chips(reps, 'rep') : '') + chips(sorts, 'sort');
     h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
     h += '<div id="csaList"></div>';
     h += '<div class="note" style="margin-top:10px;">من يومية المبيعات على جهاز الشركة — صافي بعد خصم المرتجعات. دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
@@ -9214,7 +9219,7 @@
       const diff = cur(r) - prev(r);
       return '<button type="button" class="csaRow" onclick="csaOpen_(' + i + ')"><span class="rk">' + (i + 1) + '</span><b>' + escapeHtml(r.n || r.c) + '</b>' +
         '<span class="amt">' + (csa_.sort === 'stop' ? fmt(prev(r)) : fmt(cur(r))) + '</span>' +
-        '<small>' + escapeHtml(r.c) + (r.r && !csa_.rep ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
+        '<small>' + escapeHtml(r.c) + (r.r && !csa_.rep && state.isAdmin ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
         (csa_.sort === 'down' || csa_.sort === 'up' ? ' • <span dir="ltr">' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff)) + '</span>' : '') + (csa_.sort === 'stop' ? ' • كان بيشتري' : '') + '</small>' +
         (P.prev && csa_.sort !== 'stop' ? csaDelta_(cur(r), prev(r)) : '<span></span>') + '</button>';
     }).join('') : '<div class="empty">مفيش عملاء هنا</div>';
