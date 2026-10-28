@@ -1525,6 +1525,30 @@
   .vChqPh button.done{border-style:solid; border-color:#2b7a4f; background:#e8f5ec; color:#2b7a4f;}
   .vChqPh img{width:64px; height:42px; object-fit:cover; border-radius:8px; border:1px solid var(--oline);}
   .fcImg{max-width:100%; border-radius:10px; border:1px solid var(--oline); margin-top:8px;}
+  /* بيتا: فتح حساب عميل — مستندات + استمارة */
+  .ncDoc{display:flex; align-items:center; gap:8px; margin:6px 0;}
+  .ncDoc button{flex:1; height:42px; border-radius:10px; border:1.5px dashed #c9a24a; background:#fff8e6; font-family:inherit; font-weight:800; color:#8a6218; cursor:pointer;}
+  .ncDoc button.done{border-style:solid; border-color:#2b7a4f; background:#e8f5ec; color:#2b7a4f;}
+  .ncDoc img{width:56px; height:42px; object-fit:cover; border-radius:8px; border:1px solid var(--oline);}
+  .ncDoc .x{flex:0 0 auto; width:38px; border:0; background:none; color:#a8432f; font-size:18px;}
+  .caForm label{display:block; margin-top:8px;}
+  .caSheet{background:#fff; width:210mm; height:296mm; overflow:hidden; page-break-after:always; break-after:page; position:relative; font-family:'Cairo', Tahoma, Arial, sans-serif; color:#111; direction:rtl; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .caIn{position:absolute; inset:12mm 14mm 10mm; display:flex; flex-direction:column;}
+  .caHead{display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #9a9a9a; padding-bottom:6px;}
+  .caHead .co{text-align:right;} .caHead .co b{display:block; font-size:22px; color:#8f8f8f; font-weight:900;} .caHead .co span{font-size:11px; color:#8f8f8f; font-weight:800;} .caHead .co i{display:block; font-style:normal; font-size:12px; color:#8f8f8f; font-weight:900; letter-spacing:.5px; direction:ltr; text-align:right;}
+  .caHead img{height:15mm; width:auto; filter:grayscale(1) brightness(.75);}
+  .caDate{margin-top:8px; font-weight:900; font-size:15px; text-align:left;}
+  .caTitle{text-align:center; font-weight:900; font-size:20px; text-decoration:underline; margin:6px 0 10px;}
+  .caRow{display:flex; align-items:baseline; gap:8px; margin:0 0 10px; font-size:15.5px;}
+  .caRow b{font-weight:900; white-space:nowrap; text-decoration:underline;}
+  .caRow span{flex:1; border-bottom:1px dotted #555; min-height:22px; font-weight:700; padding:0 6px;}
+  .caSign{display:flex; justify-content:space-between; margin-top:22mm; font-weight:900; font-size:15px;}
+  .caSign div{width:31%; text-align:center;} .caSign div i{display:block; height:16mm; border-bottom:1px dotted #555; margin-top:4px;}
+  .caFoot{display:flex; justify-content:space-between; border-top:3px solid #9a9a9a; margin-top:auto; padding-top:5px; font-size:10px; color:#555;}
+  .caFoot div:last-child{direction:ltr; text-align:left;}
+  .caMark{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:75%; opacity:.07; pointer-events:none;}
+  .caT{width:100%; border-collapse:collapse; margin-top:6px; font-size:13px;} .caT th, .caT td{border:1px solid #333; padding:4px 6px; text-align:center;} .caT th{background:#eee;} .caT td.nm{text-align:right;}
+  .caImg{flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-top:6px;} .caImg img{max-width:100%; max-height:100%; object-fit:contain;}
   /* بيتا: تقرير الشيكات */
   .chqRow{background:#fff; border:1px solid var(--oline); border-radius:12px; padding:10px 12px; margin-bottom:6px;}
   .chqRow.late{border-color:#e7b6aa; background:#fff8f6;}
@@ -1693,6 +1717,7 @@
         <button type="button" class="bt wide plain" id="toolsToggle" onclick="toggleTools_()"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="btTx"><b>كل الأدوات</b><small>الفواتير، الحوافظ، الإدارة، التصدير…</small></span><span class="btArr" id="toolsArr">⌄</span></button>
       </div>
       <div class="toolGrid" id="toolGrid" hidden>
+        <button type="button" class="toolBtn" onclick="openCustAccList_()"><span class="tIc t5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span>فتح حساب عميل</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
@@ -1749,6 +1774,9 @@
       <label>المنطقة</label><input type="text" id="ncArea" maxlength="80">
       <label>التاجر بيقفل الساعة كام؟</label><input type="time" id="ncClose" dir="ltr">
       <label>ملاحظات</label><textarea id="ncNotes" placeholder="مثلاً: اسم صاحب المحل، مواعيد الفتح..."></textarea>
+      <div class="cardTitle" style="margin-top:14px;">📎 مستندات فتح الحساب <small style="font-weight:700; color:var(--omut);">(صوّرهم من عند العميل)</small></div>
+      <div id="ncDocs"></div>
+      <button type="button" class="ghost wide" onclick="ncDocAdd_()">＋ مستند تاني (سجل تجاري / بطاقة ضريبية...)</button>
       <div class="locBox" id="ncLocBox">📍 جاري تحديد موقعك...</div>
       <button class="finalize" id="ncSaveBtn" onclick="saveNewCustomer_()">✔ حفظ وابدأ الزيارة</button>
       <div class="note" style="margin-top:10px;">العميل هيتضاف على اسمك ويتعلّم "جديد" في الشيت، والمكتب يكمّل بياناته.</div>
@@ -3547,6 +3575,7 @@
     state.screen = 'newcust';
     setTitle_('عميل جديد');
     ['ncName', 'ncPhone', 'ncAddress', 'ncArea', 'ncNotes', 'ncClose'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ncDocs_ = [{ label: 'البطاقة — وش', img: '' }, { label: 'البطاقة — ضهر', img: '' }]; ncDocsRender_();
     const q = (document.getElementById('custSearch').value || '').trim();
     if(q && state.backTo === 'customers') document.getElementById(/^[\d٠-٩+ ]+$/.test(q) ? 'ncPhone' : 'ncName').value = q;
     setView('viewNewCust');
@@ -3564,6 +3593,27 @@
     const b = document.getElementById('ncLocBox');
     b.className = 'locBox' + (cls ? ' ' + cls : '');
     b.textContent = text;
+  }
+  // ---------- مستندات فتح الحساب (بيتا): صور البطاقة وغيرها — بتتبعت لجهاز الشركة بعد ما العميل يتسجل ----------
+  let ncDocs_ = [];
+  function ncDocsRender_(){
+    const box = document.getElementById('ncDocs'); if(!box) return;
+    box.innerHTML = ncDocs_.map(function(d, i){
+      return '<div class="ncDoc"><button type="button" class="' + (d.img ? 'done' : '') + '" onclick="this.parentNode.querySelector(\'input\').click()">' + (d.img ? '✔ ' : '📷 ') + escapeHtml(d.label) + '</button>' +
+        '<input type="file" accept="image/*" capture="environment" hidden onchange="ncDocPhoto_(' + i + ', this)">' + (d.img ? '<img src="' + d.img + '" alt="">' : '') +
+        (i > 1 ? '<button type="button" class="x" onclick="ncDocs_.splice(' + i + ', 1); ncDocsRender_()">✖</button>' : '') + '</div>';
+    }).join('');
+  }
+  function ncDocAdd_(){
+    const l = prompt('المستند ده إيه؟ (مثلاً: سجل تجاري / بطاقة ضريبية)', 'سجل تجاري');
+    if(!l || !l.trim()) return;
+    ncDocs_.push({ label: l.trim().slice(0, 60), img: '' }); ncDocsRender_();
+  }
+  function ncDocPhoto_(i, inp){ imgShrink_(inp, function(u){ ncDocs_[i].img = u; ncDocsRender_(); }); }
+  function docsEnqueue_(code, name, docs){
+    const q = fchqQ_();
+    (docs || []).forEach(function(d, i){ if(d.img) q.push({ k: 'cacc', act: 'doc_add', uid: 'D' + Date.now().toString(36) + i + Math.random().toString(36).slice(2, 6), code: code, name: name, label: d.label, img: d.img }); });
+    fchqSave_(); fchqFlush_();
   }
   let ncSaving_ = false;
   function saveNewCustomer_(){
@@ -3591,6 +3641,7 @@
         localCacheSet_('rep', state.rep);
         const ncClose = document.getElementById('ncClose').value;
         if(ncClose) ctSave_(r.customer.code, { t: ncClose }, true);
+        docsEnqueue_(r.customer.code, r.customer.name || d.name, ncDocs_);
         showMsg(r.existed ? 'العميل ده متسجل بالفعل — كمّل الزيارة' : 'اتضاف العميل ✔', 'success');
         openVisit_(r.customer.code, 'home', !!state.isAdmin);
       })
@@ -3792,7 +3843,8 @@
     vChqSum_();
   }
   // الصورة بتتصغّر (أطول ضلع 1400 بكسل، JPEG) قبل ما تتحفظ — حوالي 150 كيلو
-  function vChqPhoto_(i, inp){
+  function vChqPhoto_(i, inp){ imgShrink_(inp, function(u){ state.visit.cheques[i].img = u; vChqRender_(); }); }
+  function imgShrink_(inp, done){
     const f = inp.files && inp.files[0]; inp.value = ''; if(!f) return;
     const url = URL.createObjectURL(f), im = new Image();
     im.onload = function(){
@@ -3800,8 +3852,7 @@
       cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k);
       cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
       URL.revokeObjectURL(url);
-      state.visit.cheques[i].img = cv.toDataURL('image/jpeg', 0.6);
-      vChqRender_();
+      done(cv.toDataURL('image/jpeg', 0.6));
     };
     im.onerror = function(){ URL.revokeObjectURL(url); showMsg('ماقدرتش أقرا الصورة — صوّر تاني', 'error'); };
     im.src = url;
@@ -3828,8 +3879,8 @@
     try{
       while(q.length){
         const x = q[0], b = new URLSearchParams();
-        b.set('e', state.auth.email || ''); b.set('p', state.auth.pin || ''); b.set('kind', 'fchq'); b.set('act', 'add');
-        Object.keys(x).forEach(function(k){ b.set(k, x[k] == null ? '' : String(x[k])); });
+        b.set('e', state.auth.email || ''); b.set('p', state.auth.pin || ''); b.set('kind', x.k || 'fchq'); b.set('act', x.act || 'add');
+        Object.keys(x).forEach(function(k){ if(k !== 'k' && k !== 'act') b.set(k, x[k] == null ? '' : String(x[k])); });
         const r = await fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' }).then(function(r){ return r.json(); });
         if(!r || r.ok !== true) break;
         q.shift(); fchqSave_();
@@ -8891,7 +8942,8 @@
       '<label>المندوب<select id="admF_rep">' + state.repOptions.concat(state.repOptions.indexOf(r.rep) === -1 && r.rep ? [r.rep] : []).map(function(n){
         return '<option' + (n === r.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select></label>' +
       f('system_code', 'كود السيستم (رقم الحساب)', 'numeric') + '<label>ملاحظات<textarea id="admF_notes" rows="2">' + escapeHtml(r.notes || '') + '</textarea></label>' +
-      '<button type="button" class="aGo wide" onclick="admCustSave_(' + i + ')">حفظ</button></div>';
+      '<button type="button" class="aGo wide" onclick="admCustSave_(' + i + ')">حفظ</button>' +
+      '<button type="button" class="ghost wide" style="margin-top:8px;" onclick="caOpenRow_(adm_.rows[' + i + '])">📝 استمارة فتح الحساب والمستندات</button></div>';
   }
   function admCustSave_(i){
     const r = adm_.rows[i], a = { code: r.code };
@@ -9153,6 +9205,149 @@
   document.addEventListener('DOMContentLoaded', function(){ try{ if(localStorage.getItem('tf_tools_open')) toggleTools_(true); }catch(e){} });
   function admCustInv_(i){ const r = adm_.rows[i]; if(r) openCustInvoicesFor_(r.code, r.name, false); }
 
+  // ================== 📝 فتح حساب عميل (بيتا) ==================
+  // المندوب بيصوّر البطاقة والمستندات وهو بيسجّل العميل، والمدير بيكمّل الاستمارة (الخصم، السداد، الائتمان...) ويطبع الملف كله:
+  // الاستمارة + أول طلبية + المستندات. البيانات والصور على جهاز الشركة (field-reports, kind=cacc) — مش Supabase.
+  var ca_ = { list: null, q: '', cur: null, data: {}, docs: [] };
+  function caApi_(act, extra){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'cacc'); b.set('act', act);
+    Object.keys(extra || {}).forEach(function(k){ b.set(k, extra[k]); });
+    return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); });
+  }
+  function openCustAccList_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📝 فتح حساب عميل', 'العملاء الجداد الأول — دوس على العميل');
+    ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    admCall_('cust_list', { q: '' }).then(function(r){ ca_.list = r || []; caListRender_(); }).catch(ldErr_);
+  }
+  function caListRender_(){
+    ldBody_().innerHTML = '<input type="search" placeholder="🔎 اسم العميل أو الكود أو الموبايل..." value="' + escapeHtml(ca_.q) + '" oninput="this.setAttribute(\'value\', this.value); ca_.q=this.value; caList_()" style="margin:0 0 10px;"><div id="caList"></div>' +
+      '<div class="note" style="margin-top:10px;">«جديد» = اتسجل من التطبيق ولسه مالوش كود سيستم.</div>';
+    caList_();
+  }
+  function caList_(){
+    const box = document.getElementById('caList'); if(!box) return;
+    const q = normAr_(normalizeDigits(ca_.q || '')).trim();
+    const isNew = function(r){ return /^N/.test(String(r.code || '')) && !String(r.system_code || '').trim(); };
+    const L = (ca_.list || []).filter(function(r){ return !q || normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1; })
+      .sort(function(a, b){ return (isNew(b) - isNew(a)) || String(b.code).localeCompare(String(a.code)); }).slice(0, 150);
+    box.innerHTML = L.length ? L.map(function(r){
+      return '<button type="button" class="chqRow" style="width:100%; text-align:right; font-family:inherit; cursor:pointer;" onclick="caOpenCode_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\')"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b>' + (isNew(r) ? '<span class="chqSt safe" style="margin:0;">جديد</span>' : '') + '</div>' +
+        '<small>' + escapeHtml([r.code, r.system_code ? 'سيستم ' + r.system_code : '', r.rep, r.area, r.phone].filter(Boolean).join(' • ')) + '</small></button>';
+    }).join('') : '<div class="empty">مفيش عملاء</div>';
+  }
+  function caOpenCode_(code){ const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }); if(r) caOpenRow_(r); }
+  function caOpenRow_(r){
+    ca_.cur = r; ca_.data = {}; ca_.docs = [];
+    dlEnter_('📝 فتح حساب', r.name || r.code);
+    ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    Promise.all([caApi_('acc_get', { code: r.code }), caApi_('doc_list', { code: r.code })]).then(function(x){
+      ca_.data = (x[0] && x[0].data) || {}; ca_.at = x[0] && x[0].at; ca_.docs = (x[1] && x[1].rows) || []; caRender_();
+    }).catch(ldErr_);
+  }
+  const CA_FIELDS_ = [['customer_name', 'اسم العميل'], ['company', 'اسم الشركة'], ['company_address', 'عنوان الشركة'], ['class', 'تصنيف العميل', 'caClass'],
+    ['discount', 'نسبة الخصم للعميل'], ['pay_terms', 'طريقة السداد', 'caPay'], ['credit_limit', 'حد الائتمان'], ['other_company', 'الشركة المتعامل معها']];
+  function caVal_(k){
+    const r = ca_.cur || {}, d = ca_.data || {};
+    if(d[k]) return d[k];
+    return k === 'customer_name' ? (r.name || '') : k === 'company_address' ? [r.address, r.area].filter(Boolean).join(' — ') : '';
+  }
+  function caRender_(){
+    const r = ca_.cur;
+    let h = '<div class="note" style="margin-bottom:8px;"><b>' + escapeHtml(r.name || '') + '</b><br>' + escapeHtml([r.code, r.system_code ? 'كود السيستم ' + r.system_code : '', r.phone, r.rep].filter(Boolean).join(' • ')) + '</div>';
+    h += '<button type="button" class="aGo wide" onclick="caPrint_()">🖨 اطبع الملف كله (الاستمارة + أول طلبية + المستندات)</button>';
+    h += '<div class="caForm aForm" style="margin-top:12px;">' + CA_FIELDS_.map(function(f){
+      return '<label>' + f[1] + '<input id="caF_' + f[0] + '"' + (f[2] ? ' list="' + f[2] + '"' : '') + ' value="' + escapeHtml(caVal_(f[0])) + '"></label>';
+    }).join('') +
+      '<datalist id="caClass"><option>جملة</option><option>قطاعي</option><option>ماركت</option><option>خاص</option></datalist>' +
+      '<datalist id="caPay"><option>كاش</option><option>آجل</option><option>شيكات</option><option>كاش وشيكات</option></datalist>' +
+      '<button type="button" class="aGo wide" style="margin-top:10px;" onclick="caSave_()">💾 حفظ الاستمارة</button>' + (ca_.at ? '<div class="note">آخر حفظ ' + ymdToDmy_(String(ca_.at).slice(0, 10)) + '</div>' : '') + '</div>';
+    h += '<div class="sectionLabel" style="margin:16px 0 8px;">📎 المستندات (' + ca_.docs.length + ')</div>';
+    h += ca_.docs.length ? ca_.docs.map(function(d, i){
+      return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(d.label || 'مستند') + '</b><span><button type="button" class="ghost" style="height:32px; padding:0 10px;" onclick="caDocShow_(' + i + ')">👁 عرض</button> <button type="button" class="ghost" style="height:32px; padding:0 10px; color:#a8432f;" onclick="caDocDel_(' + i + ')">🗑</button></span></div>' +
+        '<small>' + escapeHtml([d.rep, ymdToDmy_(String(d.at || '').slice(0, 10))].filter(Boolean).join(' • ')) + '</small></div>';
+    }).join('') : '<div class="empty">لسه مفيش مستندات — المندوب بيصوّرها وهو بيسجّل العميل، أو ضيفها من هنا</div>';
+    const pend = fchqQ_().filter(function(x){ return x.k === 'cacc' && x.code === r.code; }).length;
+    if(pend) h += '<div class="queueBar" style="margin-top:8px;"><span>⏳ ' + pend + ' مستند على الموبايل ده لسه بيترفع</span></div>';
+    h += '<button type="button" class="ghost wide" style="margin-top:8px;" onclick="this.nextElementSibling.click()">＋ 📷 ضيف مستند</button><input type="file" accept="image/*" hidden onchange="caDocAdd_(this)">';
+    ldBody_().innerHTML = h;
+  }
+  function caForm_(){ const d = {}; CA_FIELDS_.forEach(function(f){ const e = document.getElementById('caF_' + f[0]); d[f[0]] = e ? e.value.trim() : caVal_(f[0]); }); return d; }
+  function caSave_(){
+    const d = caForm_();
+    showLoading(true);
+    return caApi_('acc_save', { code: ca_.cur.code, data: JSON.stringify(d) }).then(function(){ showLoading(false); ca_.data = d; ca_.at = new Date().toISOString(); toast_('✔ اتحفظت الاستمارة'); })
+      .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); throw e; });
+  }
+  function caDocAdd_(inp){
+    const l = prompt('المستند ده إيه؟', 'البطاقة — وش'); if(!l || !l.trim()){ inp.value = ''; return; }
+    imgShrink_(inp, function(u){
+      showLoading(true);
+      caApi_('doc_add', { uid: 'D' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), code: ca_.cur.code, name: ca_.cur.name || '', label: l.trim().slice(0, 60), img: u })
+        .then(function(){ return caApi_('doc_list', { code: ca_.cur.code }); }).then(function(x){ showLoading(false); ca_.docs = x.rows || []; caRender_(); toast_('✔ اتضاف'); })
+        .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
+  }
+  function caDocShow_(i){
+    const d = ca_.docs[i];
+    dlEnter_('📎 ' + (d.label || 'مستند'), ca_.cur.name || '');
+    ldBody_().innerHTML = '<div class="aiStatus">جاري تحميل الصورة...</div>';
+    caApi_('doc_photo', { id: d.id }).then(function(x){ ldBody_().innerHTML = x.img && x.img.indexOf('data:image/') === 0 ? '<img class="fcImg" src="' + x.img + '" alt="">' : '<div class="empty">مفيش صورة</div>'; }).catch(ldErr_);
+  }
+  function caDocDel_(i){
+    const d = ca_.docs[i];
+    confirmModal_('تمسح «' + escapeHtml(d.label || 'مستند') + '»؟', 'مسح', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      caApi_('doc_del', { id: d.id }).then(function(){ showLoading(false); ca_.docs.splice(i, 1); caRender_(); }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
+  }
+  // أول طلبية للعميل من Supabase (إدارة البيانات): أقدم طلبية مش مرتجع، وأصنافها
+  async function caFirstOrder_(code){
+    const rows = await admCall_('doc_list', { from: '2024-01-01', to: ymd_(bizToday_()), rep: '', q: code }).catch(function(){ return []; });
+    const L = (rows || []).filter(function(r){ return String(r.customer_code) === String(code) && !(+r.qty < 0 || /return|مرتجع/i.test(r.type || '')); })
+      .sort(function(a, b){ return String(a.day || '').localeCompare(String(b.day || '')); });
+    if(!L.length) return null;
+    const lines = await admCall_('doc_lines', { doc_id: L[0].doc_id }).catch(function(){ return []; });
+    return { doc: L[0], lines: (lines || []).filter(function(l){ return +l.qty > 0; }) };
+  }
+  function caPage_(inner, mark){
+    return '<div class="caSheet">' + (mark ? '<img class="caMark" src="' + LOGO_D_ + '" alt="">' : '') + '<div class="caIn">' +
+      '<div class="caHead"><div class="co"><b>الزنوكى <span>لصناعة الأجهزة الكهربائية</span></b><i>ELZENOUKI ELECTRICAL APPLIANCES CO.</i></div><img src="' + LOGO_D_ + '" alt="TOUCH"></div>' +
+      inner +
+      '<div class="caFoot"><div>مدينة العبور — المنطقة الصناعية 1 — قطعة 8 — بلوك 13001<br>تليفون: 20244812411+ — فاكس: 20244812412+</div><div>Obour City Industrial Zone 1 Block 13001, Piece 8<br>Tel: +2 0244812411 Fax: +2 0244812412</div></div></div></div>';
+  }
+  async function caPrint_(){
+    const r = ca_.cur, d = caForm_();
+    showLoading(true);
+    try{
+      const first = await caFirstOrder_(r.code);
+      const imgs = [];
+      for(let i = 0; i < ca_.docs.length; i++){ const x = await caApi_('doc_photo', { id: ca_.docs[i].id }).catch(function(){ return null; }); if(x && x.img) imgs.push({ label: ca_.docs[i].label, img: x.img }); }
+      const now = bizToday_(), dt = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+      const row = function(lbl, v){ return '<div class="caRow"><b>' + lbl + ' :</b><span>' + escapeHtml(v || '') + '</span></div>'; };
+      let html = caPage_('<div class="caDate">تاريخ : ' + dt + '</div><div class="caTitle">فتح حساب عميل</div>' +
+        row('اسم العميل', d.customer_name) + row('اسم الشركة', d.company) + row('عنوان الشركة', d.company_address) + row('رقم التليفون', r.phone) +
+        row('تصنيف العميل', d['class']) + row('رجل البيع', r.rep) + row('نسبة الخصم للعميل', d.discount) + row('طريقة السداد', d.pay_terms) +
+        row('حد الائتمان', d.credit_limit) + row('الشركة المتعامل معها', d.other_company) +
+        '<div class="caSign"><div>توقيع رجل البيع<i></i></div><div>توقيع المدير المباشر<i></i></div><div>توقيع مدير المبيعات<i></i></div></div>', true);
+      if(first && first.lines.length){
+        const tq = first.lines.reduce(function(t, l){ return t + (+l.qty || 0); }, 0);
+        html += caPage_('<div class="caTitle">طلبية — ' + escapeHtml(r.name || '') + '</div>' +
+          '<div class="caRow"><b>التاريخ :</b><span>' + escapeHtml(ymdToDmy_(String(first.doc.day || '').slice(0, 10))) + '</span><b>المندوب :</b><span>' + escapeHtml(first.doc.rep || r.rep || '') + '</span></div>' +
+          '<table class="caT"><thead><tr><th style="width:8%">#</th><th style="width:18%">كود الصنف</th><th>الصنف</th><th style="width:14%">الكمية</th></tr></thead><tbody>' +
+          first.lines.map(function(l, i){ return '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(l.item_code || '') + '</td><td class="nm">' + escapeHtml(l.item_name || '') + '</td><td>' + fmt(+l.qty || 0) + '</td></tr>'; }).join('') +
+          '<tr><th colspan="3">الإجمالي</th><th>' + fmt(tq) + '</th></tr></tbody></table>', false);
+      }
+      imgs.forEach(function(x){ html += caPage_('<div class="caTitle">' + escapeHtml(x.label || 'مستند') + ' — ' + escapeHtml(r.name || '') + '</div><div class="caImg"><img src="' + x.img + '" alt=""></div>', false); });
+      showLoading(false);
+      if(!first) toast_('⚠️ مالقيتش طلبية للعميل ده — هتتطبع الاستمارة والمستندات بس');
+      await printWalletDoc_({ html: html, title: 'فتح حساب ' + (r.name || r.code) });
+    }catch(e){ showLoading(false); showMsg((e && e.message) || String(e), 'error'); }
+  }
   // ================== 📦 المخزون (بيتا) ==================
   // من جدول المخزون على جهاز الشركة. المدير بيشوف العدد — المندوب بيشوف متاح/غير متاح بس (200 قطعة فما تحت = غير متاح)،
   // والجهاز هو اللي بيشيل الأرقام قبل ما تتبعت للمندوب.
