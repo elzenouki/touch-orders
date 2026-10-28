@@ -1711,9 +1711,11 @@
 
     <!-- المشرف وصاحب الحساب -->
     <div id="adminHome" hidden>
+      <button type="button" id="ncAlert" class="queueBar" hidden style="width:100%; margin:0 0 10px; border:0; font-family:inherit; text-align:right; cursor:pointer; background:#e8f5ec; color:#2b7a4f;" onclick="openCustAccList_()"></button>
       <!-- بيتا: شكل أ — كروت كبيرة ملونة، والأدوات الباقية في «كل الأدوات» -->
       <div class="bigGrid">
         <button type="button" class="bt g1" onclick="openLoadsAdmin_()"><span class="ldBadge btCnt" id="ldBadge" hidden></span><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h11v10H2z"/><path d="M13 9h4.5L21 12.5V16h-8z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span><span class="btTx"><b>التحميلات</b><small id="ldHeroSub">موافقة العربيات والتسليم</small></span></button>
+        <button type="button" class="bt g2" onclick="openCustAccList_()"><span class="ldBadge btCnt" id="ncBadge" hidden></span><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M3 21v-1a7 7 0 0 1 11-5.7M19 14v6M16 17h6"/></svg></span><span class="btTx"><b>عميل جديد</b><small id="ncHeroSub">فتح الحساب والمستندات</small></span></button>
         <button type="button" class="bt g2" onclick="openScreen('report')"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/></svg></span><span class="btTx"><b>الزيارات</b><small>زيارات وطلبيات كل مندوب</small></span></button>
         <button type="button" class="bt g3" onclick="openScreen('live')"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span class="btTx"><b>المناديب دلوقتي</b><small>آخر مكان لكل مندوب</small></span></button>
         <button type="button" class="bt g4" onclick="openOverdues_()"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg></span><span class="btTx"><b>المتأخرات</b><small>كل مندوب وكل العملاء</small></span></button>
@@ -1722,7 +1724,6 @@
         <button type="button" class="bt wide plain" id="toolsToggle" onclick="toggleTools_()"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="btTx"><b>كل الأدوات</b><small>الفواتير، الحوافظ، الإدارة، التصدير…</small></span><span class="btArr" id="toolsArr">⌄</span></button>
       </div>
       <div class="toolGrid" id="toolGrid" hidden>
-        <button type="button" class="toolBtn" onclick="openCustAccList_()"><span class="tIc t5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></span>فتح حساب عميل</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
@@ -3097,6 +3098,7 @@
     (function(){ const d = new Date(), w = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()];
       document.getElementById('homeDate').textContent = w + ' ' + d.getDate() + '/' + (d.getMonth() + 1); })();
     ldWhoami_();
+    ncCheck_();
     loadWhNames_();
     const cachedRole = ld_.role || ((localCacheGet_('role') || {}).v);
     if(!state.isAdmin && cachedRole === 'warehouse'){
@@ -9231,20 +9233,23 @@
   }
   function openCustAccList_(){
     dl_.stack = []; dlBackBtn_();
-    dlOpen_('📝 فتح حساب عميل', 'سجّل عميل جديد، أو كمّل حساب عميل اتسجل');
+    dlOpen_('🆕 عميل جديد', 'سجّل عميل جديد، أو كمّل حساب عميل اتسجل');
+    ncMarkSeen_();
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
-    admCall_('cust_list', { q: '' }).then(function(r){ ca_.list = r || []; caListRender_(); }).catch(ldErr_);
+    Promise.all([admCall_('cust_list', { q: '' }), caApi_('acc_codes').catch(function(){ return null; })]).then(function(x){
+      ca_.list = x[0] || []; if(x[1]) ca_.done = x[1].codes || []; caListRender_();
+    }).catch(ldErr_);
   }
   function caListRender_(){
     ldBody_().innerHTML = '<button type="button" class="aGo wide" onclick="caNewCust_()">＋ عميل جديد — سجّله وافتح حسابه</button>' +
-      '<div class="sectionLabel" style="margin:16px 0 6px;">أو كمّل حساب عميل اتسجل قبل كده (مثلاً المندوب سجّله)</div>' +
+      '<div class="sectionLabel" style="margin:16px 0 6px;">عملاء جداد مستنيين تكمّل حسابهم</div>' +
       '<input type="search" placeholder="🔎 دوّر على أي عميل بالاسم أو الكود أو الموبايل..." value="' + escapeHtml(ca_.q) + '" oninput="this.setAttribute(\'value\', this.value); ca_.q=this.value; caList_()" style="margin:0 0 10px;"><div id="caList"></div>';
     caList_();
   }
   function caList_(){
     const box = document.getElementById('caList'); if(!box) return;
     const q = normAr_(normalizeDigits(ca_.q || '')).trim();
-    const isNew = function(r){ return /^N/.test(String(r.code || '')) && !String(r.system_code || '').trim(); };
+    const isNew = ncPending_;
     // من غير بحث: العملاء الجداد بس (اتسجلوا من التطبيق ولسه مالهمش كود سيستم) — والبحث بيدوّر في الكل
     const L = (ca_.list || []).filter(function(r){ return q ? (normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1) : isNew(r); })
       .sort(function(a, b){ return (isNew(b) - isNew(a)) || String(b.code).localeCompare(String(a.code)); }).slice(0, 150);
@@ -9262,6 +9267,35 @@
       state.rep.customers.push({ code: r.code, name: r.name || '', phone: r.phone || '', address: r.address || '', area: r.area || '', rep: r.rep || '', lat: r.lat == null ? null : r.lat, lng: r.lng == null ? null : r.lng });
     dlClose_();
     openVisit_(r.code, 'home', true);
+  }
+  // عميل «جديد» = اتسجل من التطبيق (كوده بيبدأ بـ N) ولسه مالوش كود سيستم ولا استمارة محفوظة
+  function ncPending_(r){ return /^N/.test(String(r.code || '')) && !String(r.system_code || '').trim() && (ca_.done || []).indexOf(String(r.code)) === -1; }
+  // إشعار المدير: عدّاد على كارت «عميل جديد» + شريط فوق لما يتفتح عميل جديد ماشافوش قبل كده (بيتشيّك كل 5 دقايق مع الرئيسية)
+  let ncLastCheck_ = 0;
+  function ncCheck_(force){
+    if(!state.isAdmin || !state.auth || (!force && Date.now() - ncLastCheck_ < 300000)) return;
+    ncLastCheck_ = Date.now();
+    Promise.all([admCall_('cust_list', { q: '' }), caApi_('acc_codes').catch(function(){ return null; })]).then(function(x){
+      ca_.list = x[0] || []; if(x[1]) ca_.done = x[1].codes || [];
+      ncBadgeRender_();
+    }).catch(function(){});
+  }
+  function ncSeen_(){ try{ return JSON.parse(localStorage.getItem('tf_nc_seen') || '[]'); }catch(e){ return []; } }
+  function ncBadgeRender_(){
+    const P = (ca_.list || []).filter(ncPending_), seen = ncSeen_();
+    const b = document.getElementById('ncBadge'); if(b){ b.textContent = P.length || ''; b.hidden = !P.length; }
+    const sub = document.getElementById('ncHeroSub'); if(sub) sub.textContent = P.length ? P.length + ' مستنيين تكمّل حسابهم' : 'فتح الحساب والمستندات';
+    const fresh = P.filter(function(r){ return seen.indexOf(String(r.code)) === -1; });
+    const al = document.getElementById('ncAlert');
+    if(al){
+      al.hidden = !fresh.length;
+      if(fresh.length) al.innerHTML = '<span>🆕 ' + (fresh.length === 1 ? 'اتفتح عميل جديد: <b>' + escapeHtml(fresh[0].name || fresh[0].code) + '</b>' + (fresh[0].rep ? ' — ' + escapeHtml(fresh[0].rep) : '') : 'اتفتح ' + fresh.length + ' عملاء جداد') + ' • دوس تكمّل حسابه</span>';
+    }
+  }
+  function ncMarkSeen_(){
+    const seen = ncSeen_(); (ca_.list || []).filter(ncPending_).forEach(function(r){ if(seen.indexOf(String(r.code)) === -1) seen.push(String(r.code)); });
+    try{ localStorage.setItem('tf_nc_seen', JSON.stringify(seen.slice(-500))); }catch(e){}
+    const al = document.getElementById('ncAlert'); if(al) al.hidden = true;
   }
   function caNewCust_(){ dlClose_(); openNewCust_(true); }
   function caOpenCode_(code){ const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }); if(r) caOpenRow_(r); }
@@ -9305,7 +9339,8 @@
   function caSave_(){
     const d = caForm_();
     showLoading(true);
-    return caApi_('acc_save', { code: ca_.cur.code, data: JSON.stringify(d) }).then(function(){ showLoading(false); ca_.data = d; ca_.at = new Date().toISOString(); toast_('✔ اتحفظت الاستمارة'); })
+    return caApi_('acc_save', { code: ca_.cur.code, data: JSON.stringify(d) }).then(function(){ showLoading(false); ca_.data = d; ca_.at = new Date().toISOString(); toast_('✔ اتحفظت الاستمارة');
+      ca_.done = (ca_.done || []).concat([String(ca_.cur.code)]); ncBadgeRender_(); })
       .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); throw e; });
   }
   function caDocAdd_(inp){
