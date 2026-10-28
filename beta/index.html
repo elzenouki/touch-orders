@@ -3807,7 +3807,8 @@
     im.src = url;
   }
   // طابور رفع الشيكات: بيتحفظ على الموبايل لحد ما يوصل لجهاز الشركة (حتى لو مفيش نت أو الجهاز مقفول)
-  const FCHQ_URL_ = function(){ return INVOICES_URL.replace(/\/webhook\/[^\/]+$/, '/webhook/field-cheques'); };
+  // بيروح لنفس فلو «تقارير التطبيق» (kind=fchq) — ده المسار المتاح على النت من جهاز الشركة
+  const FCHQ_URL_ = function(){ return INVOICES_URL.replace(/\/webhook\/[^\/]+$/, '/webhook/field-reports'); };
   let fchqMem_ = null, fchqBusy_ = false;
   function fchqQ_(){ if(fchqMem_) return fchqMem_; try{ fchqMem_ = JSON.parse(localStorage.getItem('tf_chq_up') || '[]'); }catch(e){ fchqMem_ = []; } return fchqMem_; }
   function fchqSave_(){ try{ localStorage.setItem('tf_chq_up', JSON.stringify(fchqQ_())); }catch(e){} }
@@ -3827,7 +3828,7 @@
     try{
       while(q.length){
         const x = q[0], b = new URLSearchParams();
-        b.set('e', state.auth.email || ''); b.set('p', state.auth.pin || ''); b.set('act', 'add');
+        b.set('e', state.auth.email || ''); b.set('p', state.auth.pin || ''); b.set('kind', 'fchq'); b.set('act', 'add');
         Object.keys(x).forEach(function(k){ b.set(k, x[k] == null ? '' : String(x[k])); });
         const r = await fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' }).then(function(r){ return r.json(); });
         if(!r || r.ok !== true) break;
@@ -3842,7 +3843,7 @@
   var fc_ = { rows: null, q: '' };
   function fchqApi_(act, extra){
     const b = new URLSearchParams();
-    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('act', act);
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'fchq'); b.set('act', act);
     Object.keys(extra || {}).forEach(function(k){ b.set(k, extra[k]); });
     return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
       .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
