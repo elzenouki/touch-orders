@@ -3635,6 +3635,10 @@
     showLoading(true);
     callApi('addCustomer', [state.auth, d])
       .then(function(r){
+        // المدير ساعات بيبقى لسه ماحمّلش التجار والأصناف — نحمّلهم الأول عشان يقدر يكتب الطلبية على طول
+        return (state.rep && (state.rep.asnaf || []).length ? Promise.resolve() : loadRepData_()).then(function(){ return r; }, function(){ return r; });
+      })
+      .then(function(r){
         showLoading(false);
         ncSaving_ = false;
         if(!state.rep) state.rep = { customers: [], asnaf: [], reasons: [], returnReasons: [], paymentMethods: [], todayVisits: [] };
@@ -9244,6 +9248,16 @@
         '<small>' + escapeHtml([r.code, r.system_code ? 'سيستم ' + r.system_code : '', r.rep, r.area, r.phone].filter(Boolean).join(' • ')) + '</small></button>';
     }).join('') : '<div class="empty">' + (q ? 'مفيش عميل بالاسم ده' : 'مفيش عملاء جداد مستنيين فتح حساب') + '</div>';
   }
+  // طلبية للعميل من شاشة فتح الحساب: لو العميل مش في قايمة تجار المدير على الموبايل (مثلاً مندوب سجّله) بنضيفه ليها الأول
+  async function caOrder_(){
+    const r = ca_.cur; if(!r) return;
+    if(!state.rep || !(state.rep.asnaf || []).length){ showLoading(true); await loadRepData_(); showLoading(false); }
+    if(!state.rep) state.rep = { customers: [], asnaf: [], reasons: [], returnReasons: [], paymentMethods: [], todayVisits: [] };
+    if(!state.rep.customers.some(function(c){ return c.code === r.code; }))
+      state.rep.customers.push({ code: r.code, name: r.name || '', phone: r.phone || '', address: r.address || '', area: r.area || '', rep: r.rep || '', lat: r.lat == null ? null : r.lat, lng: r.lng == null ? null : r.lng });
+    dlClose_();
+    openVisit_(r.code, 'home', true);
+  }
   function caNewCust_(){ dlClose_(); openNewCust_(true); }
   function caOpenCode_(code){ const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }); if(r) caOpenRow_(r); }
   function caOpenRow_(r){
@@ -9265,7 +9279,7 @@
     const r = ca_.cur;
     let h = '<div class="note" style="margin-bottom:8px;"><b>' + escapeHtml(r.name || '') + '</b><br>' + escapeHtml([r.code, r.system_code ? 'كود السيستم ' + r.system_code : '', r.phone, r.rep].filter(Boolean).join(' • ')) + '</div>';
     h += '<button type="button" class="aGo wide" onclick="caPrint_()">🖨 اطبع الملف كله (الاستمارة + أول طلبية + المستندات)</button>' +
-      '<button type="button" class="ghost wide" style="margin-top:8px;" onclick="dlClose_(); openVisit_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\', \'home\', true)">🧾 سجّل طلبية للعميل ده</button>';
+      '<button type="button" class="ghost wide" style="margin-top:8px;" onclick="caOrder_()">🧾 سجّل طلبية للعميل ده</button>';
     h += '<div class="caForm aForm" style="margin-top:12px;">' + CA_FIELDS_.map(function(f){
       return '<label>' + f[1] + '<input id="caF_' + f[0] + '"' + (f[2] ? ' list="' + f[2] + '"' : '') + ' value="' + escapeHtml(caVal_(f[0])) + '"></label>';
     }).join('') +
