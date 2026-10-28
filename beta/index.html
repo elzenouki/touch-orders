@@ -3570,7 +3570,8 @@
 
   // ================== عميل جديد ==================
   let ncPos_ = null;
-  function openNewCust_(){
+  function openNewCust_(fromAcc){
+    state.ncThenAcc = fromAcc === true; // من «فتح حساب عميل»: بعد الحفظ يروح على الاستمارة
     state.backTo = state.prevScreen === 'customers' ? 'customers' : null;
     state.screen = 'newcust';
     setTitle_('عميل جديد');
@@ -3643,6 +3644,8 @@
         if(ncClose) ctSave_(r.customer.code, { t: ncClose }, true);
         docsEnqueue_(r.customer.code, r.customer.name || d.name, ncDocs_);
         showMsg(r.existed ? 'العميل ده متسجل بالفعل — كمّل الزيارة' : 'اتضاف العميل ✔', 'success');
+        // جاي من «فتح حساب عميل»: بعد الحفظ نروح على استمارته على طول
+        if(state.ncThenAcc){ state.ncThenAcc = false; setView('viewHome'); openCustAccList_(); caOpenRow_(Object.assign({ phone: d.phone, address: d.address, area: d.area, rep: state.user ? state.user.name : '' }, r.customer)); return; }
         openVisit_(r.customer.code, 'home', !!state.isAdmin);
       })
       .catch(function(err){
@@ -9219,26 +9222,29 @@
   }
   function openCustAccList_(){
     dl_.stack = []; dlBackBtn_();
-    dlOpen_('📝 فتح حساب عميل', 'العملاء الجداد الأول — دوس على العميل');
+    dlOpen_('📝 فتح حساب عميل', 'سجّل عميل جديد، أو كمّل حساب عميل اتسجل');
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     admCall_('cust_list', { q: '' }).then(function(r){ ca_.list = r || []; caListRender_(); }).catch(ldErr_);
   }
   function caListRender_(){
-    ldBody_().innerHTML = '<input type="search" placeholder="🔎 اسم العميل أو الكود أو الموبايل..." value="' + escapeHtml(ca_.q) + '" oninput="this.setAttribute(\'value\', this.value); ca_.q=this.value; caList_()" style="margin:0 0 10px;"><div id="caList"></div>' +
-      '<div class="note" style="margin-top:10px;">«جديد» = اتسجل من التطبيق ولسه مالوش كود سيستم.</div>';
+    ldBody_().innerHTML = '<button type="button" class="aGo wide" onclick="caNewCust_()">＋ عميل جديد — سجّله وافتح حسابه</button>' +
+      '<div class="sectionLabel" style="margin:16px 0 6px;">أو كمّل حساب عميل اتسجل قبل كده (مثلاً المندوب سجّله)</div>' +
+      '<input type="search" placeholder="🔎 دوّر على أي عميل بالاسم أو الكود أو الموبايل..." value="' + escapeHtml(ca_.q) + '" oninput="this.setAttribute(\'value\', this.value); ca_.q=this.value; caList_()" style="margin:0 0 10px;"><div id="caList"></div>';
     caList_();
   }
   function caList_(){
     const box = document.getElementById('caList'); if(!box) return;
     const q = normAr_(normalizeDigits(ca_.q || '')).trim();
     const isNew = function(r){ return /^N/.test(String(r.code || '')) && !String(r.system_code || '').trim(); };
-    const L = (ca_.list || []).filter(function(r){ return !q || normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1; })
+    // من غير بحث: العملاء الجداد بس (اتسجلوا من التطبيق ولسه مالهمش كود سيستم) — والبحث بيدوّر في الكل
+    const L = (ca_.list || []).filter(function(r){ return q ? (normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1) : isNew(r); })
       .sort(function(a, b){ return (isNew(b) - isNew(a)) || String(b.code).localeCompare(String(a.code)); }).slice(0, 150);
     box.innerHTML = L.length ? L.map(function(r){
       return '<button type="button" class="chqRow" style="width:100%; text-align:right; font-family:inherit; cursor:pointer;" onclick="caOpenCode_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\')"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b>' + (isNew(r) ? '<span class="chqSt safe" style="margin:0;">جديد</span>' : '') + '</div>' +
         '<small>' + escapeHtml([r.code, r.system_code ? 'سيستم ' + r.system_code : '', r.rep, r.area, r.phone].filter(Boolean).join(' • ')) + '</small></button>';
-    }).join('') : '<div class="empty">مفيش عملاء</div>';
+    }).join('') : '<div class="empty">' + (q ? 'مفيش عميل بالاسم ده' : 'مفيش عملاء جداد مستنيين فتح حساب') + '</div>';
   }
+  function caNewCust_(){ dlClose_(); openNewCust_(true); }
   function caOpenCode_(code){ const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }); if(r) caOpenRow_(r); }
   function caOpenRow_(r){
     ca_.cur = r; ca_.data = {}; ca_.docs = [];
@@ -9258,7 +9264,8 @@
   function caRender_(){
     const r = ca_.cur;
     let h = '<div class="note" style="margin-bottom:8px;"><b>' + escapeHtml(r.name || '') + '</b><br>' + escapeHtml([r.code, r.system_code ? 'كود السيستم ' + r.system_code : '', r.phone, r.rep].filter(Boolean).join(' • ')) + '</div>';
-    h += '<button type="button" class="aGo wide" onclick="caPrint_()">🖨 اطبع الملف كله (الاستمارة + أول طلبية + المستندات)</button>';
+    h += '<button type="button" class="aGo wide" onclick="caPrint_()">🖨 اطبع الملف كله (الاستمارة + أول طلبية + المستندات)</button>' +
+      '<button type="button" class="ghost wide" style="margin-top:8px;" onclick="dlClose_(); openVisit_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\', \'home\', true)">🧾 سجّل طلبية للعميل ده</button>';
     h += '<div class="caForm aForm" style="margin-top:12px;">' + CA_FIELDS_.map(function(f){
       return '<label>' + f[1] + '<input id="caF_' + f[0] + '"' + (f[2] ? ' list="' + f[2] + '"' : '') + ' value="' + escapeHtml(caVal_(f[0])) + '"></label>';
     }).join('') +
