@@ -1542,6 +1542,11 @@
   .caRow{display:flex; align-items:baseline; gap:8px; margin:0 0 10px; font-size:15.5px;}
   .caRow b{font-weight:900; white-space:nowrap; text-decoration:underline;}
   .caRow span{flex:1; border-bottom:1px dotted #555; min-height:22px; font-weight:700; padding:0 6px;}
+  /* صفحة الاستمارة: الخانات بتتوزع على طول الصفحة بخط أكبر */
+  .caRows{flex:1; display:flex; flex-direction:column; justify-content:space-evenly; padding:4mm 4px 4mm 0;} .caRows .caRow b{padding-right:3px; text-underline-offset:7px; text-decoration-thickness:1.5px;}
+  .caRows .caRow{font-size:21px; margin:0;} .caRows .caRow span{min-height:30px; padding:0 10px;}
+  .caBig .caTitle{font-size:28px; margin:10px 0 4px;} .caBig .caDate{font-size:18px;}
+  .caBig .caSign{font-size:18px; margin-top:6mm; margin-bottom:8mm;} .caBig .caSign div i{height:18mm;}
   .caSign{display:flex; justify-content:space-between; margin-top:22mm; font-weight:900; font-size:15px;}
   .caSign div{width:31%; text-align:center;} .caSign div i{display:block; height:16mm; border-bottom:1px dotted #555; margin-top:4px;}
   .caFoot{display:flex; justify-content:space-between; border-top:3px solid #9a9a9a; margin-top:auto; padding-top:5px; font-size:10px; color:#555;}
@@ -9336,7 +9341,7 @@
     return { doc: L[0], lines: (lines || []).filter(function(l){ return +l.qty > 0; }) };
   }
   function caPage_(inner, mark){
-    return '<div class="caSheet">' + (mark ? '<img class="caMark" src="' + LOGO_D_ + '" alt="">' : '') + '<div class="caIn">' +
+    return '<div class="caSheet' + (mark ? ' caBig' : '') + '">' + (mark ? '<img class="caMark" src="' + LOGO_D_ + '" alt="">' : '') + '<div class="caIn">' +
       '<div class="caHead"><div class="co"><b>الزنوكى <span>لصناعة الأجهزة الكهربائية</span></b><i>ELZENOUKI ELECTRICAL APPLIANCES CO.</i></div><img src="' + LOGO_D_ + '" alt="TOUCH"></div>' +
       inner +
       '<div class="caFoot"><div>مدينة العبور — المنطقة الصناعية 1 — قطعة 8 — بلوك 13001<br>تليفون: 20244812411+ — فاكس: 20244812412+</div><div>Obour City Industrial Zone 1 Block 13001, Piece 8<br>Tel: +2 0244812411 Fax: +2 0244812412</div></div></div></div>';
@@ -9350,10 +9355,10 @@
       for(let i = 0; i < ca_.docs.length; i++){ const x = await caApi_('doc_photo', { id: ca_.docs[i].id }).catch(function(){ return null; }); if(x && x.img) imgs.push({ label: ca_.docs[i].label, img: x.img }); }
       const now = bizToday_(), dt = String(now.getDate()).padStart(2, '0') + '/' + String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
       const row = function(lbl, v){ return '<div class="caRow"><b>' + lbl + ' :</b><span>' + escapeHtml(v || '') + '</span></div>'; };
-      let html = caPage_('<div class="caDate">تاريخ : ' + dt + '</div><div class="caTitle">فتح حساب عميل</div>' +
+      let html = caPage_('<div class="caDate">تاريخ : ' + dt + '</div><div class="caTitle">فتح حساب عميل</div><div class="caRows">' +
         row('اسم العميل', d.customer_name) + row('اسم الشركة', d.company) + row('عنوان الشركة', d.company_address) + row('رقم التليفون', r.phone) +
         row('تصنيف العميل', d['class']) + row('رجل البيع', r.rep) + row('نسبة الخصم للعميل', d.discount) + row('طريقة السداد', d.pay_terms) +
-        row('حد الائتمان', d.credit_limit) + row('الشركة المتعامل معها', d.other_company) +
+        row('حد الائتمان', d.credit_limit) + row('الشركة المتعامل معها', d.other_company) + '</div>' +
         '<div class="caSign"><div>توقيع رجل البيع<i></i></div><div>توقيع المدير المباشر<i></i></div><div>توقيع مدير المبيعات<i></i></div></div>', true);
       if(first && first.lines.length){
         const tq = first.lines.reduce(function(t, l){ return t + (+l.qty || 0); }, 0);
