@@ -1306,6 +1306,7 @@
   .pwT td.nm{white-space:normal; padding:0 3px;}
   .pwT td.nm .nmx{max-height:21px; overflow:hidden; line-height:10.5px; font-size:8.5px; unicode-bidi:plaintext; word-break:break-word;}
   .pwT td.nm .nmx.one{line-height:18px; font-size:10px;}
+  .pwT td.nm .nmx.three{line-height:7px; font-size:6.8px;} .pwT td.nm .nmx b{font-weight:900;}
   .pwT td.cd{direction:ltr; white-space:nowrap; overflow:hidden; font-weight:800; color:#3f4c22; font-size:9.5px;}
   .pwT tr.tot td.cont{text-align:center; font-weight:900; color:#8a640a;}
   .pwFoot .pg{font-size:8.5px; font-weight:900; color:#2f3519;}
@@ -9632,7 +9633,8 @@
     return { rep: r[0], mgr: r[1], mgrName: r[1] ? mgr : '' };
   }
   // الاسم: سطر واحد لو قصير، ولو طويل ينزل سطرين بخط أصغر بدل ما يتقص (القص بيبوّظ الحروف في الطباعة)
-  function walletNm_(html, len){ return '<div class="nmx' + (len <= 30 ? ' one' : '') + '">' + html + '</div>'; }
+  // ولو طويل أوي (أكتر من سطرين) بيبقى 3 سطور بخط أصغر — عشان ملاحظات المصروف (زي قيمة الفاتورة) ماتتقصش
+  function walletNm_(html, len){ return '<div class="nmx' + (len <= 30 ? ' one' : len > 56 ? ' three' : '') + '">' + html + '</div>'; }
   function walletCopyHtml_(w, label, sigs, chunk, pg, pages){
     const t = w.totals;
     // التحويلات (إنستاباي / بنك / محفظة) بتتكتب في خانة النقدي — الشيكات بس في خانة الشيكات
@@ -9652,8 +9654,9 @@
       }
       let eout = '<td></td><td class="sep"></td>';
       if(e){
-        eout = '<td class="n">' + fmt(e.amount) + '</td><td class="nm sep">' + walletNm_(escapeHtml(e.kind + (e.customerName ? ' ' + e.customerName : '')) +
-          (e.notes ? ' <small>(' + escapeHtml(e.notes) + ')</small>' : ''), String(e.kind || '').length + String(e.customerName || '').length + String(e.notes || '').length + 4) + '</td>';
+        eout = '<td class="n">' + fmt(e.amount) + '</td><td class="nm sep">' + walletNm_(escapeHtml(e.kind || '') +
+          (e.notes ? ' <b>(' + escapeHtml(e.notes) + ')</b>' : '') + (e.customerName ? ' <small>' + escapeHtml(e.customerName) + '</small>' : ''),
+          String(e.kind || '').length + String(e.customerName || '').length + String(e.notes || '').length + 4) + '</td>';
       }
       rows += '<tr>' + pin + eout + '<td></td></tr>';
     }
