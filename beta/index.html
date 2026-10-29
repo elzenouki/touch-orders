@@ -9252,8 +9252,8 @@
     dlOpen_('🆕 عميل جديد', 'العملاء اللي اتفتح حسابهم من التطبيق');
     ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     const seen0 = ncSeen_();
-    Promise.all([admCall_('cust_list', { q: '' }).catch(function(){ return []; }), caApi_('opened')]).then(function(x){
-      ca_.list = x[0] || []; ca_.opened = (x[1] && x[1].rows) || []; ca_.seen0 = seen0; caListRender_(); ncMarkSeen_();
+    Promise.all([admCall_('cust_list', { q: '' }).catch(function(){ return []; }), caApi_('opened'), sysCodes_()]).then(function(x){
+      ca_.list = x[0] || []; ca_.sys = x[2] || {}; ca_.openedAll = (x[1] && x[1].rows) || []; ca_.opened = ca_.openedAll.filter(caNotCoded_); ca_.seen0 = seen0; caListRender_(); ncMarkSeen_();
     }).catch(ldErr_);
   }
   function caListRender_(){
@@ -9275,7 +9275,13 @@
         return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(nm) + '</b>' + (fresh ? '<span class="chqSt safe" style="margin:0;">🆕 جديد</span>' : '') + '</div>' +
           '<small>' + escapeHtml([o.code, r.rep || o.rep, r.area, r.phone].filter(Boolean).join(' • ')) + '<br>📎 ' + o.docs + ' مستند • ' + (o.form ? '✅ الاستمارة متملية' : '⚠️ الاستمارة لسه') + ' • ' + ymdToDmy_(String(o.at || '').slice(0, 10)) + '</small>' +
           '<div class="aBtns" style="margin-top:6px;"><button type="button" class="ok" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\', true)">🖨 تحميل الملف</button><button type="button" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\')">✏️ افتح وكمّل</button></div></div>';
-      }).join('') : '<div class="empty">لسه مفيش عملاء اتفتحلهم حساب من التطبيق</div>';
+      }).join('') : '<div class="empty">مفيش عملاء جداد مستنيين — كلهم اتكودوا ✔</div>';
+      const done = (ca_.openedAll || []).filter(function(o){ return !caNotCoded_(o); });
+      if(done.length) box.innerHTML += '<details style="margin-top:12px;"><summary class="note" style="cursor:pointer;">📁 اللي اتكودوا (' + done.length + ') — لو محتاج تحمّل ملف واحد منهم</summary>' + done.map(function(o){
+        const r = byCode[o.code] || {};
+        return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(r.name || o.name || o.code) + '</b><span class="chqSt done" style="margin:0;">✔ كود ' + escapeHtml((ca_.sys || {})[o.code] || r.system_code || '') + '</span></div>' +
+          '<div class="aBtns" style="margin-top:6px;"><button type="button" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\', true)">🖨 تحميل الملف</button></div></div>';
+      }).join('') + '</details>';
       return;
     }
     const L = (ca_.list || []).filter(function(r){ return normAr_(r.name || '').indexOf(q) !== -1 || String(r.code || '').toLowerCase().indexOf(q) !== -1 || String(r.phone || '').indexOf(q) !== -1; })
@@ -9302,7 +9308,13 @@
   function ncCheck_(force){
     if(!state.isAdmin || !state.auth || (!force && Date.now() - ncLastCheck_ < 300000)) return;
     ncLastCheck_ = Date.now();
-    caApi_('opened').then(function(x){ ca_.opened = (x && x.rows) || []; ncBadgeRender_(); }).catch(function(){});
+    Promise.all([caApi_('opened'), sysCodes_()]).then(function(x){ ca_.sys = x[1] || {}; ca_.openedAll = (x[0] && x[0].rows) || []; ca_.opened = ca_.openedAll.filter(caNotCoded_); ncBadgeRender_(); }).catch(function(){});
+  }
+  // العميل «اتكود» لما يتحطله كود سيستم (من إدارة البيانات) — ساعتها بيخرج من قايمة العملاء الجداد
+  function caNotCoded_(o){
+    if((ca_.sys || {})[o.code]) return false;
+    const r = (ca_.list || []).find(function(x){ return String(x.code) === o.code; });
+    return !(r && String(r.system_code || '').trim());
   }
   function ncSeen_(){ try{ return JSON.parse(localStorage.getItem('tf_nc_seen') || '[]'); }catch(e){ return []; } }
   function ncBadgeRender_(){
@@ -9322,7 +9334,7 @@
   }
   function caNewCust_(){ dlClose_(); openNewCust_(true); }
   function caOpenCode_(code, print){
-    const o = (ca_.opened || []).find(function(x){ return x.code === code; }) || {};
+    const o = (ca_.openedAll || ca_.opened || []).find(function(x){ return x.code === code; }) || {};
     const r = (ca_.list || []).find(function(x){ return String(x.code) === code; }) || { code: code, name: o.name || code, rep: o.rep || '' };
     caOpenRow_(r, print);
   }
