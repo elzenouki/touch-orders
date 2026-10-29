@@ -10426,6 +10426,21 @@
       if(!(state.repOptions || []).length) callApi('bootstrapHome', [state.auth]).then(function(d){ setRepOptions_(d.repOptions); fill(); }).catch(function(){});
     }
   }
+  // دوسة على عميل في التقرير: زياراته وطلبياته وتحصيله في المدة — والزيارة بتفتح تفاصيلها، والطلبية بتفتح أصنافها
+  function rvCust_(key){
+    const R = rv_.raw || { visits: [], docs: [], pays: [] };
+    const m = function(code, name){ return (code || name || '?') === key; };
+    const V = R.visits.filter(function(v){ return m(v.code, v.name); });
+    const D = R.docs.filter(function(d){ return m(d.customerCode, d.customerName); });
+    const P = R.pays.filter(function(p){ return m(p.customerCode, p.customerName); });
+    const nm = (V[0] && V[0].name) || (D[0] && D[0].customerName) || (P[0] && P[0].customerName) || key;
+    dlEnter_('👤 ' + nm, rv_.data ? rvPeriodTxt_(rv_.data.meta) : '');
+    let h = '';
+    if(D.length) h += '<div class="sectionLabel" style="margin:0 0 6px;">🧾 الطلبيات والمرتجع (' + D.length + ') — دوس على الطلبية تفتح أصنافها</div>' + D.map(function(d){ return dlDocCard_(d, false, false); }).join('');
+    if(V.length) h += '<div class="sectionLabel" style="margin:14px 0 6px;">👣 الزيارات (' + V.length + ')</div>' + V.map(function(v){ return dlVisitRow_(v, false); }).join('');
+    if(P.length) h += '<div class="sectionLabel" style="margin:14px 0 6px;">💵 التحصيل (' + P.length + ')</div>' + P.map(function(p){ return dlPayRow_(p, false); }).join('');
+    ldBody_().innerHTML = h || '<div class="empty">مفيش تفاصيل</div>';
+  }
   function rvDaysAgo_(ymd){
     const t = bizToday_(), today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
     const p = String(ymd).split('-');
@@ -10446,6 +10461,7 @@
       callApi('getUnvisited', [state.auth, D + 1, rep]).catch(function(){ return null; }),
     ]).then(function(x){
       rv_.data = rvBuild_(x[0], x[1], x[2], x[3], { from: from, to: to, rep: rep, D: D });
+      rv_.raw = { visits: (x[0] && x[0].visits) || [], docs: (x[1] && x[1].docs) || [], pays: (x[2] && x[2].payments) || [] };
       rvRender_();
     }).catch(function(e){ out.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
   }
@@ -10518,7 +10534,7 @@
     // اتزاروا
     h += '<div class="rvSec g"><b>👣 العملاء اللي اتزاروا</b><span>' + d.rows.length + '</span></div>';
     h += d.rows.length ? d.rows.map(function(r){
-      return '<div class="rvCard"><div class="rvCT"><b>' + e(r.name) + '</b><span class="oCode">' + e(r.code) + '</span></div>' +
+      return '<div class="rvCard" style="cursor:pointer;" onclick="rvCust_(\'' + e(r.code || r.name).replace(/'/g, '') + '\')"><div class="rvCT"><b>' + e(r.name) + '</b><span class="oCode">' + e(r.code) + '</span></div>' +
         '<div class="rvChips"><span class="c v">👣 ' + r.visits + ' زيارة</span>' +
         (r.orders ? '<span class="c o">🧾 ' + r.orders + ' طلبية • ' + fmt(r.qty) + ' قطعة</span>' : '<span class="c n">من غير طلبية</span>') +
         (r.paid ? '<span class="c p">💵 ' + fmt(r.paid) + ' ج</span>' : '') + '</div>' +
@@ -10529,7 +10545,7 @@
       h += '<div class="rvSec b"><b>📞 اتعاملوا من غير زيارة</b><span>' + d.remote.length + '</span></div>' +
         '<div class="note" style="margin:-2px 0 8px;">بعتوا فلوس (إنستاباي / تحويل) أو طلبوا بالتليفون — المندوب مازارهمش في المدة دي.</div>';
       h += d.remote.map(function(r){
-        return '<div class="rvCard b"><div class="rvCT"><b>' + e(r.name) + '</b><span class="oCode">' + e(r.code) + '</span></div><div class="rvChips">' +
+        return '<div class="rvCard b" style="cursor:pointer;" onclick="rvCust_(\'' + e(r.code || r.name).replace(/'/g, '') + '\')"><div class="rvCT"><b>' + e(r.name) + '</b><span class="oCode">' + e(r.code) + '</span></div><div class="rvChips">' +
           (r.paid ? '<span class="c p">💵 ' + fmt(r.paid) + ' ج' + (Object.keys(r.methods).length ? ' • ' + e(Object.keys(r.methods).join('، ')) : '') + '</span>' : '') +
           (r.orders ? '<span class="c o">🧾 ' + r.orders + ' طلبية • ' + fmt(r.qty) + ' قطعة</span>' : '') + '</div></div>';
       }).join('');
