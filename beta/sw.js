@@ -2,7 +2,7 @@
 // نفس فكرة النسخة الأساسية: الصفحة من النت الأول، ولو مفيش نت بيفتح آخر نسخة متخزنة.
 // وجوده هنا بيخلّي صفحة البيتا ماتتخزنش مكان صفحة النسخة الأساسية.
 // بيمسح الكاش القديم بتاع البيتا بس — مابيلمسش كاش النسخة الأساسية.
-const CACHE = 'touch-orders-beta-v1.30.0';
+const CACHE = 'touch-orders-beta-v1.31.0';
 const CORE = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {
