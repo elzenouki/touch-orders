@@ -1739,6 +1739,7 @@
         <button type="button" class="bt wide plain" id="toolsToggle" onclick="toggleTools_()"><span class="btIc"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></span><span class="btTx"><b>كل الأدوات</b><small>الفواتير، الحوافظ، الإدارة، التصدير…</small></span><span class="btArr" id="toolsArr">⌄</span></button>
       </div>
       <div class="toolGrid" id="toolGrid" hidden>
+        <button type="button" class="toolBtn" onclick="openSprice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>الأسعار الخاصة</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
@@ -9441,7 +9442,7 @@
   const ADM_TABS2_ = [
     ['today', '🏠', 'النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('report')"]],
     ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
-    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openInvSearch_()", "openScreen('unvisited')"]],
+    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openInvSearch_()", "openScreen('unvisited')"]],
     ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openScreen('map')", "openOrdersAccess_()"]],
     ['more', '☰', 'المزيد', ["openStock_()", "openScreen('items')", "openScreen('export')", "openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
   ];
@@ -9482,6 +9483,117 @@
     });
   }
   document.addEventListener('DOMContentLoaded', admLayout_);
+  // ================== 💲 الأسعار الخاصة — تصنيع للغير (بيتا) ==================
+  // عملاء مختارين (الكينج، روز/جملة ماركت - خاص، هلال...). لكل صنف: آخر سعر اتباع بيه من فواتير السيستم (جهاز الشركة)
+  // + سعر متفق عليه وملاحظة بتتحفظ على جهاز الشركة (field-reports, kind=sprice). للمدير بس.
+  var sp_ = { custs: null, cur: null, rows: [], q: '' };
+  function spApi_(act, extra){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'sprice'); b.set('act', act);
+    Object.keys(extra || {}).forEach(function(k){ b.set(k, extra[k] == null ? '' : extra[k]); });
+    return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); });
+  }
+  function spMoney_(v){ return v == null ? '—' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+  function openSprice_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('💲 الأسعار الخاصة', 'تصنيع للغير — آخر سعر من السيستم + السعر المتفق عليه');
+    spCustsLoad_();
+  }
+  function spCustsLoad_(){
+    ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    spApi_('custs').then(function(r){ sp_.custs = r.rows || []; spCustsRender_(); }).catch(ldErr_);
+  }
+  function spCustsRender_(){
+    let h = (sp_.custs || []).map(function(c){
+      return '<button type="button" class="chqRow" style="width:100%; text-align:right; font-family:inherit; cursor:pointer;" onclick="spOpen_(\'' + escapeHtml(c.acct).replace(/'/g, '') + '\')"><div class="chqTop"><b>' + escapeHtml(c.name || c.acct) + '</b><span class="chqSt safe" style="margin:0;">' + c.items + ' صنف</span></div>' +
+        '<small>حساب ' + escapeHtml(c.acct) + (c.last ? ' • آخر فاتورة ' + ymdToDmy_(c.last) : '') + (c.saved ? ' • ' + c.saved + ' سعر متفق عليه' : '') + '</small></button>';
+    }).join('') || '<div class="empty">مفيش عملاء — ضيف من تحت</div>';
+    h += '<div class="sectionLabel" style="margin:16px 0 6px;">＋ ضيف عميل (تصنيع للغير)</div>' +
+      '<input type="search" id="spSearch" placeholder="🔎 اسم العميل أو رقم حسابه في السيستم..." oninput="spSearch_(this.value)"><div id="spFound" style="margin-top:8px;"></div>';
+    ldBody_().innerHTML = h;
+  }
+  let spSearchT_ = null;
+  function spSearch_(v){
+    clearTimeout(spSearchT_);
+    const box = document.getElementById('spFound'); if(!box) return;
+    if(String(v || '').trim().length < 2){ box.innerHTML = ''; return; }
+    spSearchT_ = setTimeout(function(){
+      box.innerHTML = '<div class="note">بدوّر...</div>';
+      spApi_('search', { q: v.trim() }).then(function(r){
+        const have = (sp_.custs || []).map(function(c){ return c.acct; });
+        box.innerHTML = (r.rows || []).map(function(c){
+          const on = have.indexOf(c.acct) !== -1;
+          return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(c.name) + '</b>' + (on ? '<span class="chqSt done" style="margin:0;">مضاف</span>' : '<button type="button" class="ghost" style="height:32px; padding:0 12px;" onclick="spPin_(\'' + escapeHtml(c.acct).replace(/'/g, '') + '\', this)" data-n="' + escapeHtml(c.name) + '">＋ ضيف</button>') + '</div>' +
+            '<small>حساب ' + escapeHtml(c.acct) + ' • ' + c.n + ' سطر فواتير • آخر فاتورة ' + ymdToDmy_(c.last) + '</small></div>';
+        }).join('') || '<div class="empty">مالقيتش عميل بالاسم ده في فواتير السيستم</div>';
+      }).catch(function(e){ box.innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; });
+    }, 400);
+  }
+  function spPin_(acct, btn){
+    showLoading(true);
+    spApi_('pin', { acct: acct, name: btn.dataset.n || '' }).then(function(){ showLoading(false); toast_('✔ اتضاف'); spCustsLoad_(); })
+      .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+  }
+  function spOpen_(acct){
+    sp_.cur = (sp_.custs || []).find(function(c){ return c.acct === acct; }) || { acct: acct, name: acct };
+    sp_.q = '';
+    dlEnter_('💲 ' + (sp_.cur.name || acct), 'حساب ' + acct);
+    ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    spApi_('items', { acct: acct }).then(function(r){ sp_.rows = r.rows || []; spRender_(); }).catch(ldErr_);
+  }
+  function spRender_(){
+    let h = '<input type="search" placeholder="🔎 اسم الصنف أو الكود..." value="' + escapeHtml(sp_.q) + '" oninput="this.setAttribute(\'value\', this.value); sp_.q=this.value; spList_()" style="margin:0 0 8px;">' +
+      '<div class="aBtns" style="margin-bottom:8px;"><button type="button" class="ok" onclick="spCopy_()">📋 انسخ قايمة الأسعار</button><button type="button" onclick="spAddItem_()">＋ صنف مش في الفواتير</button></div>' +
+      '<div id="spList"></div>' +
+      '<div class="note" style="margin-top:10px;">«آخر سعر» = سعر الوحدة في آخر فاتورة في السيستم (آخر 13 شهر)، و«الصافي» بعد الخصم. «المتفق عليه» بتكتبه إنت ويتحفظ على جهاز الشركة — ولو آخر فاتورة طلعت بسعر مختلف هيظهر ⚠️.</div>' +
+      '<button type="button" class="ghost wide" style="margin-top:10px; color:#a8432f;" onclick="spUnpin_()">شيل العميل ده من الأسعار الخاصة</button>';
+    ldBody_().innerHTML = h; spList_();
+  }
+  function spList_(){
+    const box = document.getElementById('spList'); if(!box) return;
+    const q = normAr_(normalizeDigits(sp_.q || '')).trim();
+    const L = sp_.rows.map(function(r, i){ return [r, i]; }).filter(function(x){ return !q || normAr_(x[0].item).indexOf(q) !== -1 || String(x[0].code).toLowerCase().indexOf(q) !== -1; });
+    box.innerHTML = L.length ? L.map(function(x){
+      const r = x[0], i = x[1], diff = r.price != null && r.last_up != null && Math.abs(r.price - r.last_up) > 0.01;
+      return '<div class="chqRow' + (diff ? ' late' : '') + '"><div class="chqTop"><b>' + escapeHtml(r.item || r.code) + '</b><span class="amt">' + (r.price != null ? spMoney_(r.price) : spMoney_(r.last_up)) + '</span></div>' +
+        '<small>كود ' + escapeHtml(r.code) + (r.last ? ' • آخر سعر <b>' + spMoney_(r.last_up) + '</b>' + (r.last_net != null && Math.abs(r.last_net - r.last_up) > 0.01 ? ' (صافي ' + spMoney_(r.last_net) + ')' : '') + ' في ' + ymdToDmy_(r.last) +
+          (r.min_up != null && r.max_up != null && r.max_up - r.min_up > 0.01 ? ' • من ' + spMoney_(r.min_up) + ' لـ ' + spMoney_(r.max_up) : '') + ' • ' + fmt(r.qty || 0) + ' قطعة' : ' • لسه مااتباعش') +
+          (r.price != null ? ' • <span style="color:#2b7a4f; font-weight:800;">المتفق عليه ' + spMoney_(r.price) + '</span>' : '') + (diff ? ' • <span class="chqLate">⚠️ آخر فاتورة بسعر مختلف</span>' : '') +
+          (r.note ? '<br>📝 ' + escapeHtml(r.note) : '') + '</small>' +
+        '<div class="aBtns" style="margin-top:6px;"><button type="button" onclick="spEdit_(' + i + ')">✏️ ' + (r.price != null || r.note ? 'عدّل' : 'حدّد سعر متفق عليه') + '</button></div></div>';
+    }).join('') : '<div class="empty">مفيش أصناف</div>';
+  }
+  function spEdit_(i){
+    const r = sp_.rows[i];
+    const pv = prompt('السعر المتفق عليه لـ «' + (r.item || r.code) + '»' + (r.last_up != null ? '\n(آخر سعر في السيستم ' + spMoney_(r.last_up) + ')' : '') + '\nسيبه فاضي لو مفيش سعر متفق عليه:', r.price != null ? String(r.price) : (r.last_up != null ? String(r.last_up) : ''));
+    if(pv === null) return;
+    const nt = prompt('ملاحظة (اختياري) — مثلاً: من أول يناير / شامل الكرتونة:', r.note || '');
+    if(nt === null) return;
+    showLoading(true);
+    spApi_('save', { acct: sp_.cur.acct, code: r.code, item: r.item || '', price: normalizeDigits(pv).replace(/,/g, '').trim(), note: nt.trim() })
+      .then(function(){ return spApi_('items', { acct: sp_.cur.acct }); }).then(function(x){ showLoading(false); sp_.rows = x.rows || []; spList_(); toast_('✔ اتحفظ'); })
+      .catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+  }
+  function spAddItem_(){
+    const code = prompt('كود الصنف:'); if(!code || !code.trim()) return;
+    const item = prompt('اسم الصنف:', ''); if(item === null) return;
+    sp_.rows.unshift({ code: code.trim(), item: item.trim(), price: null, note: '' });
+    spEdit_(0);
+  }
+  function spUnpin_(){
+    confirmModal_('تشيل «' + escapeHtml(sp_.cur.name || sp_.cur.acct) + '» من الأسعار الخاصة؟<br><small>الأسعار المتفق عليه بتفضل محفوظة لو رجّعته.</small>', 'شيل', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      spApi_('unpin', { acct: sp_.cur.acct }).then(function(){ showLoading(false); dl_.stack = []; dlBackBtn_(); spCustsLoad_(); }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
+  }
+  function spCopy_(){
+    const t = '💲 أسعار ' + (sp_.cur.name || '') + ' — ' + ymdToDmy_(ymd_(bizToday_())) + '\n' + sp_.rows.filter(function(r){ return r.price != null || r.last_up != null; })
+      .map(function(r){ return '• ' + (r.item || r.code) + ' (' + r.code + '): ' + spMoney_(r.price != null ? r.price : r.last_up) + ' ج' + (r.note ? ' — ' + r.note : ''); }).join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast_('✔ اتنسخت القايمة'); }, function(){ prompt('انسخ:', t); });
+  }
   // ================== 📦 المخزون (بيتا) ==================
   // من جدول المخزون على جهاز الشركة. المدير بيشوف العدد — المندوب بيشوف متاح/غير متاح بس (200 قطعة فما تحت = غير متاح)،
   // والجهاز هو اللي بيشيل الأرقام قبل ما تتبعت للمندوب.
