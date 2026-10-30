@@ -5831,17 +5831,13 @@
   function ldCartonVol_(it){ const c = ldCarton_(it); return c ? c[0] * c[1] * c[2] / 1e6 : 0; }
   // العربية تشيل كام كرتونة من الصنف ده لوحده (بالحجم والوزن)
   function ldCartonFit_(it, v, cm){
-    const c = cm || ldCarton_(it), vol = c ? c[0] * c[1] * c[2] / 1e6 : 0; if(!vol) return 0;
-    const spec = ldVehSpec_(v), dm = ldDims_(it);
-    let n = Math.floor(spec.vol / vol);
-    if(dm && dm[1]) n = Math.min(n, Math.floor(spec.kg / dm[1]));
-    return n;
+    const c = cm || ldCarton_(it); if(!c) return 0;
+    return ldFitAlone_(c, ldVehSpec_(v));
   }
-  // صندوق كل عربية من جوه (متر) وأقصى حمولة (كجم) — 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000
-  // oven50 = العربية بتشيل كام فرن 50 لتر (كرتونة 64×58.5×41) فعليًا من المخزن — ده اللي بيحدد الحجم المفيد للعربية.
-  // L/W/H بس للرسم (3D وترتيب الصندوق).
-  const VEH_SPEC_ = [{ L: 2.2, W: 1.6, H: 1.2, kg: 1500, oven50: 35 }, { L: 3.4, W: 1.85, H: 1.8, kg: 3000, oven50: 55 }, { L: 4.3, W: 2.0, H: 2.1, kg: 3500, oven50: 115 }, { L: 5.3, W: 2.1, H: 2.25, kg: 4500, oven50: 140 }];
-  const OVEN50_VOL_ = 0.64 * 0.585 * 0.41;
+  // صندوق كل عربية من جوه (متر) — 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000
+  // المقاسات مستخرجة من عدد أفران الـ 50 لتر (كرتونة 64×58.5×41) اللي المخزن بيحمّلها فعلًا: 35 / 55 / 115 / 140
+  // (بالرص على المقاسات دي بتطلع 36 / 56 / 114 / 141). الوزن مش محسوب — كل الأصناف بتترص فوق بعض عادي.
+  const VEH_SPEC_ = [{ L: 2.31, W: 1.78, H: 1.65, oven50: 35 }, { L: 3.15, W: 1.83, H: 1.80, oven50: 55 }, { L: 4.55, W: 2.09, H: 2.05, oven50: 115 }, { L: 6.50, W: 2.04, H: 2.00, oven50: 140 }];
   const LD_USABLE_ = 0.8, LD_CARTON_ = 1.1; // 80% من الصندوق بيتملى فعلًا • الكرتونة أكبر من القطعة بحوالي 10%
   function ldNormName_(s){
     return String(s || '').replace(/4\d{4}[A-Za-z]?\s*$/, '').toLowerCase().replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
@@ -5852,7 +5848,120 @@
     return ITEM_DIMS_.code[c] || ITEM_DIMS_.name[ldNormName_(it.name)] || null;
   }
   function ldHasCap_(){ return ld_.caps.length > 0 || Object.keys(ITEM_DIMS_.code).length > 0 || Object.keys(CARTON_.code).length > 0; }
-  function ldVehSpec_(v){ const s = VEH_SPEC_[ldVehKind_(v.id, v.name)] || VEH_SPEC_[2]; return { vol: s.oven50 ? s.oven50 * OVEN50_VOL_ * 1.0001 : s.L * s.W * s.H * LD_USABLE_, kg: s.kg }; }
+  function ldVehSpec_(v){ const s = VEH_SPEC_[ldVehKind_(v.id, v.name)] || VEH_SPEC_[2]; return { L: s.L * 100, W: s.W * 100, H: s.H * 100, vol: s.L * s.W * s.H, kg: 1e12 }; }
+  // ---------- الرص الحقيقي (بيتا) ----------
+  // زي المخزن: كل صنف بيترص أعمدة لحد سقف العربية (بأحسن وش لفوق)، والأعمدة صفوف بعرض العربية من قدام لورا.
+  // الامتلاء = طول الأرضية اللي البضاعة واخداها ÷ طول العربية.
+  // كرتونة الصنف للرص (سم): مقاس الكرتونة • وإلا مكعب من حجم القطعة القديم • وإلا الكرتونة المتوسطة
+  const CARTON_MED_ = (function(){ const a = Object.keys(CARTON_.code).map(function(k){ return CARTON_.code[k]; }).sort(function(x, y){ return x[0] * x[1] * x[2] - y[0] * y[1] * y[2]; }); return a.length ? a[Math.floor(a.length / 2)] : null; })();
+  function ldBox_(it){
+    const c = ldCarton_(it); if(c) return { d: c, est: false };
+    const dm = ldDims_(it); if(dm && dm[0]){ const e = Math.cbrt(dm[0] * LD_CARTON_) * 100; return { d: [e, e, e], est: true }; }
+    return CARTON_MED_ ? { d: CARTON_MED_, est: true } : null;
+  }
+  // صفوف بعرض العربية: صف «عمقه a» بيشيل floor(W/b) عمود، وصف «عمقه b» بيشيل floor(W/a) — وبنخلط النوعين على الطول
+  function ldFloorCount_(L, W, a, b){
+    const f1 = Math.floor(W / b), f2 = Math.floor(W / a); let best = 0;
+    for(let n = 0; n * a <= L + 1e-6; n++) best = Math.max(best, n * f1 + Math.floor((L - n * a) / b) * f2);
+    return best;
+  }
+  // أقصر طول أرضية يكفي «cols» عمود (a×b)
+  function ldRowsLen_(cols, W, a, b){
+    const f1 = Math.floor(W / b), f2 = Math.floor(W / a); let best = Infinity;
+    if(!f1 && !f2) return Infinity;
+    for(let n = 0; n <= (f1 ? Math.ceil(cols / f1) : 0); n++){
+      const left = cols - n * f1, m = left <= 0 ? 0 : (f2 ? Math.ceil(left / f2) : Infinity);
+      best = Math.min(best, n * a + m * b);
+    }
+    return best;
+  }
+  // العربية تشيل كام كرتونة من الصنف ده لوحده (أعمدة لحد السقف × صفوف على الأرضية)
+  function ldFitAlone_(d, spec){
+    let best = 0;
+    for(let up = 0; up < 3; up++){
+      const c = d[up], ab = d.filter(function(_, i){ return i !== up; });
+      const layers = Math.floor(spec.H / c); if(!layers) continue;
+      best = Math.max(best, layers * ldFloorCount_(spec.L, spec.W, ab[0], ab[1]));
+    }
+    return best;
+  }
+  // طول الأرضية اللي الصنف محتاجه (بأحسن وش لفوق)
+  function ldItemLen_(d, q, spec){
+    let best = Infinity;
+    for(let up = 0; up < 3; up++){
+      const c = d[up], ab = d.filter(function(_, i){ return i !== up; });
+      const layers = Math.floor(spec.H / c); if(!layers) continue;
+      best = Math.min(best, ldRowsLen_(Math.ceil(q / layers), spec.W, ab[0], ab[1]));
+    }
+    return best;
+  }
+  // امتلاء عربية بمجموعة أصناف (كسر من 1): الرص الحقيقي + الأصناف اللي ليها رقم يدوي (استثناء) بالقسمة
+  // الصنف: صفوف كاملة بعرض العربية لوحده، والعواميد اللي ماتكمّلش صف بتتجمع مع بواقي الأصناف التانية في صفوف مشتركة
+  function ldItemRows_(d, q, spec){
+    let best = null;
+    for(let up = 0; up < 3; up++){
+      const c = d[up], ab = d.filter(function(_, i){ return i !== up; });
+      const layers = Math.floor(spec.H / c); if(!layers) continue;
+      const cols = Math.ceil(q / layers);
+      // صفوف بالاتجاهين متلخبطين لحد ما الصنف يخلص (من غير بواقي)
+      const mix = ldRowsLen_(cols, spec.W, ab[0], ab[1]);
+      if(isFinite(mix) && (!best || mix < best.score)) best = { len: mix, rem: 0, a: ab[0], b: ab[1], score: mix };
+      [[ab[0], ab[1]], [ab[1], ab[0]]].forEach(function(o){
+        const dep = o[0], per = Math.floor(spec.W / o[1]); if(!per) return;
+        const full = Math.floor(cols / per), rem = cols - full * per, len = full * dep;
+        const score = len + rem * dep * o[1] / spec.W; // البواقي بمساحتها
+        if(!best || score < best.score) best = { len: len, rem: rem, a: dep, b: o[1], score: score };
+      });
+    }
+    return best;
+  }
+  function ldPackFrac_(items, v, idx, spec){
+    let len = 0, capF = 0, est = 0, known = 0;
+    const agg = {}, pool = [];
+    items.forEach(function(it){ const k = it.code || it.name; (agg[k] = agg[k] || { code: it.code, name: it.name, qty: 0 }).qty += Number(it.qty) || 0; });
+    Object.keys(agg).forEach(function(k){
+      const it = agg[k], q = it.qty; if(q <= 0) return;
+      const cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
+      if(cap){ capF += q / cap; known++; return; }
+      const bx = ldBox_(it); if(!bx) return;
+      known++; if(bx.est) est++;
+      const r = ldItemRows_(bx.d, q, spec);
+      if(!r){ capF += 99; return; } // كرتونة أكبر من العربية
+      len += r.len;
+      for(let i = 0; i < r.rem; i++) pool.push({ a: r.a, b: r.b });
+    });
+    if(pool.length) len += ldStripLen_(pool, spec.W);
+    return { f: len / spec.L + capF, est: est, known: known };
+  }
+  // رص البواقي المختلطة على أرضية بعرض W (طول مفتوح) — skyline: كل عمود في أقرب مكان فاضي، وبنجرب نلفّه
+  function ldStripLen_(rects, W){
+    let sky = [{ x: 0, w: W, y: 0 }];
+    rects.sort(function(p, q){ return Math.max(q.a, q.b) - Math.max(p.a, p.b) || q.a * q.b - p.a * p.b; });
+    rects.forEach(function(r){
+      let best = null;
+      [[r.a, r.b], [r.b, r.a]].forEach(function(o){
+        const w = o[1], h = o[0]; if(w > W + 1e-6) return;
+        for(let i = 0; i < sky.length; i++){
+          const x = sky[i].x; if(x + w > W + 1e-6) break;
+          let y = 0, cov = 0, j = i;
+          while(cov < w - 1e-6 && j < sky.length){ y = Math.max(y, sky[j].y); cov = sky[j].x + sky[j].w - x; j++; }
+          if(!best || y + h < best.top - 1e-6 || (Math.abs(y + h - best.top) < 1e-6 && x < best.x)) best = { x: x, w: w, top: y + h };
+        }
+      });
+      if(!best) return;
+      const nx = best.x, nw = best.w, ns = [];
+      sky.forEach(function(sg){
+        const s0 = sg.x, s1 = sg.x + sg.w;
+        if(s1 <= nx + 1e-6 || s0 >= nx + nw - 1e-6){ ns.push(sg); return; }
+        if(s0 < nx) ns.push({ x: s0, w: nx - s0, y: sg.y });
+        if(s1 > nx + nw) ns.push({ x: nx + nw, w: s1 - nx - nw, y: sg.y });
+      });
+      ns.push({ x: nx, w: nw, y: best.top });
+      ns.sort(function(p, q){ return p.x - q.x; });
+      sky = ns.reduce(function(acc, sg){ const l = acc[acc.length - 1]; if(l && Math.abs(l.y - sg.y) < 1e-6 && Math.abs(l.x + l.w - sg.x) < 1e-6) l.w += sg.w; else acc.push({ x: sg.x, w: sg.w, y: sg.y }); return acc; }, []);
+    });
+    return sky.reduce(function(m, sg){ return Math.max(m, sg.y); }, 0);
+  }
   // سعات كل عربية + متوسطها (لأصناف ماليهاش مقاسات ولا سعة)
   function ldCapIndex_(){
     const capMap = {}, perV = {}, median = {};
@@ -5862,26 +5971,18 @@
   }
   // نصيب الصنف من العربية (كسر من 1) + وزنه — known=false لو مفيش أي طريقة نعرف بيها
   function ldItemFrac_(it, v, idx, spec){
-    const q = Number(it.qty) || 0, dm = ldDims_(it), cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
-    const kg = dm && dm[1] ? q * dm[1] : 0;
-    if(cap) return { f: q / cap, kg: kg, known: true, est: false };
-    const cv = ldCartonVol_(it);
-    if(cv) return { f: q * cv / spec.vol, kg: kg, known: true, est: false };
-    if(dm && dm[0]) return { f: q * dm[0] * LD_CARTON_ / spec.vol, kg: kg, known: true, est: false };
-    // صنف مالوش كرتونة ولا مقاس: بنعتبره كرتونة متوسطة (نفس الحجم في كل العربيات) — مش متوسط الأرقام اليدوية
-    if(CARTON_MED_VOL_) return { f: q * CARTON_MED_VOL_ / spec.vol, kg: kg, known: true, est: true };
-    if(idx.median[v.id]) return { f: q / idx.median[v.id], kg: kg, known: true, est: true };
-    return { f: 0, kg: kg, known: false, est: true };
+    const q = Number(it.qty) || 0, cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
+    if(cap) return { f: q / cap, kg: 0, known: true, est: false };
+    const bx = ldBox_(it); if(!bx) return { f: 0, kg: 0, known: false, est: true };
+    const fit = ldFitAlone_(bx.d, spec);
+    return { f: fit ? q / fit : 99, kg: 0, known: true, est: bx.est };
   }
   function ldFill_(items){
     const idx = ldCapIndex_();
     return (ld_.veh || []).filter(function(v){ return v.active !== false; }).map(function(v){
-      const spec = ldVehSpec_(v);
-      let f = 0, kg = 0, est = 0, known = 0;
-      items.forEach(function(it){ const r = ldItemFrac_(it, v, idx, spec); f += r.f; kg += r.kg; if(r.est) est++; if(r.known) known++; });
-      if(!known) return { v: v, pct: null, est: 0 };
-      const wf = kg / spec.kg; // الوزن ممكن يكون هو اللي يملّي العربية (أفران/مكانس)
-      return { v: v, pct: Math.round(Math.max(f, wf) * 100), est: est, kg: Math.round(kg), byWeight: wf > f, volPct: Math.round(f * 100), kgPct: Math.round(wf * 100) };
+      const r = ldPackFrac_(items, v, idx, ldVehSpec_(v));
+      if(!r.known) return { v: v, pct: null, est: 0 };
+      return { v: v, pct: Math.round(r.f * 100), est: r.est, kg: 0, byWeight: false, volPct: Math.round(r.f * 100), kgPct: 0 };
     });
   }
   // لو الطلبيات أكبر من أكبر عربية: محتاجة كام عربية؟ بنملّي أكبر عربية على الآخر،
@@ -5914,7 +6015,15 @@
       return { it: it, f: r.known && r.f > 0 ? r.f : 0.001, kg: r.kg || 0 };
     }).sort(function(a, b){ return b.f - a.f; });
     const trucks = [];
-    const room = function(t, u){ return Math.floor(Math.min((1 - t.f) / u.f, u.kg ? (spec.kg - t.kg) / u.kg : 1e9) + 1e-9); };
+    // المكان الفاضي في العربية للصنف ده = أكبر كمية لما نرصها فعلًا مع اللي فيها تفضل ≤ 100%
+    const room = function(t, u){
+      const base = Object.keys(t.items).map(function(k){ return t.items[k]; }), k0 = u.it.code || u.it.name;
+      const ok = function(q){ return ldPackFrac_(base.concat([{ code: u.it.code, name: u.it.name, qty: q }]), bigV, idx, spec).f <= 1 + 1e-9; };
+      let lo = 0, hi = Math.max(1, Math.ceil((1 - t.f) / u.f * 1.3) + 2);
+      if(ok(hi)){ while(ok(hi * 2) && hi < 1e6) hi *= 2; lo = hi; hi = hi * 2; }
+      while(hi - lo > 1){ const mid = (lo + hi) >> 1; if(ok(mid)) lo = mid; else hi = mid; }
+      return lo;
+    };
     const put = function(t, u, q){ const k = u.it.code || u.it.name; (t.items[k] = t.items[k] || { code: u.it.code, name: u.it.name, qty: 0 }).qty += q; t.f += q * u.f; t.kg += q * u.kg; };
     units.forEach(function(u){
       let left = Number(u.it.qty) || 0;
@@ -7659,12 +7768,12 @@
     const top = segs.slice(0, 4);
     const rest = segs.slice(4);
     if(rest.length) top.push({ name: 'باقي الأصناف (' + rest.length + ')', pct: rest.reduce(function(t, s){ return t + s.pct; }, 0), qty: rest.reduce(function(t, s){ return t + s.qty; }, 0) });
-    const volPct = segs.reduce(function(t, s){ return t + s.pct; }, 0), kgPct = kgT / spec.kg * 100;
-    const pct = Math.round(Math.max(volPct, kgPct));
-    // لو الوزن هو اللي مالي العربية، الألوان بتتكبر بنفس النسبة عشان الرسمة تطابق الرقم
-    if(kgPct > volPct && volPct > 0) top.forEach(function(s){ s.pct = s.pct * kgPct / volPct; });
+    const volPct = segs.reduce(function(t, s){ return t + s.pct; }, 0);
+    const pct = Math.round(ldPackFrac_(items, v, idx, spec).f * 100);
+    // الألوان بتتظبط على نسبة الرص الحقيقي عشان الرسمة تطابق الرقم
+    if(volPct > 0) top.forEach(function(s){ s.pct = s.pct * pct / volPct; });
     top.forEach(function(s, i){ s.color = LD_SEG_COLORS_[i]; });
-    return { pct: pct, segs: top, est: est, kg: Math.round(kgT), byWeight: kgPct > volPct, maxKg: spec.kg };
+    return { pct: pct, segs: top, est: est, kg: 0, byWeight: false, maxKg: 0 };
   }
   // pct: نسبة الامتلاء، segs: [{pct, color}] من تحت لفوق، kind: 0 دبابة • 1 تلت • 2 جامبو 7000 • 3 جامبو 8000، small: رسم صغير للكروت
   // كل العربيات مترسومة بنفس المقياس (الوش ناحية اليمين زي صورة الجامبو) — فالدبابة بتبان أصغر من الجامبو فعلاً
