@@ -6098,6 +6098,27 @@
     const t = ldSplitText_(ld_.lastSplit || []);
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ toast_('✔ التقسيم اتنسخ'); }, function(){ showAlertModal_(t.replace(/\n/g, '<br>'), 'info'); });
   }
+  // «ليه؟»: كل عربية بنسبتها، وأكتر الأصناف واخدة مكان ومصدر رقمها (مقاس الكرتونة / رقم يدوي / تقديري)
+  function ldWhyShow_(items){
+    dlEnter_('🔍 ليه العربية دي؟', fmt(items.reduce(function(t, x){ return t + (Number(x.qty) || 0); }, 0)) + ' قطعة');
+    const idx = ldCapIndex_();
+    let h = '';
+    ld_.veh.filter(function(v){ return v.active !== false; }).forEach(function(v){
+      const spec = ldVehSpec_(v), tot = ldPackFrac_(items, v, idx, spec);
+      const rows = items.map(function(it){
+        const cap = idx.capMap[it.code] && idx.capMap[it.code][v.id], r = ldItemFrac_(it, v, idx, spec), bx = ldBox_(it);
+        const src = cap ? '<span class="chqLate">✋ رقم يدوي: العربية تشيل ' + fmt(cap) + '</span>' : !bx ? 'مالوش مقاس' : bx.est ? '⚠️ تقديري' : 'كرتونة ' + bx.d.join('×');
+        return { it: it, f: r.f, src: src, cap: !!cap };
+      }).sort(function(a, b){ return b.f - a.f; });
+      const pct = Math.round(tot.f * 100);
+      h += '<div class="chqRow' + (pct > 100 ? ' late' : '') + '"><div class="chqTop"><b>🚚 ' + escapeHtml(v.name) + '</b><span class="amt" style="color:' + (pct > 100 ? '#a8432f' : '#2b7a4f') + '">' + pct + '%</span></div>' +
+        '<small>' + rows.slice(0, 6).map(function(x){ return escapeHtml(x.it.name || x.it.code) + ' ×' + fmt(x.it.qty) + ' ≈ ' + Math.round(x.f * 100) + '% — ' + x.src; }).join('<br>') +
+        (rows.length > 6 ? '<br>+ ' + (rows.length - 6) + ' صنف تاني' : '') + '</small></div>';
+    });
+    const anyCap = items.some(function(it){ return idx.capMap[it.code]; });
+    if(anyCap) h += '<div class="note" style="margin-top:8px;">✋ «رقم يدوي» = رقم اتكتب بالإيد زمان في «سعات العربيات» وبيغلب على المقاس. لو غلط، ادخل «⚙️ سعات العربيات» وامسحه أو دوس «📦 احسب كل الأصناف بالمقاس».</div>';
+    ldBody_().innerHTML = h;
+  }
   function ldSuggest_(fills){ return fills.find(function(f){ return f.pct != null && f.pct <= 100; }) || null; }
   function ldBar_(f, on){
     const cls = f.pct == null ? 'mut' : f.pct > 100 ? 'red' : f.pct > 90 ? 'gold' : 'green';
@@ -6174,7 +6195,7 @@
     const custs = {}; docs.forEach(function(d){ custs[d.customer_code] = 1; });
     const fills = ldFill_(items), sug = ldSuggest_(fills);
     f.innerHTML = '<div class="lFootIn"><div><b>' + docs.length + ' طلبية • ' + Object.keys(custs).length + ' تاجر • ' + fmt(pcs) + ' قطعة</b>' +
-      '<small>' + (sug ? '🚚 العربية المناسبة: <b>' + escapeHtml(sug.v.name) + '</b> (' + sug.pct + '%)' : fills.some(function(x){ return x.pct != null; }) ? (function(){ const mt = ldMultiTrucks_(items); return '⚠️ أكبر من أكبر عربية — محتاجة ' + (mt ? mt.count + ' عربيات: ' + escapeHtml(mt.text) : 'أكتر من عربية') + ' <button type="button" class="lChip gold" style="border:none; cursor:pointer;" onclick="ldSplitShow_(ldSelItems_())">📦 وريني كل عربية فيها إيه</button>'; })() : 'سعات العربيات لسه مادخلتش') + '</small></div>' +
+      '<small>' + (sug ? '🚚 العربية المناسبة: <b>' + escapeHtml(sug.v.name) + '</b> (' + sug.pct + '%) <button type="button" class="lChip" style="border:none; cursor:pointer;" onclick="ldWhyShow_(ldSelItems_())">ليه؟</button>' : fills.some(function(x){ return x.pct != null; }) ? (function(){ const mt = ldMultiTrucks_(items); return '⚠️ أكبر من أكبر عربية — محتاجة ' + (mt ? mt.count + ' عربيات: ' + escapeHtml(mt.text) : 'أكتر من عربية') + ' <button type="button" class="lChip gold" style="border:none; cursor:pointer;" onclick="ldSplitShow_(ldSelItems_())">📦 وريني كل عربية فيها إيه</button>'; })() : 'سعات العربيات لسه مادخلتش') + '</small></div>' +
       '<button type="button" class="aGo" onclick="ldRoute_()">التالي: خط السير ←</button></div>';
   }
   function ldCloseDoc_(i){
