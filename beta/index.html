@@ -5977,7 +5977,7 @@
     items.forEach(function(it){ const k = it.code || it.name; (agg[k] = agg[k] || { code: it.code, name: it.name, qty: 0 }).qty += Number(it.qty) || 0; });
     Object.keys(agg).forEach(function(k){
       const it = agg[k]; if(it.qty <= 0) return;
-      const cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
+      const cap = ldCapOf_(idx, it.code, v.id);
       if(cap){ capF += it.qty / cap; known++; return; }
       const bx = ldBox_(it); if(!bx) return;
       known++; if(bx.est) est++;
@@ -6039,10 +6039,18 @@
     Object.keys(perV).forEach(function(v){ const a = perV[v].slice().sort(function(x, y){ return x - y; }); median[v] = a[Math.floor(a.length / 2)]; });
     return { capMap: capMap, median: median };
   }
+  function ldCapOf_(idx, code, vid){
+    const c = String(code || '').trim(), b = ldBaseCode_(c);
+    const m = (idx.capMap[b] && idx.capMap[b][vid]) || (idx.capMap[c] && idx.capMap[c][vid]);
+    return m > 0 ? m : 0;
+  }
+  function ldHasCapRow_(idx, code){ const c = String(code || '').trim(); return !!(idx.capMap[ldBaseCode_(c)] || idx.capMap[c]); }
   // نصيب الصنف من العربية (كسر من 1) + وزنه — known=false لو مفيش أي طريقة نعرف بيها
   function ldItemFrac_(it, v, idx, spec){
-    const q = Number(it.qty) || 0, cap = idx.capMap[it.code] && idx.capMap[it.code][v.id];
+    const q = Number(it.qty) || 0, cap = ldCapOf_(idx, it.code, v.id);
     if(cap) return { f: q / cap, kg: 0, known: true, est: false };
+    // الحساب بالعدد: الأرقام اليدوية بس — الصنف اللي مالوش رقم بياخد متوسط أرقام العربية دي (تقديري)
+    if(ldMode_() === 'count'){ const md = idx.median[v.id]; return md ? { f: q / md, kg: 0, known: true, est: true } : { f: 0, kg: 0, known: false, est: true }; }
     const bx = ldBox_(it); if(!bx) return { f: 0, kg: 0, known: false, est: true };
     const fit = ldFitAlone_(bx.d, spec);
     return { f: fit ? q / fit : 99, kg: 0, known: true, est: bx.est };
@@ -6139,8 +6147,8 @@
     ld_.veh.filter(function(v){ return v.active !== false; }).forEach(function(v){
       const spec = ldVehSpec_(v), tot = ldPackFrac_(items, v, idx, spec);
       const rows = items.map(function(it){
-        const cap = idx.capMap[it.code] && idx.capMap[it.code][v.id], r = ldItemFrac_(it, v, idx, spec), bx = ldBox_(it);
-        const src = cap ? '<span class="chqLate">✋ رقم يدوي: العربية تشيل ' + fmt(cap) + '</span>' : !bx ? 'مالوش مقاس' : bx.est ? '⚠️ تقديري' : 'كرتونة ' + bx.d.join('×');
+        const cap = ldCapOf_(idx, it.code, v.id), r = ldItemFrac_(it, v, idx, spec), bx = ldBox_(it);
+        const src = cap ? '✋ رقمك: العربية تشيل ' + fmt(cap) : ldMode_() === 'count' ? '<span class="chqLate">⚠️ مالوش رقم في الجدول — متوسط</span>' : !bx ? 'مالوش مقاس' : bx.est ? '⚠️ تقديري' : 'كرتونة ' + bx.d.join('×');
         return { it: it, f: r.f, src: src, cap: !!cap };
       }).sort(function(a, b){ return b.f - a.f; });
       const pct = Math.round(tot.f * 100);
@@ -6148,7 +6156,7 @@
         '<small>' + rows.slice(0, 6).map(function(x){ return escapeHtml(x.it.name || x.it.code) + ' ×' + fmt(x.it.qty) + ' ≈ ' + Math.round(x.f * 100) + '% — ' + x.src; }).join('<br>') +
         (rows.length > 6 ? '<br>+ ' + (rows.length - 6) + ' صنف تاني' : '') + '</small></div>';
     });
-    const anyCap = items.some(function(it){ return idx.capMap[it.code]; });
+    const anyCap = ldMode_() !== 'count' && items.some(function(it){ return ldHasCapRow_(idx, it.code); });
     if(anyCap) h += '<div class="note" style="margin-top:8px;">✋ «رقم يدوي» = رقم اتكتب بالإيد زمان في «سعات العربيات» وبيغلب على المقاس. لو غلط، ادخل «⚙️ سعات العربيات» وامسحه أو دوس «📦 احسب كل الأصناف بالمقاس».</div>';
     ldBody_().innerHTML = h;
   }
@@ -7441,20 +7449,20 @@
     const V = ld_.veh;
     const rows = {};
     ld_.caps.forEach(function(c){ const r = rows[c.c] = rows[c.c] || { c: c.c, n: c.n || '', q: {} }; r.q[c.v] = c.q; if(c.n) r.n = c.n; });
-    Object.keys(CARTON_.code).forEach(function(c){ rows[c] = rows[c] || { c: c, n: ldItemName_(c), q: {} }; });
-    const isWhR = ld_.role === 'warehouse';
     const md = ldMode_();
+    if(md !== 'count') Object.keys(CARTON_.code).forEach(function(c){ rows[c] = rows[c] || { c: c, n: ldItemName_(c), q: {} }; });
+    const isWhR = ld_.role === 'warehouse';
     let h = '<div class="lBox" style="margin-bottom:10px;"><b>طريقة حساب التحميل</b><div class="aBtns" style="margin-top:6px;">' +
       '<button type="button" class="' + (md === 'count' ? 'ok' : '') + '" onclick="ldSetMode_(\'count\')">🔢 بالعدد اللي في الجدول</button>' +
       '<button type="button" class="' + (md === 'pack' ? 'ok' : '') + '" onclick="ldSetMode_(\'pack\')">📦 بالرص والمقاسات</button></div>' +
       '<div class="note" style="margin-top:6px;">' + (md === 'count' ? '🔢 كل صنف: الكمية ÷ العربية تشيل كام منه. الرقم اللي كتبته إنت (الأصفر) هو اللي بيتحسب، والصنف اللي مالوش رقم بياخد الرقم الباهت.' : '📦 البرنامج بيرص الكراتين فعلًا جوه العربية بالمقاسات (أعمدة لحد السقف وصفوف بالعرض).') + '</div></div>';
-    h += '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
+    if(md !== 'count') h += '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
       '<b>اكتب رقم بس لو الصنف ده بيتحمّل غير كده</b> (استثناء) — ساعتها رقمك هو اللي بيتحسب.</div>';
     h += '<button type="button" class="aGo wide" onclick="ldCapsExcel_()">📥 نزّل Excel المقاسات والأعداد</button>' +
       '<button type="button" class="aGo wide" style="margin:8px 0 10px;" onclick="this.nextElementSibling.click()">📤 ارفع Excel بعد التعديل</button><input type="file" accept=".xlsx" hidden onchange="ldCapsImport_(this)">';
     h += '<div id="ldNoDims"></div>';
     const old = ld_.caps.filter(function(c){ return CARTON_.code[c.c] && c.q !== '' && c.q != null; });
-    if(old.length) h += '<button type="button" class="aGo wide" style="margin-bottom:10px;" onclick="ldCapsReset_()">📦 احسب كل الأصناف بالمقاس (امسح ' + old.length + ' رقم قديم مكتوب بالإيد)</button>';
+    if(old.length && md !== 'count') h += '<button type="button" class="aGo wide" style="margin-bottom:10px;" onclick="ldCapsReset_()">📦 احسب كل الأصناف بالمقاس (امسح ' + old.length + ' رقم قديم مكتوب بالإيد)</button>';
     if(!isWhR) h += '<div class="sectionLabel" style="margin:0 0 6px;">أنواع العربيات (من الأصغر للأكبر)</div>' + V.map(function(v){
       return '<div class="lVRow"><input data-lvid="' + v.id + '" data-k="name" value="' + escapeHtml(v.name) + '"><input data-lvid="' + v.id + '" data-k="sort" type="number" value="' + v.sort + '" title="الترتيب">' +
         '<label class="lSw"><input type="checkbox" data-lvid="' + v.id + '" data-k="active"' + (v.active !== false ? ' checked' : '') + '> شغّالة</label></div>';
@@ -7469,13 +7477,13 @@
     h += '<div class="lCapWrap"><table class="lCap"><thead><tr><th>الصنف</th>' + V.map(function(v){ return '<th>' + escapeHtml(v.name) + '</th>'; }).join('') + '</tr></thead><tbody>' +
       (keys.length ? keys.map(function(k){
         const r = rows[k];
-        const ct = CARTON_.code[r.c], it = { code: r.c, name: r.n };
-        return '<tr data-k="' + escapeHtml(normAr_(r.c + ' ' + (r.n || ''))) + '"><td><b>' + escapeHtml(r.n || r.c) + '</b><small>' + escapeHtml(r.c) + (ct ? ' • كرتونة <span dir="ltr">' + ct.join('×') + '</span>' : ' • مالوش مقاس كرتونة') + '</small></td>' + V.map(function(v){
-          const fit = ldCartonFit_(it, v), has = r.q[v.id] != null && r.q[v.id] !== '';
+        const ct = md === 'count' ? null : CARTON_.code[r.c], it = { code: r.c, name: r.n };
+        return '<tr data-k="' + escapeHtml(normAr_(r.c + ' ' + (r.n || ''))) + '"><td><b>' + escapeHtml(r.n || r.c) + '</b><small>' + escapeHtml(r.c) + (md === 'count' ? '' : ct ? ' • كرتونة <span dir="ltr">' + ct.join('×') + '</span>' : ' • مالوش مقاس كرتونة') + '</small></td>' + V.map(function(v){
+          const fit = md === 'count' ? 0 : ldCartonFit_(it, v), has = r.q[v.id] != null && r.q[v.id] !== '';
           return '<td><input type="number" min="0" class="' + (has ? 'exc' : '') + '" data-c="' + escapeHtml(r.c) + '" data-n="' + escapeHtml(r.n) + '" data-v="' + v.id + '" data-had="' + (has ? 1 : '') + '" placeholder="' + (fit || '') + '" value="' + (has ? r.q[v.id] : '') + '"></td>';
         }).join('') + '</tr>';
       }).join('') : '<tr><td colspan="' + (V.length + 1) + '" class="empty">لسه مفيش سعات — الصقها من Excel فوق</td></tr>') + '</tbody></table></div>' +
-      (keys.length ? '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">حفظ الاستثناءات</button>' : '');
+      (keys.length ? '<button type="button" class="aGo wide" id="ldCapSave" onclick="ldSaveCaps_()">' + (md === 'count' ? 'حفظ التعديلات' : 'حفظ الاستثناءات') + '</button>' : '');
     ldBody_().innerHTML = h;
     ldNoDimsRender_();
   }
@@ -7484,7 +7492,7 @@
     const m = {};
     (ld_.capPending || []).forEach(function(d){ (d.lines || []).forEach(function(l){
       const it = { code: String(l.code || '').trim(), name: l.name || '' };
-      if(ldCarton_(it)) return;
+      if(ldMode_() === 'count' ? ldHasCapRow_(ldCapIndex_(), it.code) : ldCarton_(it)) return;
       const k = it.code || it.name; if(!k) return;
       const x = m[k] = m[k] || { code: it.code, name: it.name, qty: 0, docs: 0, old: !!ldDims_(it), man: ld_.caps.some(function(c){ return c.c === it.code && c.q !== '' && c.q != null; }) };
       x.qty += Number(l.qty) || 0; x.docs++;
@@ -7496,7 +7504,7 @@
     if(!ld_.capPending){ box.innerHTML = '<div class="note" style="margin-bottom:10px;">جاري البحث عن الأصناف اللي مالهاش مقاس...</div>'; return; }
     const L = ldNoDimsList_();
     if(!L.length){ box.innerHTML = '<div class="note" style="margin-bottom:10px;">✅ كل الأصناف اللي في الطلبيات دلوقتي ليها مقاس كرتونة</div>'; return; }
-    box.innerHTML = '<details class="splitD" style="margin-bottom:10px;" open><summary>⚠️ ' + L.length + ' صنف في الطلبيات مالوش مقاس كرتونة — بيتحسب تقريبي</summary>' +
+    box.innerHTML = '<details class="splitD" style="margin-bottom:10px;" open><summary>⚠️ ' + L.length + (ldMode_() === 'count' ? ' صنف في الطلبيات مالوش رقم في الجدول — اكتبله رقم تحت' : ' صنف في الطلبيات مالوش مقاس كرتونة') + ' — بيتحسب تقريبي</summary>' +
       '<div class="note" style="margin:6px 0;">ابعت مقاس كرتونة كل صنف (طول × عرض × ارتفاع بالسنتي) عشان الحساب يبقى مظبوط. «تقريبي» = عنده مقاس قطعة قديم، «رقم يدوي» = مكتوب له سعة بالإيد.</div>' +
       L.map(function(x){ return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(x.name || x.code) + '</b><span class="amt">' + fmt(x.qty) + ' قطعة</span></div><small>كود ' + escapeHtml(x.code || '—') + ' • في ' + x.docs + ' طلبية' + (x.man ? ' • رقم يدوي' : x.old ? ' • تقريبي من مقاس القطعة' : ' • <span class="chqLate">مالوش أي مقاس</span>') + '</small></div>'; }).join('') +
       '<button type="button" class="aGo wide" onclick="ldNoDimsCopy_()">📋 انسخ القايمة</button></details>';
