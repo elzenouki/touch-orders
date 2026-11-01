@@ -609,6 +609,10 @@
   input.ofIn:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.18);}
   .ofRow.on input.ofIn{border-color:var(--green); color:var(--green); background:var(--green-bg);}
   .ofEmpty{padding:18px; text-align:center; color:var(--muted); font-weight:800;}
+  .ofStk{display:inline-block; font-size:10.5px; font-weight:800; padding:0 6px; border-radius:6px; margin-right:6px; direction:rtl;}
+  .ofStk.ok{color:#1f6b45; background:#e3f2e8;}
+  .ofStk.no{color:#a8432f; background:#fbe6e1;}
+  .ofRow.stkNo .ofName{color:#8a6a64;}
   .ofRow.act{background:var(--gold-bg); box-shadow:inset 0 0 0 2px var(--gold);}
   .ofRow.act input.ofIn{border-color:var(--gold); box-shadow:0 0 0 3px rgba(182,134,47,.25); background:#fff; color:var(--navy);}
   /* كيبورد الأرقام بتاع التطبيق */
@@ -1742,6 +1746,7 @@
         <button type="button" class="toolBtn" onclick="openSprice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>الأسعار الخاصة</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
+        <button type="button" class="toolBtn" onclick="openLoss_()"><span class="tIc t4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l7 7 4-4 7 7"/><path d="M21 11v5h-5"/></svg></span>الفاقد من الطلبات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
         <button type="button" class="toolBtn" onclick="openMyWallet_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2M3 10h18"/></svg></span>حافظتي</button>
         <button type="button" class="toolBtn" onclick="openMyCust_()"><span class="tIc t6"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/><path d="M12 14.5l-1.2 2.5L12 20l1.2-3z"/></svg></span>عملائي (طلبية/تحصيل)</button>
@@ -3694,6 +3699,7 @@
       pos: null, posErr: null, reqId: genRequestId_(), setShop: false, setShopTouched: false, phone: !!phone,
     };
     setTitle_(phone ? '📞 من غير زيارة' : 'زيارة تاجر', c.name);
+    stkWarm_();
     document.getElementById('locBox').hidden = !!phone;
     document.getElementById('phoneNote').hidden = !phone;
     document.getElementById('modePay').hidden = false;
@@ -4116,9 +4122,10 @@
     const metas = ofMeta_();
     const lines = v[P.lk];
     const row = function(m, n, l){
-      return '<div class="ofRow' + (l ? ' on' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
+      const st = pk === 'order' ? stkOk_(m.a.code) : null;
+      return '<div class="ofRow' + (l ? ' on' : '') + (st === false ? ' stkNo' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
         '<span class="ofNo">' + (n + 1) + '</span>' +
-        '<span class="ofName">' + escapeHtml(m.a.name) + (m.a.code ? '<small>' + escapeHtml(m.a.code) + '</small>' : '') + '</span>' +
+        '<span class="ofName">' + escapeHtml(m.a.name) + '<small>' + (m.a.code ? escapeHtml(m.a.code) : '') + '<span class="ofStk' + (st == null ? '' : st ? ' ok' : ' no') + '">' + stkTag_(st) + '</span></small></span>' +
         '<input type="text" class="ofIn" inputmode="none" readonly tabindex="-1" dir="ltr" autocomplete="off" aria-label="كمية ' + escapeHtml(m.a.name) + '" value="' + (l ? l.qty : '') + '">' +
         '</div>';
     };
@@ -4155,7 +4162,10 @@
       const m = ofByKey_()[key];
       if(!m) return;
       if(pk === 'ret') lines.push({ code: m.a.code, name: m.a.name, qty: qty, reason: retDefReason_(), condition: state.visit.retCond, own: false });
-      else lines.push({ code: m.a.code, name: m.a.name, qty: qty });
+      else {
+        lines.push({ code: m.a.code, name: m.a.name, qty: qty });
+        if(stkOk_(m.a.code) === false) toast_('⚠️ ' + m.a.name + ' غير متاح في المخزن دلوقتي');
+      }
     }
   }
   function paperChanged_(pk){
@@ -9733,7 +9743,7 @@
     ['today', '🏠', 'النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('report')"]],
     ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
     ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openInvSearch_()", "openScreen('unvisited')"]],
-    ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openScreen('map')", "openOrdersAccess_()"]],
+    ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openLoss_()", "openScreen('map')", "openOrdersAccess_()"]],
     ['more', '☰', 'المزيد', ["openStock_()", "openScreen('items')", "openScreen('export')", "openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
   ];
   function admLayout_(){
@@ -9895,12 +9905,49 @@
     if(!stk_.rows){ try{ const c = JSON.parse(localStorage.getItem(stkKey_()) || 'null'); if(c){ stk_.rows = c.rows; stk_.at = c.at; } }catch(e){} }
     if(stk_.rows) stkRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     localReport_('stock').then(function(r){
-      stk_.rows = r.rows || []; stk_.at = r.synced_at; stk_.limit = r.limit || 200;
-      try{ localStorage.setItem(stkKey_(), JSON.stringify({ rows: stk_.rows, at: stk_.at })); }catch(e){}
+      stk_.rows = r.rows || []; stk_.at = r.synced_at; stk_.limit = r.limit || 200; stk_.got = Date.now();
+      try{ localStorage.setItem(stkKey_(), JSON.stringify({ rows: stk_.rows, at: stk_.at, got: stk_.got })); }catch(e){}
+      _ofRowsHtml_ = null;
       if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) stkRender_();
     }).catch(function(e){ if(!stk_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
   }
   function stkSet_(k, v){ stk_[k] = v; stkRender_(); }
+  // متاح ولا لأ وهو بيكتب الطلبية: من آخر نسخة مخزون محفوظة، وبتتحدّث في الخلفية لو قديمة
+  function stkLoadCache_(){
+    if(stk_.rows) return;
+    try{ const c = JSON.parse(localStorage.getItem(stkKey_()) || 'null'); if(c){ stk_.rows = c.rows; stk_.at = c.at; stk_.got = c.got || 0; } }catch(e){}
+  }
+  function stkOk_(code){
+    stkLoadCache_();
+    if(!stk_.rows || !code) return null;
+    if(stk_._src !== stk_.rows){ stk_._m = {}; stk_.rows.forEach(function(r){ stk_._m[String(r.code).trim()] = !!r.ok; }); stk_._src = stk_.rows; }
+    const c = String(code).trim();
+    if(c in stk_._m) return stk_._m[c];
+    const b = ldBaseCode_(c);
+    return b in stk_._m ? stk_._m[b] : null;
+  }
+  function stkTag_(st){ return st == null ? '' : st ? '✅ متاح' : '❌ غير متاح'; }
+  function stkWarm_(){
+    stkLoadCache_();
+    if(stk_.busy || (stk_.got && Date.now() - stk_.got < 3 * 3600e3)) return;
+    stk_.busy = true;
+    localReport_('stock').then(function(r){
+      stk_.rows = r.rows || []; stk_.at = r.synced_at; stk_.limit = r.limit || 200; stk_.got = Date.now();
+      try{ localStorage.setItem(stkKey_(), JSON.stringify({ rows: stk_.rows, at: stk_.at, got: stk_.got })); }catch(e){}
+      _ofRowsHtml_ = null; stkPaint_();
+    }).catch(function(){}).finally(function(){ stk_.busy = false; });
+  }
+  // بيحدّث علامة متاح/غير متاح في الورقة المفتوحة من غير ما يمسح اللي المندوب كتبه
+  function stkPaint_(){
+    const box = document.getElementById('pickList'); if(!box) return;
+    const by = ofByKey_();
+    box.querySelectorAll('.ofRow').forEach(function(row){
+      const m = by[row.dataset.k]; if(!m) return;
+      const st = stkOk_(m.a.code), tg = row.querySelector('.ofStk');
+      row.classList.toggle('stkNo', st === false);
+      if(tg){ tg.className = 'ofStk' + (st == null ? '' : st ? ' ok' : ' no'); tg.textContent = stkTag_(st); }
+    });
+  }
   function stkRender_(){
     const all = stk_.rows || [];
     const old = stk_.at ? Math.floor((Date.now() - new Date(stk_.at)) / 864e5) : null;
@@ -9929,6 +9976,165 @@
         (state.isAdmin && r.qty != null ? '<span class="amt" style="color:' + (r.ok ? 'var(--o3)' : '#a8432f') + '">' + fmt(r.qty) + '</span>' : '') + '</div>' +
         '<small>كود ' + escapeHtml(r.code) + ' • ' + (r.ok ? '<span class="chqSt done" style="margin:0;">✅ متاح</span>' : '<span class="chqSt bounced" style="margin:0;">❌ غير متاح</span>') + '</small></div>';
     }).join('') : '<div class="empty">مفيش أصناف هنا</div>';
+  }
+  // ================== 📉 الفاقد من الطلبات (بيتا) ==================
+  // الطلبية اللي دخلت على التطبيق (Supabase) قصاد الفواتير اللي خرجت للعميل بعدها على طول (جهاز الشركة، kind=loss).
+  // كل طلبية بتتقارن بفواتير نفس العميل من يوم الطلبية لحد قبل طلبيته اللي بعدها (بحد أقصى 12 يوم). للمدير بس.
+  var ls_ = { from: '', to: '', rep: '', view: 'item', q: '', data: null };
+  const LS_PENDING_DAYS_ = 2;
+  function lsYmd_(d){ return /^\d{2}\/\d{2}\/\d{4}$/.test(d || '') ? dmyToYmd_(d) : String(d || '').slice(0, 10); }
+  function lsAddDays_(ymd, n){ const d = new Date(ymd + 'T00:00:00'); d.setDate(d.getDate() + n); return ymd_(d); }
+  function lsApi_(from, to, accts){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'loss');
+    b.set('from', from); b.set('to', to); b.set('accts', accts.join(','));
+    return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); });
+  }
+  function openLoss_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📉 الفاقد من الطلبات', 'الطلبية قصاد الفاتورة اللي خرجت بعدها');
+    if(!ls_.from){ const t = ymd_(bizToday_()); ls_.to = t; ls_.from = t.slice(0, 8) + '01'; if(ls_.from === t) ls_.from = lsAddDays_(t, -30); }
+    lsShell_();
+    lsLoad_();
+  }
+  function lsShell_(){
+    ldBody_().innerHTML = '<div class="aBtns" style="margin:0 0 8px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' +
+      '<label style="font-size:12px; font-weight:800;">من <input type="date" id="lsFrom" value="' + ls_.from + '" style="width:auto; margin:0;"></label>' +
+      '<label style="font-size:12px; font-weight:800;">لحد <input type="date" id="lsTo" value="' + ls_.to + '" style="width:auto; margin:0;"></label>' +
+      '<button type="button" class="aGo" style="margin:0;" onclick="lsApply_()">عرض</button></div><div id="lsOut"><div class="aiStatus">جاري التحميل...</div></div>';
+  }
+  function lsApply_(){
+    const f = document.getElementById('lsFrom').value, t = document.getElementById('lsTo').value;
+    if(!f || !t || f > t) return showMsg('اختار المدة صح (من قبل لحد)', 'error');
+    ls_.from = f; ls_.to = t; ls_.data = null;
+    document.getElementById('lsOut').innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    lsLoad_();
+  }
+  async function lsLoad_(){
+    const out = function(){ return document.getElementById('lsOut'); };
+    try{
+      const O = await callApi('getReportList', [state.auth, ls_.from, ls_.to, '', 'orders']);
+      const docs = ((O && O.docs) || []).filter(function(d){ return d.type !== 'مرتجع' && (d.lines || []).length; });
+      const sys = await sysCodes_().catch(function(){ return {}; }) || {};
+      const custs = (state.rep && state.rep.customers) || [];
+      const acctOf = function(code){ const c = custs.find(function(x){ return x.code === code; }); return String((c && c.system_code) || sys[code] || '').trim(); };
+      docs.forEach(function(d){ d._acct = acctOf(d.customerCode); d._ymd = lsYmd_(d.date); });
+      const accts = Array.from(new Set(docs.map(function(d){ return d._acct; }).filter(Boolean)));
+      const R = accts.length ? await lsApi_(ls_.from, ls_.to, accts) : { rows: [] };
+      ls_.data = lsBuild_(docs, (R && R.rows) || []);
+      if(out()) lsRender_();
+    }catch(e){ if(out()) out().innerHTML = '<div class="aiStatus err">' + escapeHtml(e.message) + '</div>'; }
+  }
+  // بيطابق كل طلبية بالفواتير اللي بعدها لنفس العميل
+  function lsBuild_(docs, rows){
+    const inv = {}, price = {};
+    rows.forEach(function(r){
+      const x = { d: String(r[1] || ''), inv: r[2], c: String(r[3]), n: r[4], q: Number(r[5]) || 0, p: r[6] };
+      (inv[r[0]] = inv[r[0]] || []).push(x);
+      if(x.p != null){ price[x.c] = x.p; price[ldBaseCode_(x.c)] = price[ldBaseCode_(x.c)] || x.p; }
+    });
+    const today = ymd_(bizToday_());
+    // الطلبيات اللي في نفس اليوم لنفس العميل بتتحسب طلبية واحدة
+    const groups = {};
+    docs.forEach(function(d){
+      if(!d._acct) return;
+      const k = d._acct + '|' + d._ymd;
+      const g = groups[k] = groups[k] || { acct: d._acct, ymd: d._ymd, code: d.customerCode, name: d.customerName, rep: d.rep || '', ids: [], lines: {} };
+      g.ids.push(d.orderId);
+      d.lines.forEach(function(l){
+        const c = String(l.itemCode || l.itemName); const q = Math.abs(Number(l.qty) || 0); if(!q) return;
+        const L = g.lines[c] = g.lines[c] || { code: String(l.itemCode || ''), name: l.itemName || '', ord: 0, got: 0 };
+        L.ord += q;
+      });
+    });
+    const byAcct = {};
+    Object.keys(groups).forEach(function(k){ (byAcct[groups[k].acct] = byAcct[groups[k].acct] || []).push(groups[k]); });
+    const orders = [];
+    Object.keys(byAcct).forEach(function(a){
+      const list = byAcct[a].sort(function(x, y){ return x.ymd < y.ymd ? -1 : 1; });
+      const lines = (inv[a] || []).map(function(x){ return Object.assign({}, x, { left: x.q }); });
+      list.forEach(function(g, i){
+        const end = i + 1 < list.length ? list[i + 1].ymd : null, cap = lsAddDays_(g.ymd, 12);
+        const win = lines.filter(function(x){ return x.d >= g.ymd && (end ? x.d < end : true) && x.d <= cap; });
+        g.invs = Array.from(new Set(win.map(function(x){ return x.inv; }))); g.invDate = win.length ? win[0].d : '';
+        Object.keys(g.lines).forEach(function(k){
+          const L = g.lines[k]; let need = L.ord;
+          [function(x){ return x.c === L.code; }, function(x){ return ldBaseCode_(x.c) === ldBaseCode_(L.code); }].forEach(function(m){
+            win.forEach(function(x){ if(need > 0 && x.left > 0 && L.code && m(x)){ const t = Math.min(need, x.left); x.left -= t; need -= t; L.got += t; } });
+          });
+          L.loss = L.ord - L.got;
+          L.price = price[L.code] || price[ldBaseCode_(L.code)] || null;
+        });
+        g.ord = 0; g.got = 0; g.val = 0;
+        Object.keys(g.lines).forEach(function(k){ const L = g.lines[k]; g.ord += L.ord; g.got += L.got; if(L.price) g.val += L.loss * L.price; });
+        g.loss = g.ord - g.got;
+        g.st = !g.invs.length ? (g.ymd >= lsAddDays_(today, -LS_PENDING_DAYS_) ? 'wait' : 'none') : (g.loss > 0 ? 'part' : 'full');
+        orders.push(g);
+      });
+    });
+    const noAcct = docs.filter(function(d){ return !d._acct; });
+    return { orders: orders.sort(function(x, y){ return y.ymd < x.ymd ? -1 : y.ymd > x.ymd ? 1 : y.loss - x.loss; }), noAcct: noAcct };
+  }
+  function lsSet_(k, v){ ls_[k] = v; lsRender_(); }
+  function lsPct_(a, b){ return b ? Math.round(a / b * 100) : 0; }
+  function lsRender_(){
+    const box = document.getElementById('lsOut'); if(!box || !ls_.data) return;
+    const all = ls_.data.orders.filter(function(g){ return g.st !== 'wait'; });
+    const reps = {}; all.forEach(function(g){ reps[g.rep || '—'] = 1; });
+    const list = all.filter(function(g){ return !ls_.rep || (g.rep || '—') === ls_.rep; });
+    const wait = ls_.data.orders.filter(function(g){ return g.st === 'wait' && (!ls_.rep || (g.rep || '—') === ls_.rep); });
+    let ord = 0, got = 0, val = 0; list.forEach(function(g){ ord += g.ord; got += g.got; val += g.val; });
+    const none = list.filter(function(g){ return g.st === 'none'; }).length, part = list.filter(function(g){ return g.st === 'part'; }).length;
+    let h = '';
+    h += '<div class="pfMonths csaChips"><button type="button" class="' + (!ls_.rep ? 'on' : '') + '" onclick="lsSet_(\'rep\', \'\')">كل المناديب</button>' +
+      Object.keys(reps).sort().map(function(r){ return '<button type="button" class="' + (ls_.rep === r ? 'on' : '') + '" onclick="lsSet_(\'rep\', ' + escapeHtml(JSON.stringify(r)) + ')">' + escapeHtml(r) + '</button>'; }).join('') + '</div>';
+    h += dlSum_(['طلب <b>' + fmt(ord) + '</b> قطعة', 'اتفوتر <b>' + fmt(got) + '</b>', '<span style="color:#a8432f">فاقد <b>' + fmt(ord - got) + '</b> (' + lsPct_(ord - got, ord) + '%)</span>',
+      val ? 'قيمة الفاقد ~<b>' + fmt(Math.round(val)) + '</b> ج' : '']);
+    h += dlSum_([list.length + ' طلبية', part ? part + ' اتفوترت ناقص' : '', none ? '<span style="color:#a8432f">' + none + ' ماطلعلهاش فاتورة</span>' : '', wait.length ? '⏳ ' + wait.length + ' لسه جديدة (آخر ' + LS_PENDING_DAYS_ + ' يوم) مش محسوبة' : '']);
+    const V = { item: '📦 حسب الصنف', rep: '🧭 حسب المندوب', cust: '👥 حسب العميل', ord: '🧾 الطلبيات' };
+    h += '<div class="pfMonths csaChips">' + Object.keys(V).map(function(k){ return '<button type="button" class="' + (ls_.view === k ? 'on' : '') + '" onclick="lsSet_(\'view\', \'' + k + '\')">' + V[k] + '</button>'; }).join('') + '</div>';
+    h += lsView_(list);
+    if(ls_.data.noAcct.length) h += '<div class="note" style="margin-top:8px; color:var(--gold-d);">⚠️ ' + ls_.data.noAcct.length + ' طلبية لعملاء مالهمش كود سيستم — مش محسوبة: ' + escapeHtml(Array.from(new Set(ls_.data.noAcct.map(function(d){ return d.customerName; }))).slice(0, 8).join('، ')) + '</div>';
+    h += '<div class="note" style="margin-top:8px;">كل طلبية بتتقارن بفواتير نفس العميل من يوم الطلبية لحد قبل طلبيته اللي بعدها (بحد أقصى 12 يوم). القيمة تقريبية بسعر آخر فاتورة للصنف.</div>';
+    box.innerHTML = h;
+  }
+  function lsRow_(t, sub, g){
+    return '<div class="listRow"><div class="lMain"><div class="lName">' + t + '</div><div class="lSub">' + sub + '</div></div>' +
+      '<div style="text-align:left; font-weight:900; color:' + (g.loss ? '#a8432f' : 'var(--green)') + '">' + (g.loss ? '-' + fmt(g.loss) : '✔') + '<small style="display:block; font-size:11px; color:var(--muted);">' + lsPct_(g.loss, g.ord) + '%</small></div></div>';
+  }
+  function lsView_(list){
+    if(!list.length) return '<div class="empty">مفيش طلبيات في المدة دي</div>';
+    if(ls_.view === 'ord') return list.map(function(g){
+      const st = { none: '<span class="chip red">ماطلعلهاش فاتورة</span>', part: '<span class="chip red">اتفوترت ناقص</span>', full: '<span class="chip green">اتفوترت كاملة</span>' }[g.st];
+      const L = Object.keys(g.lines).map(function(k){ return g.lines[k]; }).sort(function(a, b){ return b.loss - a.loss; });
+      return '<details class="docCard"><summary><div class="dTop"><b>' + escapeHtml(g.name) + '</b><span class="oCode">' + escapeHtml(g.acct) + '</span></div>' +
+        '<div class="dMeta">' + escapeHtml([ymdToDmy_(g.ymd), g.rep, g.invs.length ? '🧾 ' + g.invs.join('، ') + (g.invDate && g.invDate !== g.ymd ? ' (' + ymdToDmy_(g.invDate) + ')' : '') : ''].filter(Boolean).join(' • ')) + '</div>' +
+        '<div class="dlChips in">' + st + '<span class="chip">طلب ' + fmt(g.ord) + ' • اتفوتر ' + fmt(g.got) + '</span>' + (g.loss ? '<span class="chip red">فاقد ' + fmt(g.loss) + '</span>' : '') + '</div></summary>' +
+        '<div class="dLines">' + L.map(function(l){
+          return '<div class="dLine"><span class="dCode">' + escapeHtml(l.code) + '</span><span class="dName">' + escapeHtml(l.name) + '<small>طلب ' + fmt(l.ord) + ' • اتفوتر ' + fmt(l.got) + '</small></span>' +
+            '<span class="dQty" style="color:' + (l.loss ? '#a8432f' : 'var(--green)') + '">' + (l.loss ? '-' + fmt(l.loss) : '✔') + '</span></div>';
+        }).join('') + '</div></details>';
+    }).join('');
+    const agg = {};
+    list.forEach(function(g){
+      if(ls_.view === 'item') Object.keys(g.lines).forEach(function(k){
+        const l = g.lines[k], a = agg[k] = agg[k] || { t: l.name || l.code, code: l.code, ord: 0, got: 0, loss: 0, val: 0, n: 0 };
+        a.ord += l.ord; a.got += l.got; a.loss += l.loss; if(l.price) a.val += l.loss * l.price; if(l.loss) a.n++;
+      });
+      else {
+        const k = ls_.view === 'rep' ? (g.rep || '—') : g.acct;
+        const a = agg[k] = agg[k] || { t: ls_.view === 'rep' ? (g.rep || '—') : g.name, code: ls_.view === 'rep' ? '' : g.acct, ord: 0, got: 0, loss: 0, val: 0, n: 0, docs: 0 };
+        a.ord += g.ord; a.got += g.got; a.loss += g.loss; a.val += g.val; a.docs++; if(g.st === 'none') a.n++;
+      }
+    });
+    return Object.keys(agg).map(function(k){ return agg[k]; }).sort(function(a, b){ return (b.loss - a.loss) || (b.ord - a.ord); }).map(function(a){
+      const sub = ls_.view === 'item'
+        ? 'طلب ' + fmt(a.ord) + ' • اتفوتر ' + fmt(a.got) + (a.n ? ' • ناقص في ' + a.n + ' طلبية' : '') + (a.val ? ' • ~' + fmt(Math.round(a.val)) + ' ج' : '')
+        : a.docs + ' طلبية • طلب ' + fmt(a.ord) + ' • اتفوتر ' + fmt(a.got) + (a.n ? ' • ' + a.n + ' من غير فاتورة' : '') + (a.val ? ' • ~' + fmt(Math.round(a.val)) + ' ج' : '');
+      return lsRow_(escapeHtml(a.t) + (a.code ? ' <span class="oCode">' + escapeHtml(a.code) + '</span>' : ''), sub, a);
+    }).join('');
   }
   // ================== 🏦 الشيكات (بيتا) ==================
   // من جهاز الشركة (field-reports, kind=cheques): كل شيك وحالته من ملف «تحليلي شيكات العملاء»، والمندوب من يومية المبيعات.
