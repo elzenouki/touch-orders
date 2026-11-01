@@ -5956,7 +5956,18 @@
     return best * slot.n;
   }
   // بنجرب طريقتين للرص (البواقي مشتركة / كل صنف صفوف كاملة بالاتجاهين) وناخد الأحسن
+  // طريقة الحساب: «count» (الافتراضي) = بالعدد اللي في جدول سعات العربيات — كل صنف: الكمية ÷ العربية تشيل كام منه
+  // (رقمك اليدوي لو موجود، وإلا الرقم المحسوب من الكرتونة اللي ظاهر باهت في الجدول) • «pack» = الرص الحقيقي بالمقاسات
+  function ldMode_(){ try{ return localStorage.getItem('tf_ld_mode') || 'count'; }catch(e){ return 'count'; } }
+  function ldSetMode_(m){ try{ localStorage.setItem('tf_ld_mode', m); }catch(e){} toast_(m === 'count' ? '✔ الحساب بالعدد اللي في الجدول' : '✔ الحساب بالرص والمقاسات'); ldRenderSettings_(); }
   function ldPackFrac_(items, v, idx, spec){
+    if(ldMode_() === 'count'){
+      let f = 0, est = 0, known = 0;
+      const agg = {};
+      items.forEach(function(it){ const k = it.code || it.name; (agg[k] = agg[k] || { code: it.code, name: it.name, qty: 0 }).qty += Number(it.qty) || 0; });
+      Object.keys(agg).forEach(function(k){ const r = ldItemFrac_(agg[k], v, idx, spec); if(r.known){ known++; f += r.f; if(r.est) est++; } });
+      return { f: f, est: est, known: known };
+    }
     const a = ldPackOnce_(items, v, idx, spec, false), b = ldPackOnce_(items, v, idx, spec, true);
     return b.f < a.f ? b : a;
   }
@@ -7432,7 +7443,12 @@
     ld_.caps.forEach(function(c){ const r = rows[c.c] = rows[c.c] || { c: c.c, n: c.n || '', q: {} }; r.q[c.v] = c.q; if(c.n) r.n = c.n; });
     Object.keys(CARTON_.code).forEach(function(c){ rows[c] = rows[c] || { c: c, n: ldItemName_(c), q: {} }; });
     const isWhR = ld_.role === 'warehouse';
-    let h = '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
+    const md = ldMode_();
+    let h = '<div class="lBox" style="margin-bottom:10px;"><b>طريقة حساب التحميل</b><div class="aBtns" style="margin-top:6px;">' +
+      '<button type="button" class="' + (md === 'count' ? 'ok' : '') + '" onclick="ldSetMode_(\'count\')">🔢 بالعدد اللي في الجدول</button>' +
+      '<button type="button" class="' + (md === 'pack' ? 'ok' : '') + '" onclick="ldSetMode_(\'pack\')">📦 بالرص والمقاسات</button></div>' +
+      '<div class="note" style="margin-top:6px;">' + (md === 'count' ? '🔢 كل صنف: الكمية ÷ العربية تشيل كام منه. الرقم اللي كتبته إنت (الأصفر) هو اللي بيتحسب، والصنف اللي مالوش رقم بياخد الرقم الباهت.' : '📦 البرنامج بيرص الكراتين فعلًا جوه العربية بالمقاسات (أعمدة لحد السقف وصفوف بالعرض).') + '</div></div>';
+    h += '<div class="note" style="margin-bottom:8px;">📦 <b>الأساس مقاس الكرتونة</b>: الرقم الباهت في كل خانة هو اللي العربية تشيله من الصنف ده لوحده محسوب من مقاس كرتونته ووزنه. ' +
       '<b>اكتب رقم بس لو الصنف ده بيتحمّل غير كده</b> (استثناء) — ساعتها رقمك هو اللي بيتحسب.</div>';
     h += '<button type="button" class="aGo wide" onclick="ldCapsExcel_()">📥 نزّل Excel المقاسات والأعداد</button>' +
       '<button type="button" class="aGo wide" style="margin:8px 0 10px;" onclick="this.nextElementSibling.click()">📤 ارفع Excel بعد التعديل</button><input type="file" accept=".xlsx" hidden onchange="ldCapsImport_(this)">';
