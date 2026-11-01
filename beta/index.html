@@ -4125,7 +4125,7 @@
       const st = pk === 'order' ? stkOk_(m.a.code) : null;
       return '<div class="ofRow' + (l ? ' on' : '') + (st === false ? ' stkNo' : '') + '" data-k="' + escapeHtml(m.key) + '">' +
         '<span class="ofNo">' + (n + 1) + '</span>' +
-        '<span class="ofName">' + escapeHtml(m.a.name) + '<small>' + (m.a.code ? escapeHtml(m.a.code) : '') + '<span class="ofStk' + (st == null ? '' : st ? ' ok' : ' no') + '">' + stkTag_(st) + '</span></small></span>' +
+        '<span class="ofName">' + escapeHtml(m.a.name) + '<small>' + (m.a.code ? escapeHtml(m.a.code) : '') + '<span class="ofStk' + (st == null ? '' : st ? ' ok' : ' no') + '">' + stkTag_(st, m.a.code) + '</span></small></span>' +
         '<input type="text" class="ofIn" inputmode="none" readonly tabindex="-1" dir="ltr" autocomplete="off" aria-label="كمية ' + escapeHtml(m.a.name) + '" value="' + (l ? l.qty : '') + '">' +
         '</div>';
     };
@@ -4164,7 +4164,7 @@
       if(pk === 'ret') lines.push({ code: m.a.code, name: m.a.name, qty: qty, reason: retDefReason_(), condition: state.visit.retCond, own: false });
       else {
         lines.push({ code: m.a.code, name: m.a.name, qty: qty });
-        if(stkOk_(m.a.code) === false) toast_('⚠️ ' + m.a.name + ' غير متاح في المخزن دلوقتي');
+        if(stkOk_(m.a.code) === false){ const n = stkLeft_(stkRow_(m.a.code)); toast_('⚠️ ' + m.a.name + ' غير متاح في المخزن' + (n ? ' — فاضل ' + fmt(n) + ' بس' : ' دلوقتي')); }
       }
     }
   }
@@ -9920,13 +9920,19 @@
   function stkOk_(code){
     stkLoadCache_();
     if(!stk_.rows || !code) return null;
-    if(stk_._src !== stk_.rows){ stk_._m = {}; stk_.rows.forEach(function(r){ stk_._m[String(r.code).trim()] = !!r.ok; }); stk_._src = stk_.rows; }
-    const c = String(code).trim();
-    if(c in stk_._m) return stk_._m[c];
-    const b = ldBaseCode_(c);
-    return b in stk_._m ? stk_._m[b] : null;
+    const r = stkRow_(code);
+    return r ? !!r.ok : null;
   }
-  function stkTag_(st){ return st == null ? '' : st ? '✅ متاح' : '❌ غير متاح'; }
+  function stkRow_(code){
+    stkLoadCache_();
+    if(!stk_.rows || !code) return null;
+    if(stk_._src !== stk_.rows){ stk_._m = {}; stk_.rows.forEach(function(r){ stk_._m[String(r.code).trim()] = r; }); stk_._src = stk_.rows; }
+    const c = String(code).trim();
+    return stk_._m[c] || stk_._m[ldBaseCode_(c)] || null;
+  }
+  // غير متاح وفاضل منه شوية (200 فما تحت): بنكتب العدد
+  function stkLeft_(r){ return r && !r.ok && Number(r.qty) > 0 ? Number(r.qty) : 0; }
+  function stkTag_(st, code){ if(st == null) return ''; if(st) return '✅ متاح'; const n = stkLeft_(stkRow_(code)); return n ? '❌ غير متاح — فاضل ' + fmt(n) : '❌ غير متاح'; }
   function stkWarm_(){
     stkLoadCache_();
     if(stk_.busy || (stk_.got && Date.now() - stk_.got < 3 * 3600e3)) return;
@@ -9945,7 +9951,7 @@
       const m = by[row.dataset.k]; if(!m) return;
       const st = stkOk_(m.a.code), tg = row.querySelector('.ofStk');
       row.classList.toggle('stkNo', st === false);
-      if(tg){ tg.className = 'ofStk' + (st == null ? '' : st ? ' ok' : ' no'); tg.textContent = stkTag_(st); }
+      if(tg){ tg.className = 'ofStk' + (st == null ? '' : st ? ' ok' : ' no'); tg.textContent = stkTag_(st, m.a.code); }
     });
   }
   function stkRender_(){
@@ -9959,7 +9965,7 @@
     h += '<div class="pfMonths csaChips">' + Object.keys(F).map(function(k){ return '<button type="button" class="' + (stk_.f === k ? 'on' : '') + '" onclick="stkSet_(\'f\', \'' + k + '\')">' + F[k] + '</button>'; }).join('') + '</div>';
     h += '<input type="search" placeholder="🔎 اسم الصنف أو الكود..." value="' + escapeHtml(stk_.q) + '" oninput="this.setAttribute(\'value\', this.value); stk_.q=this.value; stkList_()" style="margin:4px 0 10px;">';
     h += '<div id="stkList"></div>';
-    h += '<div class="note" style="margin-top:10px;">' + (state.isAdmin ? 'المندوب بيشوف «متاح» أو «غير متاح» بس من غير الأرقام. ' : '') + 'الصنف اللي فاضل منه ' + stk_.limit + ' قطعة أو أقل بيظهر «غير متاح».</div>';
+    h += '<div class="note" style="margin-top:10px;">' + (state.isAdmin ? 'المندوب بيشوف «متاح» أو «غير متاح»، والعدد بس لو الصنف غير متاح وفاضل منه شوية. ' : '') + 'الصنف اللي فاضل منه ' + stk_.limit + ' قطعة أو أقل بيظهر «غير متاح».</div>';
     ldBody_().innerHTML = h;
     stkList_();
   }
@@ -9974,7 +9980,7 @@
     box.innerHTML = list.length ? list.map(function(r){
       return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(r.name || r.code) + '</b>' +
         (state.isAdmin && r.qty != null ? '<span class="amt" style="color:' + (r.ok ? 'var(--o3)' : '#a8432f') + '">' + fmt(r.qty) + '</span>' : '') + '</div>' +
-        '<small>كود ' + escapeHtml(r.code) + ' • ' + (r.ok ? '<span class="chqSt done" style="margin:0;">✅ متاح</span>' : '<span class="chqSt bounced" style="margin:0;">❌ غير متاح</span>') + '</small></div>';
+        '<small>كود ' + escapeHtml(r.code) + ' • ' + (r.ok ? '<span class="chqSt done" style="margin:0;">✅ متاح</span>' : '<span class="chqSt bounced" style="margin:0;">❌ غير متاح' + (!state.isAdmin && stkLeft_(r) ? ' — فاضل ' + fmt(stkLeft_(r)) : '') + '</span>') + '</small></div>';
     }).join('') : '<div class="empty">مفيش أصناف هنا</div>';
   }
   // ================== 📉 الفاقد من الطلبات (بيتا) ==================
