@@ -10025,8 +10025,9 @@
       const docs = ((O && O.docs) || []).filter(function(d){ return d.type !== 'مرتجع' && (d.lines || []).length; });
       const sys = await sysCodes_().catch(function(){ return {}; }) || {};
       const custs = (state.rep && state.rep.customers) || [];
+      // كود السيستم: لو متسجل له كود مختلف بناخده، وإلا كود التطبيق نفسه (أغلب العملاء كودهم واحد في الاتنين)
       const acctOf = function(code){ const c = custs.find(function(x){ return x.code === code; }); return String((c && c.system_code) || sys[code] || '').trim(); };
-      docs.forEach(function(d){ d._acct = acctOf(d.customerCode); d._ymd = lsYmd_(d.date); });
+      docs.forEach(function(d){ const a = acctOf(d.customerCode); d._acct = a || String(d.customerCode || '').trim(); d._same = !a; d._ymd = lsYmd_(d.date); });
       const accts = Array.from(new Set(docs.map(function(d){ return d._acct; }).filter(Boolean)));
       const R = accts.length ? await lsApi_(ls_.from, ls_.to, accts) : { rows: [] };
       ls_.data = lsBuild_(docs, (R && R.rows) || []);
@@ -10047,7 +10048,7 @@
     docs.forEach(function(d){
       if(!d._acct) return;
       const k = d._acct + '|' + d._ymd;
-      const g = groups[k] = groups[k] || { acct: d._acct, ymd: d._ymd, code: d.customerCode, name: d.customerName, rep: d.rep || '', ids: [], lines: {} };
+      const g = groups[k] = groups[k] || { acct: d._acct, same: d._same, ymd: d._ymd, code: d.customerCode, name: d.customerName, rep: d.rep || '', ids: [], lines: {} };
       g.ids.push(d.orderId);
       d.lines.forEach(function(l){
         const c = String(l.itemCode || l.itemName); const q = Math.abs(Number(l.qty) || 0); if(!q) return;
@@ -10080,14 +10081,17 @@
         orders.push(g);
       });
     });
-    const noAcct = docs.filter(function(d){ return !d._acct; });
+    // عميل كوده في التطبيق هو نفسه (من غير كود سيستم متسجل) ومالوش ولا فاتورة في المدة: غالبًا كوده مختلف في السيستم — مابنحسبوش فاقد
+    const unk = orders.filter(function(g){ return g.same && !(inv[g.acct] || []).length && g.st !== 'wait'; });
+    unk.forEach(function(g){ g.st = 'unk'; });
+    const noAcct = docs.filter(function(d){ return !d._acct; }).concat(unk.map(function(g){ return { customerName: g.name }; }));
     return { orders: orders.sort(function(x, y){ return y.ymd < x.ymd ? -1 : y.ymd > x.ymd ? 1 : y.loss - x.loss; }), noAcct: noAcct };
   }
   function lsSet_(k, v){ ls_[k] = v; lsRender_(); }
   function lsPct_(a, b){ return b ? Math.round(a / b * 100) : 0; }
   function lsRender_(){
     const box = document.getElementById('lsOut'); if(!box || !ls_.data) return;
-    const all = ls_.data.orders.filter(function(g){ return g.st !== 'wait'; });
+    const all = ls_.data.orders.filter(function(g){ return g.st !== 'wait' && g.st !== 'unk'; });
     const reps = {}; all.forEach(function(g){ reps[g.rep || '—'] = 1; });
     const list = all.filter(function(g){ return !ls_.rep || (g.rep || '—') === ls_.rep; });
     const wait = ls_.data.orders.filter(function(g){ return g.st === 'wait' && (!ls_.rep || (g.rep || '—') === ls_.rep); });
@@ -10102,7 +10106,7 @@
     const V = { item: '📦 حسب الصنف', rep: '🧭 حسب المندوب', cust: '👥 حسب العميل', ord: '🧾 الطلبيات' };
     h += '<div class="pfMonths csaChips">' + Object.keys(V).map(function(k){ return '<button type="button" class="' + (ls_.view === k ? 'on' : '') + '" onclick="lsSet_(\'view\', \'' + k + '\')">' + V[k] + '</button>'; }).join('') + '</div>';
     h += lsView_(list);
-    if(ls_.data.noAcct.length) h += '<div class="note" style="margin-top:8px; color:var(--gold-d);">⚠️ ' + ls_.data.noAcct.length + ' طلبية لعملاء مالهمش كود سيستم — مش محسوبة: ' + escapeHtml(Array.from(new Set(ls_.data.noAcct.map(function(d){ return d.customerName; }))).slice(0, 8).join('، ')) + '</div>';
+    if(ls_.data.noAcct.length) h += '<div class="note" style="margin-top:8px; color:var(--gold-d);">⚠️ ' + ls_.data.noAcct.length + ' طلبية لعملاء مالقيناش ليهم ولا فاتورة في المدة (يا إما ماتفوترلهمش خالص، يا إما كودهم في السيستم مختلف — اكتبه في بيانات العميل) — مش محسوبة: ' + escapeHtml(Array.from(new Set(ls_.data.noAcct.map(function(d){ return d.customerName; }))).slice(0, 8).join('، ')) + '</div>';
     h += '<div class="note" style="margin-top:8px;">كل طلبية بتتقارن بفواتير نفس العميل من يوم الطلبية لحد قبل طلبيته اللي بعدها (بحد أقصى 12 يوم). القيمة تقريبية بسعر آخر فاتورة للصنف.</div>';
     box.innerHTML = h;
   }
