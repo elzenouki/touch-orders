@@ -6714,7 +6714,7 @@
     const hasCaps = ldHasCap_();
     // العربيات المتاحة متحددة: كل عربية بتتملي بأقدم الطلبيات الأول + القريبين منهم لحد ما تتملي، والباقي يستنى
     const fleetGroups = [];
-    if(hasCaps && ldFleetOn_()){
+    if(false && hasCaps && ldFleetOn_()){ // الاقتراح مابقاش مربوط بعدد العربيات المتاحة
       const fl = ldFleet_(), trucks = [];
       (ld_.veh || []).filter(function(v){ return v.active !== false; }).forEach(function(v){ for(let n = 0; n < (+fl[v.id] || 0); n++) trucks.push(v); });
       trucks.sort(function(a, b){ return ldVehSpec_(b).vol - ldVehSpec_(a).vol; });
@@ -6800,6 +6800,29 @@
       });
       if(cur.length) groups.push(cur);
     });
+    // الرحلات اللي ماتملاش ولا عربية 90%: بنحاول ندمج كل اتنين قريبين من بعض (لحد ضعف المسافة) لو العربية تشيلهم
+    const bestPct = function(list){ const sg = ldSuggest_(ldFill_(ldStopItems_(list))); return sg ? sg.pct : 999; };
+    let merged = true;
+    while(hasCaps && merged){
+      merged = false;
+      const low = groups.map(function(g, i){ return { g: g, i: i, p: bestPct(g) }; }).filter(function(x){ return x.p < LD_FULL_MIN_; });
+      for(let a = 0; a < low.length && !merged; a++){
+        let best = null;
+        for(let b = 0; b < low.length; b++){
+          if(a === b) continue;
+          let d = Infinity;
+          low[a].g.forEach(function(x){ low[b].g.forEach(function(y){ if(x.lat != null && y.lat != null) d = Math.min(d, distM_(x.lat, x.lng, y.lat, y.lng)); else if(x.lat == null && y.lat == null && (x.area || '') === (y.area || '')) d = 0; }); });
+          if(d > LD_MAX_GAP_KM_ * 2000) continue;
+          const m = low[a].g.concat(low[b].g);
+          if(!fits(m)) continue;
+          if(!best || d < best.d) best = { b: b, d: d, m: m };
+        }
+        if(best){
+          const ia = low[a].i, ib = low[best.b].i;
+          groups[Math.min(ia, ib)] = best.m; groups.splice(Math.max(ia, ib), 1); merged = true;
+        }
+      }
+    }
     const all = fleetGroups.map(function(x){ return { g: x.stops, v: x.v }; }).concat(groups.map(function(g){ return { g: g, v: null }; }));
     return all.map(function(x){
       const g = x.g;
@@ -6826,7 +6849,6 @@
   function ldSuggestRoutes_(){
     if(!ld_.pending.length) return;
     ld_.plan = ldPlanRoutes_();
-    ldAllocFleet_(ld_.plan);
     dlPush_(); dlBackBtn_();
     document.getElementById('dlTitle').textContent = '🧭 خطوط سير مقترحة';
     document.getElementById('dlSub').textContent = ld_.plan.length + ' رحلة من ' + ld_.pending.length + ' طلبية — حسب قرب التجار من بعض';
@@ -6838,7 +6860,6 @@
     const noLocCount = ld_.plan.reduce(function(t, r){ return t + r.stops.filter(function(s){ return s.lat == null; }).length; }, 0);
     if(noLocCount) h += '<div class="note" style="margin-bottom:10px;">📍 ' + noLocCount + ' تاجر مالهمش لوكيشن — اتجمعوا حسب المنطقة. ثبّت مواقعهم في الزيارة الجاية عشان التقسيم يبقى أدق.</div>';
     h += ldDepBox_('ldRePlan_()');
-    h += ldFleetBox_();
     if(ld_.planOff && ld_.planOff.length) h += '<div class="note" style="margin-bottom:10px; color:#a8432f;">⛔ ' + ld_.planOff.length + ' تاجر أجازتهم يوم ' + CT_DAYS_[ldWd_()] + ' واتشالوا من الاقتراح: ' +
       escapeHtml(ld_.planOff.map(function(s){ return s.name || s.customer_code; }).join('، ')) + '</div>';
     if(!ct_.missing && !ldAnyClose_(ld_.pending)) h += '<div class="note" style="margin-bottom:10px;">⏰ مفيش ولا تاجر هنا متسجل له ميعاد قفل — الترتيب بالقرب بس. المندوب يكتب الميعاد من شاشة زيارة التاجر.</div>';
@@ -6861,21 +6882,22 @@
           : '<button type="button" class="ok" onclick="ldPickPlan_(' + i + ')">اختار الرحلة دي ←</button>') +
         (r.stops.some(function(s){ return s.lat != null; }) ? '<button type="button" onclick="ldPlanMap_(' + i + ')">🗺 الخريطة</button>' : '') + '</div></div>';
     });
-    if(ldFleetOn_()){
+    if(ldHasCap_()){
       const go = [], wait = [];
-      ld_.plan.forEach(function(r, i){ (r.assign ? go : wait).push(i); });
+      ld_.plan.forEach(function(r, i){ ((r.tooBig || (r.pct != null && r.pct >= LD_FULL_MIN_)) ? go : wait).push(i); });
       const pcsOf = function(L){ return L.reduce(function(t, i){ return t + ld_.plan[i].pcs; }, 0); };
-      h += '<div class="sectionLabel" style="margin:6px 0 8px;">🚚 هتطلع يوم التسليم: ' + go.length + ' رحلة • ' + fmt(pcsOf(go)) + ' قطعة</div>' +
-        (go.length ? go.map(function(i){ return cards[i]; }).join('') : '<div class="empty">مفيش عربيات متاحة — حدد العربيات المتاحة فوق</div>');
-      if(wait.length) h += '<details style="margin-top:12px;"><summary class="sectionLabel" style="cursor:pointer; margin:0 0 8px;">⏳ مستنية عربية (' + wait.length + ' رحلة • ' + fmt(pcsOf(wait)) + ' قطعة) — دوس تشوفهم</summary>' +
+      h += '<div class="sectionLabel" style="margin:6px 0 8px;">🚚 عربيات مليانة (' + LD_FULL_MIN_ + '% أو أكتر): ' + go.length + ' رحلة • ' + fmt(pcsOf(go)) + ' قطعة</div>' +
+        (go.length ? go.map(function(i){ return cards[i]; }).join('') : '<div class="empty">لسه مفيش طلبيات تملا عربية ' + LD_FULL_MIN_ + '% — استنى طلبيات تانية</div>');
+      if(wait.length) h += '<details style="margin-top:12px;"><summary class="sectionLabel" style="cursor:pointer; margin:0 0 8px;">⏳ مش مليانة لسه — أقل من ' + LD_FULL_MIN_ + '% (' + wait.length + ' رحلة • ' + fmt(pcsOf(wait)) + ' قطعة) — بتستنى طلبيات تكمّلها</summary>' +
         wait.map(function(i){ return cards[i]; }).join('') + '</details>';
     } else {
-      h += '<div class="note" style="margin-bottom:8px; color:var(--gold-d);">💡 حدد «العربيات المتاحة» فوق عشان الاقتراح يطلّع رحلات على قد العربيات بس، والطلبيات المتأخرة الأول.</div>' + cards.join('');
+      h += cards.join('');
     }
     h += '<div class="note" style="margin-top:8px;">الأولوية للطلبيات المتأخرة: الرحلات بتتكون من أقدم الطلبيات الأول، والعربيات المتاحة بتتوزع على الأقدم. لما تختار رحلة، تقدر تعدّل الترتيب والعربية قبل ما تبعت.</div>';
     ldBody_().innerHTML = h;
   }
-  function ldRePlan_(){ ld_.plan = ldPlanRoutes_(); ldAllocFleet_(ld_.plan); ldRenderPlan_(); }
+  const LD_FULL_MIN_ = 90; // أقل امتلاء للعربية في الاقتراح
+  function ldRePlan_(){ ld_.plan = ldPlanRoutes_(); ldRenderPlan_(); }
 
   // ================== 🚚 العربيات المتاحة (بيتا) ==================
   // المدير بيكتب عنده كام عربية من كل نوع، والاقتراح بيوزّع الرحلات عليها بالأولوية (الأقدم الأول):
