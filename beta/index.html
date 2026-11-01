@@ -4827,6 +4827,11 @@
       ['التاريخ', (o.date || '') + (o.time ? '  ' + o.time : '')], ['المندوب', o.rep || (state.user && state.user.name) || ''],
       ['كود التاجر', o.customer.code], ['اسم التاجر', o.customer.name],
     ];
+    if(o.customer.sys) info.push(['كود السيستم', o.customer.sys]);
+    if(o.customer.phone) info.push(['التليفون', o.customer.phone]);
+    if(o.customer.address) info.push(['العنوان', o.customer.address]);
+    if(o.customer.area) info.push(['المنطقة', o.customer.area]);
+    if(o.customer.lat != null && o.customer.lng != null) info.push(['الموقع', 'https://maps.google.com/?q=' + o.customer.lat + ',' + o.customer.lng]);
     if(o.notes) info.push(['ملاحظات', o.notes]);
     let row = 1;
     info.forEach(function(r){
@@ -5221,7 +5226,26 @@
           (ret && (l.reason || l.condition) ? '<small>' + escapeHtml([l.reason, l.condition].filter(Boolean).join(' • ')) + '</small>' : '') + '</span>' +
           '<span class="dQty">' + (ret ? '-' : '') + fmt(l.qty) + '</span></div>';
       }).join('') + (d.notes ? '<div class="dNotes">📝 ' + escapeHtml(d.notes) + '</div>' : '') +
-      (d.visitId ? '<button type="button" class="rLink" data-vid="' + escapeHtml(d.visitId) + '">👣 الزيارة</button>' : '') + '</div></details>';
+      (d.visitId ? '<button type="button" class="rLink" data-vid="' + escapeHtml(d.visitId) + '">👣 الزيارة</button>' : '') +
+      '<button type="button" class="rLink" data-xl="' + escapeHtml(d.orderId) + '">📥 Excel ببيانات العميل</button></div></details>';
+  }
+  // ملف إكسل لطلبية/مرتجع واحد من التقارير — ومعاه بيانات العميل (التليفون والعنوان والمنطقة وكود السيستم والموقع)
+  async function dlDocXlsx_(id){
+    const d = (dl_.docs || {})[id]; if(!d) return;
+    showLoading(true);
+    try{
+      let c = state.rep && (state.rep.customers || []).find(function(x){ return x.code === d.customerCode; });
+      if(!c && state.isAdmin){ const L = await admCall_('cust_list', { q: d.customerCode }).catch(function(){ return []; }); c = (L || []).find(function(x){ return String(x.code) === String(d.customerCode); }); }
+      c = c || {};
+      const sys = c.system_code || (await sysCodes_())[d.customerCode] || '';
+      const ret = d.type === 'مرتجع';
+      const lines = d.lines.map(function(l){ return { code: l.itemCode, name: l.itemName, qty: Math.abs(Number(l.qty) || 0), reason: l.reason, condition: l.condition }; });
+      const o = { customer: { code: d.customerCode, name: d.customerName, phone: c.phone || '', address: c.address || '', area: c.area || '', sys: sys, lat: c.lat, lng: c.lng },
+        rep: d.rep || '', date: d.date || '', time: d.time || '', notes: d.notes || '', items: ret ? [] : lines, returns: ret ? lines : [], orderId: ret ? '' : d.orderId, returnId: ret ? d.orderId : '' };
+      const r = await buildOrderXlsx_(o);
+      showLoading(false);
+      await shareOrDownload_(r.blob, r.fileName, 'share');
+    }catch(err){ showLoading(false); showMsg('ماقدرتش أعمل الملف: ' + ((err && err.message) || err), 'error'); }
   }
   // ---------- النسخ: كل صنف في سطر: الكود ثم الكمية (عمودين — تتلزق في الإكسل أو السيستم على طول) ----------
   function linesToClip_(lines){
@@ -5282,6 +5306,8 @@
     if(onCopyClick_(e)) return;
     const it = e.target.closest('.tapItem[data-i]');
     if(it && dl_.items){ dlItemCustomers_(dl_.items[Number(it.dataset.i)]); return; }
+    const xl = e.target.closest('[data-xl]');
+    if(xl){ dlDocXlsx_(xl.dataset.xl); return; }
     const row = e.target.closest('.tapRow[data-vid], .rLink[data-vid]');
     if(row) openVisitDetail_(row.dataset.vid);
   });
