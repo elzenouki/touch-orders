@@ -6763,8 +6763,8 @@
     const groups = [];
     const left = loc.slice();
     while(left.length){
-      // الأولوية للطلبيات المتأخرة: الرحلة بتبدأ بأقدم تاجر (ولو قدّ بعض: الأبعد عن المخزن)
-      left.sort(function(a, b){ return (b.maxDays - a.maxDays) || (distM_(center.lat, center.lng, b.lat, b.lng) - distM_(center.lat, center.lng, a.lat, a.lng)); });
+      // الرحلة بتبدأ بأبعد تاجر عن المخزن، وبتلم اللي حواليه اللي تلحق تسلّمهم قبل ما يقفلوا
+      left.sort(function(a, b){ return distM_(center.lat, center.lng, b.lat, b.lng) - distM_(center.lat, center.lng, a.lat, a.lng); });
       const r = [left.shift()];
       if(fits(r)){
         for(;;){
@@ -6775,8 +6775,7 @@
             r.forEach(function(x){ d = Math.min(d, distM_(x.lat, x.lng, s.lat, s.lng)); });
             if(d <= LD_MAX_GAP_KM_ * 1000) cands.push({ i: i, d: d });
           });
-          // الأقرب الأول — بس كل يوم تأخير بيقرّب التاجر 2 كم (عشان المتأخر يركب قبل الجديد اللي جنبه)
-          cands.sort(function(a, b){ return (a.d / 1000 - 2 * left[a.i].maxDays) - (b.d / 1000 - 2 * left[b.i].maxDays); });
+          cands.sort(function(a, b){ return a.d - b.d; }); // الأقرب الأول
           let took = false;
           for(let k = 0; k < cands.length; k++){
             const next = r.concat([left[cands[k].i]]);
@@ -6800,7 +6799,7 @@
       });
       if(cur.length) groups.push(cur);
     });
-    // الرحلات اللي ماتملاش ولا عربية 90%: بنحاول ندمج كل اتنين قريبين من بعض (لحد ضعف المسافة) لو العربية تشيلهم
+    // الرحلات اللي ماتملاش ولا عربية 90%: بنحاول ندمج كل اتنين قريبين من بعض لو العربية تشيلهم والعربية تلحق تسلّم الكل
     const bestPct = function(list){ const sg = ldSuggest_(ldFill_(ldStopItems_(list))); return sg ? sg.pct : 999; };
     let merged = true;
     while(hasCaps && merged){
@@ -6812,9 +6811,10 @@
           if(a === b) continue;
           let d = Infinity;
           low[a].g.forEach(function(x){ low[b].g.forEach(function(y){ if(x.lat != null && y.lat != null) d = Math.min(d, distM_(x.lat, x.lng, y.lat, y.lng)); else if(x.lat == null && y.lat == null && (x.area || '') === (y.area || '')) d = 0; }); });
-          if(d > LD_MAX_GAP_KM_ * 2000) continue;
+          if(d > LD_MAX_GAP_KM_ * 1000) continue;
           const m = low[a].g.concat(low[b].g);
           if(!fits(m)) continue;
+          if(!m.every(ldWeekStop_) && ldLateCount_(m) > ldLateCount_(low[a].g) + ldLateCount_(low[b].g)) continue; // مايزوّدش حد مش هيتلحق
           if(!best || d < best.d) best = { b: b, d: d, m: m };
         }
         if(best){
@@ -6893,7 +6893,7 @@
     } else {
       h += cards.join('');
     }
-    h += '<div class="note" style="margin-top:8px;">الأولوية للطلبيات المتأخرة: الرحلات بتتكون من أقدم الطلبيات الأول، والعربيات المتاحة بتتوزع على الأقدم. لما تختار رحلة، تقدر تعدّل الترتيب والعربية قبل ما تبعت.</div>';
+    h += '<div class="note" style="margin-top:8px;">الرحلة بتلم التجار القريبين اللي العربية تلحق تسلّمهم قبل ما يقفلوا، وتظهر هنا لو العربية مليانة ' + LD_FULL_MIN_ + '% أو أكتر. لما تختار رحلة، تقدر تعدّل الترتيب والعربية قبل ما تبعت.</div>';
     ldBody_().innerHTML = h;
   }
   const LD_FULL_MIN_ = 90; // أقل امتلاء للعربية في الاقتراح
