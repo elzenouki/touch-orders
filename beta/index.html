@@ -10201,7 +10201,7 @@
     const inRep = all.filter(function(r){ return !bl_.rep || (r.rep || '—') === bl_.rep; });
     const ageSum = {}; inRep.forEach(function(r){ const k = blAge_(r); const x = ageSum[k] = ageSum[k] || { n: 0, t: 0 }; x.n++; x.t += r.bal; });
     const tot = inRep.reduce(function(t, r){ return t + r.bal; }, 0);
-    document.getElementById('dlSub').textContent = (bl_.rep ? (bl_.rep === '—' ? 'من غير مندوب' : bl_.rep) : 'كل المناديب') + (bl_.up ? ' • الأرصدة متحدثة ' + ovAgo_(bl_.up) : '');
+    document.getElementById('dlSub').textContent = (bl_.rep ? (bl_.rep === '—' ? 'من غير مندوب' : bl_.rep) : 'كل المناديب') + (bl_.up ? ' • الأرصدة متحدثة ' + ovAgo_(String(bl_.up).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00')) : '');
     let h = '<div class="ovHero"><div><span>إجمالي الأرصدة</span><b>' + fmt(Math.round(tot)) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + inRep.length + '</b></div></div>';
     h += '<div class="pfMonths csaChips"><button type="button" class="' + (!bl_.rep ? 'on' : '') + '" onclick="blSet_(\'rep\', \'\')">كل المناديب</button>' +
       Object.keys(reps).sort().map(function(r){ return '<button type="button" class="' + (bl_.rep === r ? 'on' : '') + '" onclick="blSet_(\'rep\', ' + escapeHtml(JSON.stringify(r)) + ')">' + escapeHtml(r === '—' ? 'من غير مندوب' : r) + '</button>'; }).join('') + '</div>';
