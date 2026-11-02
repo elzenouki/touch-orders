@@ -1419,6 +1419,13 @@
   .ovBar{height:7px; background:#eee9dc; border-radius:5px; margin:7px 0 4px; overflow:hidden;} .ovBar i{display:block; height:100%; background:linear-gradient(90deg,#a8432f,#d9a21b); border-radius:5px;}
   .ovRep small{color:var(--omut); font-size:11.5px;}
   .ovAmt{flex:none; font-weight:900; font-size:16px; color:#a8432f; direction:ltr;}
+  .blAges{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;}
+  .blAge{border:0; border-radius:14px; padding:10px; text-align:right; font-family:inherit; background:var(--card,#fff); box-shadow:inset 0 0 0 1.5px var(--line,#e2dfcf); cursor:pointer;}
+  .blAge span{display:block; font-size:12px; font-weight:800;} .blAge b{display:block; font-size:18px; direction:ltr; text-align:right;} .blAge small{font-size:11px; color:var(--muted);}
+  .blAge.on{box-shadow:inset 0 0 0 2.5px currentColor;}
+  .blAge.a{color:#2b7a4f;} .blAge.b{color:#a8781a;} .blAge.c{color:#c0602a;} .blAge.d{color:#a8432f;}
+  .blDays{display:block; margin-top:3px; font-size:11px; font-weight:800; border-radius:8px; padding:2px 6px; text-align:center; background:#eef0e3; color:#56672f;}
+  .blDays.a{background:#e3f0e6; color:#2b7a4f;} .blDays.b{background:#fbf1d8; color:#a8781a;} .blDays.c{background:#fbe6d6; color:#c0602a;} .blDays.d{background:#f8e3df; color:#a8432f;}
   .ovVisit{background:#fbece8; color:#a8432f; border:1px solid #e8b4a8; border-radius:12px; padding:8px 12px; margin-top:8px; font-weight:700; font-size:13.5px;}
   .ovVisit b{direction:ltr; display:inline-block;}
 
@@ -1748,6 +1755,7 @@
         <button type="button" class="toolBtn" onclick="openSprice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>الأسعار الخاصة</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
+        <button type="button" class="toolBtn" onclick="openBalances_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>أرصدة العملاء</button>
         <button type="button" class="toolBtn" onclick="openLoss_()"><span class="tIc t4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l7 7 4-4 7 7"/><path d="M21 11v5h-5"/></svg></span>الفاقد من الطلبات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
         <button type="button" class="toolBtn" onclick="openMyWallet_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2M3 10h18"/></svg></span>حافظتي</button>
@@ -2928,7 +2936,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.32.0-beta';
+  const APP_VERSION_ = 'v1.33.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -9743,7 +9751,7 @@
   // بننقل نفس الأزرار (بنفس الوظايف والعدّادات) لـ 5 تابات — أي زرار مش متوزّع بيروح في «المزيد» عشان مايضيعش
   const ADM_TABS2_ = [
     ['today', '🏠', 'النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('report')"]],
-    ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
+    ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openBalances_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
     ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openInvSearch_()", "openScreen('unvisited')"]],
     ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openLoss_()", "openScreen('map')", "openOrdersAccess_()"]],
     ['more', '☰', 'المزيد', ["openStock_()", "openScreen('items')", "openScreen('export')", "openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
@@ -10148,6 +10156,84 @@
       return lsRow_(escapeHtml(a.t) + (a.code ? ' <span class="oCode">' + escapeHtml(a.code) + '</span>' : ''), sub, a);
     }).join('');
   }
+  // ================== 💳 أرصدة العملاء + الرصيد ليه كام يوم (بيتا) ==================
+  // من جهاز الشركة (kind=aging): رصيد الإقفال لكل عميل فوق 500 ج، وأقدم فاتورة لسه داخلة في الرصيد
+  // (بنرجع من آخر فاتورة لورا لحد ما مجموع الفواتير يوصل للرصيد) — الفواتير متسجلة من 1 يناير 2025
+  var bl_ = { rows: null, up: null, rep: '', age: '', sort: 'age', q: '' };
+  const BL_DATA_FROM_ = '2025-01-01';
+  const BL_AGES_ = [['', 'الكل'], ['a', 'أقل من 30 يوم'], ['b', '30–60'], ['c', '60–90'], ['d', 'أكتر من 90 يوم']];
+  function blDays_(d){ return d ? Math.max(0, Math.round((new Date(ymd_(bizToday_()) + 'T00:00:00') - new Date(d + 'T00:00:00')) / 86400000)) : null; }
+  function blAge_(r){ return r.days == null ? '' : r.days < 30 ? 'a' : r.days < 60 ? 'b' : r.days < 90 ? 'c' : 'd'; }
+  function blFix_(res){
+    return (res.rows || []).map(function(a){
+      const r = { code: a[0], name: a[1], bal: Number(a[2]) || 0, od: a[3], ld: a[4], full: !!a[5], rep: a[6] || '', grp: a[7] || '' };
+      r.days = r.full ? blDays_(r.od) : blDays_(BL_DATA_FROM_);
+      return r;
+    }).filter(function(r){ return !isWhName_(r.rep); });
+  }
+  function openBalances_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('💳 أرصدة العملاء', 'الرصيد اللي على كل عميل وليه كام يوم');
+    const key = 'tf_bal_' + ((state.auth && state.auth.email) || '');
+    if(!bl_.rows){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c){ bl_.rows = blFix_(c); bl_.up = c.up; } }catch(e){} }
+    if(bl_.rows) blRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    localReport_('aging').then(function(res){
+      bl_.rows = blFix_(res); bl_.up = res.up;
+      try{ localStorage.setItem(key, JSON.stringify(res)); }catch(e){}
+      if(!document.getElementById('dlOverlay').hidden) blRender_();
+    }).catch(function(e){ if(!bl_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  function blSet_(k, v){ bl_[k] = v; blRender_(); }
+  function blFiltered_(){
+    const nq = normAr_(normalizeDigits(bl_.q || ''));
+    const L = (bl_.rows || []).filter(function(r){
+      return (!bl_.rep || (r.rep || '—') === bl_.rep) && (!bl_.age || blAge_(r) === bl_.age) && (!nq || normAr_([r.name, r.code, r.rep].join(' ')).indexOf(nq) !== -1);
+    });
+    return L.sort(bl_.sort === 'age' ? function(a, b){ return (b.days || 0) - (a.days || 0) || b.bal - a.bal; } : function(a, b){ return b.bal - a.bal; });
+  }
+  function blDaysTxt_(r){
+    if(r.days == null) return 'مفيش فواتير';
+    return (r.full ? '' : 'أكتر من ') + r.days + ' يوم';
+  }
+  function blRender_(){
+    const all = bl_.rows || [];
+    const reps = {}; all.forEach(function(r){ reps[r.rep || '—'] = 1; });
+    const inRep = all.filter(function(r){ return !bl_.rep || (r.rep || '—') === bl_.rep; });
+    const ageSum = {}; inRep.forEach(function(r){ const k = blAge_(r); const x = ageSum[k] = ageSum[k] || { n: 0, t: 0 }; x.n++; x.t += r.bal; });
+    const tot = inRep.reduce(function(t, r){ return t + r.bal; }, 0);
+    document.getElementById('dlSub').textContent = (bl_.rep ? (bl_.rep === '—' ? 'من غير مندوب' : bl_.rep) : 'كل المناديب') + (bl_.up ? ' • الأرصدة متحدثة ' + ovAgo_(bl_.up) : '');
+    let h = '<div class="ovHero"><div><span>إجمالي الأرصدة</span><b>' + fmt(Math.round(tot)) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + inRep.length + '</b></div></div>';
+    h += '<div class="pfMonths csaChips"><button type="button" class="' + (!bl_.rep ? 'on' : '') + '" onclick="blSet_(\'rep\', \'\')">كل المناديب</button>' +
+      Object.keys(reps).sort().map(function(r){ return '<button type="button" class="' + (bl_.rep === r ? 'on' : '') + '" onclick="blSet_(\'rep\', ' + escapeHtml(JSON.stringify(r)) + ')">' + escapeHtml(r === '—' ? 'من غير مندوب' : r) + '</button>'; }).join('') + '</div>';
+    h += '<div class="blAges">' + BL_AGES_.slice(1).map(function(a){
+      const x = ageSum[a[0]] || { n: 0, t: 0 };
+      return '<button type="button" class="blAge ' + a[0] + (bl_.age === a[0] ? ' on' : '') + '" onclick="blSet_(\'age\', bl_.age === \'' + a[0] + '\' ? \'\' : \'' + a[0] + '\')"><span>' + a[1] + (a[0] !== 'a' && a[0] !== 'd' ? ' يوم' : '') + '</span><b>' + fmt(Math.round(x.t)) + '</b><small>' + x.n + ' عميل • ' + (tot ? Math.round(x.t * 100 / tot) : 0) + '%</small></button>';
+    }).join('') + '</div>';
+    h += '<div class="pfMonths csaChips"><button type="button" class="' + (bl_.sort === 'age' ? 'on' : '') + '" onclick="blSet_(\'sort\', \'age\')">⏳ الأقدم الأول</button><button type="button" class="' + (bl_.sort === 'bal' ? 'on' : '') + '" onclick="blSet_(\'sort\', \'bal\')">💰 الأكبر الأول</button></div>';
+    h += '<input type="search" class="dlFilter" id="blQ" placeholder="🔎 دوّر على عميل بالاسم أو الكود..." value="' + escapeHtml(bl_.q) + '" oninput="bl_.q=this.value; blRenderList_()">';
+    h += '<div id="blList"></div>';
+    h += '<button type="button" class="copyBtn wide" onclick="blCopy_()">📋 نسخ القايمة (الكود | الاسم | الرصيد | كام يوم | المندوب)</button>';
+    h += '<div class="note" style="margin-top:8px;">الرصيد = رصيد الإقفال من ملف الأرصدة (فوق 500 ج بس). «ليه كام يوم» = من تاريخ أقدم فاتورة لسه داخلة في الرصيد: بنعتبر إن العميل دفع الفواتير القديمة الأول، فالرصيد هو آخر فواتيره. «أكتر من» = رصيده أكبر من كل فواتيره من يناير 2025.</div>';
+    ldBody_().innerHTML = h;
+    blRenderList_();
+  }
+  function blRenderList_(){
+    const box = document.getElementById('blList'); if(!box) return;
+    const rows = blFiltered_();
+    box.innerHTML = rows.length ? rows.slice(0, 400).map(function(r, n){
+      const sub = [bl_.rep ? '' : (r.rep || 'من غير مندوب'), r.full && r.od ? 'من فاتورة ' + ymdToDmy_(r.od) : '', r.ld ? 'آخر فاتورة ' + ymdToDmy_(r.ld) : ''].filter(Boolean).join(' • ');
+      return '<div class="listRow"><div class="lMain"><div class="lName">' + (n + 1) + '. ' + escapeHtml(r.name) + ' <span class="oCode">' + escapeHtml(r.code) + '</span></div>' +
+        '<div class="lSub">' + escapeHtml(sub) + '</div></div>' +
+        '<div style="text-align:left; flex:none;"><span class="ovAmt">' + fmt(r.bal) + '</span><span class="blDays ' + blAge_(r) + '">' + blDaysTxt_(r) + '</span></div></div>';
+    }).join('') + (rows.length > 400 ? '<div class="note" style="text-align:center;">ظاهر أول 400 — دوّر بالاسم عشان تلاقي الباقي</div>' : '')
+      : '<div class="empty">' + ((bl_.rows || []).length ? 'مفيش نتايج' : 'مفيش أرصدة') + '</div>';
+  }
+  function blCopy_(){
+    const rows = blFiltered_();
+    copyText_(rows.map(function(r){ return [r.code, r.name, r.bal, blDaysTxt_(r), r.rep].join('\t'); }).join('\n'))
+      .then(function(){ toast_('📋 اتنسخ ' + rows.length + ' عميل'); }).catch(function(){ showAlertModal_('الموبايل رفض النسخ — جرّب تاني', 'error'); });
+  }
+
   // ================== 🏦 الشيكات (بيتا) ==================
   // من جهاز الشركة (field-reports, kind=cheques): كل شيك وحالته من ملف «تحليلي شيكات العملاء»، والمندوب من يومية المبيعات.
   // المندوب بيشوف شيكات عملاءه بس — المدير الكل.
