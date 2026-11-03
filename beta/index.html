@@ -1419,6 +1419,14 @@
   .ovBar{height:7px; background:#eee9dc; border-radius:5px; margin:7px 0 4px; overflow:hidden;} .ovBar i{display:block; height:100%; background:linear-gradient(90deg,#a8432f,#d9a21b); border-radius:5px;}
   .ovRep small{color:var(--omut); font-size:11.5px;}
   .ovAmt{flex:none; font-weight:900; font-size:16px; color:#a8432f; direction:ltr;}
+  .lpHead{display:flex; flex-wrap:wrap; align-items:center; gap:6px; background:var(--o1); color:#fbf8ee; border-radius:14px; padding:10px 12px; margin-bottom:8px;}
+  .lpHead b{font-size:15px; color:#fbf8ee;} .lpHead small{width:100%; color:#e4e2c6; font-size:12px;}
+  .lpPickRow{display:flex; flex-wrap:wrap; align-items:center; gap:6px; width:100%; text-align:right; border:0; border-bottom:1px solid var(--line,#e2dfcf); background:none; padding:10px 4px; font-family:inherit; font-size:14px; cursor:pointer;}
+  .lpPickRow small{width:100%; color:var(--muted); font-size:12px;}
+  .lpRow{display:flex; gap:10px; width:100%; text-align:right; border:0; border-bottom:1px solid var(--line,#e2dfcf); background:none; padding:10px 4px; font-family:inherit; cursor:pointer; color:inherit;}
+  .lpMain{flex:1; min-width:0;} .lpMain b{display:block; font-size:14px;} .lpMain small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px;}
+  .lpMain .lpPrev{color:var(--ink,#2a2a1f); font-weight:700;}
+  .lpPrice{flex:none; text-align:left; direction:ltr;} .lpPrice b{display:block; font-size:17px; font-weight:900; color:var(--o1,#3c4a20);} .lpPrice small{display:block; font-size:11px; color:#a8432f; font-weight:800; direction:rtl; text-align:left;}
   .blAges{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;}
   .blAge{border:0; border-radius:14px; padding:10px; text-align:right; font-family:inherit; background:var(--card,#fff); box-shadow:inset 0 0 0 1.5px var(--line,#e2dfcf); cursor:pointer;}
   .blAge span{display:block; font-size:12px; font-weight:800;} .blAge b{display:block; font-size:18px; direction:ltr; text-align:right;} .blAge small{font-size:11px; color:var(--muted);}
@@ -1755,6 +1763,7 @@
         <button type="button" class="toolBtn" onclick="openSprice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>الأسعار الخاصة</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
+        <button type="button" class="toolBtn" onclick="openLastPrice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8 8h.01"/></svg></span>آخر سعر</button>
         <button type="button" class="toolBtn" onclick="openBalances_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>أرصدة العملاء</button>
         <button type="button" class="toolBtn" onclick="openLoss_()"><span class="tIc t4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l7 7 4-4 7 7"/><path d="M21 11v5h-5"/></svg></span>الفاقد من الطلبات</button>
         <button type="button" class="toolBtn" onclick="openInvSearch_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>فواتير العملاء</button>
@@ -2936,7 +2945,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.33.1-beta';
+  const APP_VERSION_ = 'v1.34.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -9752,7 +9761,7 @@
   const ADM_TABS2_ = [
     ['today', '🏠', 'النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('report')"]],
     ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openBalances_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
-    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openInvSearch_()", "openScreen('unvisited')"]],
+    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openLastPrice_()", "openInvSearch_()", "openScreen('unvisited')"]],
     ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openLoss_()", "openScreen('map')", "openOrdersAccess_()"]],
     ['more', '☰', 'المزيد', ["openStock_()", "openScreen('items')", "openScreen('export')", "openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
   ];
@@ -10232,6 +10241,93 @@
     const rows = blFiltered_();
     copyText_(rows.map(function(r){ return [r.code, r.name, r.bal, blDaysTxt_(r), r.rep].join('\t'); }).join('\n'))
       .then(function(){ toast_('📋 اتنسخ ' + rows.length + ' عميل'); }).catch(function(){ showAlertModal_('الموبايل رفض النسخ — جرّب تاني', 'error'); });
+  }
+
+  // ================== 🏷️ آخر سعر — بالعميل أو بالصنف (بيتا) ==================
+  // من سطور الفواتير على جهاز الشركة (kind=lastprice): السعر = سعر الوحدة في الفاتورة، والصافي = المبلغ ÷ الكمية (بعد الخصم)
+  var lp_ = { mode: 'cust', list: null, q: '', sel: null, data: null, f: '' };
+  function lpApi_(mode, key){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'lastprice');
+    b.set('mode', mode); if(key) b.set('key', key);
+    return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); });
+  }
+  function openLastPrice_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('🏷️ آخر سعر', 'آخر سعر خد بيه العميل الصنف — من فواتير السيستم');
+    lp_.sel = null; lp_.data = null; lp_.q = ''; lp_.f = '';
+    const key = 'tf_lpl_' + ((state.auth && state.auth.email) || '');
+    if(!lp_.list){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c && Date.now() - c.at < 12 * 3600000) lp_.list = c; }catch(e){} }
+    lpRender_();
+    if(!lp_.list || Date.now() - lp_.list.at > 30 * 60000){
+      lpApi_('list').then(function(r){
+        lp_.list = { at: Date.now(), c: r.c || [], i: r.i || [] };
+        try{ localStorage.setItem(key, JSON.stringify(lp_.list)); }catch(e){}
+        if(!lp_.sel && !document.getElementById('dlOverlay').hidden) lpRenderPick_();
+      }).catch(function(e){ if(!lp_.list) ldErr_(e); else toast_('⚠️ ' + e.message); });
+    }
+  }
+  function lpMode_(m){ lp_.mode = m; lp_.sel = null; lp_.data = null; lp_.q = ''; lp_.f = ''; lpRender_(); }
+  function lpRender_(){
+    let h = '<div class="pfMonths csaChips"><button type="button" class="' + (lp_.mode === 'cust' ? 'on' : '') + '" onclick="lpMode_(\'cust\')">👥 بالعميل</button><button type="button" class="' + (lp_.mode === 'item' ? 'on' : '') + '" onclick="lpMode_(\'item\')">📦 بالصنف</button></div>';
+    if(lp_.sel){
+      h += '<button type="button" class="rLink" style="margin-bottom:8px;" onclick="lp_.sel=null; lp_.data=null; lp_.f=\'\'; lpRender_()">← ' + (lp_.mode === 'cust' ? 'اختار عميل تاني' : 'اختار صنف تاني') + '</button>';
+      h += '<div class="lpHead"><b>' + escapeHtml(lp_.sel.n) + '</b><span class="oCode">' + escapeHtml(lp_.sel.c) + '</span>' + (lp_.sel.r ? '<small>' + escapeHtml(lp_.sel.r) + '</small>' : '') + '</div>';
+      h += '<input type="search" class="dlFilter" placeholder="🔎 ' + (lp_.mode === 'cust' ? 'دوّر على صنف' : 'دوّر على عميل') + '..." value="' + escapeHtml(lp_.f) + '" oninput="lp_.f=this.value; lpRenderRows_()">';
+      h += '<div id="lpRows"><div class="aiStatus">جاري التحميل...</div></div>';
+      h += '<div class="note" style="margin-top:8px;">السعر = سعر الوحدة في الفاتورة • الصافي = بعد الخصم (المبلغ ÷ الكمية). «قبلها» = السعر في المرة اللي قبل آخر مرة. دوس على أي سطر تشوف ' + (lp_.mode === 'cust' ? 'الصنف ده مع كل العملاء' : 'كل أصناف العميل ده') + '.</div>';
+    } else {
+      h += '<input type="search" class="dlFilter" id="lpQ" placeholder="🔎 ' + (lp_.mode === 'cust' ? 'اكتب اسم العميل أو كوده' : 'اكتب اسم الصنف أو كوده') + '..." value="' + escapeHtml(lp_.q) + '" oninput="lp_.q=this.value; lpRenderPick_()">';
+      h += '<div id="lpPick"></div>';
+    }
+    ldBody_().innerHTML = h;
+    if(lp_.sel) lpRenderRows_(); else lpRenderPick_();
+  }
+  function lpRenderPick_(){
+    const box = document.getElementById('lpPick'); if(!box) return;
+    if(!lp_.list){ box.innerHTML = '<div class="aiStatus">جاري التحميل...</div>'; return; }
+    const nq = normAr_(normalizeDigits(lp_.q || '')).trim();
+    const src = lp_.mode === 'cust' ? lp_.list.c : lp_.list.i;
+    const L = src.filter(function(x){ return !nq || normAr_(x[1] || '').indexOf(nq) !== -1 || String(x[0]).toLowerCase().indexOf(nq.toLowerCase()) !== -1; });
+    lp_.pick = L;
+    box.innerHTML = L.length ? L.slice(0, 150).map(function(x, i){
+      return '<button type="button" class="lpPickRow" onclick="lpPick_(' + i + ')"><b>' + escapeHtml(x[1] || x[0]) + '</b><span class="oCode">' + escapeHtml(x[0]) + '</span>' + (x[2] ? '<small>' + escapeHtml(x[2]) + '</small>' : '') + '</button>';
+    }).join('') + (L.length > 150 ? '<div class="note" style="text-align:center;">ظاهر أول 150 — اكتب أكتر عشان تلاقي</div>' : '')
+      : '<div class="empty">مفيش ' + (lp_.mode === 'cust' ? 'عميل' : 'صنف') + ' بالاسم ده في فواتير السيستم</div>';
+  }
+  function lpPick_(i){ const x = (lp_.pick || [])[i]; if(x) lpOpen_(lp_.mode, x[0], x[1], x[2]); }
+  function lpOpen_(mode, code, name, rep){
+    lp_.mode = mode; lp_.sel = { c: String(code), n: name || String(code), r: rep || '' }; lp_.data = null; lp_.f = '';
+    lpRender_(); ldBody_().scrollTop = 0;
+    const want = mode + '|' + code;
+    lpApi_(mode, String(code)).then(function(r){
+      if(!lp_.sel || lp_.mode + '|' + lp_.sel.c !== want) return;
+      lp_.data = r.rows || []; lpRenderRows_();
+    }).catch(function(e){ const b = document.getElementById('lpRows'); if(b) b.innerHTML = '<div class="empty" style="color:#a8432f;">' + escapeHtml(e.message) + '</div>'; });
+  }
+  function lpRenderRows_(){
+    const box = document.getElementById('lpRows'); if(!box || !lp_.data) return;
+    const byCust = lp_.mode === 'cust', nq = normAr_(normalizeDigits(lp_.f || '')).trim();
+    // [acct, name, rep, code, item, date, inv, qty, price, net, times, totalQty, prev:[date, price, net]]
+    const L = lp_.data.filter(function(r){ return !nq || normAr_(byCust ? r[4] : r[1]).indexOf(nq) !== -1 || String(byCust ? r[3] : r[0]).toLowerCase().indexOf(nq.toLowerCase()) !== -1; });
+    lp_.rows = L;
+    box.innerHTML = (L.length ? '<div class="pfYtd">' + L.length + (byCust ? ' صنف' : ' عميل') + ' — الأحدث الأول</div>' : '') + (L.length ? L.map(function(r, i){
+      const p = Number(r[8]), np = Number(r[9]), pv = r[12];
+      const disc = p > 0 && np < p - 0.01 ? Math.round((p - np) * 100 / p) : 0;
+      let ch = '';
+      if(pv){ const d = Math.round((p - Number(pv[1])) * 100 / Number(pv[1])); ch = '<small class="lpPrev">قبلها ' + fmtPrice_(pv[1]) + ' في ' + ymdToDmy_(pv[0]) + (d ? ' <i class="pfD ' + (d > 0 ? 'up' : 'dn') + '">' + (d > 0 ? '▲' : '▼') + ' ' + Math.abs(d) + '%</i>' : ' • نفس السعر') + '</small>'; }
+      return '<button type="button" class="lpRow" onclick="lpFlip_(' + i + ')"><div class="lpMain"><b>' + escapeHtml(byCust ? r[4] : r[1]) + '</b>' +
+        '<small>' + escapeHtml(byCust ? r[3] : r[0] + (r[2] ? ' • ' + r[2] : '')) + ' • آخر مرة ' + ymdToDmy_(r[5]) + ' • ' + fmt(r[7]) + ' قطعة</small>' +
+        '<small>فاتورة <span dir="ltr">' + escapeHtml(r[6]) + '</span> • خد ' + fmt(r[10]) + ' مرة، إجمالي ' + fmt(r[11]) + ' قطعة</small>' + ch + '</div>' +
+        '<div class="lpPrice"><b>' + fmtPrice_(p) + '</b>' + (disc ? '<small>صافي ' + fmtPrice_(np) + '<br>خصم ' + disc + '%</small>' : '') + '</div></button>';
+    }).join('') : '<div class="empty">' + (lp_.data.length ? 'مفيش نتايج' : (byCust ? 'العميل ده مالوش فواتير' : 'الصنف ده ماتباعش')) + '</div>');
+  }
+  function fmtPrice_(v){ v = Number(v) || 0; return Math.abs(v - Math.round(v)) < 0.005 ? fmt(Math.round(v)) : v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function lpFlip_(i){
+    const r = (lp_.rows || [])[i]; if(!r) return;
+    if(lp_.mode === 'cust') lpOpen_('item', r[3], r[4], ''); else lpOpen_('cust', r[0], r[1], r[2]);
   }
 
   // ================== 🏦 الشيكات (بيتا) ==================
