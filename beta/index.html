@@ -1430,19 +1430,29 @@
   .ssForm{display:grid; gap:8px;}
   .ssForm label{display:block; font-size:12.5px; font-weight:800;} .ssForm label small{color:var(--muted); font-weight:600;}
   .ssForm input, .ssForm textarea{display:block; width:100%; margin:3px 0 0; box-sizing:border-box; font-family:inherit; font-size:15px;}
-  .ssP{font-size:12px; color:#111; padding:10mm 12mm 6mm !important;}
-  .ssTop{display:flex; justify-content:space-between; align-items:flex-start; direction:ltr; border-bottom:2px solid #111; padding-bottom:4mm;}
-  .ssCo{font-weight:900; font-size:13px;} .ssLogo img{height:17mm; display:block;}
-  .ssTitle{text-align:center; font-weight:900; font-size:15px; margin:4mm 0 3mm; direction:ltr; line-height:1.4;}
-  .ssTitle b{display:block; font-size:17px; direction:rtl;} .ssTitle span{display:block; font-size:10px; font-weight:700; color:#555;}
-  .ssP table{width:100%; border-collapse:collapse; direction:rtl;}
-  .ssP th, .ssP td{border:1.3px solid #111; padding:2mm 3mm; text-align:center; vertical-align:middle;}
-  .ssP th{width:34%; background:#f1f1f1; font-weight:900; font-size:12px;} .ssP th small, .ssP td small{display:block; font-size:9.5px; font-weight:700; color:#444; direction:ltr;}
-  .ssHead td{font-size:13px; font-weight:800;}
-  .ssSub{text-align:center; font-weight:900; border:1.3px solid #111; margin:4mm 18% 3mm; padding:2mm; direction:ltr; line-height:1.4;} .ssSub b{display:block; direction:rtl;}
-  .ssSpec td{height:15mm; font-size:13px; font-weight:700;} .ssSpec .h{height:auto; background:#f1f1f1; font-weight:900;}
-  .ssSign{display:flex; justify-content:space-between; margin-top:8mm; padding:0 6mm;}
-  .ssSign div{width:40%; text-align:center; font-weight:900;} .ssSign small{display:block; font-size:10px; color:#444;} .ssSign i{display:block; border-bottom:1px dotted #111; height:12mm;}
+  .ssP{font-family:Calibri, Carlito, 'Segoe UI', Arial, sans-serif; color:#000; width:297mm; height:205mm; overflow:hidden; box-sizing:border-box; padding:9mm 11mm 6mm !important; position:relative; direction:ltr; font-weight:700;}
+  .ssP *{box-sizing:border-box;}
+  .ssLogo{position:absolute; left:12mm; top:8mm; text-align:center; direction:ltr;}
+  .ssLogo b{display:block; font-family:'Arial Black', 'Arial Bold', Arial, sans-serif; font-weight:900; font-size:44px; letter-spacing:-1px; line-height:1;}
+  .ssLogo b sup{font-size:12px; vertical-align:top; position:relative; top:2px;}
+  .ssLogo small{display:flex; align-items:center; gap:6px; justify-content:center; font-size:14px; font-weight:400; margin-top:3px;}
+  .ssLogo small:before, .ssLogo small:after{content:''; width:22mm; border-top:1px solid #000;}
+  .ssCo{position:absolute; right:22mm; top:13mm; font-size:13px;}
+  .ssTitle{position:absolute; left:82mm; width:116mm; top:13mm; border:1.4px solid #000; text-align:center; font-size:13px; line-height:1.35; padding:1mm 0;}
+  .ssHead{position:absolute; right:11mm; top:31mm; width:92mm; border-collapse:collapse; border:2px solid #000;}
+  .ssHead td{border:1px solid #000; height:5.3mm; padding:0 1.5mm; font-size:11px; white-space:nowrap;}
+  .ssHead td.l{width:37%; text-align:left;} .ssHead td.v{text-align:center; font-size:12px;}
+  .ssHead td.l.ar{text-align:center;}
+  .ssSub{position:absolute; left:82mm; width:116mm; top:73mm; border:2px solid #000; text-align:center; font-size:11.5px; line-height:1.35; padding:.6mm 0;}
+  .ssSpec{position:absolute; left:11mm; width:275mm; top:84mm; border-collapse:collapse; border:2px solid #000;}
+  .ssSpec td{border:1px solid #000; text-align:center; vertical-align:middle; font-size:13px;}
+  .ssSpec tr.h td{height:6mm; border-bottom:2px solid #000; font-size:12.5px;}
+  .ssSpec td.k{width:18.5%; border-left:2px solid #000; font-size:12px;}
+  .ssSpec tr.r td{height:19.5mm;} .ssSpec tr.p td{height:11mm;} .ssSpec tr.e td{height:6.5mm;}
+  .ssSpec td.v{white-space:pre-wrap; padding:1mm 4mm; font-size:14px;}
+  .ssSign{position:absolute; font-size:13px; text-align:center;}
+  .ssSign i{display:block; width:42mm; border-bottom:1.5px dotted #000; margin:4mm auto 0;}
+  .ssSign.sm{right:16mm; top:189mm;} .ssSign.fd{left:70mm; top:191mm;} .ssSign.fd i{position:relative; left:-38mm;}
   .blAges{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;}
   .blAge{border:0; border-radius:14px; padding:10px; text-align:right; font-family:inherit; background:var(--card,#fff); box-shadow:inset 0 0 0 1.5px var(--line,#e2dfcf); cursor:pointer;}
   .blAge span{display:block; font-size:12px; font-weight:800;} .blAge b{display:block; font-size:18px; direction:ltr; text-align:right;} .blAge small{font-size:11px; color:var(--muted);}
@@ -2962,7 +2972,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.35.0-beta';
+  const APP_VERSION_ = 'v1.35.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -10422,17 +10432,22 @@
     const r = ssSave_(false);
     if(!r.cust || !r.prod){ showAlertModal_('اكتب العميل والمنتج الأول', 'error'); return; }
     const e = escapeHtml, nl = function(s){ return e(s || '').replace(/\n/g, '<br>'); };
-    const row = function(f){ return '<tr><th>' + f[1] + '<small>' + f[2] + '</small></th><td>' + (f[3] === 'date' ? e(ymdToDmy_(r[f[0]]) || '') : f[0] === 'qty' && r.qty ? e(fmt(r.qty)) : e(r[f[0]] || '')) + '</td></tr>'; };
     const area = document.getElementById('printArea');
     if(area.parentNode !== document.body) document.body.appendChild(area);
-    area.innerHTML = '<div class="pw ssP">' +
-      '<div class="ssTop"><div class="ssCo">Touch El-Zenouki Home Appliances</div><div class="ssLogo"><img src="' + LOGO_D_ + '" alt="TOUCH"></div></div>' +
-      '<div class="ssTitle">Special sales request<b>طلب مبيعات خاص</b><span dir="ltr">' + e(r.id) + '</span></div>' +
-      '<table class="ssHead">' + SS_FIELDS_.map(row).join('') + '</table>' +
-      '<div class="ssSub">Customer agreed specifications<b>المواصفات المتفق عليها</b></div>' +
-      '<table class="ssSpec"><tr><th class="h">الصنف<small>Item</small></th><td class="h">المواصفات<small>Specifications</small></td></tr>' +
-      SS_SPECS_.map(function(f){ return '<tr><th>' + f[1] + '<small>' + f[2] + '</small></th><td>' + nl(r[f[0]]) + '</td></tr>'; }).join('') + '</table>' +
-      '<div class="ssSign"><div><span>مدير المبيعات</span><small>Sales Manager</small><i></i></div><div><span>مدير المصنع</span><small>Factory Director</small><i></i></div></div>' +
+    const v = function(k){ const f = SS_FIELDS_.find(function(x){ return x[0] === k; }); const x = r[k] || ''; return f && f[3] === 'date' ? e(ymdToDmy_(x) || '') : k === 'qty' && x ? e(String(x)) : e(x); };
+    const H = [['Request Date تاريخ الطلب', 'date'], ['Customer  العميل', 'cust'], ['Product', 'prod'], ['Code', 'code'], ['شروط الاستلام', 'terms', 1], ['Order QTY الكمية المطلوبة', 'qty'], ['Customer agreed date تاريخ التسليم', 'due']];
+    const S = [['Product المنتج', 'sProd', 'r'], ['Accessories  الاكسسوارات الملحقه', 'sAcc', 'r'], ['اللون', 'sColor', 'r'], ['Carton الكرتون', 'sCarton', 'r'], ['السعر', 'sPrice', 'p']];
+    area.innerHTML = '<style>@page{size:A4 landscape; margin:0;}</style><div class="ssP">' +
+      '<div class="ssLogo"><b>TOUCH<sup>®</sup></b><small>Think benefits</small></div>' +
+      '<div class="ssCo">Touch El-Zenouki Home Appliances</div>' +
+      '<div class="ssTitle">Special sales request<br>طلب مبيعات خاص</div>' +
+      '<table class="ssHead">' + H.map(function(h){ return '<tr><td class="v">' + v(h[1]) + '</td><td class="l' + (h[2] ? ' ar' : '') + '">' + h[0] + '</td></tr>'; }).join('') + '</table>' +
+      '<div class="ssSub">Customer agreed specifications<br>المواصفات المتفق عليها</div>' +
+      '<table class="ssSpec"><tr class="h"><td>Specifications المواصفات</td><td class="k">Item الصنف</td></tr>' +
+      S.map(function(x){ return '<tr class="' + x[2] + '"><td class="v">' + nl(r[x[1]]) + '</td><td class="k">' + x[0] + '</td></tr>'; }).join('') +
+      '<tr class="e"><td></td><td class="k" style="border-left:0;"></td></tr></table>' +
+      '<div class="ssSign sm">Sales Manager مدير المبيعات<i></i></div>' +
+      '<div class="ssSign fd">Factory Director مدير المصنع<i></i></div>' +
       '</div>';
     document.title = 'طلب مبيعات خاص ' + r.id + ' - ' + (r.cust || '');
     setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
