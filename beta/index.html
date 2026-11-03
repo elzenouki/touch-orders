@@ -1427,6 +1427,22 @@
   .lpMain{flex:1; min-width:0;} .lpMain b{display:block; font-size:14px;} .lpMain small{display:block; color:var(--muted); font-size:11.5px; margin-top:2px;}
   .lpMain .lpPrev{color:var(--ink,#2a2a1f); font-weight:700;}
   .lpPrice{flex:none; text-align:left; direction:ltr;} .lpPrice b{display:block; font-size:17px; font-weight:900; color:var(--o1,#3c4a20);} .lpPrice small{display:block; font-size:11px; color:#a8432f; font-weight:800; direction:rtl; text-align:left;}
+  .ssForm{display:grid; gap:8px;}
+  .ssForm label{display:block; font-size:12.5px; font-weight:800;} .ssForm label small{color:var(--muted); font-weight:600;}
+  .ssForm input, .ssForm textarea{display:block; width:100%; margin:3px 0 0; box-sizing:border-box; font-family:inherit; font-size:15px;}
+  .ssP{font-size:12px; color:#111; padding:10mm 12mm 6mm !important;}
+  .ssTop{display:flex; justify-content:space-between; align-items:flex-start; direction:ltr; border-bottom:2px solid #111; padding-bottom:4mm;}
+  .ssCo{font-weight:900; font-size:13px;} .ssLogo img{height:17mm; display:block;}
+  .ssTitle{text-align:center; font-weight:900; font-size:15px; margin:4mm 0 3mm; direction:ltr; line-height:1.4;}
+  .ssTitle b{display:block; font-size:17px; direction:rtl;} .ssTitle span{display:block; font-size:10px; font-weight:700; color:#555;}
+  .ssP table{width:100%; border-collapse:collapse; direction:rtl;}
+  .ssP th, .ssP td{border:1.3px solid #111; padding:2mm 3mm; text-align:center; vertical-align:middle;}
+  .ssP th{width:34%; background:#f1f1f1; font-weight:900; font-size:12px;} .ssP th small, .ssP td small{display:block; font-size:9.5px; font-weight:700; color:#444; direction:ltr;}
+  .ssHead td{font-size:13px; font-weight:800;}
+  .ssSub{text-align:center; font-weight:900; border:1.3px solid #111; margin:4mm 18% 3mm; padding:2mm; direction:ltr; line-height:1.4;} .ssSub b{display:block; direction:rtl;}
+  .ssSpec td{height:15mm; font-size:13px; font-weight:700;} .ssSpec .h{height:auto; background:#f1f1f1; font-weight:900;}
+  .ssSign{display:flex; justify-content:space-between; margin-top:8mm; padding:0 6mm;}
+  .ssSign div{width:40%; text-align:center; font-weight:900;} .ssSign small{display:block; font-size:10px; color:#444;} .ssSign i{display:block; border-bottom:1px dotted #111; height:12mm;}
   .blAges{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;}
   .blAge{border:0; border-radius:14px; padding:10px; text-align:right; font-family:inherit; background:var(--card,#fff); box-shadow:inset 0 0 0 1.5px var(--line,#e2dfcf); cursor:pointer;}
   .blAge span{display:block; font-size:12px; font-weight:800;} .blAge b{display:block; font-size:18px; direction:ltr; text-align:right;} .blAge small{font-size:11px; color:var(--muted);}
@@ -1763,6 +1779,7 @@
         <button type="button" class="toolBtn" onclick="openSprice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>الأسعار الخاصة</button>
         <button type="button" class="toolBtn" onclick="openStock_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg></span>المخزون</button>
         <button type="button" class="toolBtn" data-chq onclick="openCheques_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M6 10h7M6 13.5h4M15 14.5h3"/></svg></span>الشيكات</button>
+        <button type="button" class="toolBtn" onclick="openSpecialReq_()"><span class="tIc t5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg></span>طلب مبيعات خاص</button>
         <button type="button" class="toolBtn" onclick="openLastPrice_()"><span class="tIc t3"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8 8h.01"/></svg></span>آخر سعر</button>
         <button type="button" class="toolBtn" onclick="openBalances_()"><span class="tIc t2"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>أرصدة العملاء</button>
         <button type="button" class="toolBtn" onclick="openLoss_()"><span class="tIc t4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l7 7 4-4 7 7"/><path d="M21 11v5h-5"/></svg></span>الفاقد من الطلبات</button>
@@ -2945,7 +2962,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.34.0-beta';
+  const APP_VERSION_ = 'v1.35.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -9761,7 +9778,7 @@
   const ADM_TABS2_ = [
     ['today', '🏠', 'النهارده', ["openLoadsAdmin_()", "openCustAccList_()", "openScreen('report')"]],
     ['money', '💰', 'الفلوس', ["openPerf_()", "openOverdues_()", "openBalances_()", "openCheques_()", "openScreen('wallet')", "openMyWallet_()", "openMyCust_()"]],
-    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openLastPrice_()", "openInvSearch_()", "openScreen('unvisited')"]],
+    ['cust', '👥', 'العملاء', ["openCustSalesAll_()", "openSprice_()", "openSpecialReq_()", "openLastPrice_()", "openInvSearch_()", "openScreen('unvisited')"]],
     ['reps', '🧭', 'المناديب', ["openScreen('live')", "openRepVisits_()", "openLoss_()", "openScreen('map')", "openOrdersAccess_()"]],
     ['more', '☰', 'المزيد', ["openStock_()", "openScreen('items')", "openScreen('export')", "openAdminData_()", "openScreen('admin')", "openUsage_(1)", "openScreen('profile')", "handleLogout()"]]
   ];
@@ -10328,6 +10345,97 @@
   function lpFlip_(i){
     const r = (lp_.rows || [])[i]; if(!r) return;
     if(lp_.mode === 'cust') lpOpen_('item', r[3], r[4], ''); else lpOpen_('cust', r[0], r[1], r[2]);
+  }
+
+  // ================== 📝 طلب مبيعات خاص (OEM) — نفس شكل فورم الكمبيوتر (بيتا) ==================
+  // الطلبات بتتحفظ على الموبايل ده بس (آخر 50) عشان تقدر تفتحها وتطبعها تاني
+  const SS_FIELDS_ = [
+    ['date', 'تاريخ الطلب', 'Request Date', 'date'], ['cust', 'العميل', 'Customer', 'text'], ['prod', 'المنتج', 'Product', 'text'], ['code', 'الكود', 'Code', 'text'],
+    ['terms', 'شروط الاستلام', 'Delivery terms', 'text'], ['qty', 'الكمية المطلوبة', 'Order QTY', 'number'], ['due', 'تاريخ التسليم', 'Customer agreed date', 'date']
+  ];
+  const SS_SPECS_ = [['sProd', 'المنتج', 'Product'], ['sAcc', 'الاكسسوارات الملحقة', 'Accessories'], ['sColor', 'اللون', 'Color'], ['sCarton', 'الكارتون', 'Carton'], ['sPrice', 'السعر', 'Price']];
+  var ss_ = { cur: null };
+  function ssKey_(){ return 'tf_ssr_' + ((state.auth && state.auth.email) || ''); }
+  function ssAll_(){ try{ return JSON.parse(localStorage.getItem(ssKey_()) || '[]') || []; }catch(e){ return []; } }
+  function ssSaveAll_(L){ try{ localStorage.setItem(ssKey_(), JSON.stringify(L.slice(0, 50))); }catch(e){ toast_('⚠️ الموبايل مش قادر يحفظ'); } }
+  function ssNew_(){ const t = ymd_(bizToday_()); return { id: 'SSR-' + t.replace(/-/g, '').slice(2) + '-' + String(Date.now()).slice(-4), date: t }; }
+  function openSpecialReq_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('📝 طلب مبيعات خاص', 'Special sales request — املاه واطبعه PDF');
+    ss_.cur = null; ssList_();
+    if(!lp_.list) lpApi_('list').then(function(r){ lp_.list = { at: Date.now(), c: r.c || [], i: r.i || [] }; }).catch(function(){});
+  }
+  function ssList_(){
+    const L = ssAll_();
+    let h = '<button type="button" class="aGo wide" onclick="ssEdit_(null)">＋ طلب جديد</button>';
+    h += L.length ? '<div class="sectionLabel" style="margin:14px 0 6px;">الطلبات اللي اتعملت</div>' + L.map(function(r, i){
+      return '<button type="button" class="lpPickRow" onclick="ssEdit_(' + i + ')"><b>' + escapeHtml(r.cust || 'من غير عميل') + ' — ' + escapeHtml(r.prod || '') + '</b><span class="oCode">' + escapeHtml(r.id) + '</span><small>' + ymdToDmy_(r.date) + (r.qty ? ' • ' + fmt(r.qty) + ' قطعة' : '') + (r.sPrice ? ' • السعر ' + escapeHtml(r.sPrice) : '') + '</small></button>';
+    }).join('') : '<div class="empty" style="margin-top:12px;">لسه مفيش طلبات</div>';
+    h += '<div class="note" style="margin-top:10px;">الطلبات محفوظة على الموبايل ده بس.</div>';
+    ldBody_().innerHTML = h;
+  }
+  function ssEdit_(i){
+    const L = ssAll_();
+    ss_.cur = i == null ? ssNew_() : Object.assign({}, L[i]);
+    ss_.idx = i;
+    const r = ss_.cur;
+    const dl = function(id, arr){ return '<datalist id="' + id + '">' + (arr || []).slice(0, 800).map(function(x){ return '<option value="' + escapeHtml(x[1] || x[0]) + '">' + escapeHtml(x[0]) + '</option>'; }).join('') + '</datalist>'; };
+    let h = '<button type="button" class="rLink" style="margin-bottom:8px;" onclick="ssList_()">← كل الطلبات</button>';
+    h += '<div class="pfYtd">رقم الطلب <b dir="ltr">' + escapeHtml(r.id) + '</b></div>';
+    h += '<div class="ssForm">' + SS_FIELDS_.map(function(f){
+      const extra = f[0] === 'cust' ? ' list="ssCustL"' : f[0] === 'prod' ? ' list="ssProdL" onchange="ssProdPicked_(this.value)"' : f[0] === 'qty' ? ' inputmode="numeric"' : '';
+      return '<label>' + f[1] + ' <small>' + f[2] + '</small><input type="' + f[3] + '" id="ss_' + f[0] + '" value="' + escapeHtml(r[f[0]] || '') + '"' + extra + '></label>';
+    }).join('') + '</div>';
+    h += '<div class="sectionLabel" style="margin:12px 0 6px;">المواصفات المتفق عليها <small>Customer agreed specifications</small></div>';
+    h += '<div class="ssForm">' + SS_SPECS_.map(function(f){
+      return '<label>' + f[1] + ' <small>' + f[2] + '</small>' + (f[0] === 'sPrice' ? '<input type="text" inputmode="decimal" id="ss_' + f[0] + '" value="' + escapeHtml(r[f[0]] || '') + '">' : '<textarea rows="2" id="ss_' + f[0] + '">' + escapeHtml(r[f[0]] || '') + '</textarea>') + '</label>';
+    }).join('') + '</div>';
+    h += (lp_.list ? dl('ssCustL', lp_.list.c) + dl('ssProdL', lp_.list.i) : '');
+    h += '<div class="wPrevBtns" style="margin-top:12px;"><button type="button" class="aGo" onclick="ssPrint_()">🖨 اطبع / PDF</button><button type="button" class="ghost" onclick="ssSave_(true)">💾 احفظ</button></div>';
+    if(i != null) h += '<button type="button" class="ghost" style="width:100%; margin-top:8px; color:#a8432f;" onclick="ssDel_()">🗑 امسح الطلب ده</button>';
+    ldBody_().innerHTML = h; ldBody_().scrollTop = 0;
+  }
+  function ssProdPicked_(v){
+    const it = lp_.list && lp_.list.i.find(function(x){ return x[1] === v || x[0] === v; });
+    if(!it) return;
+    const c = document.getElementById('ss_code'); if(c && !c.value) c.value = it[0];
+    const s = document.getElementById('ss_sProd'); if(s && !s.value) s.value = it[1];
+  }
+  function ssRead_(){
+    const r = ss_.cur || ssNew_();
+    SS_FIELDS_.concat(SS_SPECS_).forEach(function(f){ const el = document.getElementById('ss_' + f[0]); if(el) r[f[0]] = el.value.trim(); });
+    return r;
+  }
+  function ssSave_(show){
+    const r = ssRead_(); const L = ssAll_();
+    const at = L.findIndex(function(x){ return x.id === r.id; });
+    if(at !== -1) L.splice(at, 1);
+    L.unshift(r); ssSaveAll_(L); ss_.idx = 0;
+    if(show) toast_('💾 اتحفظ');
+    return r;
+  }
+  function ssDel_(){
+    if(!confirm('تمسح الطلب ده؟')) return;
+    const L = ssAll_().filter(function(x){ return !ss_.cur || x.id !== ss_.cur.id; }); ssSaveAll_(L); ssList_();
+  }
+  function ssPrint_(){
+    const r = ssSave_(false);
+    if(!r.cust || !r.prod){ showAlertModal_('اكتب العميل والمنتج الأول', 'error'); return; }
+    const e = escapeHtml, nl = function(s){ return e(s || '').replace(/\n/g, '<br>'); };
+    const row = function(f){ return '<tr><th>' + f[1] + '<small>' + f[2] + '</small></th><td>' + (f[3] === 'date' ? e(ymdToDmy_(r[f[0]]) || '') : f[0] === 'qty' && r.qty ? e(fmt(r.qty)) : e(r[f[0]] || '')) + '</td></tr>'; };
+    const area = document.getElementById('printArea');
+    if(area.parentNode !== document.body) document.body.appendChild(area);
+    area.innerHTML = '<div class="pw ssP">' +
+      '<div class="ssTop"><div class="ssCo">Touch El-Zenouki Home Appliances</div><div class="ssLogo"><img src="' + LOGO_D_ + '" alt="TOUCH"></div></div>' +
+      '<div class="ssTitle">Special sales request<b>طلب مبيعات خاص</b><span dir="ltr">' + e(r.id) + '</span></div>' +
+      '<table class="ssHead">' + SS_FIELDS_.map(row).join('') + '</table>' +
+      '<div class="ssSub">Customer agreed specifications<b>المواصفات المتفق عليها</b></div>' +
+      '<table class="ssSpec"><tr><th class="h">الصنف<small>Item</small></th><td class="h">المواصفات<small>Specifications</small></td></tr>' +
+      SS_SPECS_.map(function(f){ return '<tr><th>' + f[1] + '<small>' + f[2] + '</small></th><td>' + nl(r[f[0]]) + '</td></tr>'; }).join('') + '</table>' +
+      '<div class="ssSign"><div><span>مدير المبيعات</span><small>Sales Manager</small><i></i></div><div><span>مدير المصنع</span><small>Factory Director</small><i></i></div></div>' +
+      '</div>';
+    document.title = 'طلب مبيعات خاص ' + r.id + ' - ' + (r.cust || '');
+    setTimeout(function(){ window.print(); document.title = 'TOUCH EL ZENOUKI - المناديب الخارجيين'; }, 80);
   }
 
   // ================== 🏦 الشيكات (بيتا) ==================
