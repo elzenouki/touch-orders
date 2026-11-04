@@ -2972,7 +2972,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.35.2-beta';
+  const APP_VERSION_ = 'v1.35.3-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -10195,7 +10195,7 @@
   // ================== 💳 أرصدة العملاء + الرصيد ليه كام يوم (بيتا) ==================
   // من جهاز الشركة (kind=aging): رصيد الإقفال لكل عميل فوق 500 ج، وأقدم فاتورة لسه داخلة في الرصيد
   // (بنرجع من آخر فاتورة لورا لحد ما مجموع الفواتير يوصل للرصيد) — الفواتير متسجلة من 1 يناير 2025
-  var bl_ = { rows: null, up: null, rep: '', age: '', sort: 'age', q: '' };
+  var bl_ = { rows: null, up: null, rep: '', age: '', sort: 'age', q: '', wallets: null };
   const BL_DATA_FROM_ = '2025-01-01';
   const BL_AGES_ = [['', 'الكل'], ['a', 'أقل من 30 يوم'], ['b', '30–60'], ['c', '60–90'], ['d', 'أكتر من 90 يوم']];
   function blDays_(d){ return d ? Math.max(0, Math.round((new Date(ymd_(bizToday_()) + 'T00:00:00') - new Date(d + 'T00:00:00')) / 86400000)) : null; }
@@ -10218,6 +10218,26 @@
       try{ localStorage.setItem(key, JSON.stringify(res)); }catch(e){}
       if(!document.getElementById('dlOverlay').hidden) blRender_();
     }).catch(function(e){ if(!bl_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+    callApi('listWallets', [state.auth, '']).then(function(r){
+      bl_.wallets = r.open || [];
+      if(!document.getElementById('dlOverlay').hidden) blRender_();
+    }).catch(function(){});
+  }
+  // تحصيل لسه مع المندوب في حافظته المفتوحة — لسه ما دخلش حساب العميل على سيستم الشركة
+  function blWalletNote_(){
+    const list = (bl_.wallets || []).filter(function(w){ return (!bl_.rep || w.rep === bl_.rep) && w.collected > 0; });
+    if(!list.length) return '';
+    if(bl_.rep){
+      const w = list[0];
+      return '<div class="note" style="margin-top:8px; background:var(--gold-bg); border-color:rgba(182,134,47,.35); color:var(--gold-d);">' +
+        '📥 معاه حاليًا <b>' + fmt(w.collected) + ' ج</b> تحصيل في حافظته المفتوحة (' + w.payCount + ' تحصيل) — لسه ما دخلش حساب العميل.</div>';
+    }
+    return '<div class="card" style="margin-top:12px;"><div class="cardTitle">📥 تحصيل لسه مع المناديب (حافظة مفتوحة)</div>' +
+      list.sort(function(a, b){ return b.collected - a.collected; }).map(function(w){
+        return '<div class="listRow tapRow" onclick="blSet_(\'rep\', ' + escapeHtml(JSON.stringify(w.rep)) + ')"><div class="lMain"><div class="lName">' + escapeHtml(w.rep) + '</div>' +
+          '<div class="lSub">' + w.payCount + ' تحصيل</div></div><span class="lNum" style="color:var(--gold-d); font-weight:900; direction:ltr;">' + fmt(w.collected) + '</span></div>';
+      }).join('') +
+      '<div class="note" style="margin-top:8px;">الفلوس دي لسه مع المندوب لحد ما يقفل حافظته ويسلّمها — مش داخلة في حساب العميل على سيستم الشركة لسه.</div></div>';
   }
   function blSet_(k, v){ bl_[k] = v; blRender_(); }
   function blFiltered_(){
@@ -10241,6 +10261,7 @@
     let h = '<div class="ovHero"><div><span>إجمالي الأرصدة</span><b>' + fmt(Math.round(tot)) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + inRep.length + '</b></div></div>';
     h += '<div class="pfMonths csaChips"><button type="button" class="' + (!bl_.rep ? 'on' : '') + '" onclick="blSet_(\'rep\', \'\')">كل المناديب</button>' +
       Object.keys(reps).sort().map(function(r){ return '<button type="button" class="' + (bl_.rep === r ? 'on' : '') + '" onclick="blSet_(\'rep\', ' + escapeHtml(JSON.stringify(r)) + ')">' + escapeHtml(r === '—' ? 'من غير مندوب' : r) + '</button>'; }).join('') + '</div>';
+    h += blWalletNote_();
     h += '<div class="blAges">' + BL_AGES_.slice(1).map(function(a){
       const x = ageSum[a[0]] || { n: 0, t: 0 };
       return '<button type="button" class="blAge ' + a[0] + (bl_.age === a[0] ? ' on' : '') + '" onclick="blSet_(\'age\', bl_.age === \'' + a[0] + '\' ? \'\' : \'' + a[0] + '\')"><span>' + a[1] + (a[0] !== 'a' && a[0] !== 'd' ? ' يوم' : '') + '</span><b>' + fmt(Math.round(x.t)) + '</b><small>' + x.n + ' عميل • ' + (tot ? Math.round(x.t * 100 / tot) : 0) + '%</small></button>';
