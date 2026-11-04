@@ -1608,6 +1608,15 @@
   .admPane > .bt, .admPane > .toolBtn{border-bottom:1px solid #f0ead6 !important;} .admPane > :last-child{border-bottom:none !important;}
   body.homeList .admPane > .toolBtn{padding:11px 12px; font-size:15px;} body.homeList .admPane .tIc{width:40px; height:40px;}
   .admPane .toolBtn::after{content:'‹'; margin-right:auto; font-size:22px; color:#b5b19a; line-height:1;} .admPane .toolBtn.out::after{content:none;}
+  /* تاب "العملاء": أيقونات جنب بعض في شبكة، مش قايمة سطور */
+  .admPane[data-tab="cust"]{display:grid !important; grid-template-columns:repeat(3,1fr); gap:10px; background:none !important; border:none !important; box-shadow:none !important; padding:0 1px;}
+  .admPane[data-tab="cust"] > .toolBtn, body.homeList .admPane[data-tab="cust"] > .toolBtn{
+    flex-direction:column !important; justify-content:center !important; text-align:center !important; gap:7px !important;
+    border:1px solid var(--oline) !important; border-radius:16px !important; padding:16px 6px 13px !important;
+    background:#fff !important; font-size:12.5px !important; line-height:1.3;
+  }
+  .admPane[data-tab="cust"] > .toolBtn::after{content:none !important;}
+  .admPane[data-tab="cust"] .tIc{width:46px !important; height:46px !important;}
   .admPaneT{font-family:'Alexandria',sans-serif; font-weight:800; font-size:13.5px; color:var(--omut); margin:12px 6px 6px;}
   .admTabs{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; height:calc(66px + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom);
     background:#fff; border-top:1px solid var(--oline); display:flex; z-index:60; box-shadow:0 -4px 16px rgba(47,53,25,.07);}
@@ -2988,7 +2997,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.38.0-beta';
+  const APP_VERSION_ = 'v1.38.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
