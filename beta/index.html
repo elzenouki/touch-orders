@@ -1647,46 +1647,60 @@
   .csaRow small{color:var(--omut); font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .csaRow .pfD{justify-self:end;}
 
-  /* ================= تصميم زجاجي شفاف (Glassmorphism) — فوق كل الأشكال السابقة ================= */
-  /* الخلفية: شوية بقع لون ناعمة عشان الزجاج يبان شفاف فعلاً فوقها */
+  /* ================= تصميم زجاجي فاخر (Liquid Glass) — فوق كل الأشكال السابقة ================= */
+  /* خلفية هادئة فيها نور دهبي ناعم من فوق وظل زيتوني غامق من تحت — عشان الزجاج يبان له عمق حقيقي */
   body{
     background:
-      radial-gradient(640px 420px at 92% -40px, rgba(217,162,27,.24) 0%, transparent 62%),
-      radial-gradient(560px 380px at 3% 6%, rgba(63,76,34,.20) 0%, transparent 60%),
-      radial-gradient(520px 360px at 50% 100%, rgba(86,103,47,.16) 0%, transparent 62%),
+      radial-gradient(1000px 620px at 88% -140px, rgba(217,162,27,.30) 0%, transparent 58%),
+      radial-gradient(820px 560px at -8% 108%, rgba(47,53,25,.26) 0%, transparent 56%),
+      radial-gradient(1100px 760px at 50% 38%, #fdfbf3 0%, var(--cream) 72%),
       var(--cream) !important;
     background-attachment:fixed !important;
   }
-  /* الأسطح الفاتحة (كروت، تايلز، أزرار الرئيسية، الشيتات) — زجاج لامع صافي زي خامة "Liquid Glass" */
+  /* ---- الأسطح الفاتحة: كروت، تايلز، أزرار الرئيسية والأدوات، الشيتات ---- */
   .card, .tile, .repCard, .orderCard, .docCard, .dlItems, .homeBtn, .adminLink, .toolBtn,
   .aiSheet, .ofPad, .batchRow, .csRow, .csaRow, .ovRep,
   body.homeList .bigGrid, body.homeList .bt, body.homeList .toolGrid{
-    position:relative;
-    background:linear-gradient(165deg, rgba(255,255,255,.82) 0%, rgba(255,255,255,.52) 55%, rgba(255,255,255,.38) 100%) !important;
-    -webkit-backdrop-filter:blur(22px) saturate(180%);
-    backdrop-filter:blur(22px) saturate(180%);
-    border:1px solid rgba(255,255,255,.85) !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.2), 0 10px 26px rgba(47,53,25,.12) !important;
+    position:relative; isolation:isolate;
+    background:linear-gradient(165deg, rgba(255,255,255,.9) 0%, rgba(255,253,246,.6) 48%, rgba(255,249,232,.42) 100%) !important;
+    -webkit-backdrop-filter:blur(26px) saturate(190%);
+    backdrop-filter:blur(26px) saturate(190%);
+    border:1px solid rgba(217,162,27,.24) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,1),
+      inset 0 0 0 1px rgba(255,255,255,.45),
+      0 16px 34px -12px rgba(47,53,25,.26),
+      0 2px 7px rgba(47,53,25,.07) !important;
   }
-  /* خط لمعة رفيع أعلى كل سطح زجاجي — إحساس الانعكاس على الزجاج الحقيقي */
-  .card::before, .tile::after, .aiSheet::before{
-    content:''; position:absolute; inset-inline:10%; top:0; height:1px;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
+  /* لمعة ذهبية رفيعة أعلى كل سطح — إحساس انعكاس الضوء على الزجاج الحقيقي */
+  .card::before, .tile::after, .aiSheet::before, .repCard::before, .docCard::before{
+    content:''; position:absolute; inset-inline:7%; top:0; height:1px; z-index:1;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.95) 35%, rgba(217,162,27,.6) 65%, transparent);
     pointer-events:none;
   }
-  /* الأسطح الغامقة (الهيدر، الشريط السفلي، كارت النهارده، صندوق الحديث) — نفس خامة الزجاج بس غامقة */
+  /* ---- الأسطح الغامقة: الهيدر، الشريط السفلي، كارت النهارده، صندوق الحديث ---- */
   .header, .tabBar, .todayCard, .hadithBox{
-    background:linear-gradient(165deg, rgba(90,100,55,.72) 0%, rgba(47,53,25,.6) 55%, rgba(38,43,21,.55) 100%) !important;
-    background-image:linear-gradient(165deg, rgba(90,100,55,.72) 0%, rgba(47,53,25,.6) 55%, rgba(38,43,21,.55) 100%) !important;
-    -webkit-backdrop-filter:blur(24px) saturate(160%);
-    backdrop-filter:blur(24px) saturate(160%);
-    border:1px solid rgba(255,255,255,.18) !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 10px 26px rgba(20,24,10,.25) !important;
+    background:linear-gradient(160deg, rgba(74,86,42,.8) 0%, rgba(47,53,25,.68) 55%, rgba(24,28,12,.72) 100%) !important;
+    background-image:linear-gradient(160deg, rgba(74,86,42,.8) 0%, rgba(47,53,25,.68) 55%, rgba(24,28,12,.72) 100%) !important;
+    -webkit-backdrop-filter:blur(28px) saturate(165%);
+    backdrop-filter:blur(28px) saturate(165%);
+    border:1px solid rgba(242,207,107,.38) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(242,207,107,.55),
+      inset 0 0 0 1px rgba(255,255,255,.08),
+      0 16px 34px -10px rgba(10,12,5,.5) !important;
   }
-  @media (min-width:700px){ .tabBar{border-color:rgba(255,255,255,.18) !important;} }
-  /* طبقة ضبابية خلف أي نافذة منبثقة */
-  .aiOverlay{ -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); }
-  /* زراير الفعل (حفظ، تقفيل..) من غير زجاج — عشان تفضل واضحة وبارزة في الشمس */
+  @media (min-width:700px){ .tabBar{border-color:rgba(242,207,107,.38) !important;} }
+  /* الأزرار الملونة الكبيرة في رئيسية المدير: نفس خامة الزجاج فوق ألوانها بتاريخ لمسة لمعان مائلة */
+  .bt{position:relative; overflow:hidden;}
+  .bt::before{
+    content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:linear-gradient(135deg, rgba(255,255,255,.38) 0%, rgba(255,255,255,.06) 32%, transparent 55%);
+  }
+  .bt > *{position:relative; z-index:1;}
+  /* طبقة ضبابية خلف أي نافذة منبثقة — تبلور اللي وراها وتدي عمق للشيت اللي فوقها */
+  .aiOverlay{ background:rgba(8,10,20,.6) !important; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  /* زراير الفعل (حفظ، تقفيل..) من غير زجاج — عشان تفضل واضحة وبارزة في الشمس أثناء الشغل بره */
 </style>
 </head>
 <body>
@@ -3013,7 +3027,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.36.1-beta';
+  const APP_VERSION_ = 'v1.37.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
