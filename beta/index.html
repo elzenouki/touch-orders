@@ -2972,7 +2972,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.35.4-beta';
+  const APP_VERSION_ = 'v1.35.5-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5761,13 +5761,15 @@
     const body = document.getElementById('dlBody');
     const today = usage_.today;
     const rows = usage_.rows.filter(function(r){ return usage_.days === 1 ? r.day === today : true; });
-    const people = {}, acts = {};
+    const people = {}, acts = {}, actUsers = {};
     let total = 0;
     rows.forEach(function(r){
       const k = r.who === '?' ? 'شاشة الدخول (قبل ما حد يسجّل)' : (r.name || r.who);
       const p = people[k] || (people[k] = { name: k, n: 0, acts: {} });
       p.n += r.n; p.acts[r.action] = (p.acts[r.action] || 0) + r.n;
       acts[r.action] = (acts[r.action] || 0) + r.n;
+      const au = actUsers[r.action] || (actUsers[r.action] = {});
+      au[k] = (au[k] || 0) + r.n;
       total += r.n;
     });
     const list = Object.keys(people).map(function(k){ return people[k]; }).sort(function(a, b){ return b.n - a.n; });
@@ -5787,9 +5789,14 @@
         '<div class="uSub">' + top.slice(0, 3).map(function(a){ return escapeHtml(an(a)) + ' ' + fmt(p.acts[a]); }).join(' • ') + '</div></summary>' +
         top.map(function(a){ return '<div class="uAct"><span>' + escapeHtml(an(a)) + '</span><span>' + fmt(p.acts[a]) + '</span></div>'; }).join('') + '</details>';
     }).join('');
-    h += '<div class="sectionLabel" style="margin:16px 0 8px;">حسب نوع الطلب</div><div class="uRow">' +
-      sortActs(acts).map(function(a){ return '<div class="uAct"><span>' + escapeHtml(an(a)) + '</span><span>' + fmt(acts[a]) + '</span></div>'; }).join('') + '</div>';
-    h += '<div class="note" style="margin-top:10px;">🔥 = أكتر من ضعف المتوسط. "تسجيل الموقع" بيتبعت لوحده كل 3 دقايق طول ما التطبيق مفتوح — لو رقمه عالي يبقى المندوب سايب التطبيق مفتوح طول اليوم.<br>' +
+    h += '<div class="sectionLabel" style="margin:16px 0 8px;">حسب نوع الطلب</div>' +
+      sortActs(acts).map(function(a){
+        const au = actUsers[a] || {};
+        const names = Object.keys(au).sort(function(x, y){ return au[y] - au[x]; });
+        return '<details class="uRow"><summary><div class="uTop"><b>' + escapeHtml(an(a)) + '</b><span>' + fmt(acts[a]) + '</span></div></summary>' +
+          names.map(function(n){ return '<div class="uAct"><span>' + escapeHtml(n) + '</span><span>' + fmt(au[n]) + '</span></div>'; }).join('') + '</details>';
+      }).join('');
+    h += '<div class="note" style="margin-top:10px;">دوس على أي نوع طلب تشوف مين بعته. 🔥 = أكتر من ضعف المتوسط. "تسجيل الموقع" بيتبعت لوحده كل 3 دقايق طول ما التطبيق مفتوح — لو رقمه عالي يبقى المندوب سايب التطبيق مفتوح طول اليوم.<br>' +
       'ملحوظة: "Log Query" في Supabase بيتحسب من قراية اللوجات في لوحة Supabase نفسها، مش من الطلبات دي — بس كل ما الطلبات تكتر اللوجات بتكبر.</div>';
     body.innerHTML = h;
   }
