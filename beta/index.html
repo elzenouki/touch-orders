@@ -1646,6 +1646,38 @@
   .csaRow .amt{font-family:var(--fTitle); font-size:16px; color:var(--o3); direction:ltr; text-align:left;}
   .csaRow small{color:var(--omut); font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .csaRow .pfD{justify-self:end;}
+
+  /* ================= تصميم زجاجي شفاف (Glassmorphism) — فوق كل الأشكال السابقة ================= */
+  /* الخلفية: شوية بقع لون ناعمة عشان الزجاج يبان شفاف فعلاً فوقها */
+  body{
+    background:
+      radial-gradient(640px 420px at 92% -40px, rgba(217,162,27,.24) 0%, transparent 62%),
+      radial-gradient(560px 380px at 3% 6%, rgba(63,76,34,.20) 0%, transparent 60%),
+      radial-gradient(520px 360px at 50% 100%, rgba(86,103,47,.16) 0%, transparent 62%),
+      var(--cream) !important;
+    background-attachment:fixed !important;
+  }
+  /* الأسطح الفاتحة (كروت، تايلز، أزرار الرئيسية، الشيتات) */
+  .card, .tile, .repCard, .orderCard, .docCard, .dlItems, .homeBtn, .adminLink, .toolBtn,
+  .aiSheet, .ofPad, .batchRow, .csRow, .csaRow, .ovRep,
+  body.homeList .bigGrid, body.homeList .bt, body.homeList .toolGrid{
+    background:rgba(255,255,255,.5) !important;
+    -webkit-backdrop-filter:blur(16px) saturate(160%);
+    backdrop-filter:blur(16px) saturate(160%);
+    border:1px solid rgba(255,255,255,.6) !important;
+  }
+  /* الأسطح الغامقة (الهيدر، الشريط السفلي، كارت النهارده، صندوق الحديث) — بتفضل غامقة بس شفافة */
+  .header, .tabBar, .todayCard, .hadithBox{
+    background:rgba(47,53,25,.6) !important;
+    background-image:none !important;
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    backdrop-filter:blur(18px) saturate(140%);
+    border:1px solid rgba(255,255,255,.14) !important;
+  }
+  @media (min-width:700px){ .tabBar{border-color:rgba(255,255,255,.14) !important;} }
+  /* طبقة ضبابية خلف أي نافذة منبثقة */
+  .aiOverlay{ -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px); }
+  /* زراير الفعل (حفظ، تقفيل..) من غير زجاج — عشان تفضل واضحة وبارزة في الشمس */
 </style>
 </head>
 <body>
@@ -2972,7 +3004,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.35.5-beta';
+  const APP_VERSION_ = 'v1.36.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
