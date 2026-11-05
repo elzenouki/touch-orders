@@ -2972,7 +2972,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.35.5-beta';
+  const APP_VERSION_ = 'v1.35.6-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -9640,7 +9640,8 @@
         const r = byCode[o.code] || {}, nm = r.name || o.name || o.code, fresh = seen.indexOf(o.code) === -1;
         return '<div class="chqRow"><div class="chqTop"><b>' + escapeHtml(nm) + '</b>' + (fresh ? '<span class="chqSt safe" style="margin:0;">🆕 جديد</span>' : '') + '</div>' +
           '<small>' + escapeHtml([o.code, r.rep || o.rep, r.area, r.phone].filter(Boolean).join(' • ')) + '<br>📎 ' + o.docs + ' مستند • ' + (o.form ? '✅ الاستمارة متملية' : '⚠️ الاستمارة لسه') + ' • ' + ymdToDmy_(String(o.at || '').slice(0, 10)) + '</small>' +
-          '<div class="aBtns" style="margin-top:6px;"><button type="button" class="ok" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\', true)">🖨 تحميل الملف</button><button type="button" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\')">✏️ افتح وكمّل</button></div></div>';
+          '<div class="aBtns" style="margin-top:6px;"><button type="button" class="ok" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\', true)">🖨 تحميل الملف</button><button type="button" onclick="caOpenCode_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\')">✏️ افتح وكمّل</button>' +
+          '<button type="button" style="color:#a8432f;" onclick="caAccDel_(\'' + escapeHtml(o.code).replace(/'/g, '') + '\', ' + escapeHtml(JSON.stringify(nm)) + ')">🗑 حذف</button></div></div>';
       }).join('') : '<div class="empty">مفيش عملاء جداد مستنيين — كلهم اتكودوا ✔</div>';
       const done = (ca_.openedAll || []).filter(function(o){ return !caNotCoded_(o); });
       if(done.length) box.innerHTML += '<details style="margin-top:12px;"><summary class="note" style="cursor:pointer;">📁 اللي اتكودوا (' + done.length + ') — لو محتاج تحمّل ملف واحد منهم</summary>' + done.map(function(o){
@@ -9763,6 +9764,19 @@
     dlEnter_('📎 ' + (d.label || 'مستند'), ca_.cur.name || '');
     ldBody_().innerHTML = '<div class="aiStatus">جاري تحميل الصورة...</div>';
     caApi_('doc_photo', { id: d.id }).then(function(x){ ldBody_().innerHTML = x.img && x.img.indexOf('data:image/') === 0 ? '<img class="fcImg" src="' + x.img + '" alt="">' : '<div class="empty">مفيش صورة</div>'; }).catch(ldErr_);
+  }
+  // مسح سجل «عميل جديد» اللي اتفتح من التطبيق (الاستمارة والمستندات) — لعميل اتسجل غلط أو مكرر، قبل ما ياخد كود سيستم
+  function caAccDel_(code, name){
+    confirmModal_('تمسح حساب «' + escapeHtml(name || code) + '» المفتوح ده نهائي؟ (الاستمارة والمستندات كلها هتتمسح)', '🗑 مسح', 'رجوع').then(function(ok){
+      if(!ok) return;
+      showLoading(true);
+      caApi_('acc_del', { code: code }).then(function(){
+        showLoading(false); toast_('✔ اتمسح');
+        ca_.openedAll = (ca_.openedAll || []).filter(function(o){ return o.code !== code; });
+        ca_.opened = (ca_.opened || []).filter(function(o){ return o.code !== code; });
+        caList_();
+      }).catch(function(e){ showLoading(false); showMsg(e.message, 'error'); });
+    });
   }
   function caDocDel_(i){
     const d = ca_.docs[i];
