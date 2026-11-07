@@ -1877,6 +1877,7 @@
       <div class="secTitle green"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>ورقة الطلبية — اكتب الكمية قدام الصنف</div>
       <div class="aiTools" style="grid-template-columns:1fr;">
         <button type="button" id="shelfToolBtn" onclick="openShelf_()" style="flex-direction:row; gap:8px; padding:10px;"><span style="display:flex"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="18" y1="20" x2="18" y2="9"/></svg></span>عد رف التاجر واطلب على قده</button>
+        <button type="button" onclick="openStale_()" style="flex-direction:row; gap:8px; padding:10px;"><span style="display:flex"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>أصناف مش بياخدها من 3 شهور</button>
       </div>
       <input type="search" id="pickSearch" class="acInput" placeholder="دوّر بالاسم أو الكود..." autocomplete="off">
       <div id="ofFilters"></div>
@@ -2972,7 +2973,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.35.6-beta';
+  const APP_VERSION_ = 'v1.36.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4407,6 +4408,34 @@
       }
       renderShelf_();
     }).catch(function(err){ setAiStatus_(err.message, true); showMsg(err.message, 'error'); });
+  }
+  // ---------- 📉 أصناف مش بياخدها العميل من 3 شهور (من جهاز الشركة) ----------
+  function staleApi_(code){
+    const b = new URLSearchParams();
+    b.set('e', (state.auth && state.auth.email) || ''); b.set('p', (state.auth && state.auth.pin) || ''); b.set('kind', 'staleitems'); b.set('code', code); b.set('days', '90');
+    return fetch(FCHQ_URL_(), { method: 'POST', body: b, cache: 'no-store' })
+      .then(function(r){ return r.json(); }, function(){ throw new Error('جهاز الشركة مش متاح دلوقتي — جرّب كمان شوية'); })
+      .then(function(d){ if(d && d.ok === true) return d.result; throw new Error((d && d.error) || 'حصل خطأ'); });
+  }
+  function openStale_(){
+    const v = state.visit;
+    if(!v || v.phone) return;
+    if(state.demo){ toast_('الأداة دي مش متاحة في التدريب'); return; }
+    openAiSheet_('stale', '📉 أصناف مش بياخدها من 3 شهور');
+    document.getElementById('aiBody').innerHTML = '<div class="aiStatus" id="aiStatus">بجيب مشترياته...</div>';
+    staleApi_(v.cust.code).then(function(r){
+      if(state.visit !== v || ai_.mode !== 'stale') return;
+      renderStale_((r && r.rows) || []);
+    }).catch(function(err){ setAiStatus_(err.message, true); });
+  }
+  function renderStale_(rows){
+    let html = '<div class="aiNote plain">أصناف اتعود العميل ده ياخدها، وبقالها <b>3 شهور</b> أو أكتر مطلبهاش — ذكّره بيها وانت بتاخد الطلبية.</div>';
+    html += !rows.length ? '<div class="empty">مفيش أصناف قديمة — كل حاجة بياخدها لسه قريب، أو مفيش تاريخ شراء كفاية للعميل ده</div>'
+      : rows.map(function(r){
+        return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(r.item || r.code) + '</div>' +
+          '<div class="lSub">آخر مرة ' + escapeHtml(ymdToDmy_(r.last)) + ' • أخدها ' + r.times + ' مرة • ' + fmt(r.qty) + ' قطعة</div></div></div>';
+      }).join('');
+    document.getElementById('aiBody').innerHTML = html;
   }
   function shelfRate_(r){
     if(r.count && r.count.daysAgo >= 3 && r.stock !== ''){
