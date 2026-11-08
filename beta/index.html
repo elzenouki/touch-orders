@@ -1884,6 +1884,7 @@
       <div class="ofCount" id="ofCount"></div>
       <div id="pickList" class="ofPaper" data-p="order"></div>
       <div class="orderSum" id="orderSum" hidden><span id="orderSumItems"></span><span id="orderSumQty"></span></div>
+      <div class="note" id="orderSumValue" hidden style="margin-top:6px;"></div>
     </div>
     <div class="card secCard retCard" id="retBox" hidden>
       <div class="secTitle red"><svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>ورقة المرتجع — اكتب الكمية قدام الصنف</div>
@@ -2973,7 +2974,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.36.1-beta';
+  const APP_VERSION_ = 'v1.37.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3744,7 +3745,9 @@
       cust: c, modes: { order: true, ret: false, pay: false, none: false },
       lines: [], rets: [], reason: '', sel: null, retSel: null, retCond: 'سليم', payMethod: '',
       pos: null, posErr: null, reqId: genRequestId_(), setShop: false, setShopTouched: false, phone: !!phone,
+      lastPrices: null, lastPricesLoading: false,
     };
+    if(!phone && !state.demo) loadLastPrices_(state.visit);
     setTitle_(phone ? '📞 من غير زيارة' : 'زيارة تاجر', c.name);
     stkWarm_();
     document.getElementById('locBox').hidden = !!phone;
@@ -4337,6 +4340,28 @@
     paperChanged_(ofPad_.pk);
     ofPadInfo_();
   });
+  // آخر سعر خد بيه العميل ده كل صنف (kind=lastprice, mode=cust) — بيتحسب بيه إجمالي الطلبية التقريبي
+  function loadLastPrices_(v){
+    if(!v || v.phone || v.lastPricesLoading || v.lastPrices) return;
+    v.lastPricesLoading = true;
+    lpApi_('cust', v.cust.code).then(function(r){
+      v.lastPricesLoading = false;
+      const map = {};
+      (r.rows || []).forEach(function(row){ map[String(row[3])] = { price: Number(row[8]) || 0, net: Number(row[9]) || 0 }; });
+      v.lastPrices = map;
+      if(state.visit === v) updateOrderSum_();
+    }).catch(function(){ v.lastPricesLoading = false; });
+  }
+  function orderValue_(v){
+    if(!v || !v.lastPrices || !v.lines.length) return null;
+    let val = 0, missing = 0;
+    v.lines.forEach(function(l){
+      const lp = v.lastPrices[l.code];
+      const p = lp && (lp.net || lp.price);
+      if(p) val += l.qty * p; else missing++;
+    });
+    return val ? { val: val, missing: missing } : null;
+  }
   function updateOrderSum_(){
     const v = state.visit;
     const n = v ? v.lines.length : 0;
@@ -4344,12 +4369,15 @@
     document.getElementById('orderSum').hidden = !n;
     document.getElementById('orderSumItems').textContent = n + ' صنف';
     document.getElementById('orderSumQty').textContent = 'إجمالي ' + fmt(total) + ' قطعة';
+    const ov = orderValue_(v), valEl = document.getElementById('orderSumValue');
+    valEl.hidden = !ov;
+    if(ov) valEl.textContent = '≈ ' + fmt(Math.round(ov.val)) + ' ج بآخر سعر للعميل ده' + (ov.missing ? ' (' + ov.missing + ' صنف من غير سعر سابق)' : '');
     const sb = document.getElementById('shelfToolBtn');
     if(sb && v){ sb.hidden = !!v.phone; sb.classList.toggle('done', !!(v.shelf && v.shelf.length)); }
     const show = n > 0 && state.screen === 'visit' && v.modes.order && !ofPadIsOpen_();
     document.getElementById('orderBar').hidden = !show;
     document.body.classList.toggle('hasBar', show);
-    if(show) document.getElementById('orderBarText').textContent = '🧾 ' + n + ' صنف • ' + fmt(total) + ' قطعة';
+    if(show) document.getElementById('orderBarText').textContent = '🧾 ' + n + ' صنف • ' + fmt(total) + ' قطعة' + (ov ? ' • ≈' + fmt(Math.round(ov.val)) + ' ج' : '');
   }
   // ================== شاشة من تحت (بتستخدمها "عد رف التاجر") ==================
   var ai_ = { mode: '', lines: [] };
