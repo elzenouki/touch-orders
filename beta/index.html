@@ -2977,7 +2977,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.38.0-beta';
+  const APP_VERSION_ = 'v1.38.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -4350,15 +4350,25 @@
     if(_priceOfSrc_ !== as){ _priceOfSrc_ = as; _priceOf_ = {}; as.forEach(function(a){ if(a.price) _priceOf_[a.code] = Number(a.price) || 0; }); }
     return _priceOf_[code] || 0;
   }
-  function orderValue_(v){
-    if(!v || !v.lines.length) return null;
-    const disc = Math.max(0, Math.min(100, Number((v.cust && v.cust.discount) || 0)));
+  // بتتستخدم لحظة الكتابة (v.cust معاه الخصم أصلاً) ولشاشة "اتسجلت"/سجل زياراتي (عندنا كود العميل بس)
+  function orderItemsValue_(items, custCode, discIn){
+    if(!items || !items.length) return null;
+    let disc = discIn;
+    if(disc == null && custCode){
+      const c = (state.rep && state.rep.customers || []).find(function(x){ return x.code === custCode; });
+      disc = c ? c.discount : 0;
+    }
+    disc = Math.max(0, Math.min(100, Number(disc) || 0));
     let val = 0, missing = 0;
-    v.lines.forEach(function(l){
+    items.forEach(function(l){
       const p = priceOf_(l.code);
       if(p) val += l.qty * p * (1 - disc / 100); else missing++;
     });
     return val ? { val: val, missing: missing, disc: disc } : null;
+  }
+  function orderValue_(v){
+    if(!v) return null;
+    return orderItemsValue_(v.lines, null, v.cust && v.cust.discount);
   }
   function updateOrderSum_(){
     const v = state.visit;
@@ -4769,7 +4779,10 @@
     if(items.length){
       det += '<div class="docBlock green"><div class="dbTitle">🧾 طلبية ' + (res.orderId ? '<span class="ltrNum" style="font-weight:700; color:var(--muted)">' + escapeHtml(res.orderId) + '</span>' : (pending ? '(لسه ماتبعتش)' : '')) + '</div>';
       det += items.map(function(it){ return '<div class="kv"><span>' + escapeHtml(it.name) + '</span><span class="ltrNum">' + fmt(it.qty) + '</span></div>'; }).join('');
-      det += '<div class="kv"><span>الإجمالي</span><span class="ltrNum">' + fmt(items.reduce(function(s, i){ return s + i.qty; }, 0)) + ' قطعة</span></div></div>';
+      det += '<div class="kv"><span>الإجمالي</span><span class="ltrNum">' + fmt(items.reduce(function(s, i){ return s + i.qty; }, 0)) + ' قطعة</span></div>';
+      const ov = orderItemsValue_(items, res.customer && res.customer.code);
+      if(ov) det += '<div class="kv"><span>القيمة التقريبية</span><span class="ltrNum">' + fmt(Math.round(ov.val)) + ' ج' + (ov.disc ? ' (خصم ' + fmtPrice_(ov.disc) + '٪)' : '') + '</span></div>';
+      det += '</div>';
     }
     if(rets.length){
       det += '<div class="docBlock red"><div class="dbTitle">↩ مرتجع ' + (res.returnId ? '<span class="ltrNum" style="font-weight:700; color:var(--muted)">' + escapeHtml(res.returnId) + '</span>' : '') + '</div>';
