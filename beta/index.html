@@ -2973,7 +2973,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.36.0-beta';
+  const APP_VERSION_ = 'v1.36.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -7891,7 +7891,7 @@
   // ================== 💰 المتأخرات ==================
   // بتتحسب على جهاز الشركة من أرصدة العملاء (رصيد الإقفال − مدين > 500) — ورك فلو "تقارير التطبيق — من الجهاز"
   // المندوب: متأخرات عملاؤه بس • المدير: الكل متقسم على المناديب
-  var ov_ = { rows: null, at: 0, synced: null, rep: '', q: '', walletByCode: null };
+  var ov_ = { rows: null, at: 0, synced: null, rep: '', q: '', walletByCode: null, walletByName: null };
   function ovApi_(){ return localReport_('overdue'); }
   function ovLoad_(force){
     if(!force && ov_.rows && Date.now() - ov_.at < 5 * 60000) return Promise.resolve(ov_.rows);
@@ -7920,24 +7920,32 @@
     ovLoad_(true).then(ovRender_).catch(function(e){ if(!cached) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
     ovLoadWallets_();
   }
-  // دفعات لسه في حافظة المندوب المفتوحة (ما دخلتش سيستم الشركة لسه) — مجمّعة بكود العميل
+  // دفعات لسه في حافظة المندوب المفتوحة (ما دخلتش سيستم الشركة لسه) — مجمّعة بكود العميل، وبالاسم كبديل
+  // (لو كود العميل في تقرير المتأخرات مش متطابق — زي لما كود الحساب في بيانات الشركة مش لاقي ليه نظير)
   function ovLoadWallets_(){
     callApi('listWallets', [state.auth, '']).then(function(r){
       const reps = (r.open || []).filter(function(w){ return w.collected > 0; }).map(function(w){ return w.rep; });
-      if(!reps.length){ ov_.walletByCode = {}; if(!document.getElementById('dlOverlay').hidden) ovRenderList_(); return; }
+      if(!reps.length){ ov_.walletByCode = {}; ov_.walletByName = {}; if(!document.getElementById('dlOverlay').hidden) ovRenderList_(); return; }
       return Promise.all(reps.map(function(rep){ return callApi('getWallet', [state.auth, rep, '']).then(function(w){ return { rep: rep, w: w }; }).catch(function(){ return null; }); }))
         .then(function(wallets){
-          const by = {};
+          const by = {}, byName = {};
           wallets.forEach(function(x){
             if(!x || !x.w || !x.w.payments) return;
             x.w.payments.forEach(function(p){
-              if(!p.customerCode) return;
-              const a = by[p.customerCode] = by[p.customerCode] || { amt: 0, n: 0, reps: [] };
-              a.amt += Number(p.amount) || 0; a.n++;
-              if(a.reps.indexOf(x.rep) === -1) a.reps.push(x.rep);
+              if(p.customerCode){
+                const a = by[p.customerCode] = by[p.customerCode] || { amt: 0, n: 0, reps: [] };
+                a.amt += Number(p.amount) || 0; a.n++;
+                if(a.reps.indexOf(x.rep) === -1) a.reps.push(x.rep);
+              }
+              if(p.customerName){
+                const k = normAr_(p.customerName);
+                const a2 = byName[k] = byName[k] || { amt: 0, n: 0, reps: [] };
+                a2.amt += Number(p.amount) || 0; a2.n++;
+                if(a2.reps.indexOf(x.rep) === -1) a2.reps.push(x.rep);
+              }
             });
           });
-          ov_.walletByCode = by;
+          ov_.walletByCode = by; ov_.walletByName = byName;
           if(!document.getElementById('dlOverlay').hidden) ovRenderList_();
         });
     }).catch(function(){});
@@ -7989,7 +7997,7 @@
     const mine = !state.isAdmin && state.rep ? state.rep.customers : null;
     box.innerHTML = rows.length ? rows.slice(0, 400).map(function(r, n){
       const known = mine && r.code && mine.some(function(c){ return String(c.code) === String(r.code); });
-      const w = r.code && ov_.walletByCode && ov_.walletByCode[r.code];
+      const w = (r.code && ov_.walletByCode && ov_.walletByCode[r.code]) || (ov_.walletByName && ov_.walletByName[normAr_(r.name)]);
       return '<div class="listRow ovRow"><div class="lMain"><div class="lName">' + (n + 1) + '. ' + escapeHtml(r.name) + (r.code ? ' <span class="oCode">' + escapeHtml(r.code) + '</span>' : '') + '</div>' +
         '<div class="lSub">' + escapeHtml([r.area, state.isAdmin ? (r.rep || 'من غير مندوب') : '', r.book_name && normAr_(r.book_name) !== normAr_(r.name) ? 'في الأرصدة: ' + r.book_name : ''].filter(Boolean).join(' • ')) + '</div>' +
         (w ? '<div class="lSub" style="color:var(--gold-d); font-weight:700;">📥 منها ' + fmt(w.amt) + ' ج لسه في حافظة ' + escapeHtml(w.reps.join('، ')) + ' — ما دخلتش السيستم</div>' : '') +
