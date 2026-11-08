@@ -1863,6 +1863,7 @@
       <div class="vSub" id="vSub"></div>
       <div class="visitBtns" id="vBtns"></div>
       <div class="ctRow" id="vCloseRow"><span id="vCloseLbl">⏰ التاجر بيقفل الساعة</span><input type="time" id="vCloseTime" dir="ltr" onchange="ctVisitChanged_()"></div>
+      <div class="ctRow" id="vDiscRow" hidden><span>💰 خصم العميل</span><input type="text" id="vDiscInput" class="ltrNum" inputmode="decimal" dir="ltr" style="width:60px; margin:0;" maxlength="5" placeholder="0" onchange="visitDiscChanged_()"><span>٪</span></div>
       <div id="vOffBox"><div class="ctOffLbl">📅 أجازته الأسبوعية (دوس على اليوم):</div><div class="ctDays" id="vOffDays"></div></div>
       <div class="locBox" id="locBox">📍 جاري تحديد موقعك...</div>
       <div class="phoneNote" id="phoneNote" hidden>📞 من غير زيارة (التاجر كلّمك أو حوّل فلوس) — من غير موقع، ومش هتتحسب زيارة</div>
@@ -2063,6 +2064,8 @@
       </div>
       <button class="primary" onclick="handleAddAsnaf_()">إضافة صنف</button>
       <div class="note" style="margin-top:10px;">التجار وأيام زيارتهم بيتكتبوا من تاب "التجار" في الشيت.</div>
+      <button class="ghost wide" style="margin-top:10px;" onclick="openPriceList_()">💰 قائمة الأسعار</button>
+      <div class="note" style="margin-top:10px;">السعر هنا هو الأساس اللي بتتحسب عليه قيمة الطلبية في الزيارة (بعد خصم كل عميل).</div>
     </div>
   </div>
 
@@ -2974,7 +2977,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.37.0-beta';
+  const APP_VERSION_ = 'v1.38.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3745,14 +3748,14 @@
       cust: c, modes: { order: true, ret: false, pay: false, none: false },
       lines: [], rets: [], reason: '', sel: null, retSel: null, retCond: 'سليم', payMethod: '',
       pos: null, posErr: null, reqId: genRequestId_(), setShop: false, setShopTouched: false, phone: !!phone,
-      lastPrices: null, lastPricesLoading: false,
     };
-    if(!phone && !state.demo) loadLastPrices_(state.visit);
     setTitle_(phone ? '📞 من غير زيارة' : 'زيارة تاجر', c.name);
     stkWarm_();
     document.getElementById('locBox').hidden = !!phone;
     document.getElementById('phoneNote').hidden = !phone;
     document.getElementById('modePay').hidden = false;
+    document.getElementById('vDiscRow').hidden = !!phone;
+    document.getElementById('vDiscInput').value = c.discount ? fmtPrice_(c.discount) : '';
     renderNotesLabel_(phone);
     document.getElementById('modeNone').hidden = !!phone;
     document.getElementById('vName').textContent = c.name + (c.isNew ? ' (جديد)' : '');
@@ -4340,27 +4343,22 @@
     paperChanged_(ofPad_.pk);
     ofPadInfo_();
   });
-  // آخر سعر خد بيه العميل ده كل صنف (kind=lastprice, mode=cust) — بيتحسب بيه إجمالي الطلبية التقريبي
-  function loadLastPrices_(v){
-    if(!v || v.phone || v.lastPricesLoading || v.lastPrices) return;
-    v.lastPricesLoading = true;
-    lpApi_('cust', v.cust.code).then(function(r){
-      v.lastPricesLoading = false;
-      const map = {};
-      (r.rows || []).forEach(function(row){ map[String(row[3])] = { price: Number(row[8]) || 0, net: Number(row[9]) || 0 }; });
-      v.lastPrices = map;
-      if(state.visit === v) updateOrderSum_();
-    }).catch(function(){ v.lastPricesLoading = false; });
+  // قيمة الطلبية = سعر الصنف من "قائمة الأسعار" (إدارة المناديب والأصناف) × (١ - خصم العميل٪)
+  var _priceOfSrc_ = null, _priceOf_ = {};
+  function priceOf_(code){
+    const as = (state.rep && state.rep.asnaf) || [];
+    if(_priceOfSrc_ !== as){ _priceOfSrc_ = as; _priceOf_ = {}; as.forEach(function(a){ if(a.price) _priceOf_[a.code] = Number(a.price) || 0; }); }
+    return _priceOf_[code] || 0;
   }
   function orderValue_(v){
-    if(!v || !v.lastPrices || !v.lines.length) return null;
+    if(!v || !v.lines.length) return null;
+    const disc = Math.max(0, Math.min(100, Number((v.cust && v.cust.discount) || 0)));
     let val = 0, missing = 0;
     v.lines.forEach(function(l){
-      const lp = v.lastPrices[l.code];
-      const p = lp && (lp.net || lp.price);
-      if(p) val += l.qty * p; else missing++;
+      const p = priceOf_(l.code);
+      if(p) val += l.qty * p * (1 - disc / 100); else missing++;
     });
-    return val ? { val: val, missing: missing } : null;
+    return val ? { val: val, missing: missing, disc: disc } : null;
   }
   function updateOrderSum_(){
     const v = state.visit;
@@ -4371,7 +4369,7 @@
     document.getElementById('orderSumQty').textContent = 'إجمالي ' + fmt(total) + ' قطعة';
     const ov = orderValue_(v), valEl = document.getElementById('orderSumValue');
     valEl.hidden = !ov;
-    if(ov) valEl.textContent = '≈ ' + fmt(Math.round(ov.val)) + ' ج بآخر سعر للعميل ده' + (ov.missing ? ' (' + ov.missing + ' صنف من غير سعر سابق)' : '');
+    if(ov) valEl.textContent = '≈ ' + fmt(Math.round(ov.val)) + ' ج' + (ov.disc ? ' (بعد خصم ' + fmtPrice_(ov.disc) + '٪)' : '') + (ov.missing ? ' — ' + ov.missing + ' صنف من غير سعر في القائمة' : '');
     const sb = document.getElementById('shelfToolBtn');
     if(sb && v){ sb.hidden = !!v.phone; sb.classList.toggle('done', !!(v.shelf && v.shelf.length)); }
     const show = n > 0 && state.screen === 'visit' && v.modes.order && !ofPadIsOpen_();
@@ -6574,6 +6572,20 @@
     row.classList.toggle('need', !v);
     document.getElementById('vCloseLbl').textContent = v ? '⏰ التاجر بيقفل الساعة' : '⏰ اكتب التاجر بيقفل الساعة كام';
     ctSave_(state.visit.cust.code, { t: v }).catch(function(){});
+  }
+  // خصم العميل (٪) — بيتحفظ فورًا وبيتحسب عليه قيمة الطلبية بعد كده بسعر الصنف من قائمة الأسعار
+  function visitDiscChanged_(){
+    const v = state.visit; if(!v) return;
+    const inp = document.getElementById('vDiscInput');
+    const d = normalizeDigits(inp.value).replace(/[^\d.]/g, '');
+    const n = Number(d);
+    if(d && (!(n >= 0) || n > 100)){ showMsg('نسبة الخصم لازم تكون بين 0 و 100', 'error'); inp.value = v.cust.discount ? fmtPrice_(v.cust.discount) : ''; return; }
+    callApi('setCustomerDiscount', [state.auth, v.cust.code, d || '0']).then(function(r){
+      v.cust.discount = r.discount;
+      inp.value = r.discount ? fmtPrice_(r.discount) : '';
+      toast_('✔ اتحفظ الخصم');
+      updateOrderSum_();
+    }).catch(function(e){ showMsg(e.message, 'error'); inp.value = v.cust.discount ? fmtPrice_(v.cust.discount) : ''; });
   }
   function ctVisitDay_(d){
     if(!state.visit) return;
@@ -12133,6 +12145,44 @@
       })
       .catch(onError);
   }
+  // ================== 💰 قائمة الأسعار (سعر ثابت لكل صنف — بيتحسب عليه قيمة الطلبية) ==================
+  var pl_ = { rows: null, q: '' };
+  function openPriceList_(){
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('💰 قائمة الأسعار', 'سعر كل صنف — دوس على الرقم وعدّله');
+    pl_.q = '';
+    ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
+    callApi('listAsnaf', [state.auth]).then(function(r){ pl_.rows = r || []; plRender_(); }).catch(ldErr_);
+  }
+  function plRender_(){
+    let h = '<input type="search" class="dlFilter" id="plQ" placeholder="🔎 دوّر على صنف بالاسم أو الكود..." value="' + escapeHtml(pl_.q) + '" oninput="pl_.q=this.value; plRenderList_()">';
+    h += '<div id="plList"></div>';
+    ldBody_().innerHTML = h;
+    plRenderList_();
+  }
+  function plFiltered_(){
+    const nq = normAr_(normalizeDigits(pl_.q || '')).trim();
+    return (pl_.rows || []).filter(function(x){ return !nq || normAr_(x.name).indexOf(nq) !== -1 || String(x.code).toLowerCase().indexOf(nq) !== -1; });
+  }
+  function plRenderList_(){
+    const box = document.getElementById('plList'); if(!box) return;
+    const L = plFiltered_();
+    box.innerHTML = L.length ? L.map(function(x){
+      return '<div class="listRow"><div class="lMain"><div class="lName">' + escapeHtml(x.name) + '</div><div class="lSub">' + escapeHtml(x.code) + '</div></div>' +
+        '<input type="text" class="ltrNum" inputmode="decimal" style="width:90px; margin:0;" data-pl-code="' + escapeHtml(x.code) + '" value="' + (x.price ? fmtPrice_(x.price) : '') + '" placeholder="0"></div>';
+    }).join('') : '<div class="empty">مفيش نتايج</div>';
+  }
+  ldBody_().addEventListener('change', function(e){
+    const inp = e.target;
+    if(!inp.dataset || !inp.dataset.plCode) return;
+    const code = inp.dataset.plCode, v = normalizeDigits(inp.value).replace(/[^\d.]/g, '');
+    const row = (pl_.rows || []).find(function(x){ return x.code === code; });
+    callApi('setItemPrice', [state.auth, code, v]).then(function(r){
+      if(row) row.price = r.price;
+      inp.value = r.price ? fmtPrice_(r.price) : '';
+      toast_('✔ اتحفظ السعر');
+    }).catch(function(e){ showMsg(e.message, 'error'); if(row) inp.value = row.price ? fmtPrice_(row.price) : ''; });
+  });
 
   // ================== إعداداتي ==================
   function openProfile_(){
