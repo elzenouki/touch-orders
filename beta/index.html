@@ -1946,6 +1946,7 @@
 
   <!-- ============ طلبياتي ============ -->
   <div id="viewMyOrders" hidden>
+    <input type="search" id="moQ" class="dlFilter" placeholder="🔎 دوّر باسم العميل أو الكود أو الصنف أو المبلغ أو التاريخ..." oninput="state.moQ_=this.value; renderMyOrders_(state.myOrders_ || [])" style="margin:0 0 10px;">
     <div id="myOrdersList"><div class="empty">جاري التحميل...</div></div>
   </div>
 
@@ -1958,6 +1959,7 @@
     </div>
     <div id="rRepWrap"><label>المندوب</label><select id="rRep"></select></div>
     <button class="primary" onclick="loadReport_()">عرض التقرير</button>
+    <button type="button" class="bigAction" style="margin-top:10px;" onclick="openVisitSearch_()">🔎 دوّر في الزيارات والطلبيات والتحصيل</button>
     <button type="button" class="bigAction" style="margin-top:10px;" onclick="openRepVisits_()">📥 تقرير زيارات مندوب (بالعميل) — Excel / PDF</button>
     <div id="reportOut" style="margin-top:16px;"></div>
   </div>
@@ -2978,7 +2980,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.40.1-beta';
+  const APP_VERSION_ = 'v1.41.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5043,12 +5045,22 @@
       .then(function(list){ localCacheSet_('myvisits', list); if(state.screen === 'myorders') renderMyOrders_(list); })
       .catch(function(err){ if(!cached) onError(err); });
   }
+  // نص البحث لكل زيارة: العميل والكود والأصناف والمبلغ والتاريخ وطريقة الدفع والملاحظات
+  function moText_(o){
+    const c = o.customer || {}, p = o.payment || {};
+    return normAr_(normalizeDigits([c.name, c.code, o.date, o.time, o.orderId, o.returnId, o.paymentId, p.amount, p.method, o.notes, o.reason, o.phone ? 'من غير زيارة تليفون' : '']
+      .concat((o.items || []).map(function(it){ return it.name + ' ' + (it.code || ''); }), (o.returns || []).map(function(it){ return it.name + ' ' + (it.code || '') + ' مرتجع'; })).join(' ')));
+  }
   function renderMyOrders_(list){
     state.myOrders_ = list;
     const box = document.getElementById('myOrdersList');
+    const qi = document.getElementById('moQ'); if(qi && qi.value !== (state.moQ_ || '')) qi.value = state.moQ_ || '';
     if(!list.length){ box.innerHTML = '<div class="empty">مفيش طلبيات ولا مرتجعات ولا تحصيل في آخر 30 يوم</div>'; return; }
-    let html = '', lastDay = '';
+    const words = normAr_(normalizeDigits(state.moQ_ || '')).split(' ').filter(Boolean);
+    let html = '', lastDay = '', shown = 0;
     list.forEach(function(o, i){
+      if(words.length){ const t = moText_(o); if(!words.every(function(w){ return t.indexOf(w) !== -1; })) return; }
+      shown++;
       if(o.date !== lastDay){ lastDay = o.date; html += '<div class="dayHead">' + escapeHtml(o.date) + '</div>'; }
       const chips = [];
       if(o.items && o.items.length) chips.push('<span class="chip green">🧾 ' + fmt(o.items.reduce(function(s, it){ return s + it.qty; }, 0)) + '</span>');
@@ -5062,7 +5074,48 @@
         '<div class="ocBtns"><button onclick="shareOrderExcel_(state.myOrders_[' + i + '])">📤 مشاركة Excel</button>' +
         '<button onclick="downloadOrderExcel_(state.myOrders_[' + i + '])">⬇ تحميل</button></div></div>';
     });
-    box.innerHTML = html;
+    box.innerHTML = words.length ? '<div class="note" style="margin-bottom:8px;">' + shown + ' نتيجة من ' + list.length + '</div>' + (html || '<div class="empty">مفيش حاجة بالكلام ده</div>') : html;
+  }
+
+  // ================== 🔎 بحث في الزيارات والطلبيات والتحصيل (بيتا) ==================
+  // نفس المدة والمندوب المختارين في تقرير الزيارات — بيدوّر باسم العميل أو الكود أو المندوب أو الصنف أو المبلغ أو السبب
+  var vs_ = { from: '', to: '', rep: '', raw: null, q: '' };
+  function openVisitSearch_(){
+    const f = document.getElementById('rFrom'), t = document.getElementById('rTo'), r = document.getElementById('rRep');
+    vs_.from = (f && f.value) || ymd_(bizToday_()); vs_.to = (t && t.value) || vs_.from;
+    vs_.rep = state.isAdmin ? ((r && r.value) || '') : ((state.user && state.user.name) || '');
+    dl_.stack = []; dlBackBtn_();
+    dlOpen_('🔎 بحث في الزيارات', 'من ' + ymdToDmy_(vs_.from) + ' لـ ' + ymdToDmy_(vs_.to) + ' • ' + (vs_.rep || 'كل المناديب'));
+    ldBody_().innerHTML = '<input type="search" class="dlFilter" id="vsQ" placeholder="🔎 اسم العميل أو الكود أو المندوب أو الصنف أو المبلغ..." value="' + escapeHtml(vs_.q) + '" oninput="vs_.q=this.value; vsRender_()">' +
+      '<div class="note" style="margin:0 0 8px;">المدة والمندوب من اختيارات تقرير الزيارات — غيّرهم هناك وارجع دوّر.</div><div id="vsOut"><div class="aiStatus">جاري التحميل...</div></div>';
+    const q = document.getElementById('vsQ'); if(q) q.focus();
+    vs_.raw = null;
+    Promise.all(['visits', 'orders', 'payments'].map(function(k){ return callApi('getReportList', [state.auth, vs_.from, vs_.to, vs_.rep, k]).catch(function(){ return null; }); }))
+      .then(function(x){
+        vs_.raw = { visits: (x[0] && x[0].visits) || [], docs: (x[1] && x[1].docs) || [], pays: (x[2] && x[2].payments) || [] };
+        vsRender_();
+      });
+  }
+  function vsRender_(){
+    const box = document.getElementById('vsOut'); if(!box || !vs_.raw) return;
+    const words = normAr_(normalizeDigits(vs_.q || '')).split(' ').filter(Boolean);
+    const hit = function(parts){ if(!words.length) return true; const t = normAr_(normalizeDigits(parts.filter(function(v){ return v != null && v !== ''; }).join(' '))); return words.every(function(w){ return t.indexOf(w) !== -1; }); };
+    const R = vs_.raw, all = !vs_.rep;
+    const D = R.docs.filter(function(d){ return hit([d.customerName, d.customerCode, d.rep, d.date, d.orderId, d.type, d.notes, d.source].concat((d.lines || []).map(function(l){ return l.itemName + ' ' + l.itemCode + ' ' + (l.reason || ''); }))); });
+    const V = R.visits.filter(function(v){ return hit([v.name, v.code, v.rep, v.date, v.reason, v.notes, v.amount]); });
+    const P = R.pays.filter(function(p){ return hit([p.customerName, p.customerCode, p.rep, p.date, p.method, p.amount, p.notes, p.chequeDate]); });
+    if(!words.length){
+      box.innerHTML = '<div class="note">في المدة دي: ' + R.visits.length + ' زيارة • ' + R.docs.length + ' طلبية/مرتجع • ' + R.pays.length + ' تحصيل — اكتب فوق عشان تدوّر.</div>';
+      return;
+    }
+    let h = '';
+    if(D.length) h += '<div class="sectionLabel" style="margin:0 0 6px;">🧾 الطلبيات والمرتجع (' + D.length + ')</div>' + D.slice(0, 150).map(function(d){ return dlDocCard_(d, all, false); }).join('');
+    if(V.length) h += '<div class="sectionLabel" style="margin:14px 0 6px;">👣 الزيارات (' + V.length + ')</div>' + V.slice(0, 150).map(function(v){ return dlVisitRow_(v, all); }).join('');
+    if(P.length){
+      const tot = P.reduce(function(t, p){ return t + (Number(p.amount) || 0); }, 0);
+      h += '<div class="sectionLabel" style="margin:14px 0 6px;">💵 التحصيل (' + P.length + ') — ' + fmt(tot) + ' ج</div>' + P.slice(0, 150).map(function(p){ return dlPayRow_(p, all); }).join('');
+    }
+    box.innerHTML = h || '<div class="empty">مفيش حاجة بالكلام ده في المدة دي</div>';
   }
 
   // ================== تقرير الزيارات ==================
