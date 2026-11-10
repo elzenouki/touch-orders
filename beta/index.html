@@ -2978,7 +2978,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.40.0-beta';
+  const APP_VERSION_ = 'v1.40.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -7978,7 +7978,7 @@
   // دفعات لسه في حافظة المندوب المفتوحة (ما دخلتش سيستم الشركة لسه) — مجمّعة بكود العميل، وبالاسم كبديل
   // (لو كود العميل في تقرير المتأخرات مش متطابق — زي لما كود الحساب في بيانات الشركة مش لاقي ليه نظير)
   function ovLoadWallets_(){
-    callApi('listWallets', [state.auth, '']).then(function(r){
+    return callApi('listWallets', [state.auth, '']).then(function(r){
       const reps = (r.open || []).filter(function(w){ return w.collected > 0; }).map(function(w){ return w.rep; });
       if(!reps.length){ ov_.walletByCode = {}; ov_.walletByName = {}; if(!document.getElementById('dlOverlay').hidden) ovRenderList_(); return; }
       return Promise.all(reps.map(function(rep){ return callApi('getWallet', [state.auth, rep, '']).then(function(w){ return { rep: rep, w: w }; }).catch(function(){ return null; }); }))
@@ -10500,6 +10500,7 @@
       { name: 'ملخص', cols: [['البند', 34], ['المبلغ (ج)', 18, XL_MONEY_]], rows: [
         ['فواتير بتستحق في ' + m, Math.round(r.inM)], ['شيكات بتستحق في ' + m, Math.round(r.chqT)], ['المتوقع في الشهر', Math.round(r.inM + r.chqT)],
         ['متأخر (استحقاقه عدّى ولسه ماتدفعش)', Math.round(r.late)], ['بيستحق قبل الشهر (من النهارده)', Math.round(r.before)],
+        ['اتخصم: تحصيل في حافظات المناديب لسه ما دخلش السيستم', Math.round(r.paid || 0)],
         ['مدة العرض / العادي (يوم)', CF_OFFER_DAYS_ + ' / ' + CF_NORMAL_DAYS_]] },
       { name: 'بالمندوب', cols: [['المندوب', 24], ['فواتير بتستحق', 16, XL_MONEY_], ['شيكات بتستحق', 16, XL_MONEY_], ['متأخر', 16, XL_MONEY_], ['المتوقع في الشهر', 18, XL_MONEY_]], rows: reps,
         total: ['الإجمالي', xlSum_(reps, 1), xlSum_(reps, 2), xlSum_(reps, 3), xlSum_(reps, 4)] },
@@ -10648,6 +10649,7 @@
       try{ localStorage.setItem(key, JSON.stringify(res)); }catch(e){}
       if(!document.getElementById('dlOverlay').hidden && !dl_.stack.length) cfRender_();
     }).catch(function(e){ if(!cf_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+    ovLoadWallets_().then(function(){ if(document.getElementById('cfList') && !dl_.stack.length) cfRender_(); });
     localReport_('cheques').then(function(r){
       cf_.chq = (r.rows || []).filter(function(x){ return !isWhName_(x.rep); });
       if(cf_.rows && !document.getElementById('dlOverlay').hidden && !dl_.stack.length) cfRender_();
@@ -10661,11 +10663,18 @@
     const custs = [];
     (cf_.rows || []).forEach(function(c){
       if(cf_.rep && (c.rep || '—') !== cf_.rep) return;
-      const x = { c: c, inM: 0, late: c.old, before: 0, list: [] };
-      c.inv.forEach(function(i){
-        if(i.due < today) x.late += i.amt;
-        else if(i.due < from) x.before += i.amt;
-        else if(i.due <= end){ x.inM += i.amt; x.list.push(i); }
+      // تحصيل لسه في حافظة مندوب مفتوحة (ما دخلش سيستم الشركة) — بيتخصم من أقدم مستحق الأول
+      const w = (ov_.walletByCode && ov_.walletByCode[c.code]) || (ov_.walletByName && ov_.walletByName[normAr_(c.name)]);
+      let left = w ? Number(w.amt) || 0 : 0;
+      const x = { c: c, inM: 0, late: 0, before: 0, list: [], paid: 0 };
+      const take = function(a){ const t = Math.min(a, left); left -= t; x.paid += t; return a - t; };
+      x.late += take(c.old);
+      c.inv.slice().sort(function(a, b){ return a.due.localeCompare(b.due); }).forEach(function(i0){
+        const amt = take(i0.amt); if(!amt) return;
+        const i = amt === i0.amt ? i0 : Object.assign({}, i0, { amt: amt, part: true });
+        if(i.due < today) x.late += amt;
+        else if(i.due < from) x.before += amt;
+        else if(i.due <= end){ x.inM += amt; x.list.push(i); }
       });
       custs.push(x);
     });
@@ -10673,7 +10682,7 @@
       return chqOpen_(chqTab_(r)) && r.due && r.due >= start && r.due <= end && (!cf_.rep || (r.rep || '—') === cf_.rep);
     });
     const sum = function(L, k){ return L.reduce(function(s, x){ return s + (Number(x[k]) || 0); }, 0); };
-    return { start: start, end: end, today: today, custs: custs, chq: chq, inM: sum(custs, 'inM'), late: sum(custs, 'late'), before: sum(custs, 'before'), chqT: sum(chq, 'amt') };
+    return { start: start, end: end, today: today, custs: custs, chq: chq, inM: sum(custs, 'inM'), late: sum(custs, 'late'), before: sum(custs, 'before'), chqT: sum(chq, 'amt'), paid: sum(custs, 'paid') };
   }
   function cfRender_(){
     const all = cf_.rows || [];
@@ -10685,6 +10694,7 @@
     h += '<div class="pfMonths csaChips"><button type="button" class="' + (!cf_.rep ? 'on' : '') + '" onclick="cfSet_(\'rep\', \'\')">كل المناديب</button>' +
       Object.keys(reps).sort().map(function(k){ return '<button type="button" class="' + (cf_.rep === k ? 'on' : '') + '" onclick="cfSet_(\'rep\', ' + escapeHtml(JSON.stringify(k)) + ')">' + escapeHtml(k === '—' ? 'من غير مندوب' : k) + '</button>'; }).join('') + '</div>';
     h += '<div class="ovHero"><div><span>المتوقع تحصيله في ' + escapeHtml(mName) + '</span><b>' + fmt(Math.round(r.inM + r.chqT)) + ' <small>ج</small></b></div></div>';
+    if(r.paid) h += '<div class="note" style="margin:6px 0; background:var(--gold-bg); border-color:rgba(182,134,47,.35); color:var(--gold-d);">📥 اتخصم ' + fmt(Math.round(r.paid)) + ' ج اتحصلوا ولسه في حافظات المناديب (ما دخلوش السيستم) — من أقدم فواتير العميل.</div>';
     const box = function(k, t, v, sub, col){
       return '<button type="button" class="blAge' + (cf_.view === k ? ' on' : '') + '" style="' + (col ? 'border-color:' + col + ';' : '') + '" onclick="cfSet_(\'view\', \'' + k + '\')"><span>' + t + '</span><b>' + fmt(Math.round(v)) + '</b><span>' + sub + '</span></button>';
     };
@@ -10700,7 +10710,7 @@
     h += '<button type="button" class="copyBtn wide" onclick="cfCopy_()">📋 نسخ القايمة</button>';
     h += xlBtn_('cfExcel_()');
     h += '<div class="note" style="margin-top:8px;">الاستحقاق = تاريخ الفاتورة + مدة الآجل. لو كاتب للعميل مدة بإيدك بتتحسب هي، وإلا: فاتورة <b>عرض</b> (خصمها أعلى من الخصم المعتاد للعميل في آخر سنة) ' + CF_OFFER_DAYS_ + ' يوم، والعادية ' + CF_NORMAL_DAYS_ + ' يوم. ' +
-      'الفواتير المفتوحة = من الأحدث للأقدم لحد ما توصل لرصيد العميل (فوق 500 ج). اللي في الرصيد وأقدم من 2025 بيتحسب متأخر. الشيكات = اللي لسه في الخزنة أو تحت التحصيل واستحقاقها في الشهر. ' +
+      'الفواتير المفتوحة = من الأحدث للأقدم لحد ما توصل لرصيد العميل (فوق 500 ج) — يعني اللي اتحصل ودخل السيستم متخصم بالفعل (الأقدم بيتقفل الأول)، واللي اتحصل ولسه في حافظة المندوب بيتخصم هنا من أقدم مستحق. اللي في الرصيد وأقدم من 2025 بيتحسب متأخر. الشيكات = اللي لسه في الخزنة أو تحت التحصيل واستحقاقها في الشهر. ' +
       'دوس على أي عميل عشان تشوف فواتيره وتكتب له مدة آجل.</div>';
     ldBody_().innerHTML = h;
     cfRenderList_();
@@ -10750,6 +10760,8 @@
       '<button type="button" class="finalize" style="width:auto; padding:0 18px; margin:0;" onclick="cfSaveDays_(' + i + ')">حفظ</button></div>' +
       '<div class="note" style="margin-top:6px;">اكتب عدد الأيام لو العميل ده ليه مدة مختلفة — بتمشي على كل فواتيره بدل ' + CF_OFFER_DAYS_ + '/' + CF_NORMAL_DAYS_ + '. فضّيها وحفظ عشان يرجع تلقائي.</div></div>';
     h += '<div class="sectionLabel" style="margin:10px 0 4px;">الفواتير اللي لسه في الرصيد</div>';
+    const cw = (ov_.walletByCode && ov_.walletByCode[c.code]) || (ov_.walletByName && ov_.walletByName[normAr_(c.name)]);
+    if(cw && cw.amt) h += '<div class="note" style="margin-bottom:6px; color:var(--gold-d);">📥 ' + fmt(Math.round(cw.amt)) + ' ج اتحصلوا منه ولسه في حافظة ' + escapeHtml(cw.reps.join('، ')) + ' — بيتخصموا من أقدم فواتيره في الحساب.</div>';
     if(c.old) h += '<div class="listRow"><div class="lMain"><div class="lName">رصيد قديم (قبل 2025)</div><div class="lSub">مالوش فواتير عندنا — بيتحسب متأخر</div></div><span class="ovAmt" style="color:#b3412e;">' + fmt(c.old) + '</span></div>';
     h += c.inv.slice().sort(function(a, b){ return a.due.localeCompare(b.due); }).map(function(v){
       const late = v.due < today;
