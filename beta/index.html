@@ -2978,7 +2978,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.39.0-beta';
+  const APP_VERSION_ = 'v1.40.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -7936,6 +7936,7 @@
       }).join('') : '<div class="empty">مفيش أرقام في الشهر ده</div>';
       if(list.some(function(x){ return !x.app; })) h += '<div class="note" style="margin-top:6px;">«مش متربط بحساب» = الاسم في السيستم مش زي اسم المندوب في التطبيق، فالمندوب مش هيشوف أرقامه. اربطه: في Supabase افتح جدول <b>reps</b> واكتب اسمه زي السيستم بالظبط في عمود <b>sys_name</b> قدام حسابه.</div>';
     }
+    h += xlBtn_('pfExcel_()');
     h += '<div class="note" style="margin-top:10px;">الأرقام من يومية المبيعات والتحصيل (نقدي + شيكات) على جهاز الشركة — نفس تقرير «الموقف».</div>';
     ldBody_().innerHTML = h;
     ldBody_().querySelectorAll('.pfRep').forEach(function(b){ b.onclick = function(){ pf_.rep = b.dataset.rep; pfRender_(); ldBody_().scrollTop = 0; }; });
@@ -8032,6 +8033,7 @@
     h += '<input type="search" class="dlFilter" id="ovQ" placeholder="🔎 دوّر على عميل بالاسم أو الكود أو المنطقة..." value="' + escapeHtml(ov_.q) + '" oninput="ov_.q=this.value; ovRenderList_()">';
     h += '<div id="ovList"></div>';
     if(rows.length) h += '<button type="button" class="copyBtn wide" onclick="ovCopy_()">📋 نسخ القايمة (الكود | الاسم | المتأخرات' + (state.isAdmin ? ' | المندوب' : '') + ')</button>';
+    if(rows.length) h += xlBtn_('ovExcel_()');
     h += '<div class="note" style="margin-top:8px;">المتأخرات = رصيد الإقفال − المدين، واللي فوق 500 ج بس — من جهاز الشركة على طول. لو عميل عنده دفعة لسه في حافظة مندوب مفتوحة (ما دخلتش السيستم)، هتبان تحت اسمه.</div>';
     ldBody_().innerHTML = h;
     ldBody_().querySelectorAll('.ovRep').forEach(function(b){ b.onclick = function(){ ov_.rep = b.dataset.rep; ovRender_(); ldBody_().scrollTop = 0; }; });
@@ -10148,6 +10150,7 @@
     h += '<div class="pfMonths csaChips">' + Object.keys(F).map(function(k){ return '<button type="button" class="' + (stk_.f === k ? 'on' : '') + '" onclick="stkSet_(\'f\', \'' + k + '\')">' + F[k] + '</button>'; }).join('') + '</div>';
     h += '<input type="search" placeholder="🔎 اسم الصنف أو الكود..." value="' + escapeHtml(stk_.q) + '" oninput="this.setAttribute(\'value\', this.value); stk_.q=this.value; stkList_()" style="margin:4px 0 10px;">';
     h += '<div id="stkList"></div>';
+    if(state.isAdmin) h += xlBtn_('stkExcel_()');
     h += '<div class="note" style="margin-top:10px;">' + (state.isAdmin ? 'المندوب بيشوف «متاح» أو «غير متاح»، والعدد بس لو الصنف غير متاح وفاضل منه شوية. ' : '') + 'الصنف اللي فاضل منه ' + stk_.limit + ' قطعة أو أقل بيظهر «غير متاح».</div>';
     ldBody_().innerHTML = h;
     stkList_();
@@ -10289,6 +10292,7 @@
     const V = { item: '📦 حسب الصنف', rep: '🧭 حسب المندوب', cust: '👥 حسب العميل', ord: '🧾 الطلبيات' };
     h += '<div class="pfMonths csaChips">' + Object.keys(V).map(function(k){ return '<button type="button" class="' + (ls_.view === k ? 'on' : '') + '" onclick="lsSet_(\'view\', \'' + k + '\')">' + V[k] + '</button>'; }).join('') + '</div>';
     h += lsView_(list);
+    h += xlBtn_('lsExcel_()');
     if(ls_.data.noAcct.length) h += '<div class="note" style="margin-top:8px; color:var(--gold-d);">⚠️ ' + ls_.data.noAcct.length + ' طلبية لعملاء مالقيناش ليهم ولا فاتورة في المدة (يا إما ماتفوترلهمش خالص، يا إما كودهم في السيستم مختلف — اكتبه في بيانات العميل) — مش محسوبة: ' + escapeHtml(Array.from(new Set(ls_.data.noAcct.map(function(d){ return d.customerName; }))).slice(0, 8).join('، ')) + '</div>';
     h += '<div class="note" style="margin-top:8px;">كل طلبية بتتقارن بفواتير نفس العميل من يوم الطلبية لحد قبل طلبيته اللي بعدها (بحد أقصى 12 يوم). القيمة تقريبية بسعر آخر فاتورة للصنف.</div>';
     box.innerHTML = h;
@@ -10407,6 +10411,7 @@
     h += '<input type="search" class="dlFilter" id="blQ" placeholder="🔎 دوّر على عميل بالاسم أو الكود..." value="' + escapeHtml(bl_.q) + '" oninput="bl_.q=this.value; blRenderList_()">';
     h += '<div id="blList"></div>';
     h += '<button type="button" class="copyBtn wide" onclick="blCopy_()">📋 نسخ القايمة (الكود | الاسم | الرصيد | كام يوم | المندوب)</button>';
+    h += xlBtn_('blExcel_()');
     h += '<div class="note" style="margin-top:8px;">الرصيد = رصيد الإقفال من ملف الأرصدة (فوق 500 ج بس). «ليه كام يوم» = من تاريخ أقدم فاتورة لسه داخلة في الرصيد: بنعتبر إن العميل دفع الفواتير القديمة الأول، فالرصيد هو آخر فواتيره. «أكتر من» = رصيده أكبر من كل فواتيره من يناير 2025.</div>';
     ldBody_().innerHTML = h;
     blRenderList_();
@@ -10426,6 +10431,169 @@
     const rows = blFiltered_();
     copyText_(rows.map(function(r){ return [r.code, r.name, r.bal, blDaysTxt_(r), r.rep].join('\t'); }).join('\n'))
       .then(function(){ toast_('📋 اتنسخ ' + rows.length + ' عميل'); }).catch(function(){ showAlertModal_('الموبايل رفض النسخ — جرّب تاني', 'error'); });
+  }
+
+  // ================== 📥 إكسل لكل التقارير (بيتا) ==================
+  // xlExport_(اسم الملف، العنوان، سطر تحت العنوان، شيتات) — كل شيت: { name, cols: [[العنوان، العرض، تنسيق؟]], rows, total? }
+  const XL_MONEY_ = '#,##0', XL_PCT_ = '0.0"%"';
+  async function xlExport_(file, title, sub, sheets){
+    showLoading(true);
+    try{
+      await ensureExcelJsLoaded_();
+      const wb = new ExcelJS.Workbook();
+      const OLIVE = 'FF3F4C22', ZEBRA = 'FFF6F3E8', LINE = { style: 'thin', color: { argb: 'FFE0D9C2' } };
+      const border = { top: LINE, bottom: LINE, left: LINE, right: LINE };
+      sheets.forEach(function(s){
+        const cols = s.cols, n = cols.length;
+        const ws = wb.addWorksheet(String(s.name).replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0, 31), { views: [{ rightToLeft: true, state: 'frozen', ySplit: 3 }] });
+        ws.columns = cols.map(function(c){ return { width: c[1] || 14 }; });
+        ws.mergeCells(1, 1, 1, n);
+        const t = ws.getCell(1, 1);
+        t.value = title + (sheets.length > 1 ? ' — ' + s.name : ''); t.font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } }; t.fill = xlFill_(OLIVE); t.alignment = { horizontal: 'center', vertical: 'middle' };
+        ws.getRow(1).height = 28;
+        ws.mergeCells(2, 1, 2, n);
+        const s2 = ws.getCell(2, 1);
+        s2.value = (sub ? sub + ' • ' : '') + 'اتعمل ' + ymdToDmy_(ymd_(new Date())); s2.font = { bold: true, color: { argb: 'FF6B6F55' } }; s2.alignment = { horizontal: 'center' };
+        const hr = ws.getRow(3);
+        cols.forEach(function(c, i){ const cell = hr.getCell(i + 1); cell.value = c[0]; cell.font = { bold: true, color: { argb: 'FF2F3519' } }; cell.fill = xlFill_('FFE9E4CF'); cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }; cell.border = border; });
+        hr.height = 22;
+        (s.rows || []).forEach(function(r, i){
+          const row = ws.addRow(r.map(function(v){ return v == null ? '' : v; }));
+          row.eachCell({ includeEmpty: true }, function(c){ c.border = border; c.alignment = { horizontal: typeof c.value === 'number' ? 'center' : 'right', vertical: 'middle', wrapText: true }; if(i % 2) c.fill = xlFill_(ZEBRA); });
+        });
+        if(s.total){
+          const row = ws.addRow(s.total);
+          row.eachCell({ includeEmpty: true }, function(c){ c.font = { bold: true, color: { argb: 'FFFFFFFF' } }; c.fill = xlFill_(OLIVE); c.border = border; c.alignment = { horizontal: 'center' }; });
+        }
+        cols.forEach(function(c, i){ if(c[2]) ws.getColumn(i + 1).numFmt = c[2]; });
+        if((s.rows || []).length) ws.autoFilter = { from: { row: 3, column: 1 }, to: { row: 3, column: n } };
+      });
+      const buf = await wb.xlsx.writeBuffer();
+      showLoading(false);
+      await shareOrDownload_(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), String(file).replace(/[\\\/:*?"<>|]/g, ' ') + ' ' + ymd_(new Date()) + '.xlsx', 'share');
+    }catch(err){ showLoading(false); showMsg('ماقدرتش أعمل الملف: ' + ((err && err.message) || err), 'error'); }
+  }
+  function xlBtn_(fn){ return '<button type="button" class="copyBtn wide" style="margin-top:6px;" onclick="' + fn + '">📥 تنزيل إكسل</button>'; }
+  function xlSum_(rows, i){ return rows.reduce(function(t, r){ return t + (Number(r[i]) || 0); }, 0); }
+  function xlRep_(r){ return r ? (r === '—' ? 'من غير مندوب' : r) : ''; }
+
+  // 💵 التحصيل المتوقع
+  function cfExcel_(){
+    const r = cfCalc_(), m = chqMonName_(cf_.ym);
+    const inv = [], late = [], before = [];
+    r.custs.forEach(function(x){
+      const c = x.c;
+      x.list.forEach(function(i){ inv.push([c.code, c.name, c.rep, i.no, ymdToDmy_(i.d), i.disc == null ? null : Number(i.disc), i.offer ? 'عرض' : 'عادي', i.term, ymdToDmy_(i.due), i.amt]); });
+      if(x.late) late.push([c.code, c.name, c.rep, c.bal, c.old || null, x.late]);
+      if(x.before) before.push([c.code, c.name, c.rep, x.before]);
+    });
+    inv.sort(function(a, b){ return dmyToYmd_(a[8]).localeCompare(dmyToYmd_(b[8])); });
+    late.sort(function(a, b){ return b[5] - a[5]; });
+    const chq = r.chq.slice().sort(function(a, b){ return String(a.due).localeCompare(String(b.due)); }).map(function(x){
+      return [x.code, x.name, x.rep, x.no, x.bank || '', chqTab_(x) === 'bank' ? 'تحت التحصيل' : 'في الخزنة', ymdToDmy_(x.due), Math.round(Number(x.amt) || 0)];
+    });
+    const by = {};
+    r.custs.forEach(function(x){ const k = x.c.rep || '—'; const o = by[k] = by[k] || [xlRep_(k), 0, 0, 0, 0]; o[1] += x.inM; o[3] += x.late; });
+    r.chq.forEach(function(x){ const k = x.rep || '—'; const o = by[k] = by[k] || [xlRep_(k), 0, 0, 0, 0]; o[2] += Number(x.amt) || 0; });
+    const reps = Object.keys(by).map(function(k){ const o = by[k]; o[4] = o[1] + o[2]; return o.map(function(v){ return typeof v === 'number' ? Math.round(v) : v; }); }).sort(function(a, b){ return b[4] - a[4]; });
+    return xlExport_('التحصيل المتوقع ' + m, 'التحصيل المتوقع — ' + m, cf_.rep ? xlRep_(cf_.rep) : 'كل المناديب', [
+      { name: 'ملخص', cols: [['البند', 34], ['المبلغ (ج)', 18, XL_MONEY_]], rows: [
+        ['فواتير بتستحق في ' + m, Math.round(r.inM)], ['شيكات بتستحق في ' + m, Math.round(r.chqT)], ['المتوقع في الشهر', Math.round(r.inM + r.chqT)],
+        ['متأخر (استحقاقه عدّى ولسه ماتدفعش)', Math.round(r.late)], ['بيستحق قبل الشهر (من النهارده)', Math.round(r.before)],
+        ['مدة العرض / العادي (يوم)', CF_OFFER_DAYS_ + ' / ' + CF_NORMAL_DAYS_]] },
+      { name: 'بالمندوب', cols: [['المندوب', 24], ['فواتير بتستحق', 16, XL_MONEY_], ['شيكات بتستحق', 16, XL_MONEY_], ['متأخر', 16, XL_MONEY_], ['المتوقع في الشهر', 18, XL_MONEY_]], rows: reps,
+        total: ['الإجمالي', xlSum_(reps, 1), xlSum_(reps, 2), xlSum_(reps, 3), xlSum_(reps, 4)] },
+      { name: 'فواتير بتستحق', cols: [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['الفاتورة', 16], ['تاريخ الفاتورة', 14], ['خصم الفاتورة %', 12, XL_PCT_], ['النوع', 9], ['مدة الآجل', 10], ['الاستحقاق', 14], ['المبلغ (ج)', 15, XL_MONEY_]], rows: inv,
+        total: ['', 'الإجمالي', '', inv.length + ' فاتورة', '', '', '', '', '', xlSum_(inv, 9)] },
+      { name: 'شيكات بتستحق', cols: [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['رقم الشيك', 14], ['البنك', 16], ['مكانه', 14], ['الاستحقاق', 14], ['المبلغ (ج)', 15, XL_MONEY_]], rows: chq,
+        total: ['', 'الإجمالي', '', chq.length + ' شيك', '', '', '', xlSum_(chq, 7)] },
+      { name: 'متأخر', cols: [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['الرصيد', 15, XL_MONEY_], ['منه رصيد قبل 2025', 16, XL_MONEY_], ['المتأخر', 15, XL_MONEY_]], rows: late,
+        total: ['', 'الإجمالي', '', xlSum_(late, 3), xlSum_(late, 4), xlSum_(late, 5)] },
+      { name: 'قبل الشهر', cols: [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['بيستحق قبل الشهر', 18, XL_MONEY_]], rows: before, total: ['', 'الإجمالي', '', xlSum_(before, 3)] }
+    ]);
+  }
+  // 💳 أرصدة العملاء
+  function blExcel_(){
+    const rows = blFiltered_().map(function(r){ return [r.code, r.name, r.rep || 'من غير مندوب', r.bal, r.full && r.od ? ymdToDmy_(r.od) : '', r.ld ? ymdToDmy_(r.ld) : '', r.days, blDaysTxt_(r)]; });
+    return xlExport_('أرصدة العملاء', 'أرصدة العملاء', bl_.rep ? xlRep_(bl_.rep) : 'كل المناديب', [{ name: 'الأرصدة',
+      cols: [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['الرصيد (ج)', 15, XL_MONEY_], ['أقدم فاتورة في الرصيد', 16], ['آخر فاتورة', 14], ['الأيام', 9], ['ليه كام يوم', 16]],
+      rows: rows, total: ['', 'الإجمالي (' + rows.length + ' عميل)', '', xlSum_(rows, 3), '', '', '', ''] }]);
+  }
+  // 💰 المتأخرات
+  function ovExcel_(){
+    const rows = ovFiltered_().map(function(r){ return [r.code || '', r.name, r.area || '', r.rep || 'من غير مندوب', r.phone || '', Number(r.amount) || 0]; });
+    return xlExport_('المتأخرات', 'المتأخرات', ov_.rep ? xlRep_(ov_.rep) : (state.isAdmin ? 'كل المناديب' : ''), [{ name: 'المتأخرات',
+      cols: [['كود العميل', 13], ['العميل', 32], ['المنطقة', 18], ['المندوب', 18], ['التليفون', 15], ['المتأخرات (ج)', 15, XL_MONEY_]],
+      rows: rows, total: ['', 'الإجمالي (' + rows.length + ' عميل)', '', '', '', xlSum_(rows, 5)] }]);
+  }
+  // 🏦 الشيكات — كل الحالات، كل حالة في شيت (بفلتر المندوب والشهر لو مختارين)
+  function chqExcel_(){
+    const sheets = Object.keys(CHQ_TABS_).map(function(tab){
+      const open = chqOpen_(tab);
+      const L = (chq_.rows || []).filter(function(r){ return chqTab_(r) === tab && (!chq_.rep || (r.rep || 'من غير مندوب') === chq_.rep) && (!chq_.mon || chqMon_(r) === chq_.mon); })
+        .sort(function(a, b){ return String(open ? a.due : b.moved || '').localeCompare(String(open ? b.due : a.moved || '')); })
+        .map(function(r){ const d = chqDays_(r.due); return [r.code, r.name, r.rep || '', r.no, r.due ? ymdToDmy_(r.due) : '', r.moved ? ymdToDmy_(r.moved) : '', open && d != null ? d : '', Math.round(Number(r.amt) || 0)]; });
+      return { name: CHQ_TABS_[tab], cols: [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['رقم الشيك', 14], ['الاستحقاق', 14], ['تاريخ الحركة', 14], ['باقي (يوم)', 10], ['المبلغ (ج)', 15, XL_MONEY_]],
+        rows: L, total: ['', 'الإجمالي (' + L.length + ' شيك)', '', '', '', '', '', xlSum_(L, 7)] };
+    });
+    return xlExport_('الشيكات', 'الشيكات', [chq_.rep, chq_.mon ? chqMonName_(chq_.mon) : ''].filter(Boolean).join(' • ') || 'كل المناديب', sheets);
+  }
+  // 🏆 مبيعات العملاء — كل الفترات جنب بعض (بالجنيه والقطعة)
+  function csaExcel_(){
+    const q = normAr_(normalizeDigits(csa_.q || '')).trim();
+    const L = (csa_.rows || []).filter(function(r){
+      return (!csa_.rep || (r.r || 'من غير مندوب') === csa_.rep) && (!csa_.sec || (r.s || 'أخرى') === csa_.sec) && (!q || normAr_(r.n || '').indexOf(q) !== -1 || String(r.c).indexOf(q) !== -1);
+    }).sort(function(a, b){ return (b.ytd || 0) - (a.ytd || 0); });
+    const K = [['ytd', 'السنة دي'], ['lytd', 'نفس الفترة السنة اللي فاتت'], ['m3', 'آخر 3 شهور'], ['p3', 'الـ 3 اللي قبلهم'], ['m12', 'آخر 12 شهر'], ['p12', 'الـ 12 اللي قبلهم'], ['ly', 'السنة اللي فاتت']];
+    const cols = [['كود العميل', 13], ['العميل', 32], ['المندوب', 18], ['القسم', 12], ['آخر فاتورة', 13]]
+      .concat(K.map(function(k){ return [k[1] + ' (ج)', 15, XL_MONEY_]; })).concat(K.map(function(k){ return [k[1] + ' (قطعة)', 13, XL_MONEY_]; }));
+    const rows = L.map(function(r){ return [r.c, r.n || '', r.r || '', r.s || '', r.last ? ymdToDmy_(String(r.last).slice(0, 10)) : '']
+      .concat(K.map(function(k){ return r[k[0]] || 0; })).concat(K.map(function(k){ return r['q' + k[0]] || 0; })); });
+    const total = ['', 'الإجمالي (' + rows.length + ' عميل)', '', '', ''].concat(cols.slice(5).map(function(c, i){ return xlSum_(rows, i + 5); }));
+    return xlExport_('مبيعات العملاء', 'مبيعات العملاء', csa_.rep || 'كل المناديب', [{ name: 'مبيعات العملاء', cols: cols, rows: rows, total: total }]);
+  }
+  // 📈 بيع وتحصيل المناديب — كل مندوب كل شهر
+  function pfExcel_(){
+    const all = (pf_.rows || []).filter(function(r){ return (!pf_.rep || r.rep === pf_.rep) && (!pf_.sec || (r.sec || 'أخرى') === pf_.sec); });
+    const g = {};
+    all.forEach(function(r){ const k = r.ym + '|' + r.rep; (g[k] = g[k] || { ym: r.ym, rep: r.rep, app: r.app, rows: [] }).rows.push(r); });
+    const rows = Object.keys(g).map(function(k){ const x = g[k], s = pfSum_(x.rows); return [pfYmLabel_(x.ym), x.ym, x.app || x.rep, s.sales, s.cash, s.cheque, s.coll, s.pct == null ? null : s.pct]; })
+      .sort(function(a, b){ return b[1].localeCompare(a[1]) || b[3] - a[3]; }).map(function(r){ r.splice(1, 1); return r; });
+    const cur = rows.filter(function(r){ return r[0] === pfYmLabel_(pf_.ym); });
+    const cols = [['الشهر', 14], ['المندوب', 22], ['المبيعات', 15, XL_MONEY_], ['تحصيل نقدي', 15, XL_MONEY_], ['تحصيل شيكات', 15, XL_MONEY_], ['إجمالي التحصيل', 16, XL_MONEY_], ['التحصيل ÷ البيع %', 13, XL_PCT_]];
+    return xlExport_('بيع وتحصيل المناديب', 'بيع وتحصيل المناديب', pf_.rep || 'كل المناديب', [
+      { name: pfYmLabel_(pf_.ym), cols: cols, rows: cur, total: ['الإجمالي', '', xlSum_(cur, 2), xlSum_(cur, 3), xlSum_(cur, 4), xlSum_(cur, 5), ''] },
+      { name: 'كل الشهور', cols: cols, rows: rows }]);
+  }
+  // 📦 المخزون
+  function stkExcel_(){
+    const rows = (stk_.rows || []).slice().sort(function(a, b){ return (b.qty || 0) - (a.qty || 0); }).map(function(r){ return [r.code, r.name || '', r.qty == null ? '' : r.qty, r.ok ? 'متاح' : 'غير متاح']; });
+    return xlExport_('المخزون', 'المخزون', stk_.at ? 'آخر تحديث ' + ymdToDmy_(String(stk_.at).slice(0, 10)) : '', [{ name: 'المخزون',
+      cols: [['كود الصنف', 16], ['الصنف', 36], ['الكمية', 12, XL_MONEY_], ['الحالة', 12]], rows: rows, total: ['', 'الإجمالي (' + rows.length + ' صنف)', xlSum_(rows, 2), ''] }]);
+  }
+  // 📉 الفاقد — كل سطر طلبية + ملخص بالصنف والمندوب
+  function lsExcel_(){
+    if(!ls_.data) return;
+    const list = ls_.data.orders.filter(function(g){ return g.st !== 'wait' && g.st !== 'unk' && (!ls_.rep || (g.rep || '—') === ls_.rep); });
+    const ST = { none: 'ماطلعلهاش فاتورة', part: 'اتفوترت ناقص', full: 'اتفوترت كاملة' };
+    const lines = [], item = {}, rep = {};
+    list.forEach(function(g){
+      Object.keys(g.lines).forEach(function(k){
+        const l = g.lines[k];
+        lines.push([ymdToDmy_(g.ymd), g.acct, g.name, g.rep || '', g.invs.join('، '), ST[g.st] || '', l.code, l.name || '', l.ord, l.got, l.loss, l.price ? Math.round(l.loss * l.price) : '']);
+        const a = item[l.code] = item[l.code] || [l.code, l.name || '', 0, 0, 0, 0]; a[2] += l.ord; a[3] += l.got; a[4] += l.loss; if(l.price) a[5] += Math.round(l.loss * l.price);
+      });
+      const r = rep[g.rep || '—'] = rep[g.rep || '—'] || [xlRep_(g.rep || '—'), 0, 0, 0, 0, 0]; r[1]++; r[2] += g.ord; r[3] += g.got; r[4] += g.loss; r[5] += Math.round(g.val);
+    });
+    const items = Object.keys(item).map(function(k){ return item[k]; }).sort(function(a, b){ return b[4] - a[4]; });
+    const reps = Object.keys(rep).map(function(k){ return rep[k]; }).sort(function(a, b){ return b[4] - a[4]; });
+    return xlExport_('الفاقد من الطلبات', 'الفاقد من الطلبات', [ls_.from && ls_.to ? 'من ' + ymdToDmy_(ls_.from) + ' لـ ' + ymdToDmy_(ls_.to) : '', ls_.rep ? xlRep_(ls_.rep) : ''].filter(Boolean).join(' • '), [
+      { name: 'حسب الصنف', cols: [['كود الصنف', 16], ['الصنف', 34], ['طلب', 10, XL_MONEY_], ['اتفوتر', 10, XL_MONEY_], ['فاقد', 10, XL_MONEY_], ['قيمة الفاقد ~ج', 14, XL_MONEY_]], rows: items,
+        total: ['', 'الإجمالي', xlSum_(items, 2), xlSum_(items, 3), xlSum_(items, 4), xlSum_(items, 5)] },
+      { name: 'حسب المندوب', cols: [['المندوب', 22], ['طلبيات', 10], ['طلب', 10, XL_MONEY_], ['اتفوتر', 10, XL_MONEY_], ['فاقد', 10, XL_MONEY_], ['قيمة الفاقد ~ج', 14, XL_MONEY_]], rows: reps,
+        total: ['الإجمالي', xlSum_(reps, 1), xlSum_(reps, 2), xlSum_(reps, 3), xlSum_(reps, 4), xlSum_(reps, 5)] },
+      { name: 'كل السطور', cols: [['تاريخ الطلبية', 13], ['كود العميل', 13], ['العميل', 28], ['المندوب', 18], ['الفواتير', 18], ['الحالة', 16], ['كود الصنف', 14], ['الصنف', 30], ['طلب', 8], ['اتفوتر', 8], ['فاقد', 8], ['قيمة الفاقد ~ج', 13, XL_MONEY_]], rows: lines }
+    ]);
   }
 
   // ================== 💵 التحصيل المتوقع — للمدير (بيتا) ==================
@@ -10530,6 +10698,7 @@
       h += '<input type="search" class="dlFilter" placeholder="🔎 دوّر على عميل بالاسم أو الكود..." value="' + escapeHtml(cf_.q) + '" oninput="cf_.q=this.value; cfRenderList_()">';
     h += '<div id="cfList"></div>';
     h += '<button type="button" class="copyBtn wide" onclick="cfCopy_()">📋 نسخ القايمة</button>';
+    h += xlBtn_('cfExcel_()');
     h += '<div class="note" style="margin-top:8px;">الاستحقاق = تاريخ الفاتورة + مدة الآجل. لو كاتب للعميل مدة بإيدك بتتحسب هي، وإلا: فاتورة <b>عرض</b> (خصمها أعلى من الخصم المعتاد للعميل في آخر سنة) ' + CF_OFFER_DAYS_ + ' يوم، والعادية ' + CF_NORMAL_DAYS_ + ' يوم. ' +
       'الفواتير المفتوحة = من الأحدث للأقدم لحد ما توصل لرصيد العميل (فوق 500 ج). اللي في الرصيد وأقدم من 2025 بيتحسب متأخر. الشيكات = اللي لسه في الخزنة أو تحت التحصيل واستحقاقها في الشهر. ' +
       'دوس على أي عميل عشان تشوف فواتيره وتكتب له مدة آجل.</div>';
@@ -10841,6 +11010,7 @@
       h += chips(reps, 'rep');
     }
     h += '<button type="button" class="ghost wide" style="margin:4px 0 6px;" onclick="openFieldChq_()">📷 شيكات المناديب بالصور (من التطبيق)</button>';
+    h += xlBtn_('chqExcel_()');
     h += '<input type="search" placeholder="🔎 اسم العميل أو رقم الشيك..." value="' + escapeHtml(chq_.q) + '" oninput="this.setAttribute(\'value\', this.value); chq_.q=this.value; chqList_()" style="margin:4px 0 10px;">';
     h += '<div id="chqList"></div>';
     h += '<div class="note" style="margin-top:10px;">من ملف «تحليلي شيكات العملاء» على جهاز الشركة. «تحت التحصيل» = اتودع البنك ولسه ماتحصلش، و«في الخزنة» = لسه ماتودعش. المحصل من ملف «الشيكات المحصلة».</div>';
@@ -10932,6 +11102,7 @@
     let h = '<div class="pfMonths csaChips"><button type="button" class="' + (csa_.unit === 'v' ? 'on' : '') + '" onclick="csaSet_(\'unit\', \'v\')">💰 بالجنيه</button><button type="button" class="' + (csa_.unit === 'q' ? 'on' : '') + '" onclick="csaSet_(\'unit\', \'q\')">📦 بالقطعة</button></div>' + chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + (state.isAdmin ? chips(reps, 'rep') : '') + chips(sorts, 'sort');
     h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
     h += '<div id="csaList"></div>';
+    h += xlBtn_('csaExcel_()');
     h += '<div class="note" style="margin-top:10px;">من يومية المبيعات على جهاز الشركة — صافي بعد خصم المرتجعات. القطع من سطور الفواتير (صافي بعد المرتجعات). دوس على أي عميل تشوف فواتيره ومبيعاته شهري / سنوي.</div>';
     ldBody_().innerHTML = h;
     csaList_();
