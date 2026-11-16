@@ -2980,7 +2980,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.41.0-beta';
+  const APP_VERSION_ = 'v1.41.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -7907,14 +7907,27 @@
     pf_.ym = pfNowYm_(); pf_.rep = '';
     dlEnter_('📈 ' + (state.isAdmin ? 'بيع وتحصيل المناديب' : 'بيعي وتحصيلي'), 'من جهاز الشركة');
     const key = 'tf_pf_' + ((state.auth && state.auth.email) || '');
-    if(!pf_.rows){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c){ pf_.rows = c.rows; pf_.synced = c.synced; } }catch(e){} }
+    if(!pf_.rows){ try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c){ pf_.rows = c.rows; pf_.synced = c.synced; pf_.diag = c.diag || null; } }catch(e){} }
     if(pf_.rows) pfRender_(); else ldBody_().innerHTML = '<div class="aiStatus">جاري التحميل...</div>';
     pfApi_().then(function(r){
       pf_.rows = (r.rows || []).filter(function(x){ return !isWhName_(x.app); });
-      pf_.synced = r.synced_at;
-      try{ localStorage.setItem(key, JSON.stringify({ rows: pf_.rows, synced: pf_.synced })); }catch(e){}
+      pf_.synced = r.synced_at; pf_.diag = r.diag || null;
+      try{ localStorage.setItem(key, JSON.stringify({ rows: pf_.rows, synced: pf_.synced, diag: pf_.diag })); }catch(e){}
       if(!document.getElementById('dlOverlay').hidden) pfRender_();
     }).catch(function(e){ if(!pf_.rows) ldErr_(e); else toast_('⚠️ ' + e.message + ' — ظاهر آخر نسخة'); });
+  }
+  // 🩺 للمدير: اللي وصل جهاز الشركة فعلًا — عشان لو رقم مش بيتحدّث تعرف السبب من غير ما تفتح n8n
+  function pfDiagHtml_(g){
+    const c = g.cash || {}, q = g.cheque || {}, s = g.sales || {};
+    const L = [];
+    if(g.errors && g.errors.length) L.push('<b style="color:var(--red)">⚠️ جهاز الشركة ماقدرش يقرا: ' + escapeHtml(g.errors.join(' • ')) + ' — الأرقام اللي ظاهرة هي آخر حساب سليم</b>');
+    L.push('🧾 المبيعات: آخر فاتورة ' + (s.last ? ymdToDmy_(s.last) : '—') + ' (' + fmt(s.rows || 0) + ' سطر)');
+    L.push('💵 النقدي: آخر تحصيل ' + (c.last ? ymdToDmy_(c.last) : '—') + ' • ' + fmt(c.rows || 0) + ' سطر، اتحسب منهم ' + fmt(c.used || 0) + ' بـ ' + fmt(c.amt || 0) + ' ج (آخر 13 شهر)');
+    if(c.noRep) L.push('<span style="color:var(--gold-d)">• ' + fmt(c.noRep) + ' ج نقدي (' + fmt(c.noRepN || 0) + ' سطر) مش متحسوب على مندوب — العميل ملوش فواتير في اليومية ولا بيانات 2025</span>');
+    if(c.otherSec) L.push('• ' + fmt(c.otherSec) + ' ج نقدي لعملاء قطاعي/ماركت (مش داخلين التقرير)');
+    if(c.notCash) L.push('• ' + fmt(c.notCash) + ' سطر في ملف النقدي نوعهم مش نقدي: ' + escapeHtml((c.types || []).map(function(t){ return t[0] + ' (' + t[1] + ')'; }).join('، ')));
+    L.push('🏦 الشيكات: آخر تحصيل ' + (q.last ? ymdToDmy_(q.last) : '—') + ' • ' + fmt(q.amt || 0) + ' ج' + (q.noRep ? ' • ' + fmt(q.noRep) + ' ج من غير مندوب' : ''));
+    return '<details class="card" style="margin-top:8px;"><summary style="font-weight:800; cursor:pointer;">🩺 البيانات اللي وصلت جهاز الشركة' + (g.at ? ' — ' + ovAgo_(g.at) : '') + '</summary><div class="note" style="line-height:1.9; margin-top:6px;">' + L.join('<br>') + '</div></details>';
   }
   function pfSec_(k){ pf_.sec = k; pfRender_(); }
   function pfSum_(rows){
@@ -7990,6 +8003,7 @@
       if(list.some(function(x){ return !x.app; })) h += '<div class="note" style="margin-top:6px;">«مش متربط بحساب» = الاسم في السيستم مش زي اسم المندوب في التطبيق، فالمندوب مش هيشوف أرقامه. اربطه: في Supabase افتح جدول <b>reps</b> واكتب اسمه زي السيستم بالظبط في عمود <b>sys_name</b> قدام حسابه.</div>';
     }
     h += xlBtn_('pfExcel_()');
+    if(state.isAdmin && pf_.diag) h += pfDiagHtml_(pf_.diag);
     h += '<div class="note" style="margin-top:10px;">الأرقام من يومية المبيعات والتحصيل (نقدي + شيكات) على جهاز الشركة — نفس تقرير «الموقف».</div>';
     ldBody_().innerHTML = h;
     ldBody_().querySelectorAll('.pfRep').forEach(function(b){ b.onclick = function(){ pf_.rep = b.dataset.rep; pfRender_(); ldBody_().scrollTop = 0; }; });
