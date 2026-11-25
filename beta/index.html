@@ -109,16 +109,18 @@
   body.wide.c2home #adminHome .bigGrid, body.wide.c2home #adminHome .toolGrid{max-width:640px; margin:0 auto;}
   #dashBox{display:none;}
   body.wide #dashBox{display:block; margin-bottom:16px;}
-  .dashTiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:10px; margin-bottom:14px;}
-  .dashTile{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; text-align:center;}
-  .dashTile b{display:block; font-size:21px;}
-  .dashTile span{font-size:12.5px; color:var(--muted);}
-  .dashCols{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
-  .dashCard{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px;}
-  .dashCard .cardTitle{margin-bottom:10px;}
-  .dashRepRow{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
-  .dashRepRow:last-child{border-bottom:0;}
-  .dashAlert{display:block; width:100%; text-align:right; font-family:inherit; background:var(--gold-bg); color:var(--gold-d); border:1px solid rgba(182,134,47,.35); border-radius:12px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:13.5px; font-weight:700;}
+  .ddTabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .ddTabs button{background:var(--card); border:1px solid var(--border); border-radius:999px; padding:7px 14px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; color:var(--text);}
+  .ddTabs button.on{background:var(--gold); color:#fff; border-color:var(--gold);}
+  .ddFil{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px;}
+  .ddFil label{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:5px;}
+  .ddFil input, .ddFil select{margin:0;}
+  #ddTableWrap{overflow-x:auto; background:var(--card); border:1px solid var(--border); border-radius:14px;}
+  .ddTable{width:100%; border-collapse:collapse; white-space:nowrap;}
+  .ddTable th, .ddTable td{padding:9px 12px; border-bottom:1px solid var(--border); font-size:13px; text-align:right;}
+  .ddTable th{color:var(--muted); font-weight:700; background:var(--card2); position:sticky; top:0;}
+  .ddTable tbody tr:last-child td{border-bottom:0;}
+  .ddTable tbody tr:hover td{background:var(--card2);}
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:16px;
     padding:20px; margin-bottom:16px;
@@ -2997,7 +2999,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.42.0-beta';
+  const APP_VERSION_ = 'v1.43.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5278,72 +5280,113 @@
     }
   }
 
-  // ================== داش بورد المدير (بيتا — ويب بس) ==================
-  // بيجمع بيانات النهارده من نداءات موجودة أصلًا (getReport، listTransferBatches، ldApi_، caApi_، ovLoad_)
-  // من غير أي نداء سيرفر جديد. بيظهر بدل الشاشة الرئيسية العادية للمدير على شاشة واسعة بس (state.isWide).
+  // ================== صفحة بيانات المدير (بيتا — ويب بس) ==================
+  // جدول واحد حقيقي (مش كروت) بتابات وفلاتر بحث فوري، من نداءات موجودة أصلًا
+  // (getReportList زي openVisitSearch_، admin_data cust_list، localReport_('perf')) — من غير أي نداء سيرفر جديد.
+  var dd_ = { tab: 'ops', from: '', to: '', ym: '', rep: '', q: '', rows: null, loading: false };
   function loadDashboard_(force){
-    if(!force && state.dashAt && Date.now() - state.dashAt < 120000) return; // تحديث كل دقيقتين بالكتير
     const box = document.getElementById('dashBox'); if(!box) return;
     box.hidden = false;
-    if(!state.dashAt) box.innerHTML = '<div class="empty">جاري تحميل لوحة اليوم...</div>';
-    const today = ymd_(bizToday_());
-    Promise.all([
-      callApi('getReport', [state.auth, today, today, '']).catch(function(){ return null; }),
-      callApi('listTransferBatches', [state.auth]).catch(function(){ return null; }),
-      ldApi_('whoami').catch(function(){ return null; }),
-      caApi_('opened').catch(function(){ return null; }),
-      ovLoad_().catch(function(){ return null; }),
-    ]).then(function(x){
-      state.dashAt = Date.now();
-      renderDashboard_(x[0], x[1], x[2], x[3], x[4]);
+    if(!dd_.from){ dd_.from = ymd_(bizToday_()); dd_.to = dd_.from; dd_.ym = pfNowYm_(); }
+    if(force) dd_.rows = null;
+    ddLoad_();
+  }
+  function ddSetTab_(tab){ dd_.tab = tab; dd_.q = ''; dd_.rows = null; ddLoad_(); }
+  function ddReadFilters_(){
+    const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
+    if(g('ddFrom') != null) dd_.from = g('ddFrom');
+    if(g('ddTo') != null) dd_.to = g('ddTo');
+    if(g('ddYm') != null) dd_.ym = g('ddYm');
+    if(g('ddRep') != null) dd_.rep = g('ddRep');
+  }
+  function ddLoad_(fromFilterChange){
+    if(fromFilterChange) ddReadFilters_();
+    const box = document.getElementById('dashBox'); if(!box) return;
+    dd_.loading = true;
+    ddRenderShell_();
+    const tab = dd_.tab;
+    let fetchP;
+    if(tab === 'ops'){
+      fetchP = Promise.all(['visits', 'orders', 'payments'].map(function(k){
+        return callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, k]).catch(function(){ return null; });
+      })).then(function(x){
+        const V = (x[0] && x[0].visits) || [], D = (x[1] && x[1].docs) || [], P = (x[2] && x[2].payments) || [];
+        const rows = [];
+        V.forEach(function(v){ rows.push({ kind: 'زيارة', date: v.date, time: v.time, name: v.name, code: v.code, rep: v.rep, info: (v.hasOrder || v.returnId || v.amount ? v.result : '✋ ' + (v.reason || '')) + (v.notes ? ' • ' + v.notes : ''), amount: v.amount || '' }); });
+        D.forEach(function(d){ rows.push({ kind: /مرتجع|return/i.test(d.type || '') ? 'مرتجع' : 'طلبية', date: d.date, time: d.time, name: d.customerName, code: d.customerCode, rep: d.rep, info: (d.lines || []).length + ' صنف', amount: '' }); });
+        P.forEach(function(p){ rows.push({ kind: 'تحصيل', date: p.date, time: p.time, name: p.customerName, code: p.customerCode, rep: p.rep, info: [p.method, p.chequeDate].filter(Boolean).join(' • '), amount: p.amount }); });
+        rows.sort(function(a, b){ return (b.date + b.time).localeCompare(a.date + a.time); });
+        return rows;
+      });
+    } else if(tab === 'cust'){
+      fetchP = admCall_('cust_list', { q: '' }).then(function(rows){
+        return (rows || []).filter(function(r){ return !dd_.rep || r.rep === dd_.rep; }).map(function(r){
+          return { name: r.name, code: r.code, rep: r.rep, area: r.area, phone: r.phone, visits: r.visits, last_visit: r.last_visit };
+        });
+      });
+    } else { // reps
+      fetchP = pfApi_().then(function(r){
+        const all = (r.rows || []).filter(function(x){ return !isWhName_(x.app); }).filter(function(x){ return x.ym === dd_.ym; });
+        const by = {};
+        all.forEach(function(x){ const k = by[x.rep] = by[x.rep] || { rep: x.rep, app: x.app, rows: [] }; k.rows.push(x); });
+        return Object.keys(by).map(function(k){ const x = by[k]; return Object.assign(x, pfSum_(x.rows)); }).sort(function(a, b){ return b.sales - a.sales; });
+      });
+    }
+    fetchP.then(function(rows){
+      if(dd_.tab !== tab) return; // المستخدم غيّر التاب قبل ما النداء يرجع
+      dd_.loading = false; dd_.rows = rows || [];
+      ddRenderShell_();
+    }).catch(function(){ if(dd_.tab === tab){ dd_.loading = false; dd_.rows = []; ddRenderShell_(); } });
+  }
+  function ddFiltered_(){
+    const nq = normAr_(normalizeDigits(dd_.q || '')).trim();
+    if(!nq || !dd_.rows) return dd_.rows || [];
+    const words = nq.split(' ').filter(Boolean);
+    return dd_.rows.filter(function(r){
+      const t = normAr_(Object.keys(r).map(function(k){ return r[k]; }).join(' '));
+      return words.every(function(w){ return t.indexOf(w) !== -1; });
     });
   }
-  function dashTile_(val, lbl){ return '<div class="dashTile"><b>' + val + '</b><span>' + lbl + '</span></div>'; }
-  function renderDashboard_(report, batches, whoami, opened, overdueRows){
+  const DD_TABS_ = [['ops', '🧾 الزيارات والطلبيات والتحصيل'], ['cust', '👥 العملاء'], ['reps', '🧑‍💼 المناديب']];
+  function ddRenderShell_(){
     const box = document.getElementById('dashBox'); if(!box || !state.isWide) return;
-    const t = report && report.totals;
-    const reps = (report && report.reps || []).filter(function(p){ return !isWhName_(p.rep); });
-    let html = '<div class="dashCard"><div class="cardTitle">📊 النهارده<button type="button" class="ghost" style="float:left; padding:4px 10px; font-size:12.5px;" onclick="loadDashboard_(true)">🔄 تحديث</button></div>';
-    html += t ? '<div class="dashTiles">' +
-        dashTile_(fmt(t.collected), 'تحصيل (ج)') +
-        dashTile_(t.orders, 'طلبية') +
-        dashTile_(fmt(t.returnQty), 'قطعة مرتجعة') +
-        dashTile_(t.visits, 'زيارة') +
-        dashTile_(pctTxt_(t.planPct), 'التزام خط السير') +
-      '</div>' : '<div class="empty">تعذر تحميل أرقام النهارده</div>';
-    html += '</div>';
-
-    html += '<div class="dashCols">';
-    // تنبيهات ومتابعة
-    html += '<div class="dashCard"><div class="cardTitle">🔔 محتاج متابعتك</div>';
-    const alerts = [];
-    if(batches && batches.pendingDocs) alerts.push(['⏳ ' + batches.pendingDocs + ' مستند لسه ماتدخلش السيستم', "openScreen('export')"]);
-    if(whoami && whoami.waiting) alerts.push(['🚚 ' + whoami.waiting + ' تحميلة مستنية موافقتك', 'openLoadsAdmin_()']);
-    const openedN = opened && opened.rows ? opened.rows.length : 0;
-    if(openedN) alerts.push(['🆕 ' + openedN + ' عميل جديد يستني كود', 'openCustAccList_()']);
-    if(overdueRows && overdueRows.length) alerts.push(['💰 متأخرات عند ' + overdueRows.length + ' عميل', 'openOverdues_()']);
-    html += alerts.length ? alerts.map(function(a){ return '<button type="button" class="dashAlert" onclick="' + a[1] + '">' + a[0] + '</button>'; }).join('') : '<div class="empty">✅ مفيش حاجة مستنية دلوقتي</div>';
-    html += '</div>';
-
-    // تقدم الزيارات لكل مندوب
-    html += '<div class="dashCard"><div class="cardTitle">👣 خط السير النهارده</div>';
-    if(reps.length){
-      html += reps.slice().sort(function(a, b){ return (b.planPct || 0) - (a.planPct || 0); }).map(function(p){
-        return '<div class="dashRepRow"><span>' + escapeHtml(p.rep) + '</span><span>' + p.plannedDone + ' من ' + p.planned + ' • ' + pctTxt_(p.planPct) + '</span></div>';
-      }).join('');
-    } else html += '<div class="empty">مفيش بيانات</div>';
-    html += '</div></div>';
-
-    // أفضل/أقل أداء (حسب التحصيل النهارده)
-    if(reps.length > 1){
-      const ranked = reps.slice().sort(function(a, b){ return (b.collected || 0) - (a.collected || 0); });
-      const worst = reps.filter(function(p){ return p.visits > 0; }).slice().sort(function(a, b){ return (a.collected || 0) - (b.collected || 0); });
-      html += '<div class="dashCols"><div class="dashCard"><div class="cardTitle">🏆 الأفضل النهارده</div>' +
-        ranked.slice(0, 3).map(function(p){ return '<div class="dashRepRow"><span>' + escapeHtml(p.rep) + '</span><span>' + fmt(p.collected) + ' ج</span></div>'; }).join('') + '</div>' +
-        '<div class="dashCard"><div class="cardTitle">📉 محتاج متابعة</div>' +
-        (worst.length ? worst.slice(0, 3).map(function(p){ return '<div class="dashRepRow"><span>' + escapeHtml(p.rep) + '</span><span>' + fmt(p.collected) + ' ج</span></div>'; }).join('') : '<div class="empty">—</div>') + '</div></div>';
+    let h = '<div class="ddTabs">' + DD_TABS_.map(function(x){ return '<button type="button" class="' + (x[0] === dd_.tab ? 'on' : '') + '" onclick="ddSetTab_(\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') +
+      '<button type="button" class="ghost" style="margin-right:auto;" onclick="loadDashboard_(true)">🔄 تحديث</button></div>';
+    h += '<div class="ddFil">';
+    if(dd_.tab === 'reps'){
+      h += '<label>الشهر<input type="month" id="ddYm" value="' + escapeHtml(dd_.ym) + '" onchange="ddLoad_(true)"></label>';
+    } else if(dd_.tab === 'ops'){
+      h += '<label>من<input type="date" id="ddFrom" value="' + escapeHtml(dd_.from) + '" onchange="ddLoad_(true)"></label>' +
+        '<label>لـ<input type="date" id="ddTo" value="' + escapeHtml(dd_.to) + '" onchange="ddLoad_(true)"></label>';
     }
-    box.innerHTML = html;
+    if(dd_.tab !== 'reps') h += '<select id="ddRep" onchange="ddLoad_(true)"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){
+      return '<option value="' + escapeHtml(n) + '"' + (n === dd_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select>';
+    h += '<input type="search" class="dlFilter" style="margin:0; flex:1;" placeholder="🔎 دوّر على أي حاجة في الجدول..." value="' + escapeHtml(dd_.q) + '" oninput="dd_.q=this.value; ddRenderShell_()"></div>';
+    h += '<div id="ddTableWrap">' + ddTableHtml_() + '</div>';
+    box.innerHTML = h;
+  }
+  function ddTableHtml_(){
+    if(dd_.loading) return '<div class="empty">جاري التحميل...</div>';
+    const rows = ddFiltered_();
+    if(!rows.length) return '<div class="empty">مفيش نتايج</div>';
+    if(dd_.tab === 'ops'){
+      return '<table class="ddTable"><thead><tr><th>التاريخ</th><th>الوقت</th><th>النوع</th><th>العميل</th><th>الكود</th><th>المندوب</th><th>تفاصيل</th><th>المبلغ</th></tr></thead><tbody>' +
+        rows.slice(0, 300).map(function(r){
+          return '<tr><td>' + escapeHtml(r.date || '') + '</td><td>' + escapeHtml(r.time || '') + '</td><td>' + escapeHtml(r.kind) + '</td><td>' + escapeHtml(r.name || '') + '</td><td>' + escapeHtml(r.code || '') + '</td><td>' + escapeHtml(r.rep || '') + '</td><td>' + escapeHtml(r.info || '') + '</td><td>' + (r.amount ? fmt(r.amount) : '') + '</td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    if(dd_.tab === 'cust'){
+      return '<table class="ddTable"><thead><tr><th>الاسم</th><th>الكود</th><th>المندوب</th><th>المنطقة</th><th>آخر زيارة</th><th>عدد الزيارات</th><th></th></tr></thead><tbody>' +
+        rows.slice(0, 300).map(function(r){
+          return '<tr><td>' + escapeHtml(r.name || '') + '</td><td>' + escapeHtml(r.code || '') + '</td><td>' + escapeHtml(r.rep || '') + '</td><td>' + escapeHtml(r.area || '') + '</td><td>' + (r.last_visit ? admDay_(r.last_visit) : '') + '</td><td>' + (r.visits || 0) + '</td>' +
+            '<td><button type="button" class="ghost" onclick="openCustSalesAll_()">📈 التفاصيل</button></td></tr>';
+        }).join('') + '</tbody></table>';
+    }
+    // reps
+    return '<table class="ddTable"><thead><tr><th>المندوب</th><th>مبيعات</th><th>نقدي</th><th>شيكات</th><th>إجمالي تحصيل</th><th>نسبة التحصيل</th></tr></thead><tbody>' +
+      rows.slice(0, 300).map(function(r){
+        return '<tr><td>' + escapeHtml(r.app || r.rep) + '</td><td>' + fmt(r.sales) + '</td><td>' + fmt(r.cash) + '</td><td>' + fmt(r.cheque) + '</td><td>' + fmt(r.coll) + '</td><td>' + (r.pct == null ? '—' : r.pct + '%') + '</td></tr>';
+      }).join('') + '</tbody></table>';
   }
 
   // ================== تفاصيل أي رقم في التقرير ==================
