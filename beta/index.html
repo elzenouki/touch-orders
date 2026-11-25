@@ -105,19 +105,31 @@
   }
   .wrap{max-width:640px; margin:0 auto; padding:26px 20px 44px;}
   /* بيتا: داش بورد المدير — بيظهر بس على شاشة واسعة (ويب/كمبيوتر)، وبيوسّع عمود الرئيسية بس وقتها */
-  body.wide.c2home .wrap{max-width:1100px;}
+  body.wide.c2home .wrap{max-width:1220px;}
   body.wide.c2home #adminHome .bigGrid, body.wide.c2home #adminHome .toolGrid{max-width:640px; margin:0 auto;}
   #dashBox{display:none;}
-  body.wide #dashBox{display:block; margin-bottom:16px;}
-  .ddFil{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px; position:sticky; top:0; background:var(--bg); z-index:5; padding:8px 0;}
+  body.wide #dashBox{display:flex; align-items:flex-start; gap:18px; margin-bottom:16px;}
+  .ddSide{flex:0 0 220px; background:var(--o1); color:#fff; border-radius:18px; padding:20px 14px; position:sticky; top:16px;}
+  .ddBrand{font-size:14px; font-weight:800; color:#fff; margin:0 10px 14px;}
+  .ddNav{padding:11px 14px; border-radius:10px; font-weight:700; font-size:13.5px; color:#dfe5cd; cursor:pointer; margin-bottom:2px;}
+  .ddNav.on{background:rgba(255,255,255,.14); color:#fff;}
+  .ddMain{flex:1; min-width:0; display:flex; flex-direction:column; gap:14px;}
+  .ddKpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .ddKpi{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px;}
+  .ddKpi .k{font-size:12px; color:var(--muted); font-weight:700;}
+  .ddKpi .v{font-size:21px; font-weight:800; margin-top:5px; color:var(--gold-d);}
+  .ddFil{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
   .ddFil label{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:5px;}
   .ddFil input, .ddFil select{margin:0;}
-  .ddSection{margin-bottom:22px;}
-  .ddSection .cardTitle{margin-bottom:8px;}
-  .ddTableWrap{overflow-x:auto; background:var(--card); border:1px solid var(--border); border-radius:14px;}
+  .ddCard{background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden;}
+  .ddCardTop{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+  .ddTabs{display:flex; gap:8px; flex-wrap:wrap;}
+  .ddTabs button{background:var(--card2); border:1px solid var(--border); border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:700; font-family:inherit; cursor:pointer; color:var(--text);}
+  .ddTabs button.on{background:var(--gold); color:#fff; border-color:var(--gold);}
+  .ddTableWrap{overflow-x:auto;}
   .ddTable{width:100%; border-collapse:collapse; white-space:nowrap;}
-  .ddTable th, .ddTable td{padding:9px 12px; border-bottom:1px solid var(--border); font-size:13px; text-align:right;}
-  .ddTable th{color:var(--muted); font-weight:700; background:var(--card2); position:sticky; top:0;}
+  .ddTable th, .ddTable td{padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; text-align:right;}
+  .ddTable th{color:var(--muted); font-weight:700; background:var(--card2);}
   .ddTable tbody tr:last-child td{border-bottom:0;}
   .ddTable tbody tr:hover td{background:var(--card2);}
   .card{
@@ -2998,7 +3010,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.43.1-beta';
+  const APP_VERSION_ = 'v1.44.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5282,15 +5294,20 @@
   // ================== صفحة بيانات المدير (بيتا — ويب بس) ==================
   // صفحة واحدة فيها كل حاجة مع بعض (مش تابات بتتبدّل) — 3 جداول حقيقية تحت بعض،
   // وخانة بحث واحدة فوق بتدوّر في الثلاثة مع بعض. من نداءات موجودة أصلًا، من غير أي نداء سيرفر جديد.
-  var dd_ = { from: '', to: '', ym: '', rep: '', q: '', ops: null, cust: null, reps: null, loadingOps: false, loadingCust: false, loadingReps: false };
+  var dd_ = { tab: 'ops', from: '', to: '', ym: '', rep: '', q: '', ops: null, cust: null, reps: null, kpi: null, loadingOps: false, loadingCust: false, loadingReps: false };
   function loadDashboard_(force){
     const box = document.getElementById('dashBox'); if(!box) return;
     box.hidden = false;
     if(!dd_.from){ dd_.from = ymd_(bizToday_()); dd_.to = dd_.from; dd_.ym = pfNowYm_(); }
-    if(force){ dd_.ops = dd_.cust = dd_.reps = null; }
+    if(force){ dd_.ops = dd_.cust = dd_.reps = dd_.kpi = null; }
     ddRenderShell_();
-    ddLoadOps_(); ddLoadCust_(); ddLoadReps_();
+    ddLoadOps_(); ddLoadCust_(); ddLoadReps_(); ddLoadKpi_();
   }
+  function ddLoadKpi_(){
+    const today = ymd_(bizToday_());
+    callApi('getReport', [state.auth, today, today, '']).then(function(r){ dd_.kpi = r && r.totals; ddRenderShell_(); }).catch(function(){ dd_.kpi = null; ddRenderShell_(); });
+  }
+  function ddSetTab_(t){ dd_.tab = t; ddRenderShell_(); }
   function ddReadFilters_(){
     const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
     if(g('ddFrom') != null) dd_.from = g('ddFrom');
@@ -5343,29 +5360,46 @@
       return words.every(function(w){ return t.indexOf(w) !== -1; });
     });
   }
+  const DD_TABS_ = [['ops', '🧾 الزيارات والطلبيات'], ['cust', '👥 العملاء'], ['reps', '🧑‍💼 المناديب']];
+  const DD_NAV_ = [['ops', '📊 لوحة اليوم'], ['__ld', '🚚 التحميلات', 'openLoadsAdmin_()'], ['__nc', '🆕 عميل جديد', 'openCustAccList_()'], ['__ov', '💰 المتأخرات', 'openOverdues_()'], ['__ad', '🛠 إدارة البيانات', 'openAdminData_()']];
+  function ddKpiTile_(val, lbl, cls){ return '<div class="ddKpi' + (cls ? ' ' + cls : '') + '"><div class="k">' + lbl + '</div><div class="v">' + val + '</div></div>'; }
   function ddRenderShell_(){
     const box = document.getElementById('dashBox'); if(!box || !state.isWide) return;
-    let h = '<div class="ddFil">' +
+    const t = dd_.kpi;
+    let nav = '<div class="ddSide"><div class="ddBrand">📊 لوحة اليوم</div>' + DD_NAV_.map(function(n){
+      return n[0] === 'ops'
+        ? '<div class="ddNav on">' + n[1] + '</div>'
+        : '<div class="ddNav" onclick="' + n[2] + '">' + n[1] + '</div>';
+    }).join('') + '</div>';
+
+    let main = '<div class="ddMain">';
+    main += '<div class="ddKpis">' +
+      ddKpiTile_(t ? fmt(t.collected) : '—', 'تحصيل النهارده') +
+      ddKpiTile_(t ? t.orders : '—', 'طلبيات') +
+      ddKpiTile_(t ? t.visits : '—', 'زيارات') +
+      ddKpiTile_(t ? pctTxt_(t.planPct) : '—', 'التزام خط السير') +
+      '</div>';
+    main += '<div class="ddFil">' +
       '<label>من<input type="date" id="ddFrom" value="' + escapeHtml(dd_.from) + '" onchange="ddFilterChanged_()"></label>' +
       '<label>لـ<input type="date" id="ddTo" value="' + escapeHtml(dd_.to) + '" onchange="ddFilterChanged_()"></label>' +
       '<label>الشهر (للمناديب)<input type="month" id="ddYm" value="' + escapeHtml(dd_.ym) + '" onchange="ddFilterChanged_()"></label>' +
       '<select id="ddRep" onchange="ddFilterChanged_()"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){
         return '<option value="' + escapeHtml(n) + '"' + (n === dd_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select>' +
-      '<input type="search" class="dlFilter" style="margin:0; flex:1; min-width:200px;" placeholder="🔎 دوّر على أي حاجة في أي جدول تحت..." value="' + escapeHtml(dd_.q) + '" oninput="dd_.q=this.value; ddRenderShell_()">' +
-      '<button type="button" class="ghost" onclick="loadDashboard_(true)">🔄 تحديث</button></div>';
-    h += ddSection_('🧾 الزيارات والطلبيات والتحصيل', dd_.loadingOps, dd_.ops, ddOpsTable_);
-    h += ddSection_('👥 العملاء', dd_.loadingCust, dd_.cust, ddCustTable_);
-    h += ddSection_('🧑‍💼 المناديب — ' + pfYmLabel_(dd_.ym), dd_.loadingReps, dd_.reps, ddRepsTable_);
-    box.innerHTML = h;
-  }
-  function ddSection_(title, loading, rows, tableFn){
+      '<button type="button" class="ghost" style="margin-right:auto;" onclick="loadDashboard_(true)">🔄 تحديث</button></div>';
+
+    main += '<div class="ddCard"><div class="ddCardTop">' +
+      '<div class="ddTabs">' + DD_TABS_.map(function(x){ return '<button type="button" class="' + (x[0] === dd_.tab ? 'on' : '') + '" onclick="ddSetTab_(\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</div>' +
+      '<input type="search" class="dlFilter" style="margin:0; width:260px;" placeholder="🔎 دوّر على أي حاجة..." value="' + escapeHtml(dd_.q) + '" oninput="dd_.q=this.value; ddRenderShell_()">' +
+      '</div>';
+    const loading = dd_.tab === 'ops' ? dd_.loadingOps : dd_.tab === 'cust' ? dd_.loadingCust : dd_.loadingReps;
+    const rows = dd_.tab === 'ops' ? dd_.ops : dd_.tab === 'cust' ? dd_.cust : dd_.reps;
+    const tableFn = dd_.tab === 'ops' ? ddOpsTable_ : dd_.tab === 'cust' ? ddCustTable_ : ddRepsTable_;
     let body;
     if(loading) body = '<div class="empty">جاري التحميل...</div>';
-    else {
-      const f = ddFiltered_(rows);
-      body = f.length ? tableFn(f) : '<div class="empty">مفيش نتايج</div>';
-    }
-    return '<div class="ddSection"><div class="cardTitle">' + title + '</div><div class="ddTableWrap">' + body + '</div></div>';
+    else { const f = ddFiltered_(rows); body = f && f.length ? tableFn(f) : '<div class="empty">مفيش نتايج</div>'; }
+    main += '<div class="ddTableWrap">' + body + '</div></div></div>';
+
+    box.innerHTML = nav + main;
   }
   function ddOpsTable_(rows){
     return '<table class="ddTable"><thead><tr><th>التاريخ</th><th>الوقت</th><th>النوع</th><th>العميل</th><th>الكود</th><th>المندوب</th><th>تفاصيل</th><th>المبلغ</th></tr></thead><tbody>' +
