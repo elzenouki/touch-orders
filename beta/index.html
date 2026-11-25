@@ -139,6 +139,15 @@
   .ddTable th{color:var(--muted); font-weight:700; background:var(--card2);}
   .ddTable tbody tr:last-child td{border-bottom:0;}
   .ddTable tbody tr:hover td{background:var(--card2);}
+  /* بيتا: "سكين" ويب عام — بيحسّن شكل العناصر المشتركة (كروت/قوائم/فورمات/أزرار) على شاشة واسعة، من غير ما يغيّر الموبايل خالص */
+  .wideFormGrid > div{margin-bottom:0;}
+  body.adminWide .wideFormGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;}
+  body.adminWide .card{padding:24px;}
+  body.adminWide .listRow{border-radius:10px; padding:12px 14px;}
+  body.adminWide .listRow:hover{background:var(--card2);}
+  body.adminWide .aRow:hover{box-shadow:0 2px 10px rgba(15,28,61,.08); border-color:var(--gold);}
+  body.adminWide input, body.adminWide select, body.adminWide textarea{font-size:14px; padding:10px 13px;}
+  body.adminWide button.primary, body.adminWide button.ghost{font-size:13.5px; padding:10px 20px;}
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:16px;
     padding:20px; margin-bottom:16px;
@@ -2102,9 +2111,11 @@
   <div id="viewAdmin" hidden>
     <div class="card">
       <div class="cardTitle">إضافة مندوب أو مشرف</div>
-      <label>الاسم</label><input type="text" id="repNameInput">
-      <label>الإيميل</label><input type="email" id="repEmailInput" dir="ltr">
-      <label>كود الدخول (6 أرقام)</label><input type="text" id="repPinInput" class="ltrNum" inputmode="numeric" maxlength="6" dir="ltr">
+      <div class="wideFormGrid">
+        <div><label>الاسم</label><input type="text" id="repNameInput"></div>
+        <div><label>الإيميل</label><input type="email" id="repEmailInput" dir="ltr"></div>
+        <div><label>كود الدخول (6 أرقام)</label><input type="text" id="repPinInput" class="ltrNum" inputmode="numeric" maxlength="6" dir="ltr"></div>
+      </div>
       <button class="primary" onclick="handleAddRep_()">إضافة</button>
       <div class="note" style="margin-top:10px;">المنطقة والمشرف المسؤول بيتكتبوا من تاب "المندوبين" في الشيت.</div>
     </div>
@@ -3033,7 +3044,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.45.0-beta';
+  const APP_VERSION_ = 'v1.45.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -8311,8 +8322,25 @@
   function ovRenderList_(rows){
     rows = rows || ovFiltered_();
     const box = document.getElementById('ovList'); if(!box) return;
+    if(!rows.length){ box.innerHTML = '<div class="empty">' + ((ov_.rows || []).length ? 'مفيش نتايج' : 'مفيش متأخرات 👌') + '</div>'; return; }
     const mine = !state.isAdmin && state.rep ? state.rep.customers : null;
-    box.innerHTML = rows.length ? rows.slice(0, 400).map(function(r, n){
+    const more = rows.length > 400 ? '<div class="note" style="text-align:center;">ظاهر أول 400 — دوّر بالاسم عشان تلاقي الباقي</div>' : '';
+    if(state.isWide){
+      box.innerHTML = '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>العميل</th><th>الكود</th><th>المنطقة</th>' +
+        (state.isAdmin ? '<th>المندوب</th>' : '') + '<th>المبلغ</th><th>ملاحظات</th><th></th></tr></thead><tbody>' +
+        rows.slice(0, 400).map(function(r){
+          const known = mine && r.code && mine.some(function(c){ return String(c.code) === String(r.code); });
+          const w = (r.code && ov_.walletByCode && ov_.walletByCode[r.code]) || (ov_.walletByName && ov_.walletByName[normAr_(r.name)]);
+          const note = [r.book_name && normAr_(r.book_name) !== normAr_(r.name) ? 'في الأرصدة: ' + r.book_name : '', w ? '📥 ' + fmt(w.amt) + ' ج لسه في حافظة ' + w.reps.join('، ') : ''].filter(Boolean).join(' • ');
+          return '<tr><td style="font-weight:700;">' + escapeHtml(r.name) + '</td><td style="color:var(--muted);">' + escapeHtml(r.code || '') + '</td><td>' + escapeHtml(r.area || '') + '</td>' +
+            (state.isAdmin ? '<td>' + escapeHtml(r.rep || 'بدون') + '</td>' : '') +
+            '<td style="font-weight:800; color:var(--gold-d);">' + fmt(r.amount) + ' ج</td><td style="color:' + (w ? 'var(--gold-d)' : 'var(--muted)') + '; font-size:12.5px;">' + escapeHtml(note) + '</td>' +
+            '<td>' + (r.phone ? '<a href="tel:' + escapeHtml(String(r.phone).replace(/[^\d+]/g, '')) + '" style="color:var(--gold-d); text-decoration:none; font-weight:700; font-size:12.5px;">📞 اتصال</a>' : '') +
+            (known ? ' <a href="#" style="color:var(--gold-d); text-decoration:none; font-weight:700; font-size:12.5px;" onclick="dlClose_(); openVisit_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\', \'home\'); return false;">👣 زيارة</a>' : '') + '</td></tr>';
+        }).join('') + '</tbody></table></div>' + more;
+      return;
+    }
+    box.innerHTML = rows.slice(0, 400).map(function(r, n){
       const known = mine && r.code && mine.some(function(c){ return String(c.code) === String(r.code); });
       const w = (r.code && ov_.walletByCode && ov_.walletByCode[r.code]) || (ov_.walletByName && ov_.walletByName[normAr_(r.name)]);
       return '<div class="listRow ovRow"><div class="lMain"><div class="lName">' + (n + 1) + '. ' + escapeHtml(r.name) + (r.code ? ' <span class="oCode">' + escapeHtml(r.code) + '</span>' : '') + '</div>' +
@@ -8321,8 +8349,7 @@
         '<div class="dlLinks">' + (r.phone ? '<a href="tel:' + escapeHtml(String(r.phone).replace(/[^\d+]/g, '')) + '">📞 اتصال</a>' : '') +
         (known ? '<a href="#" onclick="dlClose_(); openVisit_(\'' + escapeHtml(String(r.code)).replace(/'/g, '') + '\', \'home\'); return false;">👣 زيارة / تحصيل</a>' : '') + '</div></div>' +
         '<span class="ovAmt">' + fmt(r.amount) + '</span></div>';
-    }).join('') + (rows.length > 400 ? '<div class="note" style="text-align:center;">ظاهر أول 400 — دوّر بالاسم عشان تلاقي الباقي</div>' : '')
-      : '<div class="empty">' + ((ov_.rows || []).length ? 'مفيش نتايج' : 'مفيش متأخرات 👌') + '</div>';
+    }).join('') + more;
   }
   function ovCopy_(){
     const rows = ovFiltered_();
