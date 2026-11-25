@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://zdwiiymjgacxylgdrtsm.supabase.co" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=El+Messiri:wght@600;700&family=Scheherazade+New:wght@700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&family=El+Messiri:wght@600;700&family=Scheherazade+New:wght@700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
   :root{
     --bg:#f7f6f2; --card:#ffffff; --card2:#faf8f3; --border:#e4dfd1;
@@ -104,21 +104,27 @@
     .hadithBox .hadithText{ -webkit-line-clamp:3; font-size:15px; }
   }
   .wrap{max-width:640px; margin:0 auto; padding:26px 20px 44px;}
-  /* بيتا: شكل "موقع ويب" للمدير — سايد بار ثابت + عمود أوسع — بيظهر بس على شاشة واسعة (ويب/كمبيوتر). الموبايل مش بيتأثر خالص */
+  /* بيتا: شكل "موقع ويب" للمدير — هوية جديدة (فاتح/بنفسجي-أزرق، شريط علوي) — بيظهر بس على شاشة واسعة. الموبايل مش بيتأثر خالص */
+  body.adminWide{
+    --bg:#f6f7fb; --card:#ffffff; --card2:#f0f1f8; --border:#e7e9f0; --text:#161a2e; --muted:#7b8097;
+    --gold:#4f5fe0; --gold-d:#3d49b8; --gold-bg:#eef0fd; --gold-light:#7781e8;
+    --o1:#4f5fe0; --o2:#3d49b8;
+    font-family:'IBM Plex Sans Arabic', 'Cairo', system-ui, sans-serif;
+  }
   .gSide{display:none;}
   body.adminWide .gSide{
-    display:flex; flex-direction:column; gap:2px;
-    position:fixed; top:0; right:0; bottom:0; width:230px; z-index:40;
-    background:var(--o1); padding:22px 14px; box-sizing:border-box; overflow-y:auto;
+    display:flex; align-items:center; gap:4px; flex-wrap:nowrap; overflow-x:auto;
+    position:fixed; top:0; right:0; left:0; height:58px; z-index:40;
+    background:#fff; padding:0 20px; box-sizing:border-box; border-bottom:1px solid var(--border);
   }
-  .gBrand{font-size:14px; font-weight:800; color:#fff; margin:0 10px 16px;}
-  .gGroup{font-size:10.5px; font-weight:800; color:#9fae84; letter-spacing:.5px; margin:14px 10px 4px;}
-  .gNav{padding:9px 14px; border-radius:10px; font-weight:700; font-size:13px; color:#dfe5cd; cursor:pointer; margin-bottom:1px;}
-  .gNav:hover{background:rgba(255,255,255,.14); color:#fff;}
-  body.adminWide .header, body.adminWide .wrap{margin-right:230px; margin-left:auto;}
-  body.adminWide .wrap{max-width:1000px;}
+  .gBrand{font-size:14px; font-weight:800; color:var(--gold-d); margin-left:18px; white-space:nowrap; flex:none;}
+  .gGroup{display:none;}
+  .gNav{padding:8px 13px; border-radius:8px; font-weight:600; font-size:12.5px; color:var(--muted); cursor:pointer; white-space:nowrap; flex:none;}
+  .gNav:hover{background:var(--gold-bg); color:var(--gold-d);}
+  body.adminWide .header, body.adminWide .wrap{margin-right:0; margin-top:58px;}
+  body.adminWide .wrap{max-width:1040px;}
   body.adminWide.c2home .wrap{max-width:1180px;}
-  /* بيتا: على الويب، السايد بار الجديد بيغني عن قايمة الأدوات القديمة بتاعة الموبايل خالص (بيجي الكروت الكبيرة أو التابات الخمسة تحت) — مش محتاجينها مكرّرة */
+  /* بيتا: على الويب، الشريط العلوي الجديد بيغني عن قايمة الأدوات القديمة بتاعة الموبايل خالص (بيجي الكروت الكبيرة أو التابات الخمسة تحت) — مش محتاجينها مكرّرة */
   body.adminWide #adminHome .bigGrid, body.adminWide #adminHome .toolGrid, body.adminWide #adminHome #ncAlert,
   body.adminWide #adminHome .admPane, body.adminWide #adminHome .admPaneT, body.adminWide #adminHome #admTabs{display:none !important;}
   #dashBox{display:none;}
@@ -145,12 +151,15 @@
   /* بيتا: "سكين" ويب عام — بيحسّن شكل العناصر المشتركة (كروت/قوائم/فورمات/أزرار) على شاشة واسعة، من غير ما يغيّر الموبايل خالص */
   .wideFormGrid > div{margin-bottom:0;}
   body.adminWide .wideFormGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;}
-  body.adminWide .card{padding:24px;}
-  body.adminWide .listRow{border-radius:10px; padding:12px 14px;}
+  body.adminWide .card{padding:24px; background:var(--card); border-color:var(--border); box-shadow:none;}
+  body.adminWide .listRow{border-radius:10px; padding:12px 14px; border-color:var(--border);}
   body.adminWide .listRow:hover{background:var(--card2);}
-  body.adminWide .aRow:hover{box-shadow:0 2px 10px rgba(15,28,61,.08); border-color:var(--gold);}
-  body.adminWide input, body.adminWide select, body.adminWide textarea{font-size:14px; padding:10px 13px;}
+  body.adminWide .aRow{background:var(--card); border-color:var(--border);}
+  body.adminWide .aRow:hover{box-shadow:0 2px 10px rgba(22,26,46,.06); border-color:var(--gold-light);}
+  body.adminWide input, body.adminWide select, body.adminWide textarea{font-size:14px; padding:10px 13px; font-family:inherit;}
   body.adminWide button.primary, body.adminWide button.ghost{font-size:13.5px; padding:10px 20px;}
+  body.adminWide button.primary{background:var(--gold); border-color:var(--gold);}
+  body.adminWide .chip{background:var(--gold-bg); border-color:var(--border); color:var(--gold-d);}
   .pfRepTr:hover td{background:var(--card2);}
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:16px;
@@ -688,8 +697,10 @@
   .aiOverlay{position:fixed; inset:0; z-index:450; background:rgba(10,15,30,.55); display:flex; align-items:flex-end; justify-content:center;}
   .aiSheet{background:var(--bg); width:100%; max-width:640px; max-height:94vh; border-radius:22px 22px 0 0; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 -10px 40px rgba(0,0,0,.3);}
   /* بيتا: على الويب كل شاشة بقت صفحتها الخاصة فعلًا — مش نافذة منبثقة — بتملا المساحة بجانب السايد بار بالظبط */
-  body.adminWide .aiOverlay{position:fixed; top:0; right:230px; left:0; bottom:0; background:var(--bg); align-items:stretch; justify-content:stretch; padding:0; z-index:35;}
-  body.adminWide .aiSheet{width:100%; height:100%; max-width:none; max-height:none; border-radius:0; box-shadow:none;}
+  body.adminWide .aiOverlay{position:fixed; top:58px; right:0; left:0; bottom:0; background:var(--bg); align-items:stretch; justify-content:stretch; padding:0; z-index:35;}
+  body.adminWide .aiSheet{width:100%; height:100%; max-width:none; max-height:none; border-radius:0; box-shadow:none; background:var(--bg);}
+  body.adminWide .aiHead{background:#fff !important; color:var(--text); border-bottom:1px solid var(--border); box-shadow:none !important;}
+  body.adminWide .aiX{background:var(--card2); color:var(--text);}
   .aiHead{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 18px; background:var(--navy); color:#fff; font-size:16.5px;}
   .aiX{flex:none; background:rgba(255,255,255,.14); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:16px; cursor:pointer; font-family:inherit;}
   .aiBody{padding:14px 16px; overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch;}
@@ -3080,7 +3091,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.47.0-beta';
+  const APP_VERSION_ = 'v1.48.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
