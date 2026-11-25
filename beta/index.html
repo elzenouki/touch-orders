@@ -148,6 +148,7 @@
   body.adminWide .aRow:hover{box-shadow:0 2px 10px rgba(15,28,61,.08); border-color:var(--gold);}
   body.adminWide input, body.adminWide select, body.adminWide textarea{font-size:14px; padding:10px 13px;}
   body.adminWide button.primary, body.adminWide button.ghost{font-size:13.5px; padding:10px 20px;}
+  .pfRepTr:hover td{background:var(--card2);}
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:16px;
     padding:20px; margin-bottom:16px;
@@ -3044,7 +3045,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.45.1-beta';
+  const APP_VERSION_ = 'v1.46.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -8198,20 +8199,27 @@
       const list = Object.keys(by).map(function(k){ const x = by[k]; return Object.assign(x, pfSum_(x.rows)); }).sort(function(a, b){ return b.sales - a.sales; });
       const mxs = list.reduce(function(m, x){ return Math.max(m, x.sales, x.coll); }, 0) || 1;
       h += '<div class="sectionLabel" style="margin:14px 0 8px;">المناديب — ' + pfYmLabel_(pf_.ym) + '</div>';
-      h += list.length ? list.map(function(x, i){
-        return '<button type="button" class="pfRep" data-rep="' + escapeHtml(x.rep) + '"><div class="pfRepTop"><b>' + (i + 1) + '. ' + escapeHtml(x.app || x.rep) + '</b>' +
-          (x.app ? '' : '<span class="chip">مش متربط بحساب</span>') + '</div>' +
-          '<div class="pfRepRow"><span>بيع</span><div class="ovBar"><i class="s" style="width:' + Math.max(2, Math.round(x.sales * 100 / mxs)) + '%"></i></div><b>' + fmt(x.sales) + '</b></div>' +
-          '<div class="pfRepRow"><span>تحصيل</span><div class="ovBar"><i class="c" style="width:' + Math.max(2, Math.round(x.coll * 100 / mxs)) + '%"></i></div><b>' + fmt(x.coll) + '</b></div>' +
-          '<small>نقدي ' + fmt(x.cash) + ' • شيكات ' + fmt(x.cheque) + (x.pct != null ? ' • ' + x.pct + '% من البيع' : '') + '</small></button>';
-      }).join('') : '<div class="empty">مفيش أرقام في الشهر ده</div>';
+      if(state.isWide){
+        h += list.length ? '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>#</th><th>المندوب</th><th>بيع</th><th>نقدي</th><th>شيكات</th><th>إجمالي تحصيل</th><th>نسبة التحصيل</th></tr></thead><tbody>' +
+          list.map(function(x, i){
+            return '<tr class="pfRepTr" data-rep="' + escapeHtml(x.rep) + '" style="cursor:pointer;"><td>' + (i + 1) + '</td><td style="font-weight:700;">' + escapeHtml(x.app || x.rep) + (x.app ? '' : ' <span class="chip">مش متربط بحساب</span>') + '</td><td>' + fmt(x.sales) + '</td><td>' + fmt(x.cash) + '</td><td>' + fmt(x.cheque) + '</td><td style="font-weight:800; color:var(--gold-d);">' + fmt(x.coll) + '</td><td>' + (x.pct == null ? '—' : x.pct + '%') + '</td></tr>';
+          }).join('') + '</tbody></table></div>' : '<div class="empty">مفيش أرقام في الشهر ده</div>';
+      } else {
+        h += list.length ? list.map(function(x, i){
+          return '<button type="button" class="pfRep" data-rep="' + escapeHtml(x.rep) + '"><div class="pfRepTop"><b>' + (i + 1) + '. ' + escapeHtml(x.app || x.rep) + '</b>' +
+            (x.app ? '' : '<span class="chip">مش متربط بحساب</span>') + '</div>' +
+            '<div class="pfRepRow"><span>بيع</span><div class="ovBar"><i class="s" style="width:' + Math.max(2, Math.round(x.sales * 100 / mxs)) + '%"></i></div><b>' + fmt(x.sales) + '</b></div>' +
+            '<div class="pfRepRow"><span>تحصيل</span><div class="ovBar"><i class="c" style="width:' + Math.max(2, Math.round(x.coll * 100 / mxs)) + '%"></i></div><b>' + fmt(x.coll) + '</b></div>' +
+            '<small>نقدي ' + fmt(x.cash) + ' • شيكات ' + fmt(x.cheque) + (x.pct != null ? ' • ' + x.pct + '% من البيع' : '') + '</small></button>';
+        }).join('') : '<div class="empty">مفيش أرقام في الشهر ده</div>';
+      }
       if(list.some(function(x){ return !x.app; })) h += '<div class="note" style="margin-top:6px;">«مش متربط بحساب» = الاسم في السيستم مش زي اسم المندوب في التطبيق، فالمندوب مش هيشوف أرقامه. اربطه: في Supabase افتح جدول <b>reps</b> واكتب اسمه زي السيستم بالظبط في عمود <b>sys_name</b> قدام حسابه.</div>';
     }
     h += xlBtn_('pfExcel_()');
     if(state.isAdmin && pf_.diag) h += pfDiagHtml_(pf_.diag);
     h += '<div class="note" style="margin-top:10px;">الأرقام من يومية المبيعات والتحصيل (نقدي + شيكات) على جهاز الشركة — نفس تقرير «الموقف».</div>';
     ldBody_().innerHTML = h;
-    ldBody_().querySelectorAll('.pfRep').forEach(function(b){ b.onclick = function(){ pf_.rep = b.dataset.rep; pfRender_(); ldBody_().scrollTop = 0; }; });
+    ldBody_().querySelectorAll('.pfRep, .pfRepTr').forEach(function(b){ b.onclick = function(){ pf_.rep = b.dataset.rep; pfRender_(); ldBody_().scrollTop = 0; }; });
     const on = ldBody_().querySelector('.pfMonths .on'); if(on) on.scrollIntoView({ inline: 'center', block: 'nearest' });
   }
 
@@ -9120,6 +9128,7 @@
     const rows = adm_.rows;
     if(!rows.length) return body.innerHTML = h + '<div class="empty">' + (t === 'trash' ? 'السلة فاضية' : 'مفيش حاجة بالبحث ده') + '</div>';
     if(rows.length >= 300) h += '<div class="note" style="margin-bottom:8px;">ظاهر أول ' + rows.length + ' بس — ضيّق البحث عشان تلاقي اللي عاوزه</div>';
+    if(state.isWide && ['cust', 'visit', 'doc', 'pay'].indexOf(t) !== -1){ body.innerHTML = h + admTableHtml_(t, rows); return; }
     h += rows.map(function(r, i){
       if(t === 'cust') return '<div class="aRow" onclick="admCustEdit_(' + i + ')"><div class="aTop"><b>' + escapeHtml(r.name || '') + '</b><span class="chip">' + escapeHtml(r.code) + '</span></div>' +
         '<div class="aSub">' + [r.rep, r.area, r.phone, r.system_code ? 'كود السيستم ' + r.system_code : '', r.visits + ' زيارة', r.last_visit ? 'آخر زيارة ' + admDay_(r.last_visit) : ''].filter(Boolean).map(escapeHtml).join(' • ') + '</div>' +
@@ -9141,6 +9150,31 @@
         ' • بيتمسح نهائي بعد ' + Math.max(0, 30 - Math.floor((Date.now() - new Date(r.at)) / 864e5)) + ' يوم</div>' + admBtns_(i, [['↩ رجّع', 'admRestore_', 'ok']]) + '</div>';
     }).join('');
     body.innerHTML = h;
+  }
+  // نسخة جدول حقيقي من نفس تابات إدارة البيانات — ويب بس (state.isWide)، بنفس الأزرار والبيانات، بدون أي تغيير في الموبايل
+  function admTableHtml_(t, rows){
+    const esc = escapeHtml;
+    if(t === 'cust') return '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>الاسم</th><th>الكود</th><th>المندوب</th><th>المنطقة</th><th>الموبايل</th><th>آخر زيارة</th><th>ملاحظات</th><th></th></tr></thead><tbody>' +
+      rows.map(function(r, i){
+        const e = ctEnt_(r.code), notes = [e.t ? '⏰ بيقفل ' + ctFmt_(ctToMin_(e.t)) : '', e.off.length ? '📅 أجازته ' + ctOffText_(e.off) : ''].filter(Boolean).join(' • ');
+        return '<tr><td style="font-weight:700; cursor:pointer;" onclick="admCustEdit_(' + i + ')">' + esc(r.name || '') + '</td><td style="color:var(--muted);">' + esc(r.code) + '</td><td>' + esc(r.rep || '') + '</td><td>' + esc(r.area || '') + '</td><td>' + esc(r.phone || '') + '</td><td>' + (r.last_visit ? admDay_(r.last_visit) : '') + '</td><td style="font-size:12px; color:var(--muted);">' + esc(notes) + '</td><td>' + admBtns_(i, [['📄', 'admCustInv_'], ['⏰', 'admCustClose_'], ['✏️', 'admCustEdit_'], ['🔀', 'admCustMerge_'], ['🗑', 'admCustDel_', 'del']]) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    if(t === 'visit') return '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>العميل</th><th>اليوم</th><th>الوقت</th><th>المندوب</th><th>النتيجة</th><th>تفاصيل</th><th></th></tr></thead><tbody>' +
+      rows.map(function(r, i){
+        const det = [r.order_lines ? r.order_lines + ' صنف طلبية' : '', r.return_lines ? r.return_lines + ' صنف مرتجع' : '', +r.paid ? 'تحصيل ' + fmt(r.paid) : '', r.reason, r.notes].filter(Boolean).join(' • ') + (r.exported ? ' ⚠️ اتصدّر' : '');
+        return '<tr><td style="font-weight:700; cursor:pointer;" onclick="admVisit_(' + i + ')">' + esc(r.customer_name || r.customer_code || '') + '</td><td>' + admDay_(r.day) + '</td><td>' + admTime_(r.at) + '</td><td>' + esc(r.rep || '') + '</td><td>' + esc(r.result || '') + '</td><td style="font-size:12.5px; color:var(--muted);">' + esc(det) + '</td><td>' + admBtns_(i, [['🔍', 'admVisit_'], ['🗑', 'admVisitDel_', 'del']]) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    if(t === 'doc') return '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>العميل</th><th>النوع</th><th>اليوم</th><th>الوقت</th><th>المندوب</th><th>أصناف</th><th>كمية</th><th></th></tr></thead><tbody>' +
+      rows.map(function(r, i){
+        const isRet = +r.qty < 0 || /return|مرتجع/i.test(r.type || '');
+        return '<tr><td style="font-weight:700; cursor:pointer;" onclick="admDoc_(' + i + ')">' + esc(r.customer_name || r.customer_code || '') + '</td><td>' + (isRet ? '↩ مرتجع' : '🧾 طلبية') + '</td><td>' + admDay_(r.day) + '</td><td>' + admTime_(r.at) + '</td><td>' + esc(r.rep || '') + (r.visit_id ? '' : ' <span class="chip">من غير زيارة</span>') + (r.exported ? ' <span class="aWarn">اتصدّر</span>' : '') + '</td><td>' + (r.lines || 0) + '</td><td>' + fmt(Math.abs(+r.qty || 0)) + '</td><td>' + admBtns_(i, [['🔍', 'admDoc_'], ['🗑', 'admDocDel_', 'del']]) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+    // pay
+    return '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>العميل</th><th>اليوم</th><th>الوقت</th><th>المندوب</th><th>طريقة الدفع</th><th>ملاحظات</th><th>المبلغ</th><th></th></tr></thead><tbody>' +
+      rows.map(function(r, i){
+        const note = [ADM_METHODS_[String(r.method || '').toLowerCase()] || r.method, r.cheque_date ? 'شيك ' + admDay_(r.cheque_date) : '', r.notes].filter(Boolean).join(' • ');
+        return '<tr><td style="font-weight:700;">' + esc(r.customer_name || r.customer_code || '') + '</td><td>' + admDay_(r.day) + '</td><td>' + admTime_(r.at) + '</td><td>' + esc(r.rep || '') + '</td><td>' + esc(note) + '</td><td>' + (r.wallet_id ? '<span class="aLock">🔒 حافظة مقفولة</span>' : '') + '</td><td style="font-weight:800; color:var(--gold-d);">' + fmt(r.amount) + ' ج</td><td>' + (r.wallet_id ? '' : admBtns_(i, [['🗑', 'admPayDel_', 'del']])) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
   }
   // ---------- 📍 مواقع العملاء: تختار العميل وتلصق لينك الموقع (من واتساب/جوجل ماب) أو تحدده على الخريطة ----------
   var loc_ = { missing: true, res: null, map: null, mk: null, pt: null, i: -1 };
