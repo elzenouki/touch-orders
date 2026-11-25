@@ -3010,7 +3010,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.44.0-beta';
+  const APP_VERSION_ = 'v1.44.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3034,8 +3034,12 @@
   };
   // شاشة واسعة (ويب/كمبيوتر) أو موبايل عادي — بيحدد شكل الرئيسية بتاعة المدير بس (شاشة المندوب متأثرش)
   function computeWide_(){
+    const was = state.isWide;
     state.isWide = window.innerWidth >= 900;
     document.body.classList.toggle('wide', state.isWide);
+    // لو الشاشة بقت واسعة بعد ما كانت ضيقة (مثلاً المتصفح كان لسه بيحمل، أو المستخدم كبّر النافذة)
+    // والمدير واقف في الرئيسية، لازم نحمّل لوحة البيانات دلوقتي بدل ما تفضل مخفية لحد ما يعمل refresh
+    if(state.isWide && !was && state.isAdmin && state.screen === null && typeof loadDashboard_ === 'function') loadDashboard_();
   }
   computeWide_();
   window.addEventListener('resize', debounce_(computeWide_, 300));
