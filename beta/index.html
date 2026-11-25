@@ -2019,6 +2019,7 @@
     <div class="card exCard">
       <div class="cardTitle">📥 للإدخال في سيستم الشركة</div>
       <div class="note" style="margin-bottom:10px;">بينزّل الطلبيات والمرتجعات اللي <b>لسه ماتدخلتش</b> (من أي يوم)، وبيعلّمها برقم دفعة — فالمرة الجاية مش هتنزل تاني.</div>
+      <button type="button" class="bigAction" style="margin-bottom:10px;" onclick="openVisitSearch_()">🔎 دوّر على طلبية أو مرتجع لعميل معيّن</button>
       <div class="pendingBox" id="pendingBox">...</div>
       <label>المندوب</label><select id="tRep"></select>
       <button class="finalize" onclick="transferOrders_()">📥 تنزيل للإدخال في السيستم</button>
@@ -2980,7 +2981,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.41.1-beta';
+  const APP_VERSION_ = 'v1.41.2-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
