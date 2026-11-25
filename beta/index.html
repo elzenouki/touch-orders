@@ -3045,7 +3045,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.46.0-beta';
+  const APP_VERSION_ = 'v1.46.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -11463,16 +11463,29 @@
     let h = '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + P.t + (csa_.sec ? ' — ' + SEC_LIST_[csa_.sec] : '') + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '') + '</span><b>' + fmt(tc) + ' <small>' + (Q ? 'قطعة' : 'ج') + '</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
     h += '<div class="pfYtd">' + (Q ? 'بقيمة <b>' + fmt(ta) + '</b> ج • ' : '<b>' + fmt(ta) + '</b> قطعة • ') + buying + ' عميل اشترى' + (P.prev ? ' • ' + P.vs + ': <b>' + fmt(tp) + '</b>' : '') + '</div>';
     csa_.view = list;
-    h += list.length ? list.slice(0, csa_.lim).map(function(r, i){
-      const diff = cur(r) - prev(r);
-      return '<button type="button" class="csaRow" onclick="csaOpen_(' + i + ')"><span class="rk">' + (i + 1) + '</span><b>' + escapeHtml(r.n || r.c) + '</b>' +
-        '<span class="amt">' + (csa_.sort === 'stop' ? fmt(prev(r)) : fmt(cur(r))) + '</span>' +
-        '<small>' + (alt(r, csa_.sort === 'stop' && P.prev ? P.prev : P.cur) ? '<span style="font-weight:800; color:var(--ink,#2a2a1f);">' + alt(r, csa_.sort === 'stop' && P.prev ? P.prev : P.cur) + '</span> • ' : '') + escapeHtml(r.c) + (r.r && !csa_.rep && state.isAdmin ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
-        (csa_.sort === 'down' || csa_.sort === 'up' ? ' • <span dir="ltr">' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff)) + '</span>' : '') + (csa_.sort === 'stop' ? ' • كان بيشتري' : '') + '</small>' +
-        (P.prev && csa_.sort !== 'stop' ? csaDelta_(cur(r), prev(r)) : '<span></span>') + '</button>';
-    }).join('') : '<div class="empty">مفيش عملاء هنا</div>';
+    if(state.isWide){
+      h += list.length ? '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>#</th><th>العميل</th><th>الكود</th>' + (state.isAdmin && !csa_.rep ? '<th>المندوب</th>' : '') + '<th>' + (csa_.sort === 'stop' ? 'كان بيشتري' : P.t) + '</th><th>بالقطعة/قيمة</th>' + (P.prev && csa_.sort !== 'stop' ? '<th>التغيّر</th>' : '') + '<th>آخر شراء</th></tr></thead><tbody>' +
+        list.slice(0, csa_.lim).map(function(r, i){
+          const diff = cur(r) - prev(r);
+          return '<tr class="csaRowTr" data-i="' + i + '" style="cursor:pointer;"><td>' + (i + 1) + '</td><td style="font-weight:700;">' + escapeHtml(r.n || r.c) + '</td><td style="color:var(--muted);">' + escapeHtml(r.c) + '</td>' +
+            (state.isAdmin && !csa_.rep ? '<td>' + escapeHtml(r.r || 'بدون') + '</td>' : '') +
+            '<td style="font-weight:800; color:var(--gold-d);">' + fmt(csa_.sort === 'stop' ? prev(r) : cur(r)) + '</td><td>' + (alt(r, csa_.sort === 'stop' && P.prev ? P.prev : P.cur) || '—') + '</td>' +
+            (P.prev && csa_.sort !== 'stop' ? '<td><span dir="ltr">' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff)) + '</span></td>' : '') +
+            '<td>' + (r.last ? ymdToDmy_(r.last) : '') + '</td></tr>';
+        }).join('') + '</tbody></table></div>' : '<div class="empty">مفيش عملاء هنا</div>';
+    } else {
+      h += list.length ? list.slice(0, csa_.lim).map(function(r, i){
+        const diff = cur(r) - prev(r);
+        return '<button type="button" class="csaRow" onclick="csaOpen_(' + i + ')"><span class="rk">' + (i + 1) + '</span><b>' + escapeHtml(r.n || r.c) + '</b>' +
+          '<span class="amt">' + (csa_.sort === 'stop' ? fmt(prev(r)) : fmt(cur(r))) + '</span>' +
+          '<small>' + (alt(r, csa_.sort === 'stop' && P.prev ? P.prev : P.cur) ? '<span style="font-weight:800; color:var(--ink,#2a2a1f);">' + alt(r, csa_.sort === 'stop' && P.prev ? P.prev : P.cur) + '</span> • ' : '') + escapeHtml(r.c) + (r.r && !csa_.rep && state.isAdmin ? ' • ' + escapeHtml(r.r) : '') + (r.last ? ' • آخر شراء ' + ymdToDmy_(r.last) : '') +
+          (csa_.sort === 'down' || csa_.sort === 'up' ? ' • <span dir="ltr">' + (diff >= 0 ? '+' : '−') + fmt(Math.abs(diff)) + '</span>' : '') + (csa_.sort === 'stop' ? ' • كان بيشتري' : '') + '</small>' +
+          (P.prev && csa_.sort !== 'stop' ? csaDelta_(cur(r), prev(r)) : '<span></span>') + '</button>';
+      }).join('') : '<div class="empty">مفيش عملاء هنا</div>';
+    }
     if(list.length > csa_.lim) h += '<button type="button" class="ghost" style="width:100%;" onclick="csa_.lim+=100; csaList_()">اعرض كمان (' + (list.length - csa_.lim) + ')</button>';
     box.innerHTML = h;
+    box.querySelectorAll('.csaRowTr').forEach(function(tr){ tr.onclick = function(){ csaOpen_(Number(tr.dataset.i)); }; });
   }
   function csaOpen_(i){ const r = csa_.view[i]; if(r) openCustInvoicesFor_(r.c, r.n || r.c, false); }
 
