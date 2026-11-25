@@ -104,6 +104,21 @@
     .hadithBox .hadithText{ -webkit-line-clamp:3; font-size:15px; }
   }
   .wrap{max-width:640px; margin:0 auto; padding:26px 20px 44px;}
+  /* بيتا: داش بورد المدير — بيظهر بس على شاشة واسعة (ويب/كمبيوتر)، وبيوسّع عمود الرئيسية بس وقتها */
+  body.wide.c2home .wrap{max-width:1100px;}
+  body.wide.c2home #adminHome .bigGrid, body.wide.c2home #adminHome .toolGrid{max-width:640px; margin:0 auto;}
+  #dashBox{display:none;}
+  body.wide #dashBox{display:block; margin-bottom:16px;}
+  .dashTiles{display:grid; grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:10px; margin-bottom:14px;}
+  .dashTile{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; text-align:center;}
+  .dashTile b{display:block; font-size:21px;}
+  .dashTile span{font-size:12.5px; color:var(--muted);}
+  .dashCols{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  .dashCard{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px;}
+  .dashCard .cardTitle{margin-bottom:10px;}
+  .dashRepRow{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .dashRepRow:last-child{border-bottom:0;}
+  .dashAlert{display:block; width:100%; text-align:right; font-family:inherit; background:var(--gold-bg); color:var(--gold-d); border:1px solid rgba(182,134,47,.35); border-radius:12px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-size:13.5px; font-weight:700;}
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:16px;
     padding:20px; margin-bottom:16px;
@@ -1773,6 +1788,7 @@
 
     <!-- المشرف وصاحب الحساب -->
     <div id="adminHome" hidden>
+      <div id="dashBox" hidden></div>
       <button type="button" id="ncAlert" class="queueBar" hidden style="width:100%; margin:0 0 10px; border:0; font-family:inherit; text-align:right; cursor:pointer; background:#e8f5ec; color:#2b7a4f;" onclick="openCustAccList_()"></button>
       <!-- بيتا: شكل أ — كروت كبيرة ملونة، والأدوات الباقية في «كل الأدوات» -->
       <div class="bigGrid">
@@ -2981,7 +2997,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.41.2-beta';
+  const APP_VERSION_ = 'v1.42.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3000,7 +3016,16 @@
     backTo: null,
     lastPos: null,
     gps: 'unknown',
+    isWide: false,
+    dashAt: 0,
   };
+  // شاشة واسعة (ويب/كمبيوتر) أو موبايل عادي — بيحدد شكل الرئيسية بتاعة المدير بس (شاشة المندوب متأثرش)
+  function computeWide_(){
+    state.isWide = window.innerWidth >= 900;
+    document.body.classList.toggle('wide', state.isWide);
+  }
+  computeWide_();
+  window.addEventListener('resize', debounce_(computeWide_, 300));
 
   const VIEWS_ = ['viewWallet', 'viewLogin', 'viewOtp', 'viewHome', 'viewCustomers', 'viewNewCust', 'viewVisit', 'viewDone', 'viewMyOrders', 'viewReport',
     'viewUnvisited', 'viewItems', 'viewMap', 'viewLive', 'viewExport', 'viewAdmin', 'viewProfile'];
@@ -3187,6 +3212,7 @@
       if(!state.repOptions.length){
         callApi('bootstrapHome', [state.auth]).then(function(d){ setRepOptions_(d.repOptions); }).catch(function(){});
       }
+      if(state.isWide) loadDashboard_();
     } else {
       renderRepHome_();
       checkMyAccess_();
@@ -5250,6 +5276,74 @@
         row.onclick = function(){ openMap_(r.repFilter, dmyToYmd_(row.dataset.day)); };
       });
     }
+  }
+
+  // ================== داش بورد المدير (بيتا — ويب بس) ==================
+  // بيجمع بيانات النهارده من نداءات موجودة أصلًا (getReport، listTransferBatches، ldApi_، caApi_، ovLoad_)
+  // من غير أي نداء سيرفر جديد. بيظهر بدل الشاشة الرئيسية العادية للمدير على شاشة واسعة بس (state.isWide).
+  function loadDashboard_(force){
+    if(!force && state.dashAt && Date.now() - state.dashAt < 120000) return; // تحديث كل دقيقتين بالكتير
+    const box = document.getElementById('dashBox'); if(!box) return;
+    box.hidden = false;
+    if(!state.dashAt) box.innerHTML = '<div class="empty">جاري تحميل لوحة اليوم...</div>';
+    const today = ymd_(bizToday_());
+    Promise.all([
+      callApi('getReport', [state.auth, today, today, '']).catch(function(){ return null; }),
+      callApi('listTransferBatches', [state.auth]).catch(function(){ return null; }),
+      ldApi_('whoami').catch(function(){ return null; }),
+      caApi_('opened').catch(function(){ return null; }),
+      ovLoad_().catch(function(){ return null; }),
+    ]).then(function(x){
+      state.dashAt = Date.now();
+      renderDashboard_(x[0], x[1], x[2], x[3], x[4]);
+    });
+  }
+  function dashTile_(val, lbl){ return '<div class="dashTile"><b>' + val + '</b><span>' + lbl + '</span></div>'; }
+  function renderDashboard_(report, batches, whoami, opened, overdueRows){
+    const box = document.getElementById('dashBox'); if(!box || !state.isWide) return;
+    const t = report && report.totals;
+    const reps = (report && report.reps || []).filter(function(p){ return !isWhName_(p.rep); });
+    let html = '<div class="dashCard"><div class="cardTitle">📊 النهارده<button type="button" class="ghost" style="float:left; padding:4px 10px; font-size:12.5px;" onclick="loadDashboard_(true)">🔄 تحديث</button></div>';
+    html += t ? '<div class="dashTiles">' +
+        dashTile_(fmt(t.collected), 'تحصيل (ج)') +
+        dashTile_(t.orders, 'طلبية') +
+        dashTile_(fmt(t.returnQty), 'قطعة مرتجعة') +
+        dashTile_(t.visits, 'زيارة') +
+        dashTile_(pctTxt_(t.planPct), 'التزام خط السير') +
+      '</div>' : '<div class="empty">تعذر تحميل أرقام النهارده</div>';
+    html += '</div>';
+
+    html += '<div class="dashCols">';
+    // تنبيهات ومتابعة
+    html += '<div class="dashCard"><div class="cardTitle">🔔 محتاج متابعتك</div>';
+    const alerts = [];
+    if(batches && batches.pendingDocs) alerts.push(['⏳ ' + batches.pendingDocs + ' مستند لسه ماتدخلش السيستم', "openScreen('export')"]);
+    if(whoami && whoami.waiting) alerts.push(['🚚 ' + whoami.waiting + ' تحميلة مستنية موافقتك', 'openLoadsAdmin_()']);
+    const openedN = opened && opened.rows ? opened.rows.length : 0;
+    if(openedN) alerts.push(['🆕 ' + openedN + ' عميل جديد يستني كود', 'openCustAccList_()']);
+    if(overdueRows && overdueRows.length) alerts.push(['💰 متأخرات عند ' + overdueRows.length + ' عميل', 'openOverdues_()']);
+    html += alerts.length ? alerts.map(function(a){ return '<button type="button" class="dashAlert" onclick="' + a[1] + '">' + a[0] + '</button>'; }).join('') : '<div class="empty">✅ مفيش حاجة مستنية دلوقتي</div>';
+    html += '</div>';
+
+    // تقدم الزيارات لكل مندوب
+    html += '<div class="dashCard"><div class="cardTitle">👣 خط السير النهارده</div>';
+    if(reps.length){
+      html += reps.slice().sort(function(a, b){ return (b.planPct || 0) - (a.planPct || 0); }).map(function(p){
+        return '<div class="dashRepRow"><span>' + escapeHtml(p.rep) + '</span><span>' + p.plannedDone + ' من ' + p.planned + ' • ' + pctTxt_(p.planPct) + '</span></div>';
+      }).join('');
+    } else html += '<div class="empty">مفيش بيانات</div>';
+    html += '</div></div>';
+
+    // أفضل/أقل أداء (حسب التحصيل النهارده)
+    if(reps.length > 1){
+      const ranked = reps.slice().sort(function(a, b){ return (b.collected || 0) - (a.collected || 0); });
+      const worst = reps.filter(function(p){ return p.visits > 0; }).slice().sort(function(a, b){ return (a.collected || 0) - (b.collected || 0); });
+      html += '<div class="dashCols"><div class="dashCard"><div class="cardTitle">🏆 الأفضل النهارده</div>' +
+        ranked.slice(0, 3).map(function(p){ return '<div class="dashRepRow"><span>' + escapeHtml(p.rep) + '</span><span>' + fmt(p.collected) + ' ج</span></div>'; }).join('') + '</div>' +
+        '<div class="dashCard"><div class="cardTitle">📉 محتاج متابعة</div>' +
+        (worst.length ? worst.slice(0, 3).map(function(p){ return '<div class="dashRepRow"><span>' + escapeHtml(p.rep) + '</span><span>' + fmt(p.collected) + ' ج</span></div>'; }).join('') : '<div class="empty">—</div>') + '</div></div>';
+    }
+    box.innerHTML = html;
   }
 
   // ================== تفاصيل أي رقم في التقرير ==================
