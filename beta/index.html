@@ -112,12 +112,15 @@
     background:var(--o1); padding:22px 14px; box-sizing:border-box; overflow-y:auto;
   }
   .gBrand{font-size:14px; font-weight:800; color:#fff; margin:0 10px 16px;}
-  .gNav{padding:11px 14px; border-radius:10px; font-weight:700; font-size:13.5px; color:#dfe5cd; cursor:pointer; margin-bottom:2px;}
+  .gGroup{font-size:10.5px; font-weight:800; color:#9fae84; letter-spacing:.5px; margin:14px 10px 4px;}
+  .gNav{padding:9px 14px; border-radius:10px; font-weight:700; font-size:13px; color:#dfe5cd; cursor:pointer; margin-bottom:1px;}
   .gNav:hover{background:rgba(255,255,255,.14); color:#fff;}
   body.adminWide .header, body.adminWide .wrap{margin-right:230px; margin-left:auto;}
   body.adminWide .wrap{max-width:1000px;}
   body.adminWide.c2home .wrap{max-width:1180px;}
-  body.adminWide.c2home #adminHome .bigGrid, body.adminWide.c2home #adminHome .toolGrid{max-width:640px; margin:0 auto;}
+  /* بيتا: على الويب، السايد بار الجديد بيغني عن قايمة الأدوات القديمة بتاعة الموبايل خالص (بيجي الكروت الكبيرة أو التابات الخمسة تحت) — مش محتاجينها مكرّرة */
+  body.adminWide #adminHome .bigGrid, body.adminWide #adminHome .toolGrid, body.adminWide #adminHome #ncAlert,
+  body.adminWide #adminHome .admPane, body.adminWide #adminHome .admPaneT, body.adminWide #adminHome #admTabs{display:none !important;}
   #dashBox{display:none;}
   body.wide #dashBox{display:block; margin-bottom:16px;}
   .ddMain{display:flex; flex-direction:column; gap:14px;}
@@ -684,9 +687,9 @@
   .aiTools button.done{border-color:var(--green); background:var(--green-bg); color:var(--green);}
   .aiOverlay{position:fixed; inset:0; z-index:450; background:rgba(10,15,30,.55); display:flex; align-items:flex-end; justify-content:center;}
   .aiSheet{background:var(--bg); width:100%; max-width:640px; max-height:94vh; border-radius:22px 22px 0 0; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 -10px 40px rgba(0,0,0,.3);}
-  /* بيتا: نفس الشاشات (تقارير، إدارة البيانات، إلخ) بس بعرض أوسع وشكل نافذة متوسطة على الويب، ومتفاداة السايد بار الثابت */
-  body.adminWide .aiOverlay{align-items:center; padding-right:230px;}
-  body.adminWide .aiSheet{max-width:1000px; max-height:88vh; border-radius:20px;}
+  /* بيتا: على الويب كل شاشة بقت صفحتها الخاصة فعلًا — مش نافذة منبثقة — بتملا المساحة بجانب السايد بار بالظبط */
+  body.adminWide .aiOverlay{position:fixed; top:0; right:230px; left:0; bottom:0; background:var(--bg); align-items:stretch; justify-content:stretch; padding:0; z-index:35;}
+  body.adminWide .aiSheet{width:100%; height:100%; max-width:none; max-height:none; border-radius:0; box-shadow:none;}
   .aiHead{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 18px; background:var(--navy); color:#fff; font-size:16.5px;}
   .aiX{flex:none; background:rgba(255,255,255,.14); border:none; color:#fff; width:36px; height:36px; border-radius:50%; font-size:16px; cursor:pointer; font-family:inherit;}
   .aiBody{padding:14px 16px; overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch;}
@@ -1701,14 +1704,46 @@
 <!-- بيتا: سايد بار ثابت للمدير على شاشة واسعة (ويب) بس — بيظهر فوق كل الشاشات، الموبايل مش بيتأثر خالص -->
 <div class="gSide" id="gSide">
   <div class="gBrand">📊 TOUCH EL ZENOUKI</div>
+
   <div class="gNav" onclick="goHome()">🏠 الرئيسية / لوحة اليوم</div>
-  <div class="gNav" onclick="openLoadsAdmin_()">🚚 التحميلات</div>
-  <div class="gNav" onclick="openCustAccList_()">🆕 عميل جديد</div>
-  <div class="gNav" onclick="openOverdues_()">💰 المتأخرات</div>
+
+  <div class="gGroup">التقارير</div>
   <div class="gNav" onclick="openPerf_()">📈 البيع والتحصيل</div>
+  <div class="gNav" onclick="openOverdues_()">💰 المتأخرات</div>
   <div class="gNav" onclick="openCustSalesAll_()">🏆 مبيعات العملاء</div>
+  <div class="gNav" onclick="openRepVisits_()">📄 تقرير مندوب</div>
+  <div class="gNav" onclick="openLoss_()">📉 الفاقد من الطلبات</div>
+  <div class="gNav" onclick="openCashflow_()">💳 التحصيل المتوقع</div>
+  <div class="gNav" onclick="openUsage_(1)">📊 استهلاك السيرفر</div>
+
+  <div class="gGroup">العملاء والمناديب</div>
+  <div class="gNav" onclick="openCustAccList_()">🆕 عميل جديد</div>
+  <div class="gNav" onclick="openInvSearch_()">🧾 فواتير العملاء</div>
+  <div class="gNav" onclick="openBalances_()">⏳ أرصدة العملاء</div>
+  <div class="gNav" onclick="openScreen('map')">🗺 خريطة مندوب</div>
+  <div class="gNav" onclick="openScreen('unvisited')">🚫 ماتزاروش</div>
+  <div class="gNav" onclick="openLoadsAdmin_()">🚚 التحميلات</div>
+
+  <div class="gGroup">الأصناف والمخزون</div>
+  <div class="gNav" onclick="openStock_()">📦 المخزون</div>
+  <div class="gNav" onclick="openSprice_()">🏷 الأسعار الخاصة</div>
+  <div class="gNav" onclick="openLastPrice_()">🔖 آخر سعر</div>
+  <div class="gNav" onclick="openScreen('items')">📋 الأصناف المطلوبة</div>
+  <div class="gNav" onclick="openSpecialReq_()">✳️ طلب مبيعات خاص</div>
+
+  <div class="gGroup">الإدارة</div>
   <div class="gNav" onclick="openAdminData_()">🛠 إدارة البيانات</div>
-  <div class="gNav" onclick="openScreen('admin')">👥 المناديب والأصناف</div>
+  <div class="gNav" onclick="openScreen('export')">⬇ تصدير Excel</div>
+  <div class="gNav" onclick="openScreen('wallet')">👛 حوافظ المناديب</div>
+  <div class="gNav" onclick="openCheques_()">🏦 الشيكات</div>
+  <div class="gNav" id="gOaccess" hidden onclick="openOrdersAccess_()">🔑 صلاحية الطلبيات</div>
+  <div class="gNav" id="gAdminLink" hidden onclick="openScreen('admin')">👥 المناديب والأصناف</div>
+
+  <div class="gGroup">حسابي</div>
+  <div class="gNav" onclick="openMyWallet_()">👛 حافظتي</div>
+  <div class="gNav" onclick="openMyCust_()">🙋 عملائي (طلبية/تحصيل)</div>
+  <div class="gNav" onclick="openScreen('profile')">⚙️ إعداداتي</div>
+  <div class="gNav" onclick="handleLogout()">🚪 خروج</div>
 </div>
 
 <div class="header">
@@ -3045,7 +3080,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.46.1-beta';
+  const APP_VERSION_ = 'v1.47.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3235,6 +3270,8 @@
     document.getElementById('homeAvatar').textContent = String(user.name || '؟').trim().charAt(0) || '؟';
     document.getElementById('adminLink').hidden = !state.isOwner;
     document.getElementById('oaccessBtn').hidden = !state.isOwner;
+    document.getElementById('gAdminLink').hidden = !state.isOwner;
+    document.getElementById('gOaccess').hidden = !state.isOwner;
     if(state.isAdmin) document.getElementById('delegBox').hidden = true;
     document.getElementById('repHome').hidden = state.isAdmin;
     document.getElementById('adminHome').hidden = !state.isAdmin;
