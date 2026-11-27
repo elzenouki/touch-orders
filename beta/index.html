@@ -124,8 +124,9 @@
   body.adminWide .header, body.adminWide .wrap{margin-right:230px; margin-left:auto; margin-top:0;}
   body.adminWide .wrap{max-width:1000px;}
   body.adminWide.c2home .wrap{max-width:1180px;}
-  /* بيتا: رجّعنا كل الأزرار القديمة تظهر تاني جنب السايد بار، لحد ما كل حاجة في السايد بار تتأكد إنها شغالة 100% */
-  body.adminWide #admTabs{left:calc((100% - 230px) / 2);}
+  /* بيتا: على الويب، السايد بار هو التنقل الوحيد — الكروت/الأدوات/التابات القديمة بتاعة الموبايل مخفية خالص */
+  body.adminWide #adminHome .bigGrid, body.adminWide #adminHome .toolGrid, body.adminWide #adminHome #ncAlert,
+  body.adminWide #adminHome .admPane, body.adminWide #adminHome .admPaneT, body.adminWide #adminHome #admTabs{display:none !important;}
   /* بيتا: تثبيت الهيدر فوق في كل صفحات الويب (حتى الرئيسية) وهو بيعمل سكرول */
   body.adminWide .header{position:sticky; top:0; z-index:38; background:#fff;}
   body.adminWide.c2home .header{display:flex !important;}
@@ -3093,7 +3094,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.49.0-beta';
+  const APP_VERSION_ = 'v1.49.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
