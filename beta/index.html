@@ -119,8 +119,10 @@
   }
   .gBrand{font-size:14px; font-weight:800; color:var(--gold-d); margin:0 10px 16px;}
   .gGroup{font-size:10.5px; font-weight:800; color:var(--muted); letter-spacing:.5px; margin:14px 10px 4px;}
+  .gGroupHi{color:var(--gold-d); border-right:3px solid var(--gold); padding-right:7px; margin-right:7px;}
   .gNav{padding:9px 14px; border-radius:10px; font-weight:600; font-size:13px; color:var(--text); cursor:pointer; margin-bottom:1px;}
   .gNav:hover{background:var(--gold-bg); color:var(--gold-d);}
+  .gNav.on{background:var(--gold-bg); color:var(--gold-d); font-weight:800;}
   body.adminWide .header, body.adminWide .wrap{margin-right:230px; margin-left:auto; margin-top:0;}
   body.adminWide .wrap{max-width:1000px;}
   body.adminWide.c2home .wrap{max-width:1180px;}
@@ -1724,7 +1726,8 @@
 
   <div class="gNav" onclick="goHome()">🏠 الرئيسية / لوحة اليوم</div>
 
-  <div class="gGroup">التقارير</div>
+  <div class="gGroup gGroupHi">التقارير</div>
+  <div class="gNav on" id="gNavOps" onclick="goHome()">📊 تقارير التشغيل</div>
   <div class="gNav" onclick="openPerf_()">📈 البيع والتحصيل</div>
   <div class="gNav" onclick="openOverdues_()">💰 المتأخرات</div>
   <div class="gNav" onclick="openCustSalesAll_()">🏆 مبيعات العملاء</div>
@@ -3097,7 +3100,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.50.0-beta';
+  const APP_VERSION_ = 'v1.50.1-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5419,10 +5422,19 @@
   }
   function ddLoadOps_(){
     dd_.loadingOps = true; dd_.errOps = null; ddRenderShell_();
-    Promise.all(['visits', 'orders', 'payments'].map(function(k){
-      return callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, k]);
-    })).then(function(x){
-      const V = (x[0] && x[0].visits) || [], D = (x[1] && x[1].docs) || [], P = (x[2] && x[2].payments) || [];
+    const safe = function(p){ return p.then(function(r){ return { ok: true, r: r }; }, function(e){ return { ok: false, e: e }; }); };
+    Promise.all([
+      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'visits'])),
+      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'orders'])),
+      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'payments'])),
+      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'newcust'])),
+      safe(ldApi_('list'))
+    ]).then(function(x){
+      if(x.every(function(s){ return !s.ok; })){
+        dd_.loadingOps = false; dd_.errOps = (x[0].e && x[0].e.message) || 'جهاز الشركة مش متاح دلوقتي'; ddRenderShell_(); return;
+      }
+      const V = (x[0].ok && x[0].r.visits) || [], D = (x[1].ok && x[1].r.docs) || [], P = (x[2].ok && x[2].r.payments) || [],
+        NC = (x[3].ok && x[3].r.customers) || [], LD = (x[4].ok && x[4].r) || [];
       const rows = [];
       V.forEach(function(v){
         const hasRes = v.hasOrder || v.returnId || v.amount;
@@ -5438,12 +5450,25 @@
         rows.push({ key: 'payments', item: 'تحصيل', date: p.date, time: p.time, name: p.customerName, rep: p.rep,
           status: 'تم التحصيل', details: [p.method, p.chequeDate].filter(Boolean).join(' • '), amount: p.amount });
       });
+      NC.forEach(function(c){
+        rows.push({ key: 'newcust', item: 'عميل جديد', date: c.date, time: '', name: c.name, rep: c.rep,
+          status: 'تسجيل جديد', details: [c.area, c.address, c.phone].filter(Boolean).join(' • '), amount: '' });
+      });
+      LD.filter(function(l){
+        const d0 = String(l.created_at || '').slice(0, 10);
+        return (!dd_.rep || l.rep === dd_.rep) && d0 >= dd_.from && d0 <= dd_.to;
+      }).forEach(function(l){
+        const ts = String(l.created_at || '');
+        rows.push({ key: 'load', loadId: l.id, item: 'تحميلة', date: ts.slice(0, 10), time: ts.slice(11, 16), name: '#' + l.serial, rep: l.rep,
+          status: (LD_STATUS_[l.status] || [l.status])[0], details: [l.vehicle, l.stops ? l.stops + ' تاجر' : '', l.pieces ? fmt(l.pieces) + ' قطعة' : ''].filter(Boolean).join(' • '), amount: '' });
+      });
       rows.sort(function(a, b){ return (b.date + b.time).localeCompare(a.date + a.time); });
       dd_.loadingOps = false; dd_.ops = rows; ddRenderShell_();
-    }).catch(function(e){ dd_.loadingOps = false; dd_.ops = null; dd_.errOps = (e && e.message) || 'جهاز الشركة مش متاح دلوقتي'; ddRenderShell_(); });
+    });
   }
   function ddKpiTile_(val, lbl, cls){ return '<div class="ddKpi' + (cls ? ' ' + cls : '') + '"><div class="k">' + lbl + '</div><div class="v">' + val + '</div></div>'; }
-  function ddOpenAction_(key, rep){
+  function ddOpenAction_(key, rep, loadId){
+    if(key === 'load'){ ldOpen_(Number(loadId)); return; }
     ddReadFilters_();
     openReportList_(key, rep || dd_.rep || '', ymdToDmy_(dd_.from), ymdToDmy_(dd_.to));
   }
@@ -5485,7 +5510,7 @@
       rows.slice(0, 300).map(function(r, i){
         const details = [r.details, r.amount ? fmt(r.amount) + ' ج' : '', r.rep ? 'المندوب: ' + r.rep : '', r.date + (r.time ? ' ' + r.time : '')].filter(Boolean).join(' • ');
         return '<tr><td>' + escapeHtml(r.item) + ' — ' + escapeHtml(r.name || '') + '</td><td>' + escapeHtml(r.status || '') + '</td><td>' + escapeHtml(details) + '</td>' +
-          '<td><button type="button" class="ghost" onclick="ddOpenAction_(\'' + r.key + '\', \'' + escapeHtml(r.rep || '').replace(/'/g, "\\'") + '\')">عرض</button></td></tr>';
+          '<td><button type="button" class="ghost" onclick="ddOpenAction_(\'' + r.key + '\', \'' + escapeHtml(r.rep || '').replace(/'/g, "\\'") + '\', \'' + (r.loadId || '') + '\')">عرض</button></td></tr>';
       }).join('') + '</tbody></table>';
   }
 
