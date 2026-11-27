@@ -106,23 +106,38 @@
   .wrap{max-width:640px; margin:0 auto; padding:26px 20px 44px;}
   /* بيتا: شكل "موقع ويب" للمدير — هوية جديدة (فاتح/بنفسجي-أزرق، شريط علوي) — بيظهر بس على شاشة واسعة. الموبايل مش بيتأثر خالص */
   body.adminWide{
-    --bg:#f7f8fa; --card:#ffffff; --card2:#eef0f3; --border:#e1e4e9; --text:#1c2128; --muted:#69707d;
-    --gold:#0f766e; --gold-d:#0c5d57; --gold-bg:#e8f6f4; --gold-light:#2b9088;
-    --o1:#1c2128; --o2:#2a303a;
+    --bg:#f9faf7; --card:#ffffff; --card2:#f0f2ec; --border:#e5e8e0; --text:#20261c; --muted:#6c7566;
+    --gold:#4b5d3a; --gold-d:#3b4a2d; --gold-bg:#e3ead9; --gold-light:#6b7f54;
+    --o1:#20261c; --o2:#2a3322;
     font-family:'IBM Plex Sans Arabic', 'Cairo', system-ui, sans-serif;
   }
+  .gHeaderBar{display:none;}
+  body.adminWide .headerLeft, body.adminWide #backBtn{display:none !important;}
+  body.adminWide .gHeaderBar{
+    display:flex; align-items:center; justify-content:space-between; width:100%; padding:0 6px;
+  }
+  .gHeaderUser{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--text);}
+  .gHeaderAvatar{width:28px; height:28px; border-radius:50%; background:var(--gold-bg); color:var(--gold-d); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .gHeaderTitle{font-size:15px; font-weight:800; color:var(--text);}
+  .gHeaderBrand{text-align:right; line-height:1.2;}
+  .gHeaderBrand b{font-size:14px; color:var(--text); letter-spacing:.5px;}
+  .gHeaderBrand small{display:block; font-size:9px; color:var(--muted); letter-spacing:.5px;}
   .gSide{display:none;}
   body.adminWide .gSide{
     display:flex; flex-direction:column; gap:2px;
     position:fixed; top:0; right:0; bottom:0; width:230px; z-index:40;
-    background:#fff; border-left:1px solid var(--border); padding:22px 14px; box-sizing:border-box; overflow-y:auto;
+    background:#fff; border-left:1px solid var(--border); padding:18px 12px; box-sizing:border-box; overflow-y:auto;
   }
-  .gBrand{font-size:14px; font-weight:800; color:var(--gold-d); margin:0 10px 16px;}
-  .gGroup{font-size:10.5px; font-weight:800; color:var(--muted); letter-spacing:.5px; margin:14px 10px 4px;}
-  .gGroupHi{color:var(--gold-d); border-right:3px solid var(--gold); padding-right:7px; margin-right:7px;}
-  .gNav{padding:9px 14px; border-radius:10px; font-weight:600; font-size:13px; color:var(--text); cursor:pointer; margin-bottom:1px;}
+  .gNav{padding:10px 14px; border-radius:10px; font-weight:600; font-size:13.5px; color:var(--text); cursor:pointer; margin-bottom:2px; display:flex; align-items:center; gap:9px;}
   .gNav:hover{background:var(--gold-bg); color:var(--gold-d);}
   .gNav.on{background:var(--gold-bg); color:var(--gold-d); font-weight:800;}
+  .gNav.top{font-size:13.5px;}
+  .gIc{font-size:15px; flex-shrink:0; width:18px; text-align:center;}
+  .gChev{margin-right:auto; font-size:11px; color:var(--muted); transition:transform .15s ease;}
+  .gNav.top.open .gChev{transform:rotate(180deg);}
+  .gSub{margin:0 0 2px 0; padding-right:12px; border-right:2px solid var(--border);}
+  .gSub[hidden]{display:none;}
+  .gSub .gNav{font-size:12.5px; padding:8px 12px;}
   body.adminWide .header, body.adminWide .wrap{margin-right:230px; margin-left:auto; margin-top:0;}
   body.adminWide .wrap{max-width:1000px;}
   body.adminWide.c2home .wrap{max-width:1180px;}
@@ -130,7 +145,7 @@
   body.adminWide #adminHome .bigGrid, body.adminWide #adminHome .toolGrid, body.adminWide #adminHome #ncAlert,
   body.adminWide #adminHome .admPane, body.adminWide #adminHome .admPaneT, body.adminWide #adminHome #admTabs{display:none !important;}
   /* بيتا: تثبيت الهيدر فوق في كل صفحات الويب (حتى الرئيسية) وهو بيعمل سكرول */
-  body.adminWide .header{position:sticky; top:0; z-index:38; background:#fff;}
+  body.adminWide .header{position:sticky; top:0; z-index:38; background:#fff !important; background-image:none !important; box-shadow:0 1px 0 var(--border);}
   body.adminWide.c2home .header{display:flex !important;}
   #dashBox{display:none;}
   body.wide #dashBox{display:block; margin-bottom:16px;}
@@ -139,23 +154,29 @@
   .ddPageTitle{font-size:19px; font-weight:800; color:var(--text);}
   .ddPageDesc{font-size:13px; color:var(--muted);}
   .ddKpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
-  .ddKpi{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px;}
-  .ddKpi .k{font-size:12px; color:var(--muted); font-weight:700;}
-  .ddKpi .v{font-size:21px; font-weight:800; margin-top:5px; color:var(--gold-d);}
-  .ddFil{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
-  .ddFil label{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:5px;}
+  .ddKpi{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; text-align:center;}
+  .ddKpi .k{font-size:12.5px; color:var(--muted); font-weight:700;}
+  .ddKpi .v{font-size:26px; font-weight:800; margin-top:8px; color:var(--text);}
+  .ddKpi .c{font-size:11px; color:var(--muted); margin-top:6px;}
+  .ddFil{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-end; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px;}
+  .ddFil label{font-size:12px; color:var(--muted); display:flex; flex-direction:column; gap:5px; font-weight:700;}
   .ddFil input, .ddFil select{margin:0;}
+  .ddFil button.primary{margin-right:auto; align-self:center;}
   .ddCard{background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden;}
-  .ddCardTop{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+  .ddCardTop{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
   .ddTabs{display:flex; gap:8px; flex-wrap:wrap;}
   .ddTabs button{background:var(--card2); border:1px solid var(--border); border-radius:999px; padding:7px 14px; font-size:12.5px; font-weight:700; font-family:inherit; cursor:pointer; color:var(--text);}
   .ddTabs button.on{background:var(--gold); color:#fff; border-color:var(--gold);}
   .ddTableWrap{overflow-x:auto;}
-  .ddTable{width:100%; border-collapse:collapse; white-space:nowrap;}
-  .ddTable th, .ddTable td{padding:9px 16px; border-bottom:1px solid var(--border); font-size:13px; text-align:right;}
-  .ddTable th{color:var(--muted); font-weight:700; background:var(--card2);}
+  .ddTable{width:100%; border-collapse:collapse;}
+  .ddTable th, .ddTable td{padding:14px 18px; border-bottom:1px solid var(--border); font-size:13.5px; text-align:right;}
+  .ddTable th{color:var(--muted); font-weight:700; font-size:12px;}
   .ddTable tbody tr:last-child td{border-bottom:0;}
   .ddTable tbody tr:hover td{background:var(--card2);}
+  .ddPill{display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:700; background:var(--card2); color:var(--muted);}
+  .ddPill.warn{background:#fbe9d7; color:#9a5b1e;}
+  .ddLink{background:none; border:0; font-family:inherit; font-size:13px; font-weight:700; color:var(--gold-d); cursor:pointer; padding:0;}
+  .ddLink:hover{text-decoration:underline;}
   /* بيتا: "سكين" ويب عام — بيحسّن شكل العناصر المشتركة (كروت/قوائم/فورمات/أزرار) على شاشة واسعة، من غير ما يغيّر الموبايل خالص */
   .wideFormGrid > div{margin-bottom:0;}
   body.adminWide .wideFormGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;}
@@ -1722,48 +1743,54 @@
 
 <!-- بيتا: سايد بار ثابت للمدير على شاشة واسعة (ويب) بس — بيظهر فوق كل الشاشات، الموبايل مش بيتأثر خالص -->
 <div class="gSide" id="gSide">
-  <div class="gBrand">📊 TOUCH EL ZENOUKI</div>
+  <div class="gNav top on" id="gNavHome" onclick="gNavTop_('home', goHome, this)"><span class="gIc">🏠</span>الرئيسية</div>
 
-  <div class="gNav" onclick="goHome()">🏠 الرئيسية / لوحة اليوم</div>
+  <div class="gNav top" onclick="gNavTop_('money', openPerf_, this)"><span class="gIc">📈</span>البيع والتحصيل</div>
 
-  <div class="gGroup gGroupHi">التقارير</div>
-  <div class="gNav on" id="gNavOps" onclick="goHome()">📊 تقارير التشغيل</div>
-  <div class="gNav" onclick="openPerf_()">📈 البيع والتحصيل</div>
-  <div class="gNav" onclick="openOverdues_()">💰 المتأخرات</div>
-  <div class="gNav" onclick="openCustSalesAll_()">🏆 مبيعات العملاء</div>
-  <div class="gNav" onclick="openRepVisits_()">📄 تقرير مندوب</div>
-  <div class="gNav" onclick="openLoss_()">📉 الفاقد من الطلبات</div>
-  <div class="gNav" onclick="openCashflow_()">💳 التحصيل المتوقع</div>
-  <div class="gNav" onclick="openUsage_(1)">📊 استهلاك السيرفر</div>
+  <div class="gNav top" onclick="gNavTop_('overdue', openOverdues_, this)"><span class="gIc">⏳</span>المتأخرات</div>
 
-  <div class="gGroup">العملاء والمناديب</div>
-  <div class="gNav" onclick="openCustAccList_()">🆕 عميل جديد</div>
-  <div class="gNav" onclick="openInvSearch_()">🧾 فواتير العملاء</div>
-  <div class="gNav" onclick="openBalances_()">⏳ أرصدة العملاء</div>
-  <div class="gNav" onclick="openScreen('map')">🗺 خريطة مندوب</div>
-  <div class="gNav" onclick="openScreen('unvisited')">🚫 ماتزاروش</div>
-  <div class="gNav" onclick="openLoadsAdmin_()">🚚 التحميلات</div>
+  <div class="gNav top" id="gGrpCust" onclick="gNavTop_('cust', null, this)"><span class="gIc">👤</span>العملاء والمناديب<span class="gChev">⌄</span></div>
+  <div class="gSub" id="gSubCust" hidden>
+    <div class="gNav" onclick="openCustAccList_()">🆕 عميل جديد</div>
+    <div class="gNav" onclick="openInvSearch_()">🧾 فواتير العملاء</div>
+    <div class="gNav" onclick="openBalances_()">⏳ أرصدة العملاء</div>
+    <div class="gNav" onclick="openScreen('map')">🗺 خريطة مندوب</div>
+    <div class="gNav" onclick="openScreen('unvisited')">🚫 ماتزاروش</div>
+    <div class="gNav" id="gAdminLink" hidden onclick="openScreen('admin')">👥 المناديب والأصناف</div>
+    <div class="gNav" id="gOaccess" hidden onclick="openOrdersAccess_()">🔑 صلاحية الطلبيات</div>
+  </div>
 
-  <div class="gGroup">الأصناف والمخزون</div>
-  <div class="gNav" onclick="openStock_()">📦 المخزون</div>
-  <div class="gNav" onclick="openSprice_()">🏷 الأسعار الخاصة</div>
-  <div class="gNav" onclick="openLastPrice_()">🔖 آخر سعر</div>
-  <div class="gNav" onclick="openScreen('items')">📋 الأصناف المطلوبة</div>
-  <div class="gNav" onclick="openSpecialReq_()">✳️ طلب مبيعات خاص</div>
+  <div class="gNav top" onclick="gNavTop_('loads', openLoadsAdmin_, this)"><span class="gIc">🚚</span>التحميلات</div>
 
-  <div class="gGroup">الإدارة</div>
-  <div class="gNav" onclick="openAdminData_()">🛠 إدارة البيانات</div>
-  <div class="gNav" onclick="openScreen('export')">⬇ تصدير Excel</div>
-  <div class="gNav" onclick="openScreen('wallet')">👛 حوافظ المناديب</div>
-  <div class="gNav" onclick="openCheques_()">🏦 الشيكات</div>
-  <div class="gNav" id="gOaccess" hidden onclick="openOrdersAccess_()">🔑 صلاحية الطلبيات</div>
-  <div class="gNav" id="gAdminLink" hidden onclick="openScreen('admin')">👥 المناديب والأصناف</div>
+  <div class="gNav top" id="gGrpStock" onclick="gNavTop_('stock', null, this)"><span class="gIc">📦</span>المخزون والأصناف<span class="gChev">⌄</span></div>
+  <div class="gSub" id="gSubStock" hidden>
+    <div class="gNav" onclick="openStock_()">📦 المخزون</div>
+    <div class="gNav" onclick="openSprice_()">🏷 الأسعار الخاصة</div>
+    <div class="gNav" onclick="openLastPrice_()">🔖 آخر سعر</div>
+    <div class="gNav" onclick="openScreen('items')">📋 الأصناف المطلوبة</div>
+    <div class="gNav" onclick="openSpecialReq_()">✳️ طلب مبيعات خاص</div>
+  </div>
 
-  <div class="gGroup">حسابي</div>
-  <div class="gNav" onclick="openMyWallet_()">👛 حافظتي</div>
-  <div class="gNav" onclick="openMyCust_()">🙋 عملائي (طلبية/تحصيل)</div>
-  <div class="gNav" onclick="openScreen('profile')">⚙️ إعداداتي</div>
-  <div class="gNav" onclick="handleLogout()">🚪 خروج</div>
+  <div class="gNav top" id="gGrpRpt" onclick="gNavTop_('rpt', null, this)"><span class="gIc">📋</span>التقارير<span class="gChev">⌄</span></div>
+  <div class="gSub" id="gSubRpt" hidden>
+    <div class="gNav" onclick="openCustSalesAll_()">🏆 مبيعات العملاء</div>
+    <div class="gNav" onclick="openRepVisits_()">📄 تقرير مندوب</div>
+    <div class="gNav" onclick="openLoss_()">📉 الفاقد من الطلبات</div>
+    <div class="gNav" onclick="openCashflow_()">💳 التحصيل المتوقع</div>
+    <div class="gNav" onclick="openUsage_(1)">📊 استهلاك السيرفر</div>
+    <div class="gNav" onclick="openScreen('export')">⬇ تصدير Excel</div>
+  </div>
+
+  <div class="gNav top" id="gGrpSet" onclick="gNavTop_('set', null, this)"><span class="gIc">⚙️</span>الإعدادات<span class="gChev">⌄</span></div>
+  <div class="gSub" id="gSubSet" hidden>
+    <div class="gNav" onclick="openAdminData_()">🛠 إدارة البيانات</div>
+    <div class="gNav" onclick="openScreen('wallet')">👛 حوافظ المناديب</div>
+    <div class="gNav" onclick="openCheques_()">🏦 الشيكات</div>
+    <div class="gNav" onclick="openMyWallet_()">👛 حافظتي</div>
+    <div class="gNav" onclick="openMyCust_()">🙋 عملائي (طلبية/تحصيل)</div>
+    <div class="gNav" onclick="openScreen('profile')">⚙️ إعداداتي</div>
+    <div class="gNav" onclick="handleLogout()">🚪 خروج</div>
+  </div>
 </div>
 
 <div class="header">
@@ -1777,6 +1804,11 @@
     </div>
   </div>
   <button class="backBtn" id="backBtn" hidden onclick="goBack_()">⟵ رجوع</button>
+  <div class="gHeaderBar" id="gHeaderBar">
+    <div class="gHeaderBrand"><b>TOUCH</b><small>EL ZENOUKI GROUP</small></div>
+    <div class="gHeaderTitle">لوحة الإدارة</div>
+    <div class="gHeaderUser"><span class="gHeaderAvatar" id="gHeaderAvatar">؟</span><span id="gHeaderName"></span></div>
+  </div>
 </div>
 
 <div class="wrap">
@@ -3100,7 +3132,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.50.1-beta';
+  const APP_VERSION_ = 'v1.51.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -3125,6 +3157,20 @@
   // شاشة واسعة (ويب/كمبيوتر) أو موبايل عادي — بيحدد شكل الرئيسية بتاعة المدير بس (شاشة المندوب متأثرش)
   // شكل "موقع ويب" (سايد بار ثابت + عمود أوسع) بيظهر للمدير بس وعلى شاشة واسعة — الموبايل مش بيتأثر خالص
   function syncAdminWide_(){ document.body.classList.toggle('adminWide', state.isAdmin && state.isWide); }
+  // السايد بار (ويب — المدير بس): 8 عناصر رئيسية، اللي فيها تصنيفات بتفتح/تقفل أكورديون واحد بس في المرة
+  function gNavTop_(key, action, el){
+    const subId = 'gSub' + key.charAt(0).toUpperCase() + key.slice(1);
+    const sub = document.getElementById(subId);
+    document.querySelectorAll('.gSide .gNav.top').forEach(function(n){ n.classList.remove('on', 'open'); });
+    document.querySelectorAll('.gSide .gSub').forEach(function(s){ if(s !== sub) s.hidden = true; });
+    if(sub){
+      sub.hidden = !sub.hidden;
+      if(el){ el.classList.toggle('open', !sub.hidden); if(!sub.hidden) el.classList.add('on'); }
+    } else {
+      if(el) el.classList.add('on');
+      if(action) action();
+    }
+  }
   function computeWide_(){
     const was = state.isWide;
     state.isWide = window.innerWidth >= 900;
@@ -3288,6 +3334,8 @@
     document.getElementById('homeUserName').textContent = user.name;
     document.getElementById('tourAgainBox').hidden = !!isAdmin;
     document.getElementById('homeAvatar').textContent = String(user.name || '؟').trim().charAt(0) || '؟';
+    document.getElementById('gHeaderName').textContent = user.name || '';
+    document.getElementById('gHeaderAvatar').textContent = String(user.name || '؟').trim().charAt(0) || '؟';
     document.getElementById('adminLink').hidden = !state.isOwner;
     document.getElementById('oaccessBtn').hidden = !state.isOwner;
     document.getElementById('gAdminLink').hidden = !state.isOwner;
@@ -3309,6 +3357,7 @@
     state.visit = null;
     setTitle_('TOUCH EL ZENOUKI');
     setView('viewHome');
+    if(document.getElementById('gNavHome')) gNavTop_('home', null, document.getElementById('gNavHome'));
     (function(){ const d = new Date(), w = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()];
       document.getElementById('homeDate').textContent = w + ' ' + d.getDate() + '/' + (d.getMonth() + 1); })();
     ldWhoami_();
@@ -5405,8 +5454,7 @@
   }
   function ddReadFilters_(){
     const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
-    if(g('ddFrom') != null) dd_.from = g('ddFrom');
-    if(g('ddTo') != null) dd_.to = g('ddTo');
+    if(g('ddPreset') != null) ddPreset_(g('ddPreset'));
     if(g('ddRep') != null) dd_.rep = g('ddRep');
   }
   function ddApply_(){
@@ -5420,97 +5468,94 @@
       dd_.loadingKpi = false; dd_.kpi = r && r.totals; ddRenderShell_();
     }).catch(function(e){ dd_.loadingKpi = false; dd_.kpi = null; dd_.errKpi = (e && e.message) || 'حصل خطأ في تحميل المؤشرات'; ddRenderShell_(); });
   }
+  // حركة اليوم = 3 بنود ثابتة (العملاء الجدد/التحميلات/الزيارات) بحالة حقيقية من نفس البيانات والدوال
+  // المستخدمة أصلًا في تابات الموبايل "النهارده" (ncBadge/ldWhoami_/تقرير الزيارات)، مش سجل عمليات تفصيلي.
   function ddLoadOps_(){
     dd_.loadingOps = true; dd_.errOps = null; ddRenderShell_();
     const safe = function(p){ return p.then(function(r){ return { ok: true, r: r }; }, function(e){ return { ok: false, e: e }; }); };
     Promise.all([
-      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'visits'])),
-      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'orders'])),
-      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'payments'])),
-      safe(callApi('getReportList', [state.auth, dd_.from, dd_.to, dd_.rep, 'newcust'])),
-      safe(ldApi_('list'))
+      safe(Promise.all([admCall_('cust_list', { q: '' }).catch(function(){ return []; }), caApi_('opened'), sysCodes_()])),
+      safe(ldApi_('whoami'))
     ]).then(function(x){
-      if(x.every(function(s){ return !s.ok; })){
-        dd_.loadingOps = false; dd_.errOps = (x[0].e && x[0].e.message) || 'جهاز الشركة مش متاح دلوقتي'; ddRenderShell_(); return;
-      }
-      const V = (x[0].ok && x[0].r.visits) || [], D = (x[1].ok && x[1].r.docs) || [], P = (x[2].ok && x[2].r.payments) || [],
-        NC = (x[3].ok && x[3].r.customers) || [], LD = (x[4].ok && x[4].r) || [];
       const rows = [];
-      V.forEach(function(v){
-        const hasRes = v.hasOrder || v.returnId || v.amount;
-        rows.push({ key: 'visits', item: 'زيارة', date: v.date, time: v.time, name: v.name, rep: v.rep,
-          status: hasRes ? 'تمت الزيارة' : '✋ بدون طلب', details: (hasRes ? v.result : (v.reason || '')) + (v.notes ? ' • ' + v.notes : ''), amount: v.amount || '' });
-      });
-      D.forEach(function(d){
-        const isRet = /مرتجع|return/i.test(d.type || '');
-        rows.push({ key: isRet ? 'returns' : 'orders', item: isRet ? 'مرتجع' : 'طلبية', date: d.date, time: d.time, name: d.customerName, rep: d.rep,
-          status: isRet ? 'مرتجع' : 'طلبية جديدة', details: (d.lines || []).length + ' صنف', amount: '' });
-      });
-      P.forEach(function(p){
-        rows.push({ key: 'payments', item: 'تحصيل', date: p.date, time: p.time, name: p.customerName, rep: p.rep,
-          status: 'تم التحصيل', details: [p.method, p.chequeDate].filter(Boolean).join(' • '), amount: p.amount });
-      });
-      NC.forEach(function(c){
-        rows.push({ key: 'newcust', item: 'عميل جديد', date: c.date, time: '', name: c.name, rep: c.rep,
-          status: 'تسجيل جديد', details: [c.area, c.address, c.phone].filter(Boolean).join(' • '), amount: '' });
-      });
-      LD.filter(function(l){
-        const d0 = String(l.created_at || '').slice(0, 10);
-        return (!dd_.rep || l.rep === dd_.rep) && d0 >= dd_.from && d0 <= dd_.to;
-      }).forEach(function(l){
-        const ts = String(l.created_at || '');
-        rows.push({ key: 'load', loadId: l.id, item: 'تحميلة', date: ts.slice(0, 10), time: ts.slice(11, 16), name: '#' + l.serial, rep: l.rep,
-          status: (LD_STATUS_[l.status] || [l.status])[0], details: [l.vehicle, l.stops ? l.stops + ' تاجر' : '', l.pieces ? fmt(l.pieces) + ' قطعة' : ''].filter(Boolean).join(' • '), amount: '' });
-      });
-      rows.sort(function(a, b){ return (b.date + b.time).localeCompare(a.date + a.time); });
-      dd_.loadingOps = false; dd_.ops = rows; ddRenderShell_();
+      if(x[0].ok){
+        ca_.list = x[0].r[0] || []; ca_.sys = x[0].r[2] || {}; ca_.openedAll = (x[0].r[1] && x[0].r[1].rows) || [];
+        const opened = ca_.openedAll.filter(caNotCoded_);
+        rows.push({ item: 'العملاء الجدد', warn: opened.length > 0, status: opened.length ? opened.length + ' يحتاج متابعة' : 'مفيش حد مستني',
+          details: 'استكمال حساب العميل', actionLbl: 'فتح', action: openCustAccList_ });
+      } else {
+        rows.push({ item: 'العملاء الجدد', warn: false, status: 'تعذر التحميل', details: 'استكمال حساب العميل', actionLbl: 'فتح', action: openCustAccList_ });
+      }
+      if(x[1].ok){
+        const waiting = x[1].r.waiting || 0;
+        rows.push({ item: 'التحميلات', warn: waiting > 0, status: waiting ? waiting + ' بانتظار المراجعة' : 'مفيش تحميلات معلّقة',
+          details: 'موافقة العربيات والتسليم', actionLbl: 'عرض', action: openLoadsAdmin_ });
+      } else {
+        rows.push({ item: 'التحميلات', warn: false, status: 'تعذر التحميل', details: 'موافقة العربيات والتسليم', actionLbl: 'عرض', action: openLoadsAdmin_ });
+      }
+      rows.push({ item: 'الزيارات', warn: false, status: 'ملخص المندوبين', details: 'زيارات وطلبيات كل مندوب', actionLbl: 'عرض التقرير', action: function(){ openScreen('report'); } });
+      dd_.loadingOps = false;
+      dd_.errOps = (x[0].ok || x[1].ok) ? null : ((x[0].e && x[0].e.message) || (x[1].e && x[1].e.message) || 'جهاز الشركة مش متاح دلوقتي');
+      dd_.ops = rows; ddRenderShell_();
     });
   }
-  function ddKpiTile_(val, lbl, cls){ return '<div class="ddKpi' + (cls ? ' ' + cls : '') + '"><div class="k">' + lbl + '</div><div class="v">' + val + '</div></div>'; }
-  function ddOpenAction_(key, rep, loadId){
-    if(key === 'load'){ ldOpen_(Number(loadId)); return; }
-    ddReadFilters_();
-    openReportList_(key, rep || dd_.rep || '', ymdToDmy_(dd_.from), ymdToDmy_(dd_.to));
-  }
+  function ddKpiTile_(val, lbl, cls){ return '<div class="ddKpi' + (cls ? ' ' + cls : '') + '"><div class="k">' + lbl + '</div><div class="v">' + val + '</div><div class="c">ملخص الفترة</div></div>'; }
+  var DD_OPS_ACTIONS_ = [];
+  function ddOpenAction_(i){ const a = DD_OPS_ACTIONS_[i]; if(a) a(); }
   function ddRenderShell_(){
     const box = document.getElementById('dashBox'); if(!box || !state.isWide) return;
     const t = dd_.kpi;
     let main = '<div class="ddMain">';
     main += '<div class="ddPageHead"><div class="ddPageTitle">📊 تقارير التشغيل</div>' +
-      '<div class="ddPageDesc">نظرة سريعة على مبيعات وتحصيل وزيارات الفترة المحددة، وحركة العمليات بالتفصيل تحت.</div></div>';
+      '<div class="ddPageDesc">متابعة البيع والتحصيل والعملاء من لوحة واحدة</div></div>';
+
+    const curPreset = ddCurPreset_();
+    main += '<div class="ddFil">' +
+      '<label>الفترة<select id="ddPreset">' + [['d', 'اليوم'], ['w', 'الأسبوع'], ['m', 'الشهر']].map(function(o){
+        return '<option value="' + o[0] + '"' + (o[0] === curPreset ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>' +
+      '<label>المندوب<select id="ddRep"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){
+        return '<option value="' + escapeHtml(n) + '"' + (n === dd_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select></label>' +
+      '<button type="button" class="primary" onclick="ddApply_()">تطبيق</button></div>';
 
     main += '<div class="ddKpis">' +
-      ddKpiTile_(dd_.loadingKpi ? '…' : (t ? t.orders : '—'), 'المبيعات (عدد الطلبيات)') +
+      ddKpiTile_(dd_.loadingKpi ? '…' : (t ? t.orders : '—'), 'المبيعات') +
       ddKpiTile_(dd_.loadingKpi ? '…' : (t ? fmt(t.collected) : '—'), 'التحصيل') +
       ddKpiTile_(dd_.loadingKpi ? '…' : (t ? t.visits : '—'), 'الزيارات') +
-      ddKpiTile_(dd_.loadingKpi ? '…' : (t ? t.newCustomers : '—'), 'العملاء الجدد') +
+      ddKpiTile_(dd_.loadingKpi ? '…' : (t ? t.newCustomers : '—'), 'عميل جديد') +
       '</div>';
     if(dd_.errKpi) main += '<div class="note" style="color:var(--red);">⚠️ ' + escapeHtml(dd_.errKpi) + '</div>';
 
-    main += '<div class="ddFil">' +
-      '<label>من<input type="date" id="ddFrom" value="' + escapeHtml(dd_.from) + '"></label>' +
-      '<label>لـ<input type="date" id="ddTo" value="' + escapeHtml(dd_.to) + '"></label>' +
-      '<select id="ddRep"><option value="">كل المناديب</option>' + state.repOptions.map(function(n){
-        return '<option value="' + escapeHtml(n) + '"' + (n === dd_.rep ? ' selected' : '') + '>' + escapeHtml(n) + '</option>'; }).join('') + '</select>' +
-      '<button type="button" class="primary" onclick="ddApply_()">✅ تطبيق الفلاتر</button></div>';
-
-    const periodTxt = (dd_.from === dd_.to ? ymdToDmy_(dd_.from) : 'من ' + ymdToDmy_(dd_.from) + ' إلى ' + ymdToDmy_(dd_.to)) + (dd_.rep ? ' — ' + dd_.rep : '');
-    main += '<div class="ddCard"><div class="ddCardTop"><div class="ddPageTitle" style="font-size:15px;">🧾 حركة اليوم</div><div class="note" style="margin:0;">' + escapeHtml(periodTxt) + '</div></div>';
+    main += '<div class="ddCard"><div class="ddCardTop"><div class="ddPageTitle" style="font-size:16px;">حركة اليوم</div></div>';
     let body;
     if(dd_.loadingOps) body = '<div class="empty">جاري التحميل...</div>';
-    else if(dd_.errOps) body = '<div class="empty" style="color:var(--red);">⚠️ ' + escapeHtml(dd_.errOps) + '</div>';
-    else if(!dd_.ops || !dd_.ops.length) body = '<div class="empty">مفيش حركة في الفترة المحددة</div>';
+    else if(!dd_.ops || !dd_.ops.length) body = '<div class="empty">مفيش حركة دلوقتي</div>';
     else body = ddOpsTable_(dd_.ops);
-    main += '<div class="ddTableWrap">' + body + '</div></div></div>';
+    if(dd_.errOps) body += '<div class="note" style="color:var(--red); padding:0 16px 12px;">⚠️ ' + escapeHtml(dd_.errOps) + ' — بعض البنود فوق ممكن يكون مش محدّث</div>';
+    main += '<div class="ddTableWrap">' + body + '</div></div>';
+    main += '<div class="note">اقتراح: تقارير أوضح بفلاتر ثابتة وجدول مركزي.</div>';
+    main += '</div>';
 
     box.innerHTML = main;
   }
+  function ddPreset_(p){
+    const d = bizToday_();
+    if(p === 'd'){ dd_.from = dd_.to = ymd_(d); }
+    else if(p === 'w'){ const s = new Date(d); s.setDate(s.getDate() - 6); dd_.from = ymd_(s); dd_.to = ymd_(d); }
+    else { const s = new Date(d.getFullYear(), d.getMonth(), 1); dd_.from = ymd_(s); dd_.to = ymd_(d); }
+  }
+  function ddCurPreset_(){
+    const today = ymd_(bizToday_());
+    if(dd_.to !== today) return 'd';
+    if(dd_.from === today) return 'd';
+    const s = new Date(bizToday_()); s.setDate(s.getDate() - 6);
+    return dd_.from === ymd_(s) ? 'w' : 'm';
+  }
   function ddOpsTable_(rows){
+    DD_OPS_ACTIONS_ = rows.map(function(r){ return r.action; });
     return '<table class="ddTable"><thead><tr><th>البند</th><th>الحالة</th><th>التفاصيل</th><th>الإجراء</th></tr></thead><tbody>' +
-      rows.slice(0, 300).map(function(r, i){
-        const details = [r.details, r.amount ? fmt(r.amount) + ' ج' : '', r.rep ? 'المندوب: ' + r.rep : '', r.date + (r.time ? ' ' + r.time : '')].filter(Boolean).join(' • ');
-        return '<tr><td>' + escapeHtml(r.item) + ' — ' + escapeHtml(r.name || '') + '</td><td>' + escapeHtml(r.status || '') + '</td><td>' + escapeHtml(details) + '</td>' +
-          '<td><button type="button" class="ghost" onclick="ddOpenAction_(\'' + r.key + '\', \'' + escapeHtml(r.rep || '').replace(/'/g, "\\'") + '\', \'' + (r.loadId || '') + '\')">عرض</button></td></tr>';
+      rows.map(function(r, i){
+        return '<tr><td>' + escapeHtml(r.item) + '</td><td><span class="ddPill' + (r.warn ? ' warn' : '') + '">' + escapeHtml(r.status) + '</span></td><td>' + escapeHtml(r.details) + '</td>' +
+          '<td><button type="button" class="ddLink" onclick="ddOpenAction_(' + i + ')">' + escapeHtml(r.actionLbl) + '</button></td></tr>';
       }).join('') + '</tbody></table>';
   }
 
