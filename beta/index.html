@@ -154,7 +154,7 @@
   .ddPageHead{display:flex; flex-direction:column; gap:3px;}
   .ddPageTitle{font-size:19px; font-weight:800; color:var(--text);}
   .ddPageDesc{font-size:13px; color:var(--muted);}
-  .ddKpis{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
+  .ddKpis{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;}
   .ddKpi{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; text-align:center;}
   .ddKpi .k{font-size:12.5px; color:var(--muted); font-weight:700;}
   .ddKpi .v{font-size:26px; font-weight:800; margin-top:8px; color:var(--text);}
@@ -3133,7 +3133,7 @@
   // ================================================================
   //                 TOUCH EL ZENOUKI — منطق التطبيق
   // ================================================================
-  const APP_VERSION_ = 'v1.51.1-beta';
+  const APP_VERSION_ = 'v1.52.0-beta';
   const OWNER_EMAIL_ = 'm.s.e.m.eyg@gmail.com';
   const FAR_METERS_ = 300;
   const VISIT_NOTES_MIN_ = 5;            // أقل طول لـ "إيه اللي اتعمل في الزيارة" — نفس السيرفر
@@ -5500,7 +5500,7 @@
       dd_.ops = rows; ddRenderShell_();
     });
   }
-  function ddKpiTile_(val, lbl, cls){ return '<div class="ddKpi' + (cls ? ' ' + cls : '') + '"><div class="k">' + lbl + '</div><div class="v">' + val + '</div><div class="c">ملخص الفترة</div></div>'; }
+  function ddKpiTile_(val, lbl, cls, cap){ return '<div class="ddKpi' + (cls ? ' ' + cls : '') + '"><div class="k">' + lbl + '</div><div class="v">' + val + '</div><div class="c">' + (cap || 'ملخص الفترة') + '</div></div>'; }
   var DD_OPS_ACTIONS_ = [];
   function ddOpenAction_(i){ const a = DD_OPS_ACTIONS_[i]; if(a) a(); }
   function ddRenderShell_(){
@@ -8197,6 +8197,18 @@
       return '<button type="button" class="' + (cur === k ? 'on' : '') + '" onclick="' + onPick + '(\'' + k + '\')">' + SEC_LIST_[k] + '</button>';
     }).join('') + '</div>';
   }
+  // نفس بيانات secChips_ بس بشكل Dropdown — للويب بس (ddFil)
+  function secSecList_(rows, field){
+    const has = {}; rows.forEach(function(r){ if(r[field]) has[r[field]] = 1; });
+    return Object.keys(SEC_LIST_).filter(function(k){ return !k || has[k]; });
+  }
+  function ddSelectHtml_(lbl, id, opts, cur){
+    if(!opts || opts.length < 2) return '';
+    return '<label>' + lbl + '<select id="' + id + '">' + opts.map(function(o){
+      const v = Array.isArray(o) ? o[0] : o, t = Array.isArray(o) ? o[1] : o;
+      return '<option value="' + escapeHtml(v) + '"' + (v === cur ? ' selected' : '') + '>' + escapeHtml(t) + '</option>';
+    }).join('') + '</select></label>';
+  }
   const PF_MONTHS_ = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
   function pfYmLabel_(ym, short){ const p = ym.split('-'); const m = PF_MONTHS_[Number(p[1]) - 1] || ym; return short ? m.slice(0, 3) : m + ' ' + p[0]; }
   function pfNowYm_(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
@@ -8239,6 +8251,12 @@
     return '<details class="card" style="margin-top:8px;"><summary style="font-weight:800; cursor:pointer;">🩺 البيانات اللي وصلت جهاز الشركة' + (g.at ? ' — ' + ovAgo_(g.at) : '') + '</summary><div class="note" style="line-height:1.9; margin-top:6px;">' + L.join('<br>') + '</div></details>';
   }
   function pfSec_(k){ pf_.sec = k; pfRender_(); }
+  function pfApply_(){
+    const ymEl = document.getElementById('pfYmSel'), secEl = document.getElementById('pfSecSel');
+    if(ymEl) pf_.ym = ymEl.value;
+    if(secEl) pf_.sec = secEl.value;
+    pfRender_();
+  }
   function pfSum_(rows){
     const t = { sales: 0, cash: 0, cheque: 0 };
     rows.forEach(function(r){ t.sales += Number(r.sales) || 0; t.cash += Number(r.cash) || 0; t.cheque += Number(r.cheque) || 0; });
@@ -8274,17 +8292,32 @@
       return;
     }
     // الشهور
-    h += '<div class="pfMonths">' + months.slice().reverse().map(function(ym){
-      return '<button type="button" class="' + (ym === pf_.ym ? 'on' : '') + '" onclick="pf_.ym=\'' + ym + '\'; pfRender_()">' + pfYmLabel_(ym) + '</button>';
-    }).join('') + '</div>';
-    h += secChips_(pf_.sec, all0, 'sec', 'pfSec_');
+    if(state.isWide){
+      h += '<div class="ddFil">' + ddSelectHtml_('الشهر', 'pfYmSel', months.slice().reverse().map(function(ym){ return [ym, pfYmLabel_(ym)]; }), pf_.ym) +
+        ddSelectHtml_('القسم', 'pfSecSel', secSecList_(all0, 'sec').map(function(k){ return [k, SEC_LIST_[k]]; }), pf_.sec) +
+        '<button type="button" class="primary" onclick="pfApply_()">تطبيق</button></div>';
+    } else {
+      h += '<div class="pfMonths">' + months.slice().reverse().map(function(ym){
+        return '<button type="button" class="' + (ym === pf_.ym ? 'on' : '') + '" onclick="pf_.ym=\'' + ym + '\'; pfRender_()">' + pfYmLabel_(ym) + '</button>';
+      }).join('') + '</div>';
+      h += secChips_(pf_.sec, all0, 'sec', 'pfSec_');
+    }
     // الأرقام
-    h += '<div class="pfHero"><span>المبيعات — ' + pfYmLabel_(pf_.ym) + (pf_.sec ? ' — ' + SEC_LIST_[pf_.sec] : '') + '</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' + pfDelta_(cur.sales, prev.sales) + '</div>';
-    h += '<div class="pfTiles">' +
+    if(state.isWide){
+      h += '<div class="ddKpis">' +
+        ddKpiTile_(fmt(cur.sales) + ' ج', 'المبيعات', '', pfYmLabel_(pf_.ym) + (pf_.sec ? ' — ' + SEC_LIST_[pf_.sec] : '')) +
+        ddKpiTile_(fmt(cur.cash), 'تحصيل نقدي', '', pfYmLabel_(pf_.ym)) +
+        ddKpiTile_(fmt(cur.cheque), 'تحصيل شيكات', '', pfYmLabel_(pf_.ym)) +
+        ddKpiTile_(fmt(cur.coll), 'إجمالي التحصيل', '', (cur.pct == null ? '—' : cur.pct + '%') + ' من البيع') +
+        '</div>';
+    } else {
+      h += '<div class="pfHero"><span>المبيعات — ' + pfYmLabel_(pf_.ym) + (pf_.sec ? ' — ' + SEC_LIST_[pf_.sec] : '') + '</span><b>' + fmt(cur.sales) + ' <small>ج</small></b>' + pfDelta_(cur.sales, prev.sales) + '</div>';
+      h += '<div class="pfTiles">' +
       '<div><span>💵 تحصيل نقدي</span><b>' + fmt(cur.cash) + '</b></div>' +
       '<div><span>🏦 تحصيل شيكات</span><b>' + fmt(cur.cheque) + '</b></div>' +
       '<div class="gold"><span>💰 إجمالي التحصيل</span><b>' + fmt(cur.coll) + '</b>' + pfDelta_(cur.coll, prev.coll) + '</div>' +
       '<div><span>نسبة التحصيل للبيع</span><b>' + (cur.pct == null ? '—' : cur.pct + '%') + '</b></div></div>';
+    }
     h += '<div class="pfYtd">من أول ' + yr + ': بيع <b>' + fmt(ytd.sales) + '</b> • تحصيل <b>' + fmt(ytd.coll) + '</b>' + (ytd.pct != null ? ' • ' + ytd.pct + '%' : '') + '</div>';
     // رسم الشهور
     const ser = months.slice(-12).map(function(ym){ const s = pfSum_(repRows.filter(function(r){ return r.ym === ym; })); s.ym = ym; return s; });
@@ -8388,6 +8421,11 @@
         });
     }).catch(function(){});
   }
+  function ovApply_(){
+    const e = document.getElementById('ovRepSel');
+    if(e) ov_.rep = e.value;
+    ovRender_();
+  }
   function ovRender_(){
     const all = ov_.rows || [];
     const nq = normAr_(normalizeDigits(ov_.q || ''));
@@ -8398,7 +8436,17 @@
     });
     const tot = rows.reduce(function(t, r){ return t + Number(r.amount); }, 0);
     document.getElementById('dlSub').textContent = (ov_.rep === '—' ? 'من غير مندوب' : ov_.rep || (state.isAdmin ? 'كل المناديب' : 'عملاءك')) + (ov_.synced ? ' • اتحسبت ' + ovAgo_(ov_.synced) : '');
-    let h = '<div class="ovHero"><div><span>إجمالي المتأخرات</span><b>' + fmt(tot) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + rows.length + '</b></div></div>';
+    let h = '';
+    if(state.isWide && state.isAdmin){
+      const repNames = {}; all.forEach(function(r){ repNames[r.rep || '—'] = r.rep ? r.rep : '⚠️ من غير مندوب'; });
+      h += '<div class="ddFil">' + ddSelectHtml_('المندوب', 'ovRepSel', [['', 'كل المناديب']].concat(Object.keys(repNames).map(function(k){ return [k, repNames[k]]; })), ov_.rep) +
+        '<button type="button" class="primary" onclick="ovApply_()">تطبيق</button></div>';
+    }
+    if(state.isWide){
+      h += '<div class="ddKpis">' + ddKpiTile_(fmt(tot) + ' ج', 'إجمالي المتأخرات', '', (ov_.rep === '—' ? 'من غير مندوب' : ov_.rep || 'كل المناديب')) + ddKpiTile_(rows.length, 'عدد العملاء', '', 'فوق 500 ج') + '</div>';
+    } else {
+      h += '<div class="ovHero"><div><span>إجمالي المتأخرات</span><b>' + fmt(tot) + ' <small>ج</small></b></div><div><span>عملاء</span><b>' + rows.length + '</b></div></div>';
+    }
     // المدير: كروت المناديب
     if(state.isAdmin && !ov_.rep && !nq){
       const by = {};
@@ -10617,10 +10665,17 @@
     lsLoad_();
   }
   function lsShell_(){
-    ldBody_().innerHTML = '<div class="aBtns" style="margin:0 0 8px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' +
-      '<label style="font-size:12px; font-weight:800;">من <input type="date" id="lsFrom" value="' + ls_.from + '" style="width:auto; margin:0;"></label>' +
-      '<label style="font-size:12px; font-weight:800;">لحد <input type="date" id="lsTo" value="' + ls_.to + '" style="width:auto; margin:0;"></label>' +
-      '<button type="button" class="aGo" style="margin:0;" onclick="lsApply_()">عرض</button></div><div id="lsOut"><div class="aiStatus">جاري التحميل...</div></div>';
+    if(state.isWide){
+      ldBody_().innerHTML = '<div class="ddFil">' +
+        '<label>من<input type="date" id="lsFrom" value="' + ls_.from + '"></label>' +
+        '<label>لحد<input type="date" id="lsTo" value="' + ls_.to + '"></label>' +
+        '<button type="button" class="primary" onclick="lsApply_()">تطبيق</button></div><div id="lsOut"><div class="aiStatus">جاري التحميل...</div></div>';
+    } else {
+      ldBody_().innerHTML = '<div class="aBtns" style="margin:0 0 8px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">' +
+        '<label style="font-size:12px; font-weight:800;">من <input type="date" id="lsFrom" value="' + ls_.from + '" style="width:auto; margin:0;"></label>' +
+        '<label style="font-size:12px; font-weight:800;">لحد <input type="date" id="lsTo" value="' + ls_.to + '" style="width:auto; margin:0;"></label>' +
+        '<button type="button" class="aGo" style="margin:0;" onclick="lsApply_()">عرض</button></div><div id="lsOut"><div class="aiStatus">جاري التحميل...</div></div>';
+    }
   }
   function lsApply_(){
     const f = document.getElementById('lsFrom').value, t = document.getElementById('lsTo').value;
@@ -10699,6 +10754,12 @@
     return { orders: orders.sort(function(x, y){ return y.ymd < x.ymd ? -1 : y.ymd > x.ymd ? 1 : y.loss - x.loss; }), noAcct: noAcct };
   }
   function lsSet_(k, v){ ls_[k] = v; lsRender_(); }
+  function lsApply2_(){
+    const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
+    if(g('lsRepSel') != null) ls_.rep = g('lsRepSel');
+    if(g('lsViewSel') != null) ls_.view = g('lsViewSel');
+    lsRender_();
+  }
   function lsPct_(a, b){ return b ? Math.round(a / b * 100) : 0; }
   function lsRender_(){
     const box = document.getElementById('lsOut'); if(!box || !ls_.data) return;
@@ -10709,13 +10770,26 @@
     let ord = 0, got = 0, val = 0; list.forEach(function(g){ ord += g.ord; got += g.got; val += g.val; });
     const none = list.filter(function(g){ return g.st === 'none'; }).length, part = list.filter(function(g){ return g.st === 'part'; }).length;
     let h = '';
-    h += '<div class="pfMonths csaChips"><button type="button" class="' + (!ls_.rep ? 'on' : '') + '" onclick="lsSet_(\'rep\', \'\')">كل المناديب</button>' +
-      Object.keys(reps).sort().map(function(r){ return '<button type="button" class="' + (ls_.rep === r ? 'on' : '') + '" onclick="lsSet_(\'rep\', ' + escapeHtml(JSON.stringify(r)) + ')">' + escapeHtml(r) + '</button>'; }).join('') + '</div>';
-    h += dlSum_(['طلب <b>' + fmt(ord) + '</b> قطعة', 'اتفوتر <b>' + fmt(got) + '</b>', '<span style="color:#a8432f">فاقد <b>' + fmt(ord - got) + '</b> (' + lsPct_(ord - got, ord) + '%)</span>',
-      val ? 'قيمة الفاقد ~<b>' + fmt(Math.round(val)) + '</b> ج' : '']);
-    h += dlSum_([list.length + ' طلبية', part ? part + ' اتفوترت ناقص' : '', none ? '<span style="color:#a8432f">' + none + ' ماطلعلهاش فاتورة</span>' : '', wait.length ? '⏳ ' + wait.length + ' لسه جديدة (آخر ' + LS_PENDING_DAYS_ + ' يوم) مش محسوبة' : '']);
     const V = { item: '📦 حسب الصنف', rep: '🧭 حسب المندوب', cust: '👥 حسب العميل', ord: '🧾 الطلبيات' };
-    h += '<div class="pfMonths csaChips">' + Object.keys(V).map(function(k){ return '<button type="button" class="' + (ls_.view === k ? 'on' : '') + '" onclick="lsSet_(\'view\', \'' + k + '\')">' + V[k] + '</button>'; }).join('') + '</div>';
+    if(state.isWide){
+      h += '<div class="ddFil">' +
+        ddSelectHtml_('المندوب', 'lsRepSel', [['', 'كل المناديب']].concat(Object.keys(reps).sort().map(function(r){ return [r, r]; })), ls_.rep) +
+        ddSelectHtml_('العرض', 'lsViewSel', Object.keys(V).map(function(k){ return [k, V[k]]; }), ls_.view) +
+        '<button type="button" class="primary" onclick="lsApply2_()">تطبيق</button></div>';
+      h += '<div class="ddKpis">' +
+        ddKpiTile_(fmt(ord) + ' قطعة', 'المطلوب', '', '') +
+        ddKpiTile_(fmt(got) + ' قطعة', 'اللي اتفوتر', '', '') +
+        ddKpiTile_(fmt(ord - got) + ' (' + lsPct_(ord - got, ord) + '%)', 'الفاقد', '', val ? '~' + fmt(Math.round(val)) + ' ج' : '') +
+        ddKpiTile_(list.length, 'عدد الطلبيات', '', (part ? part + ' ناقص' : '') + (none ? ' • ' + none + ' من غير فاتورة' : '')) +
+        '</div>';
+    } else {
+      h += '<div class="pfMonths csaChips"><button type="button" class="' + (!ls_.rep ? 'on' : '') + '" onclick="lsSet_(\'rep\', \'\')">كل المناديب</button>' +
+        Object.keys(reps).sort().map(function(r){ return '<button type="button" class="' + (ls_.rep === r ? 'on' : '') + '" onclick="lsSet_(\'rep\', ' + escapeHtml(JSON.stringify(r)) + ')">' + escapeHtml(r) + '</button>'; }).join('') + '</div>';
+      h += dlSum_(['طلب <b>' + fmt(ord) + '</b> قطعة', 'اتفوتر <b>' + fmt(got) + '</b>', '<span style="color:#a8432f">فاقد <b>' + fmt(ord - got) + '</b> (' + lsPct_(ord - got, ord) + '%)</span>',
+        val ? 'قيمة الفاقد ~<b>' + fmt(Math.round(val)) + '</b> ج' : '']);
+      h += dlSum_([list.length + ' طلبية', part ? part + ' اتفوترت ناقص' : '', none ? '<span style="color:#a8432f">' + none + ' ماطلعلهاش فاتورة</span>' : '', wait.length ? '⏳ ' + wait.length + ' لسه جديدة (آخر ' + LS_PENDING_DAYS_ + ' يوم) مش محسوبة' : '']);
+      h += '<div class="pfMonths csaChips">' + Object.keys(V).map(function(k){ return '<button type="button" class="' + (ls_.view === k ? 'on' : '') + '" onclick="lsSet_(\'view\', \'' + k + '\')">' + V[k] + '</button>'; }).join('') + '</div>';
+    }
     h += lsView_(list);
     h += xlBtn_('lsExcel_()');
     if(ls_.data.noAcct.length) h += '<div class="note" style="margin-top:8px; color:var(--gold-d);">⚠️ ' + ls_.data.noAcct.length + ' طلبية لعملاء مالقيناش ليهم ولا فاتورة في المدة (يا إما ماتفوترلهمش خالص، يا إما كودهم في السيستم مختلف — اكتبه في بيانات العميل) — مش محسوبة: ' + escapeHtml(Array.from(new Set(ls_.data.noAcct.map(function(d){ return d.customerName; }))).slice(0, 8).join('، ')) + '</div>';
@@ -11081,6 +11155,12 @@
     }).catch(function(){});
   }
   function cfSet_(k, v){ cf_[k] = v; cfRender_(); }
+  function cfApply_(){
+    const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
+    if(g('cfYmSel') != null) cf_.ym = g('cfYmSel');
+    if(g('cfRepSel') != null) cf_.rep = g('cfRepSel');
+    cfRender_();
+  }
   // حساب الشهر: start/end للشهر، والنهارده — المتأخر = استحقاقه قبل النهارده، والباقي حسب الشهر
   function cfCalc_(){
     const ym = cf_.ym, start = ym + '-01', end = cfYmd_(new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0)), today = ymd_(bizToday_());
@@ -11114,11 +11194,20 @@
     const r = cfCalc_();
     const mName = chqMonName_(cf_.ym);
     document.getElementById('dlSub').textContent = mName + (cf_.rep ? ' • ' + (cf_.rep === '—' ? 'من غير مندوب' : cf_.rep) : '') + (cf_.up ? ' • الأرصدة متحدثة ' + ovAgo_(String(cf_.up).replace(' ', 'T').replace(/([+-]\d\d)$/, '$1:00')) : '');
-    let h = '<div class="pfMonths csaChips">' + cfMonths_().map(function(m){ return '<button type="button" class="' + (cf_.ym === m ? 'on' : '') + '" onclick="cfSet_(\'ym\', \'' + m + '\')">' + chqMonName_(m) + '</button>'; }).join('') + '</div>';
+    let h = '';
     const reps = {}; all.forEach(function(c){ reps[c.rep || '—'] = 1; });
-    h += '<div class="pfMonths csaChips"><button type="button" class="' + (!cf_.rep ? 'on' : '') + '" onclick="cfSet_(\'rep\', \'\')">كل المناديب</button>' +
-      Object.keys(reps).sort().map(function(k){ return '<button type="button" class="' + (cf_.rep === k ? 'on' : '') + '" onclick="cfSet_(\'rep\', ' + escapeHtml(JSON.stringify(k)) + ')">' + escapeHtml(k === '—' ? 'من غير مندوب' : k) + '</button>'; }).join('') + '</div>';
-    h += '<div class="ovHero"><div><span>المتوقع تحصيله في ' + escapeHtml(mName) + '</span><b>' + fmt(Math.round(r.inM + r.chqT)) + ' <small>ج</small></b></div></div>';
+    if(state.isWide){
+      h += '<div class="ddFil">' +
+        ddSelectHtml_('الشهر', 'cfYmSel', cfMonths_().map(function(m){ return [m, chqMonName_(m)]; }), cf_.ym) +
+        ddSelectHtml_('المندوب', 'cfRepSel', [['', 'كل المناديب']].concat(Object.keys(reps).sort().map(function(k){ return [k, k === '—' ? 'من غير مندوب' : k]; })), cf_.rep) +
+        '<button type="button" class="primary" onclick="cfApply_()">تطبيق</button></div>';
+      h += '<div class="ddKpis">' + ddKpiTile_(fmt(Math.round(r.inM + r.chqT)) + ' ج', 'المتوقع تحصيله', '', escapeHtml(mName)) + '</div>';
+    } else {
+      h += '<div class="pfMonths csaChips">' + cfMonths_().map(function(m){ return '<button type="button" class="' + (cf_.ym === m ? 'on' : '') + '" onclick="cfSet_(\'ym\', \'' + m + '\')">' + chqMonName_(m) + '</button>'; }).join('') + '</div>';
+      h += '<div class="pfMonths csaChips"><button type="button" class="' + (!cf_.rep ? 'on' : '') + '" onclick="cfSet_(\'rep\', \'\')">كل المناديب</button>' +
+        Object.keys(reps).sort().map(function(k){ return '<button type="button" class="' + (cf_.rep === k ? 'on' : '') + '" onclick="cfSet_(\'rep\', ' + escapeHtml(JSON.stringify(k)) + ')">' + escapeHtml(k === '—' ? 'من غير مندوب' : k) + '</button>'; }).join('') + '</div>';
+      h += '<div class="ovHero"><div><span>المتوقع تحصيله في ' + escapeHtml(mName) + '</span><b>' + fmt(Math.round(r.inM + r.chqT)) + ' <small>ج</small></b></div></div>';
+    }
     if(r.paid) h += '<div class="note" style="margin:6px 0; background:var(--gold-bg); border-color:rgba(182,134,47,.35); color:var(--gold-d);">📥 اتخصم ' + fmt(Math.round(r.paid)) + ' ج اتحصلوا ولسه في حافظات المناديب (ما دخلوش السيستم) — من أقدم فواتير العميل.</div>';
     const box = function(k, t, v, sub, col){
       return '<button type="button" class="blAge' + (cf_.view === k ? ' on' : '') + '" style="' + (col ? 'border-color:' + col + ';' : '') + '" onclick="cfSet_(\'view\', \'' + k + '\')"><span>' + t + '</span><b>' + fmt(Math.round(v)) + '</b><span>' + sub + '</span></button>';
@@ -11522,6 +11611,17 @@
   }
   function csaSec_(k){ csaSet_('sec', k); }
   function csaSet_(k, v){ csa_[k] = v; csa_.lim = 100; if(k === 'per' && v === 'ly') csa_.sort = 'top'; csaRender_(); }
+  function csaApply_(){
+    const g = function(id){ const e = document.getElementById(id); return e ? e.value : null; };
+    if(g('csaUnitSel') != null) csa_.unit = g('csaUnitSel');
+    if(g('csaPerSel') != null) csa_.per = g('csaPerSel');
+    if(g('csaSecSel') != null) csa_.sec = g('csaSecSel');
+    if(g('csaRepSel') != null) csa_.rep = g('csaRepSel');
+    if(g('csaSortSel') != null) csa_.sort = g('csaSortSel');
+    csa_.lim = 100;
+    if(csa_.per === 'ly') csa_.sort = 'top';
+    csaRender_();
+  }
   function csaRender_(){
     const P = CSA_PER_[csa_.per], rows = csa_.rows || [];
     document.getElementById('dlSub').textContent = 'من سيستم الشركة' + (csa_.at ? ' • اتحسب ' + ovAgo_(csa_.at) : '');
@@ -11536,7 +11636,18 @@
     Object.keys(repTot).sort(function(a, b){ return repTot[b] - repTot[a]; }).forEach(function(k){ reps[k] = k; });
     if(csa_.rep && !reps[csa_.rep]) csa_.rep = '';
     const sorts = {}; Object.keys(CSA_SORT_).forEach(function(k){ if(P.prev || k === 'top') sorts[k] = CSA_SORT_[k]; });
-    let h = '<div class="pfMonths csaChips"><button type="button" class="' + (csa_.unit === 'v' ? 'on' : '') + '" onclick="csaSet_(\'unit\', \'v\')">💰 بالجنيه</button><button type="button" class="' + (csa_.unit === 'q' ? 'on' : '') + '" onclick="csaSet_(\'unit\', \'q\')">📦 بالقطعة</button></div>' + chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + (state.isAdmin ? chips(reps, 'rep') : '') + chips(sorts, 'sort');
+    let h = '';
+    if(state.isWide){
+      h += '<div class="ddFil">' +
+        ddSelectHtml_('الوحدة', 'csaUnitSel', [['v', '💰 بالجنيه'], ['q', '📦 بالقطعة']], csa_.unit) +
+        ddSelectHtml_('الفترة', 'csaPerSel', Object.keys(CSA_PER_).map(function(k){ return [k, CSA_PER_[k].t]; }), csa_.per) +
+        ddSelectHtml_('القسم', 'csaSecSel', secSecList_(rows, 's').map(function(k){ return [k, SEC_LIST_[k]]; }), csa_.sec) +
+        (state.isAdmin ? ddSelectHtml_('المندوب', 'csaRepSel', Object.keys(reps).map(function(k){ return [k, reps[k]]; }), csa_.rep) : '') +
+        ddSelectHtml_('الترتيب', 'csaSortSel', Object.keys(sorts).map(function(k){ return [k, sorts[k]]; }), csa_.sort) +
+        '<button type="button" class="primary" onclick="csaApply_()">تطبيق</button></div>';
+    } else {
+      h += '<div class="pfMonths csaChips"><button type="button" class="' + (csa_.unit === 'v' ? 'on' : '') + '" onclick="csaSet_(\'unit\', \'v\')">💰 بالجنيه</button><button type="button" class="' + (csa_.unit === 'q' ? 'on' : '') + '" onclick="csaSet_(\'unit\', \'q\')">📦 بالقطعة</button></div>' + chips(CSA_PER_, 'per') + secChips_(csa_.sec, rows, 's', 'csaSec_') + (state.isAdmin ? chips(reps, 'rep') : '') + chips(sorts, 'sort');
+    }
     h += '<input type="search" id="csaQ" placeholder="🔎 اسم العميل أو الكود..." value="' + escapeHtml(csa_.q) + '" oninput="this.setAttribute(\'value\', this.value); csa_.q=this.value; csa_.lim=100; csaList_()" style="margin:4px 0 10px;">';
     h += '<div id="csaList"></div>';
     h += xlBtn_('csaExcel_()');
@@ -11563,8 +11674,19 @@
     else if(csa_.sort === 'up') list = list.filter(function(r){ return cur(r) > prev(r); }).sort(function(a, b){ return (cur(b) - prev(b)) - (cur(a) - prev(a)); });
     else if(csa_.sort === 'stop') list = list.filter(function(r){ return prev(r) > 0 && cur(r) <= 0; }).sort(function(a, b){ return prev(b) - prev(a); });
     else list = list.filter(function(r){ return cur(r) > 0; }).sort(function(a, b){ return cur(b) - cur(a); });
-    let h = '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + P.t + (csa_.sec ? ' — ' + SEC_LIST_[csa_.sec] : '') + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '') + '</span><b>' + fmt(tc) + ' <small>' + (Q ? 'قطعة' : 'ج') + '</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
-    h += '<div class="pfYtd">' + (Q ? 'بقيمة <b>' + fmt(ta) + '</b> ج • ' : '<b>' + fmt(ta) + '</b> قطعة • ') + buying + ' عميل اشترى' + (P.prev ? ' • ' + P.vs + ': <b>' + fmt(tp) + '</b>' : '') + '</div>';
+    let h = '';
+    const periodLbl = P.t + (csa_.sec ? ' — ' + SEC_LIST_[csa_.sec] : '') + (csa_.rep ? ' — ' + escapeHtml(csa_.rep) : '');
+    if(state.isWide){
+      h += '<div class="ddKpis" style="margin-bottom:8px;">' +
+        ddKpiTile_(fmt(tc) + ' ' + (Q ? 'قطعة' : 'ج'), 'مبيعات الفترة', '', periodLbl) +
+        ddKpiTile_(fmt(ta) + (Q ? ' ج' : ' قطعة'), Q ? 'بالقيمة' : 'بالقطعة', '', periodLbl) +
+        ddKpiTile_(buying, 'عميل اشترى', '', periodLbl) +
+        (P.prev ? ddKpiTile_(fmt(tp), P.vs, '', periodLbl) : '') +
+        '</div>';
+    } else {
+      h += '<div class="pfHero" style="margin-bottom:8px;"><span>مبيعات ' + periodLbl + '</span><b>' + fmt(tc) + ' <small>' + (Q ? 'قطعة' : 'ج') + '</small></b>' + (P.prev ? csaDelta_(tc, tp) : '') + '</div>';
+      h += '<div class="pfYtd">' + (Q ? 'بقيمة <b>' + fmt(ta) + '</b> ج • ' : '<b>' + fmt(ta) + '</b> قطعة • ') + buying + ' عميل اشترى' + (P.prev ? ' • ' + P.vs + ': <b>' + fmt(tp) + '</b>' : '') + '</div>';
+    }
     csa_.view = list;
     if(state.isWide){
       h += list.length ? '<div class="ddTableWrap" style="background:var(--card); border:1px solid var(--border); border-radius:14px;"><table class="ddTable"><thead><tr><th>#</th><th>العميل</th><th>الكود</th>' + (state.isAdmin && !csa_.rep ? '<th>المندوب</th>' : '') + '<th>' + (csa_.sort === 'stop' ? 'كان بيشتري' : P.t) + '</th><th>بالقطعة/قيمة</th>' + (P.prev && csa_.sort !== 'stop' ? '<th>التغيّر</th>' : '') + '<th>آخر شراء</th></tr></thead><tbody>' +
